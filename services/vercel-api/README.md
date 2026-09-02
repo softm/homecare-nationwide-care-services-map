@@ -1,16 +1,14 @@
 # nationwide-care-services-api
 
-`전국 요양기관찾기`와 `전국 주간` 지도에서 공통으로 사용하는 Vercel 서버리스 API입니다. 지도 프런트엔드와 분리해 별도 Git 저장소와 Vercel 프로젝트로 운영하도록 구성했습니다.
+`전국 요양기관찾기`와 `전국 주간` 지도에서 공통으로 사용하는 길찾기 전용 Vercel 서버리스 API입니다. 네이버 Client Secret을 브라우저에 노출할 수 없어서 이 기능만 서버에 유지합니다.
 
 ## 제공 API
 
 | 경로 | 방식 | 역할 |
 |---|---|---|
 | `/api/directions` | POST | 네이버 자동차 경로 계산 |
-| `/api/official-detail` | GET, POST | 국민건강보험공단 기관 상세 HTML을 구조화 |
-| `/api/official-image` | GET | 공단 기관 사진을 안전하게 프록시 |
 
-주소 좌표 변환과 역주소 변환은 서버 API가 아니라 지도 프런트의 네이버 Maps JavaScript SDK `geocoder` 서브모듈에서 처리합니다.
+주소 좌표 변환과 역주소 변환은 지도 프런트의 네이버 Maps JavaScript SDK `geocoder` 서브모듈에서 처리합니다. 공단 상세·사진은 루트 프로젝트의 `data/nhis` 정적 JSON과 공단 원본 사진 URL을 사용합니다. // SOFTM-DIRECTIONS-ONLY 날짜:20260902 : 비밀키가 필요한 경로 계산 외 서버 프록시를 두지 않음
 
 ## 로컬 실행
 
@@ -33,11 +31,10 @@ npm run check
 npx vercel link
 npx vercel env add NAVER_MAPS_API_KEY_ID production
 npx vercel env add NAVER_MAPS_API_SECRET production
-npx vercel env add PUBLIC_API_BASE_URL production
 npm run deploy
 ```
 
-Vercel 프로젝트 이름은 Git 저장소와 동일한 `nationwide-care-services-api`를 권장합니다. 배포 후 `PUBLIC_API_BASE_URL`은 실제 프로덕션 주소로 설정하고 한 번 더 배포합니다.
+Vercel 프로젝트 이름은 Git 저장소와 동일한 `nationwide-care-services-api`를 권장합니다.
 
 ## 환경변수
 
@@ -45,7 +42,6 @@ Vercel 프로젝트 이름은 Git 저장소와 동일한 `nationwide-care-servic
 |---|---:|---|
 | `NAVER_MAPS_API_KEY_ID` | 예 | 네이버 Directions API Key ID |
 | `NAVER_MAPS_API_SECRET` | 예 | 네이버 Directions API Secret |
-| `PUBLIC_API_BASE_URL` | 권장 | 사진 프록시 절대 URL을 만들 새 API 프로덕션 주소 |
 
 비밀값은 Git에 커밋하지 마세요. `.env.local`과 `.vercel`은 `.gitignore`에 포함돼 있습니다.
 
@@ -61,13 +57,13 @@ Vercel 프로젝트 이름은 Git 저장소와 동일한 `nationwide-care-servic
 
 ## 프런트 연결
 
-별도 저장소로 배포한 다음 지도 HTML에 남아 있는 기존 주소를 새 Vercel 주소로 교체합니다.
+별도 저장소로 배포한 다음 지도 HTML의 길찾기 기준 주소만 새 Vercel 주소로 교체합니다.
 
 ```text
 https://daycare-directions-proxy.vercel.app
 → https://nationwide-care-services-api.vercel.app
 ```
 
-교체 대상은 directions와 official-detail API입니다. 주소 좌표 변환은 프런트의 네이버 Maps JavaScript SDK가 담당하며, 사진 상세에 별도로 사용하는 `daycare-nhis-detail-api.softm.chatgpt.site`는 이 저장소에 포함되지 않습니다.
+교체 대상은 directions API뿐입니다. 주소 좌표 변환은 프런트의 네이버 Maps JavaScript SDK가 담당하고, 공단 데이터는 정적 JSON으로 배포합니다.
 
 자세한 인수인계 순서는 [MIGRATION.md](./MIGRATION.md)를 참고하세요.

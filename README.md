@@ -1,6 +1,6 @@
 # 전국 주간 + 전국 요양 통합 소스
 
-로컬 Codex에서 두 지도 프로젝트를 한 번에 이어서 작업할 수 있도록 프런트엔드, 공식 원본 데이터, 데이터 생성 스크립트, 광고 설정과 서버 코드를 한 폴더에 모았습니다.
+로컬 Codex에서 두 지도 프로젝트를 한 번에 이어서 작업할 수 있도록 프런트엔드, 공식 원본 데이터, 정적 공단 스냅샷, 데이터 생성 스크립트, 광고 설정과 길찾기 서버 코드를 한 폴더에 모았습니다.
 
 ## 프로젝트 구분
 
@@ -20,11 +20,11 @@ npm run serve
 
 그다음 다음 주소를 엽니다.
 
-- `http://localhost:8000/`
-- `http://localhost:8000/nationwide-daycare-map.html`
-- `http://localhost:8000/nationwide-care-services-map.html?type=daycare`
+- `http://localhost:3000/`
+- `http://localhost:3000/nationwide-daycare-map.html`
+- `http://localhost:3000/nationwide-care-services-map.html?type=daycare`
 
-네이버 지도 클라이언트 설정에서 로컬 주소가 허용되지 않으면 지도 인증 오류가 날 수 있습니다. 현재 서버 API의 CORS는 `http://localhost:3000`과 `http://127.0.0.1:3000`을 허용하므로 API까지 동일 조건으로 시험하려면 `python3 -m http.server 3000`을 사용하세요.
+네이버 지도 클라이언트 설정에서 로컬 주소가 허용되지 않으면 지도 인증 오류가 날 수 있습니다. 현재 Maps Application의 Web 서비스 URL에는 배포 Origin과 `http://localhost:3000`을 등록해야 합니다. 로컬 통합 검증은 `python3 -m http.server 3000`으로 실행하며, 등록하지 않은 `127.0.0.1`로 바꾸면 별도 Origin으로 판정됩니다.
 
 ## 디렉터리
 
@@ -40,9 +40,10 @@ npm run serve
 ├── nationwide-care-data/
 ├── nationwide-care-ad-config.js
 ├── source-data/                    # 공단·심평원 원본
+├── data/nhis/                      # GitHub Pages가 제공하는 정적 공단 JSON
+├── nhis-static-data.js             # 두 지도의 상세·사진 공용 로더
 ├── scripts/                        # 데이터 재생성·검증
-├── services/vercel-api/            # 지도·경로·공단 상세 Vercel API
-├── services/daycare-nhis-detail-api/ # 공단 상세·사진 ChatGPT Sites Worker
+├── services/vercel-api/            # Client Secret이 필요한 길찾기 전용 API
 └── docs/reference-images/          # 최근 UI·광고 검수 참고 이미지
 ```
 
@@ -59,14 +60,35 @@ npm run check
 
 `build_nationwide_care_services.py`는 `source-data`의 공단 XLSX·평가 CSV·심평원 CSV로 `nationwide-care-data`와 매니페스트를 다시 만듭니다.
 
+## 공단 정적 데이터
+
+브라우저는 공단 상세 페이지나 공공데이터 API를 실시간 호출하지 않습니다. GitHub Actions가 공식 [기관 검색 API](https://www.data.go.kr/data/15059029/openapi.do), [시설별 상세조회 API](https://www.data.go.kr/data/15058856/openapi.do), [시설별 현황](https://www.data.go.kr/data/15124763/fileData.do), [평가 결과](https://www.data.go.kr/data/15104801/fileData.do)와 공개 사진 페이지를 수집하고 `data/nhis`에 정규화합니다. 두 지도는 같은 기관별 상세·사진 JSON을 사용하며, 사진 탭을 열 때만 사진 매니페스트를 읽습니다. // SOFTM-NHIS-DOC 날짜:20260903 : 실시간 서버 대신 배포 전 생성된 공단 스냅샷을 단일 기준으로 사용
+
+로컬 키는 `.env.local`의 `DATA_GO_KR_SERVICE_KEY`에만 저장합니다. 저장소에는 빈 예제만 있고, GitHub Actions에는 같은 이름의 Repository Secret을 등록합니다.
+
+```bash
+# 특정 기관 전체 강제 갱신
+.venv/bin/python scripts/sync_nhis_static.py --mode institution --scope all --institution 24119001267 --type B03 --force
+
+# 14개 샤드 중 하나 갱신
+.venv/bin/python scripts/sync_nhis_static.py --mode rotation --scope details,photos --shard-count 14 --shard-index 0 --max-calls 8000
+
+# 실패 기관 재처리
+.venv/bin/python scripts/sync_nhis_static.py --mode retry --scope details,photos --max-calls 8000
+
+# 전국 전체 갱신(14개 샤드별 체크포인트를 이어서 실행)
+.venv/bin/python scripts/sync_nhis_static.py --mode full --scope all --shard-count 14 --shard-index 0 --max-calls 570
+```
+
+워크플로는 서울 시간 매일 03:23 증분 갱신(최대 900회), 매일 04:41 순환 갱신(최대 6,800회), 매월 1일 05:17 기준자료 점검(최대 300회)을 예약해 예약 실행 합계를 하루 8,000회 이하로 제한합니다. GitHub가 공개 저장소의 비활성 예약 실행을 중단했다면 Actions 화면에서 `Refresh NHIS static data`를 수동 실행하거나 워크플로를 다시 활성화합니다. 현재 29,153개 기관에는 기관·급여 조합이 43,581개이고 조합마다 상세 API를 최대 9회 호출하므로 이론상 최대치는 392,229회입니다. 8,000회/일을 전부 상세에 사용해도 최소 50일이며, 예약 순환 몫 6,800회/일 기준으로는 최소 58일입니다. 따라서 14개 샤드는 여러 순환에 걸쳐 체크포인트부터 재개됩니다. 사진 분류는 공단 전체 목록 응답에 개별 분류값이 없어 빈 값으로 보존하고, 원문 목록의 `전체` 조회 맥락만 별도 기록합니다.
+
 ## 서버 구분
 
 | 위치 | 주요 API | 현재 프런트 연결 |
 |---|---|---|
-| `services/vercel-api` | directions, official-detail, official-image | `daycare-directions-proxy.vercel.app` |
-| `services/daycare-nhis-detail-api` | nhis-detail, nhis-photo | `daycare-nhis-detail-api.softm.chatgpt.site` |
+| `services/vercel-api` | directions | `daycare-directions-proxy.vercel.app` |
 
-Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.md`와 `MIGRATION.md`를 따릅니다. Sites Worker는 해당 하위 폴더를 프로젝트 루트로 열어 작업합니다.
+Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.md`와 `MIGRATION.md`를 따릅니다. 공단 상세·사진용 Vercel 함수와 ChatGPT Sites Worker는 정적 데이터 전환 후 제거했습니다. Client Secret이 필요한 `/api/directions`만 서버 호출로 유지합니다.
 
 주소→좌표와 좌표→주소 변환은 두 지도에서 `naver-geocoder.js`를 공유하며, 네이버 Maps JavaScript SDK의 `geocoder` 서브모듈을 브라우저에서 사용합니다. 기존 기관별 `daycareCoord`·`careCoord` 캐시는 계속 호환됩니다.
 
@@ -80,4 +102,4 @@ Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.m
 npm run check
 ```
 
-검사는 HTML의 로컬 스크립트 누락, JavaScript 구문, 전국 주간 5,751곳, 전국 요양 유형별 매니페스트 개수와 중복 기관기호를 확인합니다.
+검사는 HTML의 로컬 스크립트 누락, JavaScript·Python 구문, 전국 주간 5,751곳, 전국 요양 유형별 매니페스트 개수와 중복 기관기호, 공단 정적 스키마·필수 표본·사진 상한을 확인합니다.

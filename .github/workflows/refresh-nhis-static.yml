@@ -1,0 +1,149 @@
+name: Refresh NHIS static data
+
+# SOFTM-NHIS-ACTIONS START 날짜:20260903 : 공단 API 키를 브라우저에 노출하지 않고 일일 호출 상한 안에서 정적 스냅샷을 단계적으로 갱신
+on:
+  schedule:
+    - cron: "23 18 * * *" # 매일 03:23 Asia/Seoul
+    - cron: "41 19 * * *" # 매일 04:41 Asia/Seoul, 14일 순환
+    - cron: "17 20 * * *" # 매일 후보를 만들고 Asia/Seoul 1일 05:17인 실행만 아래에서 월간 점검
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 수집 모드
+        required: true
+        default: incremental
+        type: choice
+        options: [incremental, institution, rotation, full, retry]
+      scope:
+        description: 수집 범위
+        required: true
+        default: all
+        type: choice
+        options: [catalog, details, photos, evaluations, all]
+      institution_id:
+        description: institution 모드 기관기호(쉼표 구분)
+        required: false
+        type: string
+      service_type:
+        description: 선택 급여종류 코드(B03 등)
+        required: false
+        type: string
+      shard_count:
+        description: 전체 분할 개수
+        required: false
+        default: "14"
+        type: string
+      force:
+        description: 기존 성공 JSON도 다시 수집
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nhis-static-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+      NHIS_MAX_PHOTOS_PER_INSTITUTION: "10"
+      NHIS_PHOTO_MODE: remote
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - id: plan
+        name: 실행 계획 결정
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_SCOPE: ${{ inputs.scope }}
+          INPUT_INSTITUTION: ${{ inputs.institution_id }}
+          INPUT_TYPE: ${{ inputs.service_type }}
+          INPUT_SHARD_COUNT: ${{ inputs.shard_count }}
+          INPUT_FORCE: ${{ inputs.force }}
+        run: |
+          python - <<'PY'
+          import datetime, os
+          from pathlib import Path
+          event, schedule = os.environ.get("EVENT_NAME"), os.environ.get("SCHEDULE", "")
+          mode = os.environ.get("INPUT_MODE") or "incremental"
+          scope = os.environ.get("INPUT_SCOPE") or "all"
+          run = True
+          max_calls = 8000
+          if event == "schedule" and schedule == "23 18 * * *": mode, scope, max_calls = "incremental", "all", 900
+          elif event == "schedule" and schedule == "41 19 * * *": mode, scope, max_calls = "rotation", "details,photos", 6800
+          elif event == "schedule":
+              now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+              run, mode, scope, max_calls = now.day == 1, "incremental", "catalog,evaluations", 300
+          shard_count = int(os.environ.get("INPUT_SHARD_COUNT") or 14)
+          if mode == "full": shard_count = max(14, shard_count)
+          shard = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).timetuple().tm_yday % shard_count
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          output.write_text(f"run={str(run).lower()}\nmode={mode}\nscope={scope}\nshard={shard}\nshard_count={shard_count}\nmax_calls={max_calls}\nforce={str(os.environ.get('INPUT_FORCE','').lower() == 'true').lower()}\ninstitution={os.environ.get('INPUT_INSTITUTION','')}\nservice_type={os.environ.get('INPUT_TYPE','')}\n")
+          PY
+      - name: 키와 정적 스키마 사전 검사
+        if: steps.plan.outputs.run == 'true'
+        run: |
+          test -n "$DATA_GO_KR_SERVICE_KEY"
+          python -m py_compile scripts/sync_nhis_static.py scripts/validate_nhis_static.py
+      - name: 증분·기관·순환·재시도 수집
+        if: steps.plan.outputs.run == 'true' && steps.plan.outputs.mode != 'full'
+        env:
+          MODE: ${{ steps.plan.outputs.mode }}
+          SCOPE: ${{ steps.plan.outputs.scope }}
+          SHARD: ${{ steps.plan.outputs.shard }}
+          SHARD_COUNT: ${{ steps.plan.outputs.shard_count }}
+          MAX_CALLS: ${{ steps.plan.outputs.max_calls }}
+          FORCE: ${{ steps.plan.outputs.force }}
+          INSTITUTIONS: ${{ steps.plan.outputs.institution }}
+          SERVICE_TYPE: ${{ steps.plan.outputs.service_type }}
+        run: |
+          args=(--mode "$MODE" --scope "$SCOPE" --shard-count "$SHARD_COUNT" --shard-index "$SHARD" --max-calls "$MAX_CALLS")
+          if [ -n "$SERVICE_TYPE" ]; then args+=(--type "$SERVICE_TYPE"); fi
+          if [ "$FORCE" = true ]; then args+=(--force); fi
+          if [ "$MODE" = incremental ] && [ "$SCOPE" = catalog,evaluations ]; then args+=(--refresh-source-files); fi
+          if [ "$MODE" = institution ]; then
+            IFS=',' read -ra ids <<< "$INSTITUTIONS"
+            for id in "${ids[@]}"; do args+=(--institution "$id"); done
+          fi
+          python scripts/sync_nhis_static.py "${args[@]}"
+      - name: 수동 전체 수집(호출 상한 내 14개 이상 샤드 순차 체크포인트)
+        if: steps.plan.outputs.run == 'true' && steps.plan.outputs.mode == 'full'
+        env:
+          SCOPE: ${{ steps.plan.outputs.scope }}
+          FORCE: ${{ steps.plan.outputs.force }}
+          SHARD_COUNT: ${{ steps.plan.outputs.shard_count }}
+          MAX_CALLS: ${{ steps.plan.outputs.max_calls }}
+        run: |
+          per_shard=$((MAX_CALLS / SHARD_COUNT))
+          for shard in $(seq 0 $((SHARD_COUNT - 1))); do
+            args=(--mode full --scope "$SCOPE" --shard-count "$SHARD_COUNT" --shard-index "$shard" --max-calls "$per_shard")
+            if [ "$FORCE" = true ]; then args+=(--force); fi
+            python scripts/sync_nhis_static.py "${args[@]}"
+          done
+      - name: 생성물 검증
+        if: steps.plan.outputs.run == 'true'
+        run: npm run check
+      - name: 변경 커밋 및 반영
+        if: steps.plan.outputs.run == 'true'
+        run: |
+          if git diff --quiet -- data/nhis source-data; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/nhis source-data
+          git commit -m "$(TZ=Asia/Seoul date +%Y%m%d)_nhis_static_refresh"
+          git push
+# SOFTM-NHIS-ACTIONS END

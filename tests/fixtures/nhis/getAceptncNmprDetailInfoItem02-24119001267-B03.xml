@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SOFTM-NHIS-FIXTURE 날짜:20260902 : 정원·현원 정규화의 고정 입력 -->
+<response><header><resultCode>00</resultCode></header><body><items><item><totPer>34</totPer><maNowPer>8</maNowPer><fmNowPer>21</fmNowPer><maRsvPer>0</maRsvPer><fmRsvPer>0</fmRsvPer></item></items><totalCount>1</totalCount></body></response>

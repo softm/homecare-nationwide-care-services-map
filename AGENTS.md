@@ -37,7 +37,7 @@
 1. `README.md`를 읽는다.
 2. `npm run check`를 실행해 현재 묶음의 기준 상태를 확인한다.
 3. 변경할 프로젝트의 HTML, 광고 설정, 데이터 매니페스트만 우선 읽는다.
-4. 서버 변경은 `services/vercel-api`와 `services/daycare-nhis-detail-api` 중 실제 호출 경로를 먼저 확인한다.
+4. 서버 변경은 `services/vercel-api/api/directions.js`와 정적 `data/nhis` 중 실제 호출 경로를 먼저 확인한다.
 
 ## 중요한 동작 기준
 
@@ -57,6 +57,8 @@
 - 생성된 `nationwide-care-data/*.js`, `nationwide-care-manifest.js`, `nationwide-daycare-evaluations.js`를 직접 임의 수정하지 않는다.
 - 데이터를 재생성하면 `npm run check`로 개수·중복·참조 누락을 확인한다.
 - 전국 주간과 전국 요양 `daycare`의 기관기호 집합 차이는 0이어야 한다.
+- 공단 상세·사진은 `data/nhis`의 정적 JSON을 단일 기준으로 사용하고 두 지도가 `nhis-static-data.js`를 공유한다. // SOFTM-NHIS-POLICY 날짜:20260902 : 실시간 공단 크롤링 서버가 다시 생기지 않도록 정적 배포 구조를 고정
+- 공공데이터 서비스키는 로컬 `.env.local`과 GitHub Actions Secret `DATA_GO_KR_SERVICE_KEY`에만 두며 HTML·정적 JSON·로그에 넣지 않는다.
 
 ## 서버 원칙
 
@@ -65,8 +67,8 @@
 - 전국 주간·전국 요양 SDK는 신규 통합 Maps Application Key ID `etfcybk8vf`를 `ncpKeyId`로 사용한다. 기존 `p4sjps53pa`는 구형 Web Dynamic Map Client ID이므로 두 전국 지도에 다시 사용하지 않는다.
 - 두 지도는 `naverGeocoder:v1:*` 주소 캐시와 기존 `daycareCoord`·`careCoord` 기관 좌표 캐시 호환성을 유지한다.
 - Vercel API의 허용 Origin을 바꾸면 모든 핸들러를 동일하게 수정한다.
-- 공단 HTML 구조가 바뀌면 기본정보와 사진을 함께 회귀검사한다.
-- ChatGPT Sites Worker의 실제 수정 파일은 `services/daycare-nhis-detail-api/worker/index.js`다.
+- 공단 공개 사진 페이지 구조가 바뀌면 `scripts/sync_nhis_static.py`의 사진 매니페스트 파서와 직접 이미지 표시를 함께 회귀검사한다.
+- 공단 상세·사진은 브라우저 실시간 API를 만들지 않고 GitHub Actions에서 정적 JSON으로 수집한다. Client Secret이 필요한 길찾기만 Vercel 서버에 유지한다.
 - 프런트 API 주소를 변경할 때 전국 주간과 전국 요양을 모두 검색해 교체한다.
 
 ## 완료 전 검사

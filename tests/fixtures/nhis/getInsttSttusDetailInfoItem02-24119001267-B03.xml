@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SOFTM-NHIS-FIXTURE 날짜:20260902 : 시설현황 정규화의 고정 입력 -->
+<response><header><resultCode>00</resultCode></header><body><items><item><prsnRoomReal1>0</prsnRoomReal1><ofce>1</ofce><medRoomReal>1</medRoomReal><funcTrnRoomReal>1</funcTrnRoomReal><pgmRoomReal>1</pgmRoomReal><crmnyPrst>1</crmnyPrst><batRoom>1</batRoom></item></items><totalCount>1</totalCount></body></response>

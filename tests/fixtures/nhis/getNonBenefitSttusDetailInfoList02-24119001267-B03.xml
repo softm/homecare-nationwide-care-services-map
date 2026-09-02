@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SOFTM-NHIS-FIXTURE 날짜:20260902 : 비급여 현황 정규화의 고정 입력 -->
+<response><header><resultCode>00</resultCode></header><body><items><item><nonpayKind>식재료비</nonpayKind><prodBase>1식</prodBase><nonpayTgtAmt>4000</nonpayTgtAmt><uptDt>20260801</uptDt></item></items><totalCount>1</totalCount></body></response>

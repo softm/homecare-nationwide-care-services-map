@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SOFTM-NHIS-FIXTURE 날짜:20260902 : 인력현황 정규화의 고정 입력 -->
+<response><header><resultCode>00</resultCode></header><body><items><item><equipLong>16</equipLong><hdOfce>1</hdOfce><socWel>2</socWel><nur>1</nur><nurArticle>1</nurArticle><physicalMTret>1</physicalMTret><wrkMTret>0</wrkMTret><recuProt_1>9</recuProt_1><ofceEmp>1</ofceEmp><cook>1</cook></item></items><totalCount>1</totalCount></body></response>

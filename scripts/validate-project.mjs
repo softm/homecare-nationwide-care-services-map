@@ -129,7 +129,7 @@ const careDaycareById = new Map(careDaycare.map(row => [row.i, row]));
 if (daycare.some(row => careDaycareById.get(row.i)?.a !== row.a)) fail('전국 주간·전국 요양 주야간보호 주소 불일치'); // SOFTM-GEOCODER-CONSISTENCY 날짜:20260902 : 같은 기관이 같은 SDK 좌표를 얻도록 원본 주소까지 비교
 
 for (const file of ['nationwide-daycare-ad-config.js', 'nationwide-care-ad-config.js']) new vm.Script(read(file), { filename: file });
-for (const file of ['naver-geocoder.js', 'services/vercel-api/api/directions.js', 'services/vercel-api/api/official-detail.js', 'services/vercel-api/api/official-image.js', 'services/daycare-nhis-detail-api/worker/index.js']) { // SOFTM-GEOCODER-CHECK 날짜:20260902 : 삭제한 서버 주소 API 대신 공용 브라우저 모듈 구문 검사
+for (const file of ['naver-geocoder.js', 'nhis-static-data.js', 'services/vercel-api/api/directions.js']) { // SOFTM-NHIS-STATIC-CHECK 날짜:20260902 : 폐기한 공단 프록시 대신 공용 정적 데이터 모듈을 검사
   execFileSync(process.execPath, ['--check', path.join(root, file)], { stdio: 'pipe' });
 }
 

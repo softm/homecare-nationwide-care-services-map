@@ -2,6 +2,8 @@
 .env.*
 !.env.example
 .vercel/
+# SOFTM-NHIS-STATIC 날짜:20260902 : 로컬 공공데이터 수집 의존성을 저장소에 포함하지 않음
+.venv/
 node_modules/
 dist/
 __pycache__/

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SOFTM-NHIS-FIXTURE 날짜:20260902 : 홈페이지·교통·주차 정규화의 고정 입력 -->
+<response><header><resultCode>00</resultCode></header><body><items><item><hmpgAddr>https://example.invalid/</hmpgAddr><tfMth>대중교통 이용</tfMth><pkngEquip>주차 가능</pkngEquip></item></items><totalCount>1</totalCount></body></response>
