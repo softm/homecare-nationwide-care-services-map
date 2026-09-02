@@ -1,0 +1,1235 @@
+<!doctype html>
+<!-- gwangmyeong detail build 20260831-map-runtime-fix-v4 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>광명 오리로 1034-1 기준 주간보호센터 비교지도 — 수정본</title>
+<style>
+:root {
+  --bg:#f4f7fb; --card:#fff; --text:#172033; --muted:#667085; --line:#d8e0ec;
+  --green:#0f8a5f; --blue:#2563eb; --orange:#d97706; --gray:#64748b; --dark:#26364d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
+header{background:linear-gradient(125deg,#17324d,#285f8f);color:white;padding:24px clamp(18px,4vw,48px)}
+h1{font-size:clamp(22px,3vw,34px);margin:0 0 8px}
+header p{margin:5px 0;color:#e7f0fb;line-height:1.6}
+.wrap{max-width:1500px;margin:auto;padding:18px}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:0 4px 16px rgba(23,32,51,.05)}
+.kpi b{display:block;font-size:25px;margin-top:4px}.kpi span{color:var(--muted);font-size:13px}
+.alert{border-left:5px solid var(--green);line-height:1.65}
+.grid{display:grid;grid-template-columns:minmax(420px,1.15fr) minmax(380px,.85fr);gap:16px}
+.map-shell{position:relative;height:690px;border-radius:12px;border:1px solid var(--line);overflow:hidden;overscroll-behavior:contain;background:#e7eef7}
+.map-search-button{position:absolute;z-index:20;top:14px;left:50%;transform:translateX(-50%);border:0;border-radius:999px;background:#1877f2;color:#fff;font-weight:800;box-shadow:0 4px 14px rgba(24,119,242,.35);padding:9px 16px;white-space:nowrap}
+.map-search-button:hover{background:#1168d8}.map-search-clear{top:58px;background:#fff;color:#31557d;border:1px solid #cbd5e1;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.map-detail-panel{position:absolute;z-index:40;top:102px;right:12px;width:min(350px,calc(100% - 24px));max-height:calc(100% - 114px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border-radius:12px;box-shadow:0 12px 34px rgba(15,35,55,.3);touch-action:pan-y}
+.map-detail-panel .popup{width:100%}
+.map-detail-panel .popup-close{position:sticky;float:right;top:8px;margin:8px 8px -36px 0;z-index:5}
+.map-progress{position:absolute;inset:0;z-index:55;display:grid;place-items:center;padding:18px;background:rgba(231,238,247,.16);pointer-events:none}
+.map-progress-card{width:min(320px,calc(100% - 32px));padding:14px 15px;border:1px solid rgba(255,255,255,.86);border-radius:14px;background:rgba(23,50,77,.92);color:#fff;box-shadow:0 12px 32px rgba(15,35,55,.3);backdrop-filter:blur(7px)}
+.map-progress-head{display:grid;grid-template-columns:22px 1fr auto;gap:9px;align-items:center;font-size:13px}.map-progress-head b{line-height:1.35}.map-progress-head span{color:#dcecff;font-size:12px;font-weight:800}
+.map-progress-spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,.28);border-top-color:#fff;border-radius:50%;animation:map-progress-spin .75s linear infinite}
+.map-progress-track{height:6px;margin-top:10px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.2)}.map-progress-track i{display:block;width:8%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#6ee7b7,#7dd3fc);transition:width .16s ease}
+@keyframes map-progress-spin{to{transform:rotate(360deg)}}
+@media(max-width:560px){.map-detail-panel{left:10px;right:10px;width:auto;top:102px;max-height:calc(100% - 112px)}}
+#naverMap,#leafletMap,#staticMap{position:absolute;inset:0;width:100%;height:100%}
+#naverMap,#leafletMap{touch-action:none!important}
+#naverMap{z-index:3;background:#e7eef7}
+#leafletMap{z-index:2;background:#e7eef7}
+#staticMap{z-index:1;background:linear-gradient(#f7fafc,#eef4f8)}
+.hidden{display:none!important}
+.map-primary-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) 44px;gap:9px;align-items:center;margin-bottom:12px}
+.center-search-box{position:relative;display:flex;align-items:center}
+.center-search-box input{width:100%;height:44px;padding:10px 42px 10px 42px;border:1px solid #b9c8da;border-radius:12px;background:#f8fbff;font-size:15px;box-shadow:inset 0 1px 2px rgba(23,50,77,.04)}
+.center-search-box input:focus{outline:3px solid rgba(37,99,235,.16);border-color:#2563eb;background:#fff}
+.center-search-icon{position:absolute;left:14px;width:18px;height:18px;color:#48647f;pointer-events:none}
+.center-search-clear{position:absolute;right:7px;width:31px;height:31px;padding:0;border:0;border-radius:50%;background:transparent;color:#5f7185;font-size:20px;line-height:31px}
+.center-search-clear:hover{background:#e6eef8}
+.share-icon-button{width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:12px;border:1px solid #b9c8da;background:#17324d;color:#fff;box-shadow:0 3px 10px rgba(23,50,77,.2)}
+.share-icon-button:hover{background:#285f8f}.share-icon-button svg{width:20px;height:20px}
+.empty-state{padding:22px 10px;text-align:center;color:var(--muted);line-height:1.55}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+button,input,select{border:1px solid #cbd5e1;border-radius:9px;background:white;padding:9px 11px;font-size:14px;color:var(--text)}
+button{cursor:pointer}button:hover{background:#f5f8fc}.filter-btn.active,.view-btn.active{background:var(--dark);color:white;border-color:var(--dark)}
+.grade-btn.active{background:#7c3aed;color:white;border-color:#7c3aed}.score-btn.active{background:#0f766e;color:white;border-color:#0f766e}.confidence-btn.active{background:#b45309;color:white;border-color:#b45309}.filter-label{display:flex;align-items:center;padding:0 2px;color:var(--muted);font-size:12px;font-weight:800}
+.route-planner{margin-top:16px}.route-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.route-toolbar button.primary{background:#0f8a5f;color:#fff;border-color:#0f8a5f;font-weight:800}.route-toolbar button.primary:hover{background:#0b7450}
+.route-layout{display:grid;grid-template-columns:minmax(280px,.78fr) minmax(380px,1.22fr);gap:14px}
+.route-options{border:1px solid var(--line);border-radius:12px;padding:12px;max-height:430px;overflow:auto;background:#f8fafc}
+.route-option{display:grid;grid-template-columns:25px 1fr auto;gap:8px;align-items:start;padding:8px 5px;border-bottom:1px solid #e8edf4}
+.route-option:last-child{border-bottom:0}.route-option input{margin-top:3px}.route-option small{color:var(--muted)}
+.route-result{border:1px solid var(--line);border-radius:12px;padding:12px;min-height:150px}
+.route-summary{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:10px}.route-chip{background:#eaf7f2;color:#086446;border-radius:999px;padding:6px 10px;font-size:13px;font-weight:700}
+.route-stop{display:grid;grid-template-columns:35px 1fr auto;gap:9px;align-items:center;border-bottom:1px solid #e8edf4;padding:8px 0}
+.route-stop:last-child{border-bottom:0}.route-no{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#17324d;color:white;font-weight:800}
+.route-stop a,.route-actions a{display:inline-block;text-decoration:none;color:#1859c9;border:1px solid #b8c9e8;border-radius:7px;padding:5px 8px;margin:2px;font-size:12px;background:#fff}
+.route-actions{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.route-note{font-size:12px;color:var(--muted);line-height:1.55;margin-top:8px}
+.route-map-marker{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#7c3aed;color:#fff;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);font-size:12px;font-weight:900}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:9px;align-items:center}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:4px}
+.status{margin-left:auto;padding:4px 8px;border-radius:99px;background:#edf4ff;color:#31557d;font-weight:700}
+.side{max-height:745px;overflow:auto}
+.ranking-toolbar{position:sticky;top:-15px;z-index:4;background:#fff;padding:15px 0 10px;border-bottom:1px solid var(--line)}
+.ranking-title-row,.ranking-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.ranking-title-row{justify-content:space-between}.ranking-title-row h2{margin:0;font-size:19px}.ranking-title-row select{padding:7px 9px}
+.ranking-actions{margin-top:9px}.ranking-actions button{padding:7px 9px;font-size:12px}.ranking-actions .primary{background:#0f8a5f;color:#fff;border-color:#0f8a5f;font-weight:800}.route-select-all{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:12px;font-weight:800;cursor:pointer;user-select:none}.route-select-all input{width:17px;height:17px;margin:0;padding:0;accent-color:#2563eb}.route-select-all:has(input:checked),.route-select-all:has(input:indeterminate){border-color:#8fb1e5;background:#eef5ff;color:#184f8c}
+#ranking{max-height:430px;overflow:auto;margin-top:6px}.rank{display:flex;gap:9px;align-items:flex-start;padding:11px 4px;border-bottom:1px solid #edf1f6;cursor:pointer;border-radius:8px}
+.rank:hover{background:#f6f9fd}.rank:last-child{border-bottom:none}
+.rank.selected{background:#f2f7ff}.rank-check{width:18px;height:18px;margin:5px 0 0 2px;flex:0 0 auto;accent-color:#2563eb}.route-order{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:999px;background:#7c3aed;color:#fff;font-size:11px;font-weight:900;margin-right:4px}
+.badge{display:inline-block;padding:3px 7px;border-radius:99px;font-size:11px;font-weight:700}
+.badge.new{background:#fff1dc;color:#9a5200}.badge.old{background:#e9f1ff;color:#1d4ed8}
+.score{font-size:20px;font-weight:800;min-width:48px;color:var(--green)}
+.rank h3{font-size:15px;margin:0 0 4px}.rank p{font-size:12px;color:var(--muted);margin:3px 0;line-height:1.45}
+.table-card{margin-top:16px;overflow:hidden}
+.table-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.table-wrap{overflow:auto;max-height:800px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:1450px;font-size:13px}
+th,td{padding:10px 9px;border-bottom:1px solid #e9eef5;vertical-align:top;text-align:left;line-height:1.45}
+th{position:sticky;top:0;background:#edf3fa;z-index:2;white-space:nowrap}
+tr.omitted{background:#fffaf1}tr:hover{background:#f2f7fd}.center-link{cursor:pointer;color:#173f70}
+.stars{white-space:nowrap;color:#f59e0b;letter-spacing:-1px}.phone{white-space:nowrap;font-weight:700}
+.muted{color:var(--muted)}.small{font-size:11px}.foot{margin-top:16px;line-height:1.65;color:var(--muted);font-size:13px}
+.marker-symbol{position:relative;width:50px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.12))}.marker-symbol .marker-pin{position:absolute;left:0;top:0}
+.marker-rank{position:absolute;left:26px;top:-8px;min-width:21px;height:21px;padding:0 5px;display:grid;place-items:center;border:2px solid #fff;border-radius:999px;background:#172033;color:#fff;font-size:10px;font-weight:900;line-height:1;box-shadow:0 2px 7px rgba(15,23,42,.35)}
+.marker-pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.marker-pin span{transform:rotate(45deg);font-size:9px;color:white;font-weight:900}.m-green{background:var(--green)}.m-blue{background:var(--blue)}.m-orange{background:var(--orange)}.m-gray{background:var(--gray)}
+.base-marker{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#dc2626;color:white;border:3px solid white;font-weight:900;box-shadow:0 2px 9px rgba(0,0,0,.35)}
+.popup{width:min(330px,78vw);color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Arial,sans-serif}
+.popup{position:relative}.popup-close{position:absolute;z-index:3;right:8px;top:8px;width:28px;height:28px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:20px;line-height:28px;font-weight:800}.popup-close:hover{background:rgba(255,255,255,.35)}
+.popup-head{padding:14px 15px 12px;background:linear-gradient(135deg,#17324d,#285f8f);color:#fff;border-radius:11px 11px 0 0}.popup-eyebrow{display:flex;gap:6px;align-items:center;margin-bottom:7px}.popup-eyebrow span{padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.16);font-size:10px;font-weight:800}.popup h3{font-size:17px;line-height:1.35;margin:0;font-weight:900}.popup-score-row{display:flex;align-items:center;gap:9px;margin-top:9px}.popup-score{font-size:25px;font-weight:900;color:#ffe082}.popup-stars{color:#ffd166;font-size:13px;white-space:nowrap}
+.popup-body{padding:12px 15px 14px;background:#fff;border:1px solid #d8e0ec;border-top:0;border-radius:0 0 11px 11px}.popup-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}.popup-chip{padding:7px 8px;border-radius:8px;background:#f2f6fb;font-size:11px;line-height:1.35;color:#46576d}.popup-chip b{display:block;color:#172033;font-size:12px;margin-top:2px}.popup-row{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid #edf1f6;font-size:12px;line-height:1.45}.popup-row-label{flex:0 0 42px;color:#667085;font-weight:800}.popup-row-value{color:#25344a}.popup-phone{color:#1458b8;font-weight:800;text-decoration:none}.popup-note{margin-top:8px;padding:9px 10px;border-radius:8px;background:#fff8e8;color:#684b16;font-size:11px;line-height:1.48;border:1px solid #f3dfb0}
+.official-box{margin-top:9px;padding:9px 10px;border:1px solid #d8e6f5;border-radius:9px;background:#f4f8fd;font-size:11px;line-height:1.45;color:#40526a}.official-box b{display:block;margin-bottom:3px;color:#17324d;font-size:12px}.official-verified{display:inline-flex;align-items:center;margin-left:5px;padding:2px 6px;border-radius:999px;background:#dff5e9;color:#087443;font-size:9px;font-weight:900}.map-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.map-actions a,.map-actions button{display:flex;align-items:center;justify-content:center;min-height:34px;padding:7px 6px;border:0;border-radius:8px;text-decoration:none;text-align:center;font-size:10px;font-weight:900}.map-actions .kakao{background:#fee500;color:#191919}.map-actions .naver{background:#03c75a;color:#fff}.map-actions .nhis{background:#1976d2;color:#fff}.map-actions .copy{grid-column:1/-1;background:#334155;color:#fff}.rank-copy{margin-top:5px;min-height:27px;padding:3px 7px;font-size:11px}.leaflet-popup-content{margin:0!important;width:auto!important}.leaflet-popup-content-wrapper{padding:0!important;border-radius:12px!important;overflow:hidden}.leaflet-popup-tip-container{margin-top:-1px}
+.static-stage{position:relative;width:100%;height:100%;overflow:hidden}.static-stage svg{width:100%;height:100%;display:block}.static-head{position:absolute;left:12px;top:12px;z-index:2;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px;line-height:1.45;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.static-info{position:absolute;right:12px;top:12px;width:min(330px,calc(100% - 24px));z-index:3;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:12px;line-height:1.5;box-shadow:0 3px 14px rgba(0,0,0,.12)}
+.static-info h3{font-size:15px;margin:0 0 5px}.static-info button{float:right;padding:3px 7px;margin:-3px -3px 4px 6px}.static-marker{cursor:pointer}.static-marker circle{stroke:#fff;stroke-width:75;filter:drop-shadow(0 65px 75px rgba(0,0,0,.22))}.static-marker text{fill:#fff;font-weight:900;font-size:250px;text-anchor:middle;dominant-baseline:central;pointer-events:none}.static-marker:hover circle{stroke:#111827;stroke-width:105}
+.static-marker .static-rank-circle{stroke-width:45}.static-marker:hover .static-rank-circle{stroke:#fff;stroke-width:55}.static-marker .static-rank-text{font-size:180px}
+.load-note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:#53657b;font-size:14px;line-height:1.6;background:linear-gradient(#f7fafc,#eef4f8)}
+.toast{position:fixed;left:50%;bottom:28px;z-index:10050;max-width:min(520px,calc(100vw - 32px));transform:translate(-50%,18px);padding:11px 16px;border-radius:10px;background:#172033;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.28);font-size:13px;font-weight:800;line-height:1.45;opacity:0;visibility:hidden;transition:opacity .18s,transform .18s,visibility .18s;pointer-events:none}.toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+@media(max-width:980px){.summary{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.map-shell{height:560px}.side{max-height:none}}
+@media(max-width:760px){.route-layout{grid-template-columns:1fr}.route-options{max-height:300px}.route-stop{grid-template-columns:35px 1fr}.route-stop>div:last-child{grid-column:2}}
+@media(max-width:560px){.summary{grid-template-columns:1fr 1fr}.wrap{padding:10px}.map-shell{height:500px}.status{width:100%;margin-left:0}.static-info{top:auto;bottom:10px}.map-primary-toolbar{grid-template-columns:minmax(0,1fr) 44px}.center-search-box input{font-size:14px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>광명 오리로 1034-1 기준 주간보호센터 비교</h1>
+  <p>네이버지도를 기본으로 사용하며, 등록 좌표로 18개 센터와 최적 순회 경로를 표시합니다.</p>
+  <p>네이버지도가 로딩되지 않으면 ‘일반지도’ 또는 ‘간이좌표도’로 전환할 수 있습니다.</p>
+</header>
+<div class="wrap">
+  <section class="summary">
+    <div class="card kpi"><span>비교 센터</span><b id="countAll"></b></div>
+    <div class="card kpi"><span>추가 조사센터</span><b id="countNew"></b></div>
+    <div class="card kpi"><span>공식 A등급</span><b id="countA"></b></div>
+    <div class="card kpi"><span>공식평가 전 신설기관</span><b id="countFresh"></b></div>
+  </section>
+
+  <section class="card alert">
+    <b>지도 사용:</b> 지도를 끌어 이동하면 보이는 화면을 자동으로 다시 검색합니다. 지도 빈 곳을 누르면 그 지점이 새 붉은 ‘기준’이 되고 거리·목록·마커가 즉시 다시 계산됩니다.
+    확대·축소는 현재 축척을 유지하며, 마커가 겹쳐 보일 때는 표 또는 우선순위 항목을 누르면 해당 센터로 이동합니다.
+  </section>
+
+  <section class="grid" style="margin-top:16px">
+    <div class="card">
+      <div class="map-primary-toolbar">
+        <div class="center-search-box">
+          <svg class="center-search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="search" type="search" autocomplete="off" placeholder="읍·면·동 또는 요양기관명 검색" aria-label="읍면동 또는 요양기관명 검색" oninput="handleCenterSearchInput(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();announceCenterSearch()}">
+          <button class="center-search-clear hidden" id="centerSearchClear" type="button" onclick="clearCenterSearch()" aria-label="검색어 지우기" title="검색어 지우기">×</button>
+        </div>
+        <button class="share-icon-button" type="button" onclick="shareCurrentState()" aria-label="현재 조회상태 공유" title="현재 조회상태 공유">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5" fill="currentColor"/><circle cx="6" cy="12" r="2.5" fill="currentColor"/><circle cx="18" cy="19" r="2.5" fill="currentColor"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="controls" id="mapControls">
+        <span class="filter-label">지역</span>
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">전체</button>
+        <button class="filter-btn" data-filter="omitted" onclick="setFilter('omitted',this)">추가 조사만</button>
+        <button class="filter-btn" data-filter="광명" onclick="setFilter('광명',this)">광명</button>
+        <button class="filter-btn" data-filter="구로" onclick="setFilter('구로',this)">구로</button>
+        <button onclick="focusBase()">기준지 중심</button>
+        <button onclick="fitVisible()">표시센터 전체보기</button>
+        <button class="view-btn active" id="btnNaver" onclick="showNaverView(true)">네이버지도</button>
+        <button class="view-btn" id="btnLeaflet" onclick="showLeafletView(true)">일반지도</button>
+        <button class="view-btn" id="btnStatic" onclick="showStaticView('수동 전환')">간이좌표도</button>
+      </div>
+      <div class="controls" id="gradeControls">
+        <span class="filter-label">공식등급 · 복수선택</span>
+        <button class="grade-btn active" data-grade="all" onclick="setGradeFilter('all',this)">전체등급</button>
+        <button class="grade-btn" data-grade="A" onclick="setGradeFilter('A',this)">A 최우수</button>
+        <button class="grade-btn" data-grade="B" onclick="setGradeFilter('B',this)">B 우수</button>
+        <button class="grade-btn" data-grade="C" onclick="setGradeFilter('C',this)">C 양호</button>
+        <button class="grade-btn" data-grade="D" onclick="setGradeFilter('D',this)">D 보통</button>
+        <button class="grade-btn" data-grade="new" onclick="setGradeFilter('new',this)">신설·미평가</button>
+        <button class="grade-btn" data-grade="other" onclick="setGradeFilter('other',this)">기타·확인필요</button>
+        <span class="status" id="filterCount">18곳 표시</span>
+      </div>
+      <div class="controls" id="scoreControls">
+        <span class="filter-label">종합평점 · 복수선택</span>
+        <button class="score-btn active" data-score="all" onclick="setScoreFilter('all',this)">전체평점</button>
+        <button class="score-btn" data-score="top" onclick="setScoreFilter('top',this)">4.4 이상</button>
+        <button class="score-btn" data-score="high" onclick="setScoreFilter('high',this)">4.0~4.39</button>
+        <button class="score-btn" data-score="mid" onclick="setScoreFilter('mid',this)">3.5~3.99</button>
+        <button class="score-btn" data-score="low" onclick="setScoreFilter('low',this)">3.49 이하</button>
+      </div>
+      <div class="controls" id="confidenceControls">
+        <span class="filter-label">정보 신뢰도 · 복수선택</span>
+        <button class="confidence-btn active" data-confidence="all" onclick="setConfidenceFilter('all',this)">전체신뢰도</button>
+        <button class="confidence-btn" data-confidence="높음" onclick="setConfidenceFilter('높음',this)">높음</button>
+        <button class="confidence-btn" data-confidence="중상" onclick="setConfidenceFilter('중상',this)">중상</button>
+        <button class="confidence-btn" data-confidence="중간" onclick="setConfidenceFilter('중간',this)">중간</button>
+        <button class="confidence-btn" data-confidence="중하" onclick="setConfidenceFilter('중하',this)">중하</button>
+        <button class="confidence-btn" data-confidence="낮음" onclick="setConfidenceFilter('낮음',this)">낮음</button>
+      </div>
+      <div class="map-shell">
+        <button class="map-search-button" onclick="searchCurrentMap(event)">↻ 현 지도에서 검색</button>
+        <button class="map-search-button map-search-clear hidden" id="mapSearchClear" onclick="clearCurrentMapSearch(event)">지도영역 검색 해제</button>
+        <div id="mapDetailPanel" class="map-detail-panel hidden" role="dialog" aria-label="센터 상세정보" onpointerdown="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.stopPropagation()" onwheel="event.stopPropagation()"></div>
+        <div id="mapProgress" class="map-progress hidden" role="status" aria-live="polite" aria-busy="false">
+          <div class="map-progress-card">
+            <div class="map-progress-head"><i class="map-progress-spinner" aria-hidden="true"></i><b id="mapProgressLabel">지도 준비 중</b><span id="mapProgressPercent">0%</span></div>
+            <div class="map-progress-track" aria-hidden="true"><i id="mapProgressBar"></i></div>
+          </div>
+        </div>
+        <div id="naverMap"><div class="load-note">네이버지도를 불러오는 중입니다.<br>인증되지 않으면 일반지도로 자동 전환합니다.</div></div>
+        <div id="leafletMap" class="hidden"><div class="load-note">일반지도를 불러오는 중입니다.</div></div>
+        <div id="staticMap" class="hidden"></div>
+      </div>
+      <div class="legend">
+        <span><b class="marker-rank" style="position:static;display:inline-grid;vertical-align:middle;margin-right:4px">1</b>목록 순번</span>
+        <span><i class="dot" style="background:#0f8a5f"></i>4.4점 이상</span>
+        <span><i class="dot" style="background:#2563eb"></i>4.0~4.39</span>
+        <span><i class="dot" style="background:#d97706"></i>3.5~3.99</span>
+        <span><i class="dot" style="background:#64748b"></i>3.49 이하</span>
+        <span class="status" id="mapStatus">지도 준비 중</span>
+      </div>
+    </div>
+    <div class="card side">
+      <div class="ranking-toolbar">
+        <div class="ranking-title-row">
+          <h2>우선 검토·순회 경로</h2>
+          <select id="rankingSort" onchange="setRankingSort(this.value)" aria-label="목록 정렬">
+            <option value="priority">우선순위</option>
+            <option value="route">탐색순위</option>
+          </select>
+        </div>
+        <div class="small muted">지도에 표시된 센터만 나오며 체크한 센터만 경로에 포함됩니다.</div>
+        <div class="ranking-actions">
+          <label class="route-select-all" for="routeSelectAll"><input id="routeSelectAll" type="checkbox" onchange="selectAllRoute(this.checked)"><span>표시센터 전체 선택</span></label>
+          <button class="primary" onclick="optimizeRoute()">최적경로 탐색</button>
+          <span class="status" id="routeSelectionCount">0곳 선택</span>
+        </div>
+      </div>
+      <div id="ranking"></div>
+      <div class="route-result" id="routeResult">
+        <div class="muted">센터를 체크하고 ‘최적경로 탐색’을 누르세요.</div>
+      </div>
+      <div class="route-note">출발은 지도 위 붉은 ‘기준’ 위치이며 마지막 센터에서 종료합니다. 실제 도로·교통 상황은 내비게이션에서 최종 확인하세요.</div>
+    </div>
+  </section>
+
+  <section class="card table-card">
+    <div class="table-head">
+      <div>
+        <h2 style="margin:0 0 4px;font-size:20px">센터별 별점 비교표</h2>
+        <div class="muted small">센터명을 누르면 지도에서 해당 마커로 이동합니다. 거리는 입력 좌표 기준 직선거리입니다.</div>
+      </div>
+      <div class="controls">
+        <select id="sort" onchange="renderTable()">
+          <option value="quality">종합점수 순</option>
+          <option value="distance">거리 순</option>
+          <option value="grade">공식등급 순</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>구분</th><th>센터</th><th>예상 직선거리</th><th>공식 평가</th><th>종합</th>
+        <th>프로그램·재활</th><th>시설·정돈</th><th>인력/운영</th><th>대표전화</th><th>판단</th><th>주소</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card foot">
+    <b>지도 사용법:</b> 처음에는 기준 주소가 중앙에 고정됩니다. 휠·터치패드 확대/축소는 입력을 완만하게 처리해 한 단계씩 조정됩니다.
+    지도 오른쪽의 +/− 버튼이나 두 손가락 확대도 사용할 수 있습니다. ‘현 지도에서 검색’을 누르면 현재 화면 전체가 초록색 반투명 사각영역으로 고정 표시됩니다. 일반지도 배경이 보이지 않으면 ‘간이좌표도’를 누르십시오.
+    거리와 좌표는 송영시간이 아니라 주소 기반 상대 비교용입니다.
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+const BASE = {"name": "기준 위치", "address": "경기도 광명시 오리로 1034-1", "lat": 37.4812886, "lon": 126.8486736};
+const centers = [{"name": "예담실버케어주간보호센터 광명", "region": "광명", "listed": true, "phone": "02-899-3655", "user_phone": "02-899-3655", "address": "경기도 광명시 금하로 529, 302~306호", "geoAddress": "경기도 광명시 금하로 529", "lat": 37.4469, "lon": 126.8867, "grade": "A(최우수)", "eval_year": "2024", "eval_score": "영역점수 89·100·100·95·90", "program": "인지음악·인지언어·근력운동 등", "staff": "간호 1명, 요양보호사 15명/이용 56명", "facility": "대형, 공개사진 12장, 지하주차 확인 자료", "clean": "4.6", "program_star": 4.6, "quality": 4.8, "confidence": "높음", "note": "공식평가·인력·프로그램이 고르게 강함. 송영권역 확인 필요.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 5.09, "status": "기존 조사", "id": 0}, {"name": "광명제일데이케어센터", "region": "광명", "listed": false, "phone": "02-2682-7974", "user_phone": "", "address": "경기도 광명시 광화로 22, 5층", "geoAddress": "경기도 광명시 광화로 22", "lat": 37.4742, "lon": 126.8487, "grade": "신설기관", "eval_year": "미평가", "eval_score": "공단 현재 화면: 신설기관", "program": "신체활동·교구블록·인지 프로그램", "staff": "간호조무사 1명, 요양보호사 9명/정원 34명", "facility": "재활·훈련 공간 공개, 기계식 주차 조건 확인 필요", "clean": "4.3", "program_star": 4.5, "quality": 4.7, "confidence": "높음", "note": "기준지와 가깝지만 공단 현재 화면은 신설기관으로 표시됨. 현 평가·운영승계 여부를 방문 전 확인.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 0.79, "status": "누락 보강", "id": 1}, {"name": "사회복지법인 광남새마을금고 복지재단 노인데이케어센터", "region": "광명", "listed": false, "phone": "02-2684-9988", "user_phone": "", "address": "경기도 광명시 광명로831번길 5-1, 401·501호", "geoAddress": "경기도 광명시 광명로831번길 5-1", "lat": 37.4735766, "lon": 126.8507671, "grade": "A(최우수)", "eval_year": "2023", "eval_score": "약 94.6점", "program": "인지·신체·생활지원, 옥상정원·족욕 등 공개", "staff": "간호 1명, 요양보호사 9명/이용 49명", "facility": "공개사진 8장, 온돌방·옥상정원 등", "clean": "4.5", "program_star": 4.4, "quality": 4.7, "confidence": "높음", "note": "기준지에서 가까운 안정형 후보. 권리보장 100점.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 0.88, "status": "누락 보강", "id": 2}, {"name": "광명효재활 주간보호센터", "region": "광명", "listed": false, "phone": "02-2135-5535", "user_phone": "", "address": "경기도 광명시 범안로 1008, 4층", "geoAddress": "경기도 광명시 범안로 1008", "lat": 37.4618, "lon": 126.8787, "grade": "B(우수)", "eval_year": "2023", "eval_score": "영역점수 78·93·70·83·95", "program": "재활·신체활동 중심", "staff": "간호 1명, 요양보호사 14명/이용 36명", "facility": "공개사진 11장, 재활 중심 시설정보", "clean": "4.4", "program_star": 4.8, "quality": 4.5, "confidence": "높음", "note": "돌봄 인력비가 매우 좋음. 다만 권리보장 점수 70은 방문 시 확인.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 3.42, "status": "누락 보강", "id": 3}, {"name": "소하노인주간보호센터", "region": "광명", "listed": false, "phone": "02-897-0078", "user_phone": "", "address": "경기도 광명시 소하로 25", "geoAddress": "경기도 광명시 소하로 25", "lat": 37.4447, "lon": 126.8797, "grade": "A(최우수)", "eval_year": "2023", "eval_score": "영역점수 89·100·100·95·97", "program": "인지·건강·신체·사회활동", "staff": "간호 1명, 요양보호사 3명/이용 24명", "facility": "공개사진 46장, 장기운영", "clean": "4.5", "program_star": 4.5, "quality": 4.5, "confidence": "높음", "note": "평가와 운영이 매우 안정적이나 기준지에서는 다소 멂.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 4.9, "status": "누락 보강", "id": 4}, {"name": "미소들주야간보호센터", "region": "구로", "listed": true, "phone": "02-2067-9251", "user_phone": "02-2067-9251", "address": "서울특별시 구로구 고척로21나길 88-41", "geoAddress": "서울특별시 구로구 고척로21나길 88-41", "lat": 37.4937, "lon": 126.8418, "grade": "B(우수)", "eval_year": "2024", "eval_score": "89.32점", "program": "건강체조·음악·미술·웃음치료·인지놀이·공기압치료", "staff": "정원 32명, 공개자료상 전체인력 12명", "facility": "의료재단·병원 연계 환경, 중형", "clean": "4.3", "program_star": 4.7, "quality": 4.5, "confidence": "중상", "note": "뇌혈관질환 이후 건강관리·재활 관점에서 비교 가치가 큼.", "source": "구로구 공식명단·건보공단 기반 공개자료·의료재단 소개", "distance": 1.51, "status": "기존 조사", "id": 5}, {"name": "희망주야간보호센터", "region": "구로", "listed": false, "phone": "02-2681-0692", "user_phone": "", "address": "서울특별시 구로구 중앙로 79", "geoAddress": "서울특별시 구로구 중앙로 79", "lat": 37.5032, "lon": 126.862, "grade": "B(우수)", "eval_year": "2023", "eval_score": "영역점수 94·93·75·80·84", "program": "인지·신체·사회활동, 평일 야간운영", "staff": "요양보호사 10명/정원 44명 자료", "facility": "공개사진 7장, 장기운영", "clean": "4.2", "program_star": 4.3, "quality": 4.4, "confidence": "중상", "note": "평일 08~22시 운영 자료가 있어 보호시간이 긴 가정에 유리.", "source": "구로구 공식명단·건보공단 기반 공개자료", "distance": 2.71, "status": "누락 보강", "id": 6}, {"name": "시니어데이케어 주은 광명센터", "region": "광명", "listed": true, "phone": "02-898-0776", "user_phone": "0507-1316-0776", "address": "경기도 광명시 일직로12번길 11, 5층", "geoAddress": "경기도 광명시 일직로12번길 11", "lat": 37.4189, "lon": 126.887, "grade": "B(우수)", "eval_year": "2024", "eval_score": "84.85점", "program": "레크리에이션·인지카드·미술·신체활동", "staff": "간호조무사 2명, 요양보호사 12명/정원 51명", "facility": "중대형, 프로그램 사진 다수", "clean": "4.3", "program_star": 4.5, "quality": 4.3, "confidence": "높음", "note": "평가·인력은 양호하나 기준지에서 거리가 큼.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 7.72, "status": "기존 조사", "id": 7}, {"name": "구립온수데이케어센터", "region": "구로", "listed": false, "phone": "02-2612-8750", "user_phone": "", "address": "서울특별시 구로구 부일로9길 111, 4층", "geoAddress": "서울특별시 구로구 부일로9길 111", "lat": 37.4933, "lon": 126.8175, "grade": "B(우수)", "eval_year": "2024", "eval_score": "83.8점", "program": "인지자극·운동요법·가족참여·재활훈련", "staff": "간호 1명, 요양보호사 공개자료 2~5명", "facility": "구립·소규모, 재활훈련실", "clean": "4.2", "program_star": 4.5, "quality": 4.3, "confidence": "중상", "note": "구립·소규모 장점이 있으나 대기자가 있는 공개자료 확인.", "source": "구로구 공식명단·건보공단 기반 공개자료", "distance": 3.06, "status": "누락 보강", "id": 8}, {"name": "하안노인주간보호센터", "region": "광명", "listed": false, "phone": "070-8850-0115", "user_phone": "", "address": "경기도 광명시 하안로 238", "geoAddress": "경기도 광명시 하안로 238", "lat": 37.4613, "lon": 126.8794, "grade": "B(우수)", "eval_year": "2023", "eval_score": "88.35점", "program": "인지·건강·신체활동", "staff": "간호조무사 1명, 요양보호사 4명/정원 24명", "facility": "소규모·장기운영", "clean": "4.1", "program_star": 4.1, "quality": 4.2, "confidence": "높음", "note": "환경안전 97.73·권리보장 100점. 제공과정은 상대적으로 낮음.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 3.51, "status": "누락 보강", "id": 9}, {"name": "(주)대교 뉴이프 데이케어센터 광명센터", "region": "광명", "listed": false, "phone": "02-6953-9409", "user_phone": "", "address": "경기도 광명시 신기로17번길 11, 603·604호", "geoAddress": "경기도 광명시 신기로17번길 11", "lat": 37.4211, "lon": 126.8877, "grade": "신설기관", "eval_year": "미평가", "eval_score": "-", "program": "공개목록 49개, 상·하지운동·사이클·인지 15종 등", "staff": "간호조무사 1명, 요양보호사 12명/이용 57명", "facility": "신축형, 물리치료 공간·지하2~4층 대형주차장", "clean": "4.7", "program_star": 4.9, "quality": 4.3, "confidence": "중간", "note": "프로그램·시설은 강하지만 공식평가 전이며 기준지에서 멂.", "source": "광명시 공식명단·공공데이터 기반 시설 공개자료", "distance": 7.53, "status": "누락 보강", "id": 10}, {"name": "(주)케어링 주간보호센터 광명점", "region": "광명", "listed": true, "phone": "02-897-9997", "user_phone": "0507-1433-0172", "address": "경기도 광명시 소하로109번길 14, 2·7층", "geoAddress": "경기도 광명시 소하로109번길 14", "lat": 37.4485, "lon": 126.8835, "grade": "신설기관", "eval_year": "미평가", "eval_score": "-", "program": "작업치료사 배치, 물리치료·인지·음악·신체 등 다수", "staff": "작업치료사 1명, 간호조무사 1명, 요양보호사 11명/이용 76명", "facility": "재활훈련실·프로그램 공개 활발, 건물 내 주차 불가 자료", "clean": "4.4", "program_star": 4.8, "quality": 4.2, "confidence": "중간", "note": "전문 프로그램 장점. 공식평가 전이고 주차는 불리.", "source": "광명시 공식명단·공공데이터 기반 시설 공개자료", "distance": 4.77, "status": "기존 조사", "id": 11}, {"name": "참사랑재가복지센터", "region": "광명", "listed": true, "phone": "02-2060-9522", "user_phone": "0507-1368-9522", "address": "경기도 광명시 부평말길 39", "geoAddress": "경기도 광명시 부평말길 39", "lat": 37.4743, "lon": 126.8356, "grade": "신설기관", "eval_year": "미평가", "eval_score": "-", "program": "공개 세부 커리큘럼 제한", "staff": "간호 1명, 요양보호사 10명/이용 36명", "facility": "공개사진 17장, 중형", "clean": "4.3", "program_star": 3.9, "quality": 4.0, "confidence": "중간", "note": "기준지와 비교적 가깝고 인력비는 좋음. 프로그램 실체 확인 필요.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 1.39, "status": "기존 조사", "id": 12}, {"name": "광명어르신데이케어센터", "region": "광명", "listed": true, "phone": "02-897-8892", "user_phone": "02-897-8890", "address": "경기도 광명시 소하로109번길 15, 4층", "geoAddress": "경기도 광명시 소하로109번길 15", "lat": 37.4485, "lon": 126.8838, "grade": "신설기관", "eval_year": "미평가", "eval_score": "-", "program": "공개 세부 커리큘럼 제한", "staff": "간호 1명, 요양보호사 15명/이용 60명", "facility": "대형, 공개사진 2장", "clean": "3.9", "program_star": 3.8, "quality": 3.9, "confidence": "중하", "note": "인력비는 양호하나 평가·시설 공개자료가 아직 적음. 전화번호 출처 상이.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 4.79, "status": "기존 조사", "id": 13}, {"name": "킴스너싱재활데이케어", "region": "광명", "listed": false, "phone": "02-2612-5151", "user_phone": "", "address": "경기도 광명시 오리로 1041", "geoAddress": "경기도 광명시 오리로 1041", "lat": 37.48155, "lon": 126.8481, "grade": "신설기관", "eval_year": "2025-06 개설", "eval_score": "-", "program": "재활 표방, 주간보호 세부 커리큘럼 공개는 제한적", "staff": "공개 초기자료: 간호조무사 1명·요양보호사 2명(변동 가능)", "facility": "신규 대형, 지상·지하1·2층 주차", "clean": "4.5", "program_star": 4.0, "quality": 3.8, "confidence": "낮음", "note": "기준지 사실상 바로 옆이라 반드시 확인할 곳. 공식평가·운영실적은 아직 없음.", "source": "광명시 공식명단·시설/공공데이터 공개자료", "distance": 0.06, "status": "누락 보강", "id": 14}, {"name": "구로미가데이케어센터", "region": "구로", "listed": false, "phone": "02-2060-0993", "user_phone": "", "address": "서울특별시 구로구 천왕로 32, 6·7층", "geoAddress": "서울특별시 구로구 천왕로 32", "lat": 37.480564, "lon": 126.83978, "grade": "C(양호)", "eval_year": "2023", "eval_score": "영역점수 67·86·75·75·84", "program": "레크리에이션·워크북·기능회복·행사", "staff": "정원 72명, 최근 전체인력 18명 공개자료", "facility": "대형, 공개사진 3장 이상", "clean": "3.9", "program_star": 3.9, "quality": 3.7, "confidence": "중상", "note": "기준지 약 1km권의 실질 후보지만 공식평가는 C.", "source": "구로구 공식명단·건보공단 기반 공개자료", "distance": 0.79, "status": "누락 보강", "id": 15}, {"name": "광명노인주간보호센터", "region": "광명", "listed": true, "phone": "02-897-8830", "user_phone": "02-897-8830", "address": "경기도 광명시 소하로 88, 703·704호", "geoAddress": "경기도 광명시 소하로 88", "lat": 37.45, "lon": 126.8838, "grade": "D(보통)", "eval_year": "2023", "eval_score": "69.8점", "program": "인지 10종·행사·생활/건강체조", "staff": "간호사 1명, 요양보호사 5명/공개 정원 43명", "facility": "프로그램실·식당·목욕실 등", "clean": "3.8", "program_star": 4.0, "quality": 3.4, "confidence": "높음", "note": "프로그램 수는 있으나 권리보장 41.7·제공과정 60.9로 우선순위 낮춤.", "source": "광명시 공식명단·건보공단 기반 공개자료", "distance": 4.66, "status": "기존 조사", "id": 16}, {"name": "(주)구로 휴 복지법인주간보호센터", "region": "구로", "listed": true, "phone": "02-2066-3816", "user_phone": "0507-1304-3816", "address": "서울특별시 구로구 중앙로 9, 5층", "geoAddress": "서울특별시 구로구 중앙로 9", "lat": 37.498, "lon": 126.858, "grade": "보통권", "eval_year": "최근 공개자료 상이", "eval_score": "2025 영역 59·87·75·73·65 / 2024 E자료도 존재", "program": "공개 세부 커리큘럼 제한", "staff": "간호 1명, 요양보호사 7명/이용 32명", "facility": "공개사진 7장, 중형", "clean": "3.9", "program_star": 3.7, "quality": 3.3, "confidence": "중간", "note": "최근 평가자료가 출처별로 달라 직접 공단 결과 확인 권장.", "source": "구로구 공식명단·건보공단 기반 공개자료", "distance": 2.03, "status": "기존 조사", "id": 17}];
+// 공단 사이트는 브라우저의 교차 출처 제한 때문에 정적 페이지에서 실시간으로
+// 읽을 수 없다. 전국 공단 연계 데이터의 기관기호·주소를 대조해 상세 페이지로 바로 연결한다.
+const officialRegistry = {
+  0:{code:'24121000233',type:'B03',name:'예담실버케어주야간보호센터(광명점)'},
+  1:{code:'24121000312',type:'B03',name:'광명제일데이케어센터'},
+  2:{code:'24121000220',type:'B03',name:'사회복지법인 광남새마을금고 복지재단 노인데이케어센터'},
+  3:{code:'24121000230',type:'B03',name:'광명효재활 주간보호센터'},
+  4:{code:'34121000038',type:'C03',name:'소하노인주간보호센터'},
+  5:{code:'21153000209',type:'B03',name:'미소들주야간보호센터',closed:true},
+  6:{code:'21153000128',type:'B03',name:'희망주야간보호센터'},
+  7:{code:'34121000201',type:'C03',name:'시니어데이케어 주은 광명센터'},
+  8:{code:'21153000369',type:'B03',name:'구립온수데이케어센터'},
+  9:{code:'34121000146',type:'C03',name:'하안노인주간보호센터'},
+  10:{code:'24121000275',type:'B03',name:'(주)대교뉴이프 데이케어센터 광명센터'},
+  11:{code:'24121000293',type:'B03',name:'(주)케어링 주간보호센터 광명점'},
+  12:{code:'24121000288',type:'B03',name:'참사랑재가복지센터'},
+  13:{code:'24121000297',type:'B03',name:'광명어르신데이케어센터'},
+  14:{code:'24121000299',type:'B03',name:'킴스너싱재활데이케어'},
+  15:{code:'21153000322',type:'B03',name:'구로미가데이케어센터'},
+  16:{code:'34121000214',type:'C03',name:'광명노인주간보호센터'},
+  17:{code:'21153000383',type:'B03',name:'(주)구로 휴 복지법인주간보호센터'}
+};
+let currentFilter = 'all';
+let currentMapCenterIds = null;
+let currentMapSearchArea = null;
+let centerSearchQuery = '';
+let centerSearchToastTimer = null;
+const centerLocalities={0:'소하동',1:'광명동',2:'광명동',3:'하안동',4:'소하동',5:'개봉동',6:'고척동',7:'일직동',8:'온수동',9:'하안동',10:'일직동',11:'소하동',12:'옥길동',13:'소하동',14:'광명동',15:'천왕동',16:'소하동',17:'고척동'};
+// 빈 Set은 '전체등급', 값이 있으면 선택된 여러 등급을 OR 조건으로 표시한다.
+const selectedGradeFilters = new Set();
+const selectedScoreFilters = new Set();
+const selectedConfidenceFilters = new Set();
+let sharedViewport = null;
+let sharedView = 'naver';
+let pendingSharedMapSearch = false;
+const NAVER_MAP_CLIENT_ID = 'p4sjps53pa';
+// 현재 발급 키는 기존 AI·NAVER API Maps Client ID이므로 legacy 파라미터를 사용한다.
+// 신규 Application Services > Maps 키로 교체할 때는 'ncpKeyId'로 변경한다.
+const NAVER_MAP_KEY_PARAM = 'ncpClientId';
+let naverReady = false;
+let naverMap = null;
+let naverMarkers = [];
+let naverBaseMarker = null;
+let naverInfoWindow = null;
+let naverRouteOverlays = [];
+let pendingMarkerViewport = null;
+let leafletReady = false;
+let leafletLoading = false;
+let leafletMap = null;
+let centerLayer = null;
+let centerMarkers = new Map();
+let baseLayer = null;
+let rangeLayers = [];
+let currentView = 'naver';
+let loadTimedOut = false;
+let routeLayer = null;
+let activeRoute = [];
+const selectedRouteIds = new Set();
+let rankingSortMode = 'priority';
+let mapProgressSequence = 0;
+let mapProgressHideTimer = null;
+let mapAutoSearchTimer = null;
+let suppressMapClickUntil = 0;
+let initialMapLoadProgress = null;
+const IS_LOCAL_FILE = location.protocol === 'file:';
+
+function hav(lat1,lon1,lat2,lon2){
+  const R=6371, r=x=>x*Math.PI/180, p1=r(lat1),p2=r(lat2),dp=r(lat2-lat1),dl=r(lon2-lon1);
+  const a=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+centers.forEach((c,i)=>{c.id=i;c.distance=hav(BASE.lat,BASE.lon,c.lat,c.lon)});
+
+document.getElementById('countAll').textContent=centers.length+'곳';
+document.getElementById('countNew').textContent=centers.filter(c=>!c.listed).length+'곳';
+document.getElementById('countA').textContent=centers.filter(c=>String(c.grade).startsWith('A')).length+'곳';
+document.getElementById('countFresh').textContent=centers.filter(c=>c.grade==='신설기관').length+'곳';
+
+function gradeCategoryMatches(c,grade){
+  if(grade==='new')return c.grade==='신설기관'||c.eval_year==='미평가'||c.eval_score==='-';
+  if(grade==='other')return !['A','B','C','D'].some(g=>String(c.grade).startsWith(g))&&c.grade!=='신설기관'&&c.eval_year!=='미평가'&&c.eval_score!=='-';
+  return String(c.grade).startsWith(grade);
+}
+function gradeMatches(c){
+  if(selectedGradeFilters.size===0)return true;
+  return [...selectedGradeFilters].some(grade=>gradeCategoryMatches(c,grade));
+}
+function scoreCategoryMatches(c,range){
+  const score=Number(c.quality);
+  if(range==='top')return score>=4.4;
+  if(range==='high')return score>=4.0&&score<4.4;
+  if(range==='mid')return score>=3.5&&score<4.0;
+  if(range==='low')return score<3.5;
+  return true;
+}
+function scoreMatches(c){
+  if(selectedScoreFilters.size===0)return true;
+  return [...selectedScoreFilters].some(range=>scoreCategoryMatches(c,range));
+}
+function confidenceMatches(c){
+  return selectedConfidenceFilters.size===0||selectedConfidenceFilters.has(c.confidence);
+}
+function normalizeCenterSearch(value){return String(value||'').trim().toLowerCase().replace(/\s+/g,' ')}
+function centerMatchesSearch(c){
+  if(!centerSearchQuery)return true;
+  const haystack=[c.name,c.mapName,c.address,c.geoAddress,c.region,centerLocalities[c.id],c.note,c.program].filter(Boolean).join(' ').toLowerCase();
+  return centerSearchQuery.split(' ').every(token=>haystack.includes(token));
+}
+function visible(c){
+  const regionMatches=currentFilter==='all'||(currentFilter==='omitted'&&!c.listed)||c.region===currentFilter;
+  return regionMatches&&gradeMatches(c)&&scoreMatches(c)&&confidenceMatches(c)&&centerMatchesSearch(c)&&(!currentMapCenterIds||currentMapCenterIds.has(c.id));
+}
+function markerClass(q){return q>=4.4?'m-green':q>=4?'m-blue':q>=3.5?'m-orange':'m-gray'}
+function markerColor(q){return q>=4.4?'#0f8a5f':q>=4?'#2563eb':q>=3.5?'#d97706':'#64748b'}
+function stars(x){const n=Math.round(Number(x)*2)/2,full=Math.floor(n),half=n-full>=.5;return '★'.repeat(full)+(half?'½':'')+'☆'.repeat(Math.max(0,5-full-(half?1:0)))}
+function cleanMapAddress(c){return c.geoAddress||String(c.address).replace(/,.*$/,'')}
+function mapSearchQuery(c){return `${c.mapName||c.name} ${cleanMapAddress(c)}`.trim()}
+function naverSearchUrl(c){return `https://map.naver.com/p/search/${encodeURIComponent(mapSearchQuery(c))}`}
+function kakaoSearchUrl(c){return `https://map.kakao.com/link/search/${encodeURIComponent(c.mapName||c.name)}`}
+function officialSearchUrl(){return 'https://www.longtermcare.or.kr/npbs/t/z/150/selectLtcoInfoList'}
+function officialInfo(c){return officialRegistry[c.id]||null}
+function officialDetailUrl(info){return `https://www.longtermcare.or.kr/npbs/r/a/201/selectLtcoSrchDetail.web?ltcAdminSym=${encodeURIComponent(info.code)}&adminPttnCd=${encodeURIComponent(info.type)}&aTab=11`}
+function officialUrl(c){const info=officialInfo(c);return info?officialDetailUrl(info):officialSearchUrl()}
+function officialBox(c){
+  const info=officialInfo(c);
+  if(info){
+    const status=info.closed?'공단 기관조회상 폐업 포함 결과 · 현재 운영 여부 재확인 필요':'기관번호·주소 대조 완료 · 운영 상태는 공단 상세 참조';
+    return `<div class="official-box"><b>국민건강보험공단 공식정보 <span class="official-verified">상세 바로 연결</span></b>기관기호 ${info.code}<br>${info.name}<br>${status}<br>지도 평가표시: ${c.grade} · ${c.eval_year}</div>`;
+  }
+  return `<div class="official-box"><b>국민건강보험공단 공식정보</b>기관기호 미확인으로 공단 기관조회 화면을 엽니다.</div>`;
+}
+function mapLinks(c){return `<div class="map-actions"><button class="copy" onclick="event.stopPropagation();copyCenterDestination(${c.id})">목적지명·주소 복사</button><a class="kakao" target="_blank" rel="noopener" href="${kakaoSearchUrl(c)}">카카오맵 상세</a><a class="naver" target="_blank" rel="noopener" href="${naverSearchUrl(c)}">네이버지도 상세</a><a class="nhis" target="_blank" rel="noopener" href="${officialUrl(c)}">공단 상세 바로열기</a></div>`}
+function popupHtml(c){return `<div class="popup">
+  <button class="popup-close" type="button" onclick="closeOpenCenterPopup(event)" aria-label="센터 정보 닫기">×</button>
+  <div class="popup-head">
+    <div class="popup-eyebrow"><span>${c.listed?'기존 조사':'추가 조사'}</span><span>${c.region}</span><span>정보신뢰 ${c.confidence}</span></div>
+    <h3>${c.name}</h3>
+    <div class="popup-score-row"><span class="popup-score">${Number(c.quality).toFixed(1)}</span><span class="popup-stars">${stars(c.quality)}</span><span style="font-size:11px;opacity:.85">종합평점</span></div>
+  </div>
+  <div class="popup-body">
+    <div class="popup-meta">
+      <div class="popup-chip">공식평가<b>${c.grade} · ${c.eval_year}</b></div>
+      <div class="popup-chip">기준지 거리<b>직선 약 ${c.distance.toFixed(1)}km</b></div>
+    </div>
+    <div class="popup-row"><span class="popup-row-label">전화</span><span class="popup-row-value"><a class="popup-phone" href="tel:${c.phone.replace(/[^0-9+]/g,'')}">${c.phone}</a></span></div>
+    <div class="popup-row"><span class="popup-row-label">주소</span><span class="popup-row-value">${c.address}</span></div>
+    <div class="popup-row"><span class="popup-row-label">프로그램</span><span class="popup-row-value">${c.program}</span></div>
+    <div class="popup-note"><b>검토 의견</b><br>${c.note}</div>
+    ${officialBox(c)}
+    ${mapLinks(c)}
+  </div>
+</div>`}
+
+function setStatus(text){document.getElementById('mapStatus').textContent=text}
+let toastTimer=null;
+function showToast(message){const el=document.getElementById('toast');if(!el)return;el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
+function beginMapProgress(label,percent=8){
+  const token=++mapProgressSequence,overlay=document.getElementById('mapProgress');
+  clearTimeout(mapProgressHideTimer);
+  if(!overlay)return token;
+  overlay.classList.remove('hidden');overlay.setAttribute('aria-busy','true');
+  updateMapProgress(token,label,percent);return token;
+}
+function updateMapProgress(token,label,percent){
+  if(token!==mapProgressSequence)return;
+  const value=Math.max(0,Math.min(100,Math.round(percent))),overlay=document.getElementById('mapProgress');
+  if(!overlay)return;
+  document.getElementById('mapProgressLabel').textContent=label;
+  document.getElementById('mapProgressPercent').textContent=value+'%';
+  document.getElementById('mapProgressBar').style.width=value+'%';
+}
+function finishMapProgress(token,label='완료'){
+  if(token!==mapProgressSequence)return;
+  updateMapProgress(token,label,100);
+  mapProgressHideTimer=setTimeout(()=>{
+    if(token!==mapProgressSequence)return;
+    const overlay=document.getElementById('mapProgress');if(!overlay)return;
+    overlay.classList.add('hidden');overlay.setAttribute('aria-busy','false');
+  },260);
+}
+function failMapProgress(token,label='처리하지 못했습니다'){
+  if(token!==mapProgressSequence)return;
+  updateMapProgress(token,label,100);finishMapProgress(token,label);
+}
+function waitForMapPaint(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))}
+async function refreshFilteredViewsWithProgress(label='조회조건 적용 중'){
+  const token=beginMapProgress(label,10);
+  await waitForMapPaint();if(token!==mapProgressSequence)return;
+  try{
+    closeOpenCenterPopup();updateMapProgress(token,'조건에 맞는 센터 조회 중',30);
+    resetRouteAfterFilter();
+    if(naverReady)refreshNaverMarkers();
+    updateMapProgress(token,'지도 마커 표시 중',58);
+    if(leafletReady)refreshLeafletMarkers();
+    await waitForMapPaint();if(token!==mapProgressSequence)return;
+    renderStaticMap();renderRanking();renderTable();updateFilterCount();updateRouteSelectionSummary();
+    const count=centers.filter(visible).length;
+    finishMapProgress(token,count?`${count}곳 표시 완료`:'표시할 센터 없음');
+  }catch(error){console.error(error);failMapProgress(token);showToast('조회 중 오류가 발생했습니다. 다시 시도해 주세요.')}
+}
+async function copyText(value){
+  if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);return}
+  const area=document.createElement('textarea');area.value=value;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();
+  const copied=document.execCommand('copy');area.remove();if(!copied)throw new Error('copy failed');
+}
+async function copyCenterDestination(id){
+  const center=centers.find(item=>item.id===id);if(!center){showToast('복사할 센터 정보를 찾지 못했습니다.');return}
+  try{await copyText(`${center.name}\n${center.address}`);showToast(`${center.name} 목적지명과 주소를 복사했습니다.`)}
+  catch{showToast('복사하지 못했습니다. 브라우저 권한을 확인해 주세요.')}
+}
+function setParam(params,name,value){if(value!==''&&value!==null&&value!==undefined)params.set(name,String(value))}
+function currentViewport(){
+  if(currentView==='naver'&&naverReady){const c=naverMap.getCenter();return {lat:c.lat(),lon:c.lng(),zoom:naverMap.getZoom()}}
+  if(currentView==='leaflet'&&leafletReady){const c=leafletMap.getCenter();return {lat:c.lat,lon:c.lng,zoom:leafletMap.getZoom()}}
+  return sharedViewport||{lat:BASE.lat,lon:BASE.lon,zoom:14};
+}
+function buildShareUrl(){
+  const url=new URL(location.href);url.search='';url.hash='';const p=url.searchParams;
+  setParam(p,'share','1');setParam(p,'region',currentFilter);
+  if(selectedGradeFilters.size)setParam(p,'grades',[...selectedGradeFilters].join(','));
+  if(selectedScoreFilters.size)setParam(p,'scores',[...selectedScoreFilters].join(','));
+  if(selectedConfidenceFilters.size)setParam(p,'confidence',[...selectedConfidenceFilters].join(','));
+  setParam(p,'q',document.getElementById('search').value.trim());setParam(p,'sort',document.getElementById('sort').value);
+  setParam(p,'rsort',rankingSortMode);setParam(p,'view',currentView);
+  if(selectedRouteIds.size)setParam(p,'selected',[...selectedRouteIds].join(','));
+  const v=currentViewport();setParam(p,'lat',Number(v.lat).toFixed(5));setParam(p,'lon',Number(v.lon).toFixed(5));setParam(p,'zoom',v.zoom);
+  setParam(p,'baseLat',Number(BASE.lat).toFixed(6));setParam(p,'baseLon',Number(BASE.lon).toFixed(6));
+  if(currentMapCenterIds)setParam(p,'map','1');
+  return url.toString();
+}
+async function shareCurrentState(){
+  const url=buildShareUrl(),data={title:'광명·구로 주간보호센터 조회상태',text:'현재 조회조건과 지도 위치를 공유합니다.',url};
+  try{
+    if(navigator.share){await navigator.share(data);showToast('현재 조회상태를 공유했습니다.')}
+    else{await copyText(url);showToast('현재 조회상태 링크를 복사했습니다.')}
+  }catch(error){
+    if(error?.name==='AbortError')return;
+    try{await copyText(url);showToast('현재 조회상태 링크를 복사했습니다.')}catch{showToast('공유 링크를 복사하지 못했습니다.')}
+  }
+}
+function readCsvSet(params,name,allowed){
+  return new Set((params.get(name)||'').split(',').filter(value=>allowed.includes(value)));
+}
+function syncFilterControls(){
+  document.querySelectorAll('.filter-btn').forEach(button=>button.classList.toggle('active',button.dataset.filter===currentFilter));
+  for(const [selector,key,set] of [['.grade-btn','grade',selectedGradeFilters],['.score-btn','score',selectedScoreFilters],['.confidence-btn','confidence',selectedConfidenceFilters]]){
+    document.querySelectorAll(selector).forEach(button=>{const value=button.dataset[key],active=value==='all'?set.size===0:set.has(value);button.classList.toggle('active',active);button.setAttribute('aria-pressed',active?'true':'false')});
+  }
+}
+function restoreSharedState(){
+  const p=new URLSearchParams(location.search);if(p.get('share')!=='1')return;
+  const regions=['all','omitted','광명','구로'];if(regions.includes(p.get('region')))currentFilter=p.get('region');
+  selectedGradeFilters.clear();readCsvSet(p,'grades',['A','B','C','D','new','other']).forEach(value=>selectedGradeFilters.add(value));
+  selectedScoreFilters.clear();readCsvSet(p,'scores',['top','high','mid','low']).forEach(value=>selectedScoreFilters.add(value));
+  selectedConfidenceFilters.clear();readCsvSet(p,'confidence',['높음','중상','중간','중하','낮음']).forEach(value=>selectedConfidenceFilters.add(value));
+  const search=document.getElementById('search'),sort=document.getElementById('sort'),ranking=document.getElementById('rankingSort');
+  search.value=(p.get('q')||'').slice(0,100);centerSearchQuery=normalizeCenterSearch(search.value);
+  document.getElementById('centerSearchClear').classList.toggle('hidden',!centerSearchQuery);
+  if(['quality','distance','grade'].includes(p.get('sort')))sort.value=p.get('sort');
+  if(['priority','route'].includes(p.get('rsort'))){rankingSortMode=p.get('rsort');ranking.value=rankingSortMode}
+  const ids=new Set(centers.map(c=>String(c.id)));(p.get('selected')||'').split(',').filter(id=>ids.has(id)).forEach(id=>selectedRouteIds.add(Number(id)));
+  const baseLat=Number(p.get('baseLat')),baseLon=Number(p.get('baseLon'));
+  if(baseLat>=33&&baseLat<=39&&baseLon>=124&&baseLon<=132){
+    BASE.lat=baseLat;BASE.lon=baseLon;BASE.name='공유된 지도 기준';BASE.address=`공유된 지도 기준 (${baseLat.toFixed(5)}, ${baseLon.toFixed(5)})`;
+    centers.forEach(c=>{c.distance=hav(BASE.lat,BASE.lon,c.lat,c.lon)});
+  }
+  const lat=Number(p.get('lat')),lon=Number(p.get('lon')),zoom=Number(p.get('zoom'));
+  if(lat>=33&&lat<=39&&lon>=124&&lon<=132&&zoom>=10&&zoom<=19)sharedViewport={lat,lon,zoom};
+  if(['naver','leaflet','static'].includes(p.get('view')))sharedView=p.get('view');
+  pendingSharedMapSearch=p.get('map')==='1';syncFilterControls();
+}
+
+let mapWheelAccumulator=0;
+let mapWheelResetTimer=null;
+let lastWheelZoomAt=0;
+function mapPointerOffset(clientX,clientY,element){
+  const rect=element.getBoundingClientRect();
+  return {x:Math.max(0,Math.min(rect.width,clientX-rect.left)),y:Math.max(0,Math.min(rect.height,clientY-rect.top))};
+}
+function applyMapZoomStep(step,clientX,clientY,effect=true){
+  if(!step||currentView==='static')return false;
+  if(currentView==='naver'&&naverReady){
+    const current=naverMap.getZoom(),target=Math.max(10,Math.min(21,current+step)),delta=target-current;
+    if(!delta)return false;
+    const offset=mapPointerOffset(clientX,clientY,naverMap.getElement());
+    let origin=null;
+    try{origin=naverMap.getProjection().fromOffsetToCoord(new naver.maps.Point(offset.x,offset.y))}catch{}
+    naverMap.zoomBy(delta,origin||naverMap.getCenter(),effect);return true;
+  }
+  if(currentView==='leaflet'&&leafletReady){
+    const current=leafletMap.getZoom(),target=Math.max(10,Math.min(19,current+step));
+    if(target===current)return false;
+    const offset=mapPointerOffset(clientX,clientY,leafletMap.getContainer());
+    leafletMap.setZoomAround(L.point(offset.x,offset.y),target,{animate:effect});return true;
+  }
+  return false;
+}
+function handleMapWheelZoom(event){
+  if(event.target.closest?.('#mapDetailPanel,.map-search-button,.map-progress'))return;
+  if(currentView==='static')return;
+  if(event.cancelable)event.preventDefault();event.stopPropagation();
+  const modeScale=event.deltaMode===1?18:event.deltaMode===2?80:1;
+  const delta=Math.max(-120,Math.min(120,(Number(event.deltaY)||0)*modeScale));
+  if(!delta)return;
+  mapWheelAccumulator+=delta;
+  clearTimeout(mapWheelResetTimer);
+  mapWheelResetTimer=setTimeout(()=>{mapWheelAccumulator=0},190);
+  const threshold=event.ctrlKey?24:(Math.abs(delta)>=80?88:115),now=performance.now();
+  if(Math.abs(mapWheelAccumulator)<threshold||now-lastWheelZoomAt<85)return;
+  const step=mapWheelAccumulator<0?1:-1;
+  mapWheelAccumulator+=step>0?threshold:-threshold;lastWheelZoomAt=now;
+  if(applyMapZoomStep(step,event.clientX,event.clientY,true))scheduleMapZoomSearch();
+}
+let trackpadGestureZoom=null;
+let trackpadGesturePoint=null;
+function handleMapGestureStart(event){
+  if(touchPinchActive||event.target.closest?.('#mapDetailPanel,.map-search-button,.map-progress'))return;
+  if(currentView==='static')return;if(event.cancelable)event.preventDefault();
+  trackpadGestureZoom=currentView==='naver'&&naverReady?naverMap.getZoom():currentView==='leaflet'&&leafletReady?leafletMap.getZoom():null;
+  trackpadGesturePoint={x:event.clientX||document.querySelector('.map-shell').getBoundingClientRect().left+document.querySelector('.map-shell').clientWidth/2,y:event.clientY||document.querySelector('.map-shell').getBoundingClientRect().top+document.querySelector('.map-shell').clientHeight/2};
+}
+function handleMapGestureChange(event){
+  if(trackpadGestureZoom===null)return;if(event.cancelable)event.preventDefault();
+  const scale=Math.max(.25,Math.min(4,Number(event.scale)||1)),targetOffset=Math.max(-3,Math.min(3,Math.round(Math.log2(scale)*1.35)));
+  const current=currentView==='naver'&&naverReady?naverMap.getZoom():currentView==='leaflet'&&leafletReady?leafletMap.getZoom():trackpadGestureZoom;
+  const target=Math.max(currentView==='naver'?10:10,Math.min(currentView==='naver'?21:19,trackpadGestureZoom+targetOffset));
+  if(target!==current)applyMapZoomStep(target-current,trackpadGesturePoint.x,trackpadGesturePoint.y,false);
+}
+function handleMapGestureEnd(event){if(trackpadGestureZoom!==null&&event.cancelable)event.preventDefault();if(trackpadGestureZoom!==null)scheduleMapZoomSearch();trackpadGestureZoom=null;trackpadGesturePoint=null}
+let touchPinchActive=false;
+function handleMapTouchStart(event){if(event.touches&&event.touches.length>=2)touchPinchActive=true}
+function handleMapTouchEnd(event){if(touchPinchActive&&(!event.touches||event.touches.length<2)){touchPinchActive=false;scheduleMapZoomSearch()}}
+function captureVisibleMapViewport(){
+  const state={view:currentView,scrollX:window.scrollX,scrollY:window.scrollY,map:null};
+  if(currentView==='naver'&&naverReady){
+    const center=naverMap.getCenter();
+    state.map={lat:center.lat(),lon:center.lng(),zoom:naverMap.getZoom()};
+  }else if(currentView==='leaflet'&&leafletReady){
+    const center=leafletMap.getCenter();
+    state.map={lat:center.lat,lon:center.lng,zoom:leafletMap.getZoom()};
+  }
+  return state;
+}
+function restoreVisibleMapViewport(state){
+  if(!state)return;
+  requestAnimationFrame(()=>{
+    if(state.view==='naver'&&currentView==='naver'&&naverReady&&state.map){
+      const center=naverMap.getCenter();
+      if(naverMap.getZoom()!==state.map.zoom)naverMap.setZoom(state.map.zoom,false);
+      if(Math.abs(center.lat()-state.map.lat)>1e-10||Math.abs(center.lng()-state.map.lon)>1e-10){
+        naverMap.setCenter(new naver.maps.LatLng(state.map.lat,state.map.lon));
+      }
+    }else if(state.view==='leaflet'&&currentView==='leaflet'&&leafletReady&&state.map){
+      const center=leafletMap.getCenter();
+      if(leafletMap.getZoom()!==state.map.zoom||Math.abs(center.lat-state.map.lat)>1e-10||Math.abs(center.lng-state.map.lon)>1e-10){
+        leafletMap.setView([state.map.lat,state.map.lon],state.map.zoom,{animate:false});
+      }
+    }
+    if(Math.abs(window.scrollX-state.scrollX)>1||Math.abs(window.scrollY-state.scrollY)>1){
+      const root=document.documentElement,previous=root.style.scrollBehavior;
+      root.style.scrollBehavior='auto';window.scrollTo(state.scrollX,state.scrollY);root.style.scrollBehavior=previous;
+    }
+  });
+}
+function rememberMarkerViewport(){
+  pendingMarkerViewport={state:captureVisibleMapViewport(),capturedAt:Date.now()};
+}
+function showCenterPanel(c,usePendingMarkerViewport=true){
+  const pending=pendingMarkerViewport;
+  pendingMarkerViewport=null;
+  const viewport=usePendingMarkerViewport&&pending&&Date.now()-pending.capturedAt<2000?pending.state:captureVisibleMapViewport();
+  closeOpenCenterPopup(null,false);
+  const panel=document.getElementById('mapDetailPanel');if(!panel)return;
+  panel.innerHTML=popupHtml(c);panel.classList.remove('hidden');
+  const body=panel.querySelector('.popup-body');if(body)body.scrollTop=0;
+  restoreVisibleMapViewport(viewport);
+}
+function formatMapSpan(km){
+  if(km>=10)return km.toFixed(0)+'km';
+  if(km>=1)return km.toFixed(1)+'km';
+  return Math.max(1,Math.round(km*1000))+'m';
+}
+function makeViewportSearchArea(south,west,north,east){
+  const middleLat=(south+north)/2,middleLon=(west+east)/2;
+  return {south,west,north,east,widthKm:hav(middleLat,west,middleLat,east),heightKm:hav(south,middleLon,north,middleLon)};
+}
+function captureCurrentMapSearchArea(){
+  if(currentView==='naver'&&naverReady){
+    const bounds=naverMap.getBounds(),sw=bounds.getSW(),ne=bounds.getNE();
+    return makeViewportSearchArea(sw.lat(),sw.lng(),ne.lat(),ne.lng());
+  }
+  if(currentView==='leaflet'&&leafletReady){
+    const bounds=leafletMap.getBounds(),sw=bounds.getSouthWest(),ne=bounds.getNorthEast();
+    return makeViewportSearchArea(sw.lat,sw.lng,ne.lat,ne.lng);
+  }
+  return null;
+}
+function searchAreaContains(c){
+  const area=currentMapSearchArea;
+  return !area||(c.lat>=area.south&&c.lat<=area.north&&c.lon>=area.west&&c.lon<=area.east);
+}
+function mapSearchAreaText(){
+  const area=currentMapSearchArea;
+  return area?`약 ${formatMapSpan(area.widthKm)} × ${formatMapSpan(area.heightKm)}`:'';
+}
+function renderSearchRangeOverlays(){
+  // 검색 범위는 마커 필터링에만 사용하고 지도 위 시각 레이어는 표시하지 않는다.
+}
+function refreshAllViewsAfterMapSearch(token){
+  activeRoute=[];drawActiveRoute();
+  if(naverReady)refreshNaverMarkers();
+  if(token)updateMapProgress(token,'지도 마커 표시 중',62);
+  if(leafletReady)refreshLeafletMarkers();
+  renderStaticMap();renderRanking();renderTable();updateFilterCount();updateRouteSelectionSummary();
+}
+async function searchCurrentMap(event,options={}){
+  if(event)event.stopPropagation();closeOpenCenterPopup();
+  const source=options.source||'manual',notify=options.notify!==false;
+  if(currentView==='static'){
+    const message='간이좌표도는 전체 범위를 표시합니다. 네이버지도 또는 일반지도에서 검색하세요.';setStatus(message);if(notify)showToast(message);return null;
+  }
+  const token=beginMapProgress(source==='drag'?'이동한 지도 영역 자동 조회 중':source==='zoom'?'확대·축소한 지도 영역 자동 조회 중':source==='base'?'새 기준으로 다시 조회 중':'현재 지도 영역 조회 중',10);
+  await waitForMapPaint();if(token!==mapProgressSequence)return null;
+  try{
+    currentMapSearchArea=captureCurrentMapSearchArea();
+    if(!currentMapSearchArea){failMapProgress(token,'검색영역 계산 실패');if(notify)showToast('현재 지도 검색영역을 계산하지 못했습니다.');return null}
+    updateMapProgress(token,'화면 안의 센터 찾는 중',32);
+    currentMapCenterIds=new Set(centers.filter(searchAreaContains).map(c=>c.id));
+    document.getElementById('mapSearchClear').classList.remove('hidden');
+    renderSearchRangeOverlays();await waitForMapPaint();if(token!==mapProgressSequence)return null;
+    refreshAllViewsAfterMapSearch(token);
+    const count=centers.filter(visible).length,areaText=mapSearchAreaText();
+    const statusPrefix=source==='drag'?'지도 이동 자동검색':source==='zoom'?'지도 확대·축소 자동검색':'현재 화면 전체';
+    setStatus(`${statusPrefix} ${areaText} · ${count}곳 검색`);
+    finishMapProgress(token,count?`${count}곳 마커 표시 완료`:'표시할 센터 없음');
+    if(notify||count===0)showToast(count?`현재 지도 화면 전체에서 ${count}곳을 조회했습니다.`:'현재 지도 화면 안에 표시할 센터가 없습니다.');
+    return count;
+  }catch(error){console.error(error);failMapProgress(token);showToast('지도 조회 중 오류가 발생했습니다. 다시 시도해 주세요.');return null}
+}
+async function clearCurrentMapSearch(event){
+  if(event)event.stopPropagation();
+  const token=beginMapProgress('지도 검색영역 해제 중',15);
+  currentMapCenterIds=null;currentMapSearchArea=null;
+  document.getElementById('mapSearchClear').classList.add('hidden');
+  await waitForMapPaint();if(token!==mapProgressSequence)return;
+  renderSearchRangeOverlays();refreshAllViewsAfterMapSearch(token);setStatus('지도영역 검색 해제');finishMapProgress(token,'전체 센터 표시 완료');showToast('지도 검색영역을 해제했습니다.');
+}
+function scheduleMapDragSearch(){
+  clearTimeout(mapAutoSearchTimer);suppressMapClickUntil=Date.now()+350;
+  mapAutoSearchTimer=setTimeout(()=>searchCurrentMap(null,{source:'drag',notify:false}),220);
+}
+function scheduleMapZoomSearch(){
+  clearTimeout(mapAutoSearchTimer);
+  mapAutoSearchTimer=setTimeout(()=>searchCurrentMap(null,{source:'zoom',notify:false}),360);
+}
+function updateBaseVisuals(){
+  if(naverBaseMarker)naverBaseMarker.setPosition(new naver.maps.LatLng(BASE.lat,BASE.lon));
+  if(baseLayer){baseLayer.setLatLng([BASE.lat,BASE.lon]);baseLayer.setPopupContent(`<div class="popup"><h3>기준 위치</h3><p>${BASE.address}</p></div>`)}
+  rangeLayers.forEach(layer=>layer.setLatLng&&layer.setLatLng([BASE.lat,BASE.lon]));
+}
+async function setMapReferencePoint(lat,lon){
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<33||lat>39||lon<124||lon>132)return;
+  clearTimeout(mapAutoSearchTimer);closeOpenCenterPopup();
+  BASE.lat=lat;BASE.lon=lon;BASE.name='지도에서 지정한 기준';BASE.address=`지도에서 지정한 위치 (${lat.toFixed(5)}, ${lon.toFixed(5)})`;
+  centers.forEach(c=>{c.distance=hav(BASE.lat,BASE.lon,c.lat,c.lon)});
+  updateBaseVisuals();activeRoute=[];drawActiveRoute();
+  const count=await searchCurrentMap(null,{source:'base',notify:false});
+  if(count!==null){setStatus(`새 기준 지정 · 현재 화면 ${count}곳 자동검색`);showToast(`클릭한 위치를 새 기준으로 지정하고 ${count}곳을 조회했습니다.`)}
+}
+function setViewButtons(view){
+  document.getElementById('btnNaver').classList.toggle('active',view==='naver');
+  document.getElementById('btnLeaflet').classList.toggle('active',view==='leaflet');
+  document.getElementById('btnStatic').classList.toggle('active',view==='static');
+}
+function setFilter(filter,button){
+  currentFilter=filter;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(button)button.classList.add('active');
+  refreshFilteredViewsWithProgress('지역 조회조건 적용 중');
+}
+function setGradeFilter(grade,button){
+  if(grade==='all')selectedGradeFilters.clear();
+  else if(selectedGradeFilters.has(grade))selectedGradeFilters.delete(grade);
+  else selectedGradeFilters.add(grade);
+  document.querySelectorAll('.grade-btn').forEach(b=>{
+    const value=b.dataset.grade;
+    b.classList.toggle('active',value==='all'?selectedGradeFilters.size===0:selectedGradeFilters.has(value));
+    b.setAttribute('aria-pressed',b.classList.contains('active')?'true':'false');
+  });
+  refreshFilteredViewsWithProgress('등급 조회조건 적용 중');
+}
+function setScoreFilter(range,button){
+  if(range==='all')selectedScoreFilters.clear();
+  else if(selectedScoreFilters.has(range))selectedScoreFilters.delete(range);
+  else selectedScoreFilters.add(range);
+  document.querySelectorAll('.score-btn').forEach(b=>{
+    const value=b.dataset.score;
+    b.classList.toggle('active',value==='all'?selectedScoreFilters.size===0:selectedScoreFilters.has(value));
+    b.setAttribute('aria-pressed',b.classList.contains('active')?'true':'false');
+  });
+  refreshFilteredViewsWithProgress('평점 조회조건 적용 중');
+}
+function setConfidenceFilter(value,button){
+  if(value==='all')selectedConfidenceFilters.clear();
+  else if(selectedConfidenceFilters.has(value))selectedConfidenceFilters.delete(value);
+  else selectedConfidenceFilters.add(value);
+  document.querySelectorAll('.confidence-btn').forEach(b=>{
+    const item=b.dataset.confidence;
+    b.classList.toggle('active',item==='all'?selectedConfidenceFilters.size===0:selectedConfidenceFilters.has(item));
+    b.setAttribute('aria-pressed',b.classList.contains('active')?'true':'false');
+  });
+  refreshFilteredViewsWithProgress('신뢰도 조회조건 적용 중');
+}
+function updateFilterCount(){
+  const count=centers.filter(visible).length;
+  document.getElementById('filterCount').textContent=count+'곳 표시';
+}
+function refreshAfterCenterSearch(){
+  refreshFilteredViewsWithProgress('기관·지역 검색 중');
+}
+function handleCenterSearchInput(value){
+  centerSearchQuery=normalizeCenterSearch(value);
+  document.getElementById('centerSearchClear').classList.toggle('hidden',!centerSearchQuery);
+  refreshAfterCenterSearch();
+  clearTimeout(centerSearchToastTimer);
+  centerSearchToastTimer=setTimeout(announceCenterSearch,450);
+}
+function announceCenterSearch(){
+  if(!centerSearchQuery)return;
+  const count=centers.filter(visible).length;
+  const message=count?`"${centerSearchQuery}" 검색 결과 ${count}곳입니다.`:`"${centerSearchQuery}" 검색 결과가 없습니다.`;
+  setStatus(`기관·지역 검색 · ${count}곳`);showToast(message);
+}
+function clearCenterSearch(){
+  const input=document.getElementById('search');input.value='';centerSearchQuery='';
+  document.getElementById('centerSearchClear').classList.add('hidden');
+  clearTimeout(centerSearchToastTimer);refreshAfterCenterSearch();
+  const count=centers.filter(visible).length;setStatus(`검색 해제 · ${count}곳 표시`);showToast('기관·지역 검색을 해제했습니다.');input.focus();
+}
+
+function loadNaver(){
+  initialMapLoadProgress=beginMapProgress('네이버지도 불러오는 중',6);
+  if(IS_LOCAL_FILE){
+    setStatus('로컬 파일 모드 · 일반지도 연결 중');
+    showLeafletView(true);
+    return;
+  }
+  if(window.naver&&window.naver.maps){initNaverMap();return}
+  setStatus('네이버지도 불러오는 중');
+  window.initNaverMap=initNaverMap;
+  window.navermap_authFailure=()=>{
+    setStatus('네이버지도 인증 실패 · Web 서비스 URL 등록 확인');
+    document.getElementById('naverMap').classList.add('hidden');
+    showLeafletView(true);
+  };
+  const script=document.createElement('script');
+  script.src=`https://oapi.map.naver.com/openapi/v3/maps.js?${NAVER_MAP_KEY_PARAM}=${encodeURIComponent(NAVER_MAP_CLIENT_ID)}&callback=initNaverMap`;
+  script.async=true;
+  // 일부 로컬 개발 서버에서는 네이버 SDK가 내려와도 callback 쿼리가
+  // 호출되지 않는 경우가 있어, script load 완료 시에도 직접 초기화한다.
+  script.onload=()=>{
+    if(window.naver&&window.naver.maps){
+      setTimeout(initNaverMap,0);
+    }else{
+      setStatus('네이버지도 SDK 실행 실패 · 콘솔 오류 확인');
+    }
+  };
+  script.onerror=()=>{setStatus('네이버지도 로딩 실패 · 일반지도로 전환');showLeafletView(true)};
+  document.head.appendChild(script);
+  setTimeout(()=>{
+    if(!naverReady&&window.naver&&window.naver.maps){initNaverMap()}
+    if(!naverReady&&currentView==='naver'){
+      setStatus('네이버지도 초기화 실패 · 콘솔 탭의 첫 오류 확인');
+      showLeafletView(true);
+    }
+  },7000);
+}
+function initNaverMap(){
+  if(naverReady||!window.naver||!naver.maps)return;
+  const progress=initialMapLoadProgress||beginMapProgress('네이버지도 준비 중',15);
+  updateMapProgress(progress,'네이버지도 초기화 중',28);
+  document.getElementById('naverMap').innerHTML='';
+  const initial=sharedViewport||{lat:BASE.lat,lon:BASE.lon,zoom:14};
+  naverMap=new naver.maps.Map('naverMap',{center:new naver.maps.LatLng(initial.lat,initial.lon),zoom:initial.zoom,zoomControl:true,zoomControlOptions:{position:naver.maps.Position.RIGHT_BOTTOM,style:naver.maps.ZoomControlStyle.LARGE},scrollWheel:false,pinchZoom:true,disableTwoFingerTapZoom:false});
+  naverBaseMarker=new naver.maps.Marker({position:new naver.maps.LatLng(BASE.lat,BASE.lon),map:naverMap,title:'기준 위치',zIndex:3000,icon:{content:'<div class="base-marker">기준</div>',anchor:new naver.maps.Point(19,19)}});
+  naverInfoWindow=new naver.maps.InfoWindow({maxWidth:360,backgroundColor:'#fff',borderColor:'#cbd5e1',borderWidth:1,anchorSize:new naver.maps.Size(10,10),pixelOffset:new naver.maps.Point(0,-12),disableAutoPan:true});
+  naver.maps.Event.addListener(naverMap,'dragend',scheduleMapDragSearch);
+  naver.maps.Event.addListener(naverMap,'click',event=>{
+    closeOpenCenterPopup();if(Date.now()<suppressMapClickUntil||!event?.coord)return;
+    setMapReferencePoint(event.coord.lat(),event.coord.lng());
+  });
+  updateMapProgress(progress,'센터 마커 표시 중',68);
+  naverReady=true;refreshNaverMarkers();renderSearchRangeOverlays();
+  if(activeRoute.length)drawNaverRoute();
+  showNaverView(false);setStatus('네이버지도 · 지도를 끌면 자동검색, 빈 곳을 누르면 기준 지정');finishMapProgress(progress,`${centers.filter(visible).length}곳 마커 표시 완료`);initialMapLoadProgress=null;
+  if(pendingSharedMapSearch){pendingSharedMapSearch=false;setTimeout(()=>searchCurrentMap(),120)}
+}
+function refreshNaverMarkers(){
+  if(!naverReady)return;
+  naverMarkers.forEach(m=>m.setMap(null));naverMarkers=[];
+  const {rows,displayOrder}=rankingState();
+  rows.forEach(c=>{
+    const number=displayOrder.get(c.id);
+    const marker=new naver.maps.Marker({position:new naver.maps.LatLng(c.lat,c.lon),map:naverMap,title:`${number}. ${c.name}`,zIndex:1000-Math.round(c.distance*10),icon:{content:markerSymbolHtml(c,number),anchor:new naver.maps.Point(15,28)}});
+    marker.centerId=c.id;
+    naver.maps.Event.addListener(marker,'click',()=>showCenterPanel(c));
+    naverMarkers.push(marker);
+  });
+}
+function showNaverView(retry){
+  if(!naverReady){if(retry)loadNaver();return}
+  currentView='naver';setViewButtons('naver');
+  document.getElementById('naverMap').classList.remove('hidden');
+  document.getElementById('leafletMap').classList.add('hidden');
+  document.getElementById('staticMap').classList.add('hidden');
+  naver.maps.Event.trigger(naverMap,'resize');setStatus('네이버지도 · 지도를 끌면 자동검색, 빈 곳을 누르면 기준 지정');
+}
+
+function loadLeaflet(){
+  if(leafletLoading||leafletReady)return;
+  initialMapLoadProgress=beginMapProgress('일반지도 불러오는 중',8);
+  leafletLoading=true;
+  const css=document.createElement('link');
+  css.rel='stylesheet';
+  css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  css.integrity='sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+  css.crossOrigin='';
+  const js=document.createElement('script');
+  js.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  js.integrity='sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+  js.crossOrigin='';
+  let cssDone=false,jsDone=false,failed=false;
+  const maybeStart=()=>{
+    if(failed||loadTimedOut||leafletReady)return;
+    if(cssDone&&jsDone&&window.L)initLeaflet();
+  };
+  css.onload=()=>{cssDone=true;maybeStart()};
+  js.onload=()=>{jsDone=true;maybeStart()};
+  const fail=()=>{failed=true;leafletLoading=false;if(!leafletReady)showStaticView(IS_LOCAL_FILE?'로컬 파일 보안 제한':'일반지도 파일을 불러오지 못함')};
+  css.onerror=fail;js.onerror=fail;
+  document.head.appendChild(css);document.head.appendChild(js);
+  setTimeout(()=>{
+    if(!leafletReady){loadTimedOut=true;showStaticView('일반지도 로딩 지연')}
+  },5000);
+}
+
+function initLeaflet(){
+  if(leafletReady||!window.L)return;
+  const progress=initialMapLoadProgress||beginMapProgress('일반지도 준비 중',15);
+  updateMapProgress(progress,'일반지도 초기화 중',28);
+  leafletLoading=false;
+  document.getElementById('leafletMap').innerHTML='';
+  const initial=sharedViewport||{lat:BASE.lat,lon:BASE.lon,zoom:14};
+  leafletMap=L.map('leafletMap',{zoomControl:false,preferCanvas:true,scrollWheelZoom:false,touchZoom:true,bounceAtZoomLimits:false,minZoom:10,maxZoom:19}).setView([initial.lat,initial.lon],initial.zoom);
+  L.control.zoom({position:'bottomright'}).addTo(leafletMap);
+  leafletMap.on('dragend',scheduleMapDragSearch);
+  leafletMap.on('click',event=>{
+    closeOpenCenterPopup();if(Date.now()<suppressMapClickUntil||!event?.latlng)return;
+    setMapReferencePoint(event.latlng.lat,event.latlng.lng);
+  });
+  const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors',updateWhenIdle:true,keepBuffer:2});
+  let tileErrors=0;
+  tiles.on('tileerror',()=>{
+    tileErrors++;
+    if(tileErrors===3){
+      if(IS_LOCAL_FILE)showStaticView('로컬 파일에서 외부 지도 타일 차단');
+      else setStatus('배경지도 지연 · 마커는 정상');
+    }
+  });
+  tiles.on('load',()=>{if(!currentMapSearchArea)setStatus('일반지도 · 지도를 끌면 자동검색, 빈 곳을 누르면 기준 지정')});
+  tiles.addTo(leafletMap);
+  rangeLayers=[
+    L.circle([BASE.lat,BASE.lon],{radius:3000,color:'#2563eb',weight:1,fillOpacity:.025,dashArray:'6 6'}).addTo(leafletMap),
+    L.circle([BASE.lat,BASE.lon],{radius:5000,color:'#64748b',weight:1,fillOpacity:.015,dashArray:'6 6'}).addTo(leafletMap)
+  ];
+  baseLayer=L.marker([BASE.lat,BASE.lon],{zIndexOffset:2000,icon:L.divIcon({className:'',html:'<div class="base-marker">기준</div>',iconSize:[38,38],iconAnchor:[19,19]})})
+    .addTo(leafletMap).bindPopup(`<div class="popup"><h3>기준 위치</h3><p>${BASE.address}</p></div>`);
+  centerLayer=L.layerGroup().addTo(leafletMap);
+  routeLayer=L.layerGroup().addTo(leafletMap);
+  updateMapProgress(progress,'센터 마커 표시 중',68);
+  leafletReady=true;
+  refreshLeafletMarkers();renderSearchRangeOverlays();
+  if(activeRoute.length)drawActiveRoute();
+  leafletMap.whenReady(()=>setTimeout(()=>leafletMap.invalidateSize(false),80));
+  window.addEventListener('resize',()=>leafletMap&&leafletMap.invalidateSize(false));
+  if(!loadTimedOut)showLeafletView(false);
+  finishMapProgress(progress,`${centers.filter(visible).length}곳 마커 표시 완료`);initialMapLoadProgress=null;
+  if(pendingSharedMapSearch){pendingSharedMapSearch=false;setTimeout(()=>searchCurrentMap(),120)}
+}
+
+function makeLeafletMarker(c,number){
+  const icon=L.divIcon({className:'',html:markerSymbolHtml(c,number),iconSize:[50,36],iconAnchor:[15,28],popupAnchor:[0,-27]});
+  const m=L.marker([c.lat,c.lon],{icon,zIndexOffset:Math.round(1000-c.distance*10)});
+  m.on('click',event=>{if(event.originalEvent)L.DomEvent.stopPropagation(event.originalEvent);showCenterPanel(c)});
+  m.bindTooltip(`${number}. ${c.name}`,{direction:'top',offset:[0,-25],opacity:.95});
+  centerMarkers.set(c.id,m);return m;
+}
+function refreshLeafletMarkers(){
+  if(!leafletReady)return;
+  centerLayer.clearLayers();centerMarkers.clear();
+  const {rows,displayOrder}=rankingState();
+  rows.forEach(c=>centerLayer.addLayer(makeLeafletMarker(c,displayOrder.get(c.id))));
+}
+function showLeafletView(retry){
+  if(!leafletReady){
+    if(retry){loadTimedOut=false;setStatus('일반지도 다시 불러오는 중');loadLeaflet()}
+    return;
+  }
+  currentView='leaflet';setViewButtons('leaflet');
+  document.getElementById('naverMap').classList.add('hidden');
+  document.getElementById('staticMap').classList.add('hidden');
+  document.getElementById('leafletMap').classList.remove('hidden');
+  setTimeout(()=>leafletMap.invalidateSize(false),30);
+  setStatus('일반지도 · 지도를 끌면 자동검색, 빈 곳을 누르면 기준 지정');
+}
+
+function localXY(c){
+  const latRad=BASE.lat*Math.PI/180;
+  return {x:(c.lon-BASE.lon)*111.32*Math.cos(latRad),y:(c.lat-BASE.lat)*110.574};
+}
+function renderStaticMap(){
+  const el=document.getElementById('staticMap');
+  const {rows,displayOrder}=rankingState();
+  const all=rows.map(c=>({...c,...localXY(c)}));
+  const maxAbs=Math.max(5.4,...all.flatMap(c=>[Math.abs(c.x),Math.abs(c.y)]));
+  const span=Math.ceil((maxAbs+0.8)*2); const half=span/2; const scale=1000;
+  const min=-half*scale,size=span*scale;
+  let grid='';
+  for(let k=Math.ceil(-half);k<=Math.floor(half);k++){
+    const p=k*scale;grid+=`<line x1="${p}" y1="${min}" x2="${p}" y2="${-min}" stroke="#d6e0e9" stroke-width="15"/><line x1="${min}" y1="${p}" x2="${-min}" y2="${p}" stroke="#d6e0e9" stroke-width="15"/>`;
+  }
+  const marks=all.map(c=>{
+    const x=c.x*scale,y=-c.y*scale,col=markerColor(Number(c.quality));
+    return `<g class="static-marker" transform="translate(${x} ${y})" onclick="selectStatic(${c.id})"><title>${displayOrder.get(c.id)}. ${c.name} · ${c.distance.toFixed(1)}km</title><circle r="310" fill="${col}"/><text y="12">${Number(c.quality).toFixed(1)}</text><circle class="static-rank-circle" cx="330" cy="-275" r="180" fill="#172033"/><text class="static-rank-text" x="330" y="-270">${displayOrder.get(c.id)}</text></g>`;
+  }).join('');
+  el.innerHTML=`<div class="static-stage"><div class="static-head"><b>기준지 상대 좌표도</b><br>눈금 1칸 ≈ 1km · 북쪽이 위</div><div class="static-info hidden" id="staticInfo"></div><svg viewBox="${min} ${min} ${size} ${size}" preserveAspectRatio="xMidYMid meet"><rect x="${min}" y="${min}" width="${size}" height="${size}" fill="#f6fafc"/>${grid}<circle cx="0" cy="0" r="5000" fill="none" stroke="#64748b" stroke-width="35" stroke-dasharray="150 120"/><circle cx="0" cy="0" r="3000" fill="none" stroke="#2563eb" stroke-width="35" stroke-dasharray="150 120"/><line x1="0" y1="${min}" x2="0" y2="${-min}" stroke="#b5c5d4" stroke-width="24"/><line x1="${min}" y1="0" x2="${-min}" y2="0" stroke="#b5c5d4" stroke-width="24"/>${marks}<g transform="translate(0 0)"><circle r="390" fill="#dc2626" stroke="#fff" stroke-width="90"/><text fill="#fff" font-size="235" text-anchor="middle" dominant-baseline="central" font-weight="900">기준</text></g><text x="${min+350}" y="${min+500}" font-size="300" fill="#52677d" font-weight="700">N ↑</text></svg></div>`;
+}
+function selectStatic(id){
+  const c=centers.find(x=>x.id===id);if(!c)return;
+  const info=document.getElementById('staticInfo');
+  info.classList.remove('hidden');
+  info.innerHTML=`<button onclick="this.parentElement.classList.add('hidden')">닫기</button><h3>${c.name}</h3><div><b>${c.grade}</b> · 종합 ${Number(c.quality).toFixed(1)} · 직선 ${c.distance.toFixed(1)}km</div><div>${c.phone}</div><div>${c.address}</div><div style="margin-top:5px">${c.note}</div><div>${mapLinks(c)}</div>`;
+}
+function showStaticView(reason){
+  currentView='static';setViewButtons('static');renderStaticMap();
+  document.getElementById('naverMap').classList.add('hidden');
+  document.getElementById('leafletMap').classList.add('hidden');
+  document.getElementById('staticMap').classList.remove('hidden');
+  setStatus('간이좌표도 · '+reason);
+  if(initialMapLoadProgress){finishMapProgress(initialMapLoadProgress,'간이좌표도 표시 완료');initialMapLoadProgress=null}
+}
+function focusBase(){
+  if(currentView==='naver'&&naverReady){naverMap.setCenter(new naver.maps.LatLng(BASE.lat,BASE.lon));naverMap.setZoom(15);setTimeout(()=>searchCurrentMap(null,{source:'base',notify:false}),180)}
+  else if(currentView==='leaflet'&&leafletReady){leafletMap.setView([BASE.lat,BASE.lon],15,{animate:false});setTimeout(()=>searchCurrentMap(null,{source:'base',notify:false}),180)}
+  else{showStaticView('기준지 중심');const i=document.getElementById('staticInfo');if(i){i.classList.remove('hidden');i.innerHTML=`<button onclick="this.parentElement.classList.add('hidden')">닫기</button><h3>기준 위치</h3><div>${BASE.address}</div>`}}
+}
+function fitVisible(){
+  if(currentView==='naver'&&naverReady){
+    const bounds=new naver.maps.LatLngBounds();bounds.extend(new naver.maps.LatLng(BASE.lat,BASE.lon));centers.filter(visible).forEach(c=>bounds.extend(new naver.maps.LatLng(c.lat,c.lon)));naverMap.fitBounds(bounds,{top:40,right:40,bottom:40,left:40});
+  }else if(currentView==='leaflet'&&leafletReady){
+    const pts=centers.filter(visible).map(c=>[c.lat,c.lon]);pts.push([BASE.lat,BASE.lon]);
+    leafletMap.fitBounds(pts,{padding:[35,35],maxZoom:14,animate:false});
+  }else showStaticView('표시센터 전체');
+}
+function focusCenter(id){
+  const c=centers.find(x=>x.id===id);if(!c)return;
+  if(currentView==='naver'&&naverReady){
+    const marker=naverMarkers.find(m=>m.centerId===id);naverMap.setCenter(new naver.maps.LatLng(c.lat,c.lon));naverMap.setZoom(16);if(marker)showCenterPanel(c,false)
+  }else if(currentView==='leaflet'&&leafletReady){
+    let m=centerMarkers.get(id);
+    if(!m&&visible(c)){refreshLeafletMarkers();m=centerMarkers.get(id)}
+    if(m){leafletMap.setView([c.lat,c.lon],16,{animate:false});showCenterPanel(c,false)}
+  }else{showStaticView('센터 선택');setTimeout(()=>selectStatic(id),0)}
+  document.querySelector('.map-shell').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function gradeRank(g){return String(g).startsWith('A')?1:String(g).startsWith('B')?2:String(g).startsWith('C')?3:String(g).startsWith('D')?4:g==='신설기관'?5:6}
+function rankingState(){
+  const rows=centers.filter(visible).slice();
+  let routeBasis=activeRoute.filter(visible);
+  if(!routeBasis.length){
+    const selected=rows.filter(c=>selectedRouteIds.has(c.id));
+    routeBasis=optimizeOpenPath(selected.length?selected:rows);
+  }
+  const routeOrder=new Map(routeBasis.map((c,i)=>[c.id,i+1]));
+  if(rankingSortMode==='route')rows.sort((a,b)=>(routeOrder.get(a.id)??999)-(routeOrder.get(b.id)??999)||b.quality-a.quality||a.distance-b.distance);
+  else rows.sort((a,b)=>b.quality-a.quality||a.distance-b.distance);
+  const displayOrder=new Map(rows.map((c,index)=>[c.id,rankingSortMode==='route'&&routeOrder.get(c.id)?routeOrder.get(c.id):index+1]));
+  return {rows,routeOrder,displayOrder};
+}
+function markerSymbolHtml(c,number){
+  return `<div class="marker-symbol" onpointerdown="rememberMarkerViewport()" onmousedown="rememberMarkerViewport()" ontouchstart="rememberMarkerViewport()"><div class="marker-pin ${markerClass(Number(c.quality))}"><span>${Number(c.quality).toFixed(1)}</span></div><b class="marker-rank" aria-label="목록 순번 ${number}">${number}</b></div>`;
+}
+function refreshMarkerNumbers(){
+  if(naverReady)refreshNaverMarkers();
+  if(leafletReady)refreshLeafletMarkers();
+  if(currentView==='static')renderStaticMap();
+}
+
+function selectedRouteCenters(){
+  return centers.filter(c=>visible(c)&&selectedRouteIds.has(c.id));
+}
+function selectAllRoute(on){
+  if(on)centers.filter(visible).forEach(c=>selectedRouteIds.add(c.id));
+  else selectedRouteIds.clear();
+  routeSelectionChanged();
+}
+function syncRouteSelectAll(){
+  const checkbox=document.getElementById('routeSelectAll');if(!checkbox)return;
+  const rows=centers.filter(visible),selected=rows.filter(c=>selectedRouteIds.has(c.id)).length;
+  checkbox.checked=rows.length>0&&selected===rows.length;
+  checkbox.indeterminate=selected>0&&selected<rows.length;
+  checkbox.disabled=rows.length===0;
+  checkbox.setAttribute('aria-checked',checkbox.indeterminate?'mixed':String(checkbox.checked));
+  checkbox.title=checkbox.indeterminate?`표시센터 ${selected}/${rows.length}곳 선택`:(checkbox.checked?'표시센터 전체 선택됨':'표시센터 전체 선택');
+}
+function toggleRouteSelection(id,on){
+  if(on)selectedRouteIds.add(id);else selectedRouteIds.delete(id);
+  routeSelectionChanged();
+}
+function routeSelectionChanged(){
+  activeRoute=[];drawActiveRoute();
+  updateRouteSelectionSummary();renderRanking();refreshMarkerNumbers();
+  const n=selectedRouteCenters().length,total=selectedRouteIds.size;
+  document.getElementById('routeResult').innerHTML=`<div class="muted">현재 필터에서 ${n}곳 선택됨${total!==n?` · 다른 필터에 ${total-n}곳 선택 유지`:''} · ‘최적경로 탐색’을 누르세요.</div>`;
+}
+function updateRouteSelectionSummary(){
+  const el=document.getElementById('routeSelectionCount');if(!el)return;
+  const n=selectedRouteCenters().length,total=selectedRouteIds.size;
+  el.textContent=total===n?`${n}곳 선택`:`필터 내 ${n}곳 · 전체 ${total}곳`;
+  syncRouteSelectAll();
+}
+function resetRouteAfterFilter(){
+  activeRoute=[];drawActiveRoute();
+  const el=document.getElementById('routeResult');if(!el)return;
+  const n=selectedRouteCenters().length;
+  el.innerHTML=`<div class="muted">지도 필터가 변경되었습니다. 현재 표시된 센터 중 ${n}곳이 선택되어 있습니다.</div>`;
+}
+function setRankingSort(mode){
+  rankingSortMode=mode==='route'?'route':'priority';
+  renderRanking();refreshMarkerNumbers();
+}
+function legDistance(a,b){return hav(a.lat,a.lon,b.lat,b.lon)}
+function routeDistance(route){
+  let total=0,prev=BASE;route.forEach(c=>{total+=legDistance(prev,c);prev=c});return total;
+}
+function optimizeOpenPath(nodes){
+  const remaining=nodes.slice(),route=[];let current=BASE;
+  while(remaining.length){
+    let best=0;
+    for(let i=1;i<remaining.length;i++)if(legDistance(current,remaining[i])<legDistance(current,remaining[best]))best=i;
+    current=remaining.splice(best,1)[0];route.push(current);
+  }
+  let changed=true,passes=0;
+  while(changed&&passes++<100){
+    changed=false;
+    for(let i=0;i<route.length-1;i++)for(let k=i+1;k<route.length;k++){
+      const prev=i===0?BASE:route[i-1],next=k+1<route.length?route[k+1]:null;
+      const oldCost=legDistance(prev,route[i])+(next?legDistance(route[k],next):0);
+      const newCost=legDistance(prev,route[k])+(next?legDistance(route[i],next):0);
+      if(newCost+0.00001<oldCost){route.splice(i,k-i+1,...route.slice(i,k+1).reverse());changed=true}
+    }
+  }
+  return route;
+}
+function kakaoLegUrl(from,to){
+  return `https://map.kakao.com/link/from/${encodeURIComponent(from.name)},${from.lat},${from.lon}/to/${encodeURIComponent(to.name)},${to.lat},${to.lon}`;
+}
+function naverAppRouteUrl(from,to){
+  const appName=encodeURIComponent(location.href.split('#')[0]);
+  return `nmap://route/car?slat=${from.lat}&slng=${from.lon}&sname=${encodeURIComponent(from.name)}&dlat=${to.lat}&dlng=${to.lon}&dname=${encodeURIComponent(to.name)}&appname=${appName}`;
+}
+function googleRouteUrl(origin,stops){
+  const last=stops[stops.length-1],middle=stops.slice(0,-1);
+  const q=p=>encodeURIComponent(p.geoAddress||p.address);
+  let url=`https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${q(origin)}&destination=${q(last)}`;
+  if(middle.length)url+=`&waypoints=${middle.map(q).join('%7C')}`;
+  return url;
+}
+function routeGroupLinks(route){
+  const links=[];let origin=BASE;
+  for(let i=0;i<route.length;i+=7){
+    const chunk=route.slice(i,i+7);links.push(`<a target="_blank" rel="noopener" href="${googleRouteUrl(origin,chunk)}">${i+1}~${i+chunk.length}번 묶음경로</a>`);origin=chunk[chunk.length-1];
+  }
+  return links.join('');
+}
+function drawActiveRoute(){
+  drawNaverRoute();
+  if(leafletReady&&routeLayer){
+    routeLayer.clearLayers();if(!activeRoute.length)return;
+    const pts=[[BASE.lat,BASE.lon],...activeRoute.map(c=>[c.lat,c.lon])];
+    L.polyline(pts,{color:'#7c3aed',weight:5,opacity:.82,dashArray:'10 7'}).addTo(routeLayer);
+    if(currentView==='leaflet')leafletMap.fitBounds(pts,{padding:[45,45],maxZoom:14,animate:false});
+  }
+}
+function drawNaverRoute(){
+  if(!naverReady)return;
+  naverRouteOverlays.forEach(o=>o.setMap(null));naverRouteOverlays=[];if(!activeRoute.length)return;
+  const pts=[new naver.maps.LatLng(BASE.lat,BASE.lon),...activeRoute.map(c=>new naver.maps.LatLng(c.lat,c.lon))];
+  naverRouteOverlays.push(new naver.maps.Polyline({map:naverMap,path:pts,strokeColor:'#7c3aed',strokeOpacity:.85,strokeWeight:5,strokeStyle:'shortdash'}));
+  if(currentView==='naver'){const bounds=new naver.maps.LatLngBounds();pts.forEach(p=>bounds.extend(p));naverMap.fitBounds(bounds,{top:50,right:50,bottom:50,left:50})}
+}
+function closeOpenCenterPopup(event,preserveViewport=true){
+  if(event){event.preventDefault();event.stopPropagation()}
+  const viewport=preserveViewport?captureVisibleMapViewport():null;
+  if(naverInfoWindow)naverInfoWindow.close();
+  if(leafletMap)leafletMap.closePopup();
+  const panel=document.getElementById('mapDetailPanel');
+  if(panel){panel.classList.add('hidden');panel.innerHTML=''}
+  const staticInfo=document.getElementById('staticInfo');
+  if(staticInfo)staticInfo.classList.add('hidden');
+  if(viewport)restoreVisibleMapViewport(viewport);
+}
+function optimizeRoute(){
+  closeOpenCenterPopup();
+  const selected=selectedRouteCenters();
+  if(!selected.length){document.getElementById('routeResult').innerHTML='<div class="muted">방문할 센터를 한 곳 이상 선택하세요.</div>';showToast('방문할 센터를 한 곳 이상 선택하세요.');return}
+  activeRoute=optimizeOpenPath(selected);const total=routeDistance(activeRoute);
+  let prev=BASE;
+  const stops=activeRoute.map((c,i)=>{const leg=legDistance(prev,c),from=prev;prev=c;return `<div class="route-stop"><div class="route-no">${i+1}</div><div><b>${c.name}</b><div class="small muted">${c.address} · 이전 지점에서 직선 ${leg.toFixed(1)}km</div></div><div><a href="${naverAppRouteUrl(from,c)}">네이버앱 길찾기</a><a target="_blank" rel="noopener" href="${naverSearchUrl(c)}">네이버 웹 위치</a><a target="_blank" rel="noopener" href="${kakaoLegUrl(from,c)}">카카오 길찾기</a></div></div>`}).join('');
+  const startLabel=BASE.name==='기준 위치'?'오리로 1034-1':'지도 지정 기준';
+  document.getElementById('routeResult').innerHTML=`<div class="route-summary"><span class="route-chip">출발: ${startLabel}</span><span class="route-chip">방문 ${activeRoute.length}곳</span><span class="route-chip">직선 연결거리 ${total.toFixed(1)}km</span><span class="route-chip">마지막 센터에서 종료</span></div>${stops}<div class="route-actions"><b>여러 지점 묶음 실행</b><br>${routeGroupLinks(activeRoute)}<div class="route-note">묶음경로는 지도 서비스의 경유지 제한 때문에 7곳 단위로 나뉩니다.</div></div>`;
+  rankingSortMode='route';document.getElementById('rankingSort').value='route';renderRanking();refreshMarkerNumbers();updateRouteSelectionSummary();
+  if(naverReady){showNaverView(false);drawActiveRoute()}
+  else if(leafletReady){showLeafletView(false);drawActiveRoute()}
+  else setStatus('경로 계산 완료 · 지도 로딩 대기');
+}
+function renderRanking(){
+  const {rows,routeOrder}=rankingState();
+  const sort=document.getElementById('rankingSort');if(sort)sort.value=rankingSortMode;
+  if(!rows.length){document.getElementById('ranking').innerHTML='<div class="empty-state">조건에 맞는 센터가 없습니다.<br>검색어 또는 조회조건을 변경하세요.</div>';return}
+  document.getElementById('ranking').innerHTML=rows.map((c,idx)=>{
+    const checked=selectedRouteIds.has(c.id),order=routeOrder.get(c.id);
+    return `<div class="rank${checked?' selected':''}" onclick="focusCenter(${c.id})">
+      <input type="checkbox" class="rank-check" ${checked?'checked':''} aria-label="${c.name} 경로 선택" onclick="event.stopPropagation()" onchange="toggleRouteSelection(${c.id},this.checked)">
+      <div class="score">${Number(c.quality).toFixed(1)}</div>
+      <div><h3>${rankingSortMode==='route'&&order?`<span class="route-order">${order}</span>`:`${idx+1}.`} ${c.name} <span class="badge ${c.listed?'old':'new'}">${c.listed?'기존':'추가'}</span></h3><p>${c.grade} · 직선 약 ${c.distance.toFixed(1)}km · ${c.confidence} 신뢰도</p><p>${c.note}</p><button class="rank-copy" onclick="event.stopPropagation();copyCenterDestination(${c.id})">목적지명·주소 복사</button></div>
+    </div>`;
+  }).join('');
+}
+function renderTable(){
+  const sort=document.getElementById('sort').value;
+  let rows=centers.filter(visible);
+  rows.sort((a,b)=>sort==='distance'?a.distance-b.distance:sort==='grade'?gradeRank(a.grade)-gradeRank(b.grade)||b.quality-a.quality:b.quality-a.quality||a.distance-b.distance);
+  if(!rows.length){document.getElementById('tbody').innerHTML='<tr><td colspan="11"><div class="empty-state">조건에 맞는 센터가 없습니다. 검색어 또는 조회조건을 변경하세요.</div></td></tr>';return}
+  document.getElementById('tbody').innerHTML=rows.map(c=>`<tr class="${c.listed?'':'omitted'}"><td><span class="badge ${c.listed?'old':'new'}">${c.listed?'기존':'추가'}</span></td><td><b class="center-link" onclick="focusCenter(${c.id})">${c.name}</b><div class="small muted">${c.region} · 정보신뢰 ${c.confidence}</div><button class="rank-copy" onclick="copyCenterDestination(${c.id})">목적지명·주소 복사</button></td><td><b>${c.distance.toFixed(1)}km</b><div class="small muted">직선거리</div></td><td><b>${c.grade}</b><div class="small muted">${c.eval_year} ${c.eval_score}</div></td><td><b>${Number(c.quality).toFixed(1)}</b><div class="stars">${stars(c.quality)}</div></td><td><div class="stars">${stars(c.program_star)}</div><div class="small">${c.program}</div></td><td><div class="stars">${stars(Number(c.clean))}</div><div class="small">${c.facility}</div></td><td>${c.staff}</td><td class="phone">${c.phone}${c.user_phone&&c.user_phone!==c.phone?`<div class="small muted">조사번호 ${c.user_phone}</div>`:''}</td><td>${c.note}</td><td>${c.address}</td></tr>`).join('');
+}
+
+document.getElementById('staticMap').addEventListener('click',event=>{if(!event.target.closest?.('.static-marker'))closeOpenCenterPopup()});
+document.querySelector('.map-shell').addEventListener('wheel',handleMapWheelZoom,{passive:false,capture:true});
+document.querySelector('.map-shell').addEventListener('gesturestart',handleMapGestureStart,{passive:false,capture:true});
+document.querySelector('.map-shell').addEventListener('gesturechange',handleMapGestureChange,{passive:false,capture:true});
+document.querySelector('.map-shell').addEventListener('gestureend',handleMapGestureEnd,{passive:false,capture:true});
+document.querySelector('.map-shell').addEventListener('touchstart',handleMapTouchStart,{passive:true,capture:true});
+document.querySelector('.map-shell').addEventListener('touchend',handleMapTouchEnd,{passive:true,capture:true});
+document.querySelector('.map-shell').addEventListener('touchcancel',handleMapTouchEnd,{passive:true,capture:true});
+restoreSharedState();renderStaticMap();renderRanking();renderTable();updateFilterCount();updateRouteSelectionSummary();
+if(IS_LOCAL_FILE){
+  setStatus('로컬 파일 모드 · OpenStreetMap 연결 시도');
+  showLeafletView(true);
+}else if(sharedView==='leaflet'){
+  showLeafletView(true);
+}else if(sharedView==='static'){
+  showStaticView('공유 조회상태 복원');
+}else{
+  loadNaver();
+}
+</script>
+</body>
+</html>

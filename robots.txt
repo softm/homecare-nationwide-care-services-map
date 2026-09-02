@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://softm.github.io/sitemap-daycare.xml
+Sitemap: https://softm.github.io/sitemap.xml
