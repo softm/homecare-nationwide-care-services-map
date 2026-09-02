@@ -1,0 +1,15 @@
+{
+  "name": "nationwide-care-services-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "전국 요양기관찾기·전국 주간 지도에서 사용하는 Vercel API",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check api/directions.js && node --check api/official-detail.js && node --check api/official-image.js",
+    "dev": "npx vercel dev",
+    "deploy": "npx vercel --prod"
+  }
+}

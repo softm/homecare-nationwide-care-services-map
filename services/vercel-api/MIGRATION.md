@@ -1,0 +1,61 @@
+# 분리 배포 인수인계
+
+## 1. 새 Git 저장소 생성
+
+권장 저장소 이름은 `nationwide-care-services-api`입니다.
+
+```bash
+git init
+git add .
+git commit -m "Initial Vercel API extraction"
+git branch -M main
+git remote add origin <새 Git 저장소 URL>
+git push -u origin main
+```
+
+## 2. 새 Vercel 프로젝트 연결
+
+Vercel에서 새 Git 저장소를 가져오거나 로컬에서 `npx vercel link`를 실행합니다. Framework Preset은 `Other`로 두고 별도의 Build Command나 Output Directory를 설정하지 않습니다.
+
+프로덕션 환경변수는 다음 세 개를 등록합니다.
+
+- `NAVER_MAPS_API_KEY_ID`
+- `NAVER_MAPS_API_SECRET`
+- `PUBLIC_API_BASE_URL`
+
+## 3. API 동작 확인
+
+배포 주소가 `https://nationwide-care-services-api.vercel.app`이라고 가정한 예시입니다.
+
+```bash
+curl -i -X POST 'https://nationwide-care-services-api.vercel.app/api/directions' \
+  -H 'Origin: https://softm.github.io' \
+  -H 'Content-Type: application/json' \
+  --data '{"start":{"lat":37.48145,"lng":126.84805},"goal":{"lat":37.4782,"lng":126.8644},"waypoints":[],"option":"traoptimal"}'
+```
+
+`directions`는 네이버 Directions API 권한이 켜져 있어야 합니다. 주소 좌표 변환은 프런트의 네이버 Maps JavaScript SDK `geocoder` 서브모듈로 검증합니다. `official-detail`과 `official-image`는 공단 사이트 응답 형식이나 접근 정책이 바뀌면 수정이 필요합니다.
+
+## 4. 지도 프런트 주소 교체
+
+`전국 요양기관찾기`와 `전국 주간`의 프런트 파일에서 다음 기존 API 기준 주소를 새 프로덕션 주소로 바꿉니다.
+
+```text
+https://daycare-directions-proxy.vercel.app
+```
+
+연결 대상:
+
+- `/api/directions`
+- `/api/official-detail`
+
+공단 사진 프록시는 `official-detail` 응답이 새 배포 도메인의 `/api/official-image`를 자동 반환합니다.
+
+## 5. 완료 조건
+
+- 새 Vercel 프로젝트의 directions, official-detail, official-image 세 API가 응답함
+- 허용된 GitHub Pages Origin에서 CORS 오류가 없음
+- 두 지도에서 Maps JavaScript SDK 주소 검색과 행정구역 자동 검색이 동작함
+- 경로 찾기가 동작함
+- 공단 상세 기본정보와 사진이 열림
+- 이전 `daycare-directions-proxy.vercel.app`의 geocode·reverse-geocode 호출이 브라우저 Network 탭에서 발생하지 않음
