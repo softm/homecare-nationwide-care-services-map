@@ -20,7 +20,8 @@ GitHub Actions
 
 | 항목 | 값 |
 |---|---|
-| 이름 | `Refresh NHIS static data` |
+| 워크플로 이름 | `Refresh NHIS static data` |
+| 실행 제목 | 수동 실행은 mode·scope·기관·shard, 자동 실행은 주기·범위를 표시 |
 | 파일 | `.github/workflows/refresh-nhis-static.yml` |
 | 실행 환경 | GitHub-hosted `ubuntu-latest` |
 | 수집기 | `scripts/sync_nhis_static.py` |
@@ -28,6 +29,16 @@ GitHub Actions
 | 동시 실행 | `nhis-static-refresh` 그룹에서 한 번에 하나 |
 | 실행 제한시간 | 350분 |
 | 자동 커밋 범위 | `data/nhis`, `source-data` |
+
+Actions 목록의 `WORKFLOW` 열은 공통 워크플로 이름을 표시하고 `TITLE` 열은 실행별 목적을 표시한다. `run-name`은 새 실행부터 적용되며 이미 시작된 실행 제목은 바뀌지 않는다. <!-- SOFTM-NHIS-RUN-NAME 날짜:20260903 : 같은 워크플로의 여러 실행을 제목으로 구분하는 방법을 기록 -->
+
+| 실행 예 | Actions `TITLE` 표시 |
+|---|---|
+| 사진 제외 전체 수동 수집 | `NHIS 수동 · mode=full · scope=catalog,details,evaluations · 기관=전체 · shard=14` |
+| 특정 기관 사진 수동 수집 | `NHIS 수동 · mode=institution · scope=photos · 기관=24119001267 · shard=14` |
+| 매일 증분 자동 수집 | `NHIS 자동 · 매일 증분 · scope=all` |
+| 매일 순환 자동 수집 | `NHIS 자동 · 매일 순환 · scope=details,photos` |
+| 월간 원본 자동 수집 | `NHIS 자동 · 월간 원본 · scope=catalog,evaluations` |
 
 ## 수집 데이터와 저장 위치
 
