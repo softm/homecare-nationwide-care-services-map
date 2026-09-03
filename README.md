@@ -67,6 +67,8 @@ npm run check
 
 브라우저는 공단 상세 페이지나 공공데이터 API를 실시간 호출하지 않습니다. GitHub Actions가 공식 [기관 검색 API](https://www.data.go.kr/data/15059029/openapi.do), [시설별 상세조회 API](https://www.data.go.kr/data/15058856/openapi.do), [시설별 현황](https://www.data.go.kr/data/15124763/fileData.do), [평가 결과](https://www.data.go.kr/data/15104801/fileData.do)와 공개 사진 페이지를 수집하고 `data/nhis`에 정규화합니다. 두 지도는 같은 기관별 상세·사진 JSON을 사용하며, 사진 탭을 열 때만 사진 매니페스트를 읽습니다. // SOFTM-NHIS-DOC 날짜:20260903 : 실시간 서버 대신 배포 전 생성된 공단 스냅샷을 단일 기준으로 사용
 
+자동·수동 수집 종류, 실행 주기, 명령, Run ID 확인과 전체 완료 판정은 [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md)를 기준으로 운영합니다. <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 실행 중복과 체크포인트 누락 없이 수집을 이어가도록 운영 절차를 단일 문서로 연결 -->
+
 로컬 키는 `.env.local`의 `DATA_GO_KR_SERVICE_KEY`에만 저장합니다. 저장소에는 빈 예제만 있고, GitHub Actions에는 같은 이름의 Repository Secret을 등록합니다.
 
 ```bash

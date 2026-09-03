@@ -82,6 +82,8 @@
 - 공개 화면은 GitHub Pages 정적 호스팅, 로컬 화면은 저장소 루트의 `npm run serve`(`http://localhost:3000`)로 실행한다.
 - 브라우저의 동적 외부 호출은 네이버 Maps JavaScript SDK와 Vercel `/api/directions`로 제한한다. 주소 변환은 SDK, 공단 상세·사진은 정적 JSON이 담당한다.
 - 공단 수집은 GitHub Actions의 `refresh-nhis-static.yml`과 `scripts/sync_nhis_static.py`가 담당하며 결과를 `source-data`와 `data/nhis`에 커밋한다.
+- 공단 수집 종류·주기·명령·완료 판정은 `docs/DATA_COLLECTION.md`를 기준으로 하며 워크플로, 수집 범위, 호출 한도, 체크포인트 방식이 바뀌면 같은 작업에서 문서를 갱신한다. <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 실행 방식 변경 후 오래된 명령이 남지 않도록 문서 동기화를 필수화 -->
+- 전체 수집의 다음 회차는 이전 Actions 실행과 `github-actions[bot]` 커밋이 완료된 뒤 호출한다. 실행 중 미리 큐에 넣으면 이전 SHA를 사용해 체크포인트를 이어받지 못할 수 있다. <!-- SOFTM-NHIS-RUN-SEQUENCE 날짜:20260903 : 동일 구간 중복 수집과 push 충돌을 방지 -->
 - 비밀값은 공공데이터 `DATA_GO_KR_SERVICE_KEY`와 Vercel의 `NAVER_MAPS_API_SECRET`이며 HTML·정적 JSON·로그·문서에 실제 값을 남기지 않는다.
 - 정적 서버와 Vercel 로컬 개발 서버는 기본 포트가 겹칠 수 있으므로 동시에 검증할 때 한쪽 포트를 명시적으로 변경한다.
 
