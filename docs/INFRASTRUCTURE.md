@@ -46,6 +46,8 @@
 
 ## 자동 수집 일정
 
+실행 명령, 수동 모드, 상태·완료 판정과 체크포인트 운영의 상세 기준은 [`DATA_COLLECTION.md`](DATA_COLLECTION.md)를 따른다. <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 수집 운영 명령의 중복 문서화를 줄이고 최신 기준으로 연결 -->
+
 | 서울 시간 | GitHub cron(UTC) | 모드 | 범위 | 최대 호출 수 | 목적 |
 |---|---|---|---|---:|---|
 | 매일 03:23 | `23 18 * * *` | `incremental` | 전체 | 900 | 변경 기관 중심 증분 수집 |
@@ -90,6 +92,6 @@
 | 공단 정적 스키마 | 수집기, `nhis-static-data.js`, 두 지도 상세 UI, `validate_nhis_static.py` |
 | 기관 원본 데이터 | 두 빌드 스크립트, 생성 매니페스트, 전국 주간과 전국 요양 daycare 기관기호 차이 0 |
 | 사진 페이지 구조 | 사진 파서, 정적 사진 JSON, 두 지도의 사진 탭 |
-| 자동 수집 일정·예산 | 세 cron 합계, 일일 API 한도, 샤드 체크포인트 지속성 |
+| 자동 수집 일정·예산 | 세 cron 합계, 일일 API 한도, 샤드 체크포인트 지속성, `DATA_COLLECTION.md` 동기화 | <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 워크플로 변경 시 운영 문서가 누락되지 않도록 점검 범위를 고정 -->
 
 <!-- SOFTM-INFRA-DOC END -->
