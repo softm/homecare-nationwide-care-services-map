@@ -1,4 +1,4 @@
-/** SOFTM-NHIS-STATIC START 날짜:20260902 : 두 지도가 같은 정적 공단 상세·사진 JSON과 요청 중복 제거 캐시를 공유 */
+/** SOFTM-NHIS-STATIC START 날짜:20260903 : 두 지도가 같은 정적 공단 상세·사진 JSON과 수집목록 기반 요청 제어를 공유 */
 (function(){
  'use strict';
  const BASE=new URL('data/nhis/',document.baseURI),memory=new Map(),tasks=new Map();
@@ -15,12 +15,13 @@
  }
  function serviceDetail(document,serviceCode=''){
   const details=document?.serviceDetails||{},code=String(serviceCode||'').split(',')[0].toUpperCase();
-  return details[code]||details[Object.keys(details)[0]]||null
+  return code?(details[code]||null):(details[Object.keys(details)[0]]||null)
  }
+ async function collected(kind,key,label){const manifest=await fetchJson('manifest.json','공단 데이터 수집 현황');const ids=manifest?.[`${kind}Ids`];if(Array.isArray(ids)&&!ids.includes(key))throw new Error(`${label}가 아직 정적 데이터에 수집되지 않았습니다.`)}
  window.NhisStaticData=Object.freeze({
   baseUrl:BASE.href,
-  detail(id,serviceCode=''){const key=institutionId(id);return fetchJson(`details/${key.slice(0,2)}/${key}.json`,'공단 상세정보').then(document=>({document,detail:serviceDetail(document,serviceCode)}))},
-  photos(id){const key=institutionId(id);return fetchJson(`photos/${key.slice(0,2)}/${key}.json`,'공단 등록사진')},
+  detail(id,serviceCode=''){const key=institutionId(id);return collected('detail',key,'공단 상세정보').then(()=>fetchJson(`details/${key.slice(0,2)}/${key}.json`,'공단 상세정보')).then(document=>({document,detail:serviceDetail(document,serviceCode)}))},
+  photos(id){const key=institutionId(id);return collected('photo',key,'공단 등록사진').then(()=>fetchJson(`photos/${key.slice(0,2)}/${key}.json`,'공단 등록사진'))},
   manifest(){return fetchJson('manifest.json','공단 데이터 수집 현황')},
   clear(){memory.clear();tasks.clear()}
  })

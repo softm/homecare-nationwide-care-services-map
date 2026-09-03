@@ -59,6 +59,7 @@
 - 데이터를 재생성하면 `npm run check`로 개수·중복·참조 누락을 확인한다.
 - 전국 주간과 전국 요양 `daycare`의 기관기호 집합 차이는 0이어야 한다.
 - 공단 상세·사진은 `data/nhis`의 정적 JSON을 단일 기준으로 사용하고 두 지도가 `nhis-static-data.js`를 공유한다. // SOFTM-NHIS-POLICY 날짜:20260902 : 실시간 공단 크롤링 서버가 다시 생기지 않도록 정적 배포 구조를 고정
+- 시설별 상세조회 JSON이 아직 없는 기관은 오류 화면 대신 공단 시설별 현황·평가의 주소·정원·인력·평가 요약을 표시하고, JSON 수집 후 같은 화면에서 상세 항목으로 자동 전환한다. // SOFTM-NHIS-FALLBACK 날짜:20260903 : 장기 순환 수집 기간에도 두 지도의 공단 정보를 중단 없이 제공
 - 공공데이터 서비스키는 로컬 `.env.local`과 GitHub Actions Secret `DATA_GO_KR_SERVICE_KEY`에만 두며 HTML·정적 JSON·로그에 넣지 않는다.
 
 ## 서버 원칙
