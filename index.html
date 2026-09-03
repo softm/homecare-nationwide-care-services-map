@@ -79,12 +79,12 @@
     </div>
     <!-- /** SOFTM-INDEX-CATEGORY-ADS END */ -->
   </main>
-  <script src="nationwide-care-ad-config.js?v=20260903-1"></script>
+  <script src="index-ad-config.js?v=20260903-1"></script><!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 전용 광고 단위만 이 화면에서 사용 -->
   <script src="nationwide-care-manifest.js"></script>
   <script>
-    /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 기존 요양 지도 광고 단위를 재사용하고 실제 데이터 수를 링크에 표시해 설정 중복을 방지 */
+    /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 인덱스 전용 광고 단위와 실제 데이터 수를 사용해 화면별 광고 집계를 분리 */
     const manifest=window.NATIONAL_CARE_MANIFEST||{};
-    const adConfig=window.CARE_AD_CONFIG||{enabled:false,mode:'off',placements:{}};
+    const adConfig=window.INDEX_AD_CONFIG||{enabled:false,mode:'off',placements:{}};
     const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     function safeAdUrl(value){try{const url=new URL(value,location.href);return ['https:','http:','mailto:'].includes(url.protocol)?url.href:'#'}catch{return'#'}}
     function directAd(){return (adConfig.direct?.items||[]).find(item=>item?.active&&item.title&&item.url)}

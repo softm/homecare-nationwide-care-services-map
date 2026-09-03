@@ -10,7 +10,7 @@
 | 전국 요양 | `nationwide-care-services-map.html` | 요양시설·주야간보호·방문요양·방문간호·방문목욕·단기보호·치매전담·요양병원 통합 지도 |
 | 통합 시작 | `index.html` | 두 지도 선택 화면 |
 
-통합 시작 화면은 전국 요양 8개 기관 카테고리로 바로 들어가는 링크와 기존 요양 지도 광고 설정을 공유합니다. 광고는 PC `728×90`, 모바일 `320×100` 상단 배너를 사용합니다. <!-- SOFTM-INDEX-ENTRY 날짜:20260903 : 별도 광고 키 중복 없이 첫 화면의 카테고리 접근성과 반응형 광고 규격을 고정 -->
+통합 시작 화면은 전국 요양 8개 기관 카테고리로 바로 들어가는 링크와 `index-ad-config.js`의 전용 광고 설정을 사용합니다. 광고는 PC `728×90`, 모바일 `320×100` 상단 배너이며 전국 요양 광고 단위와 분리됩니다. <!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 광고의 화면별 집계를 요양 지도와 분리 -->
 
 ## 로컬 실행
 
@@ -33,6 +33,7 @@ npm run serve
 ```text
 .
 ├── index.html
+├── index-ad-config.js              # 인덱스 PC·모바일 전용 광고 단위
 ├── nationwide-daycare-map.html
 ├── nationwide-daycare-data-*.js
 ├── nationwide-daycare-evaluations.js
