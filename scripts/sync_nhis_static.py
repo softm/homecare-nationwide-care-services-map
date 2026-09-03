@@ -717,10 +717,12 @@ def main() -> int:
         checkpoint = load_json(checkpoint_file, {})
         if checkpoint.get("completed") and checkpoint.get("shard", {}).get("count") == args.shard_count:
             completed_shards.append(checkpoint["shard"]["index"])
+    detail_ids = sorted(path.stem for path in (DATA_ROOT / "details").glob("*/*.json")) if (DATA_ROOT / "details").exists() else []
+    photo_ids = sorted(path.stem for path in (DATA_ROOT / "photos").glob("*/*.json")) if (DATA_ROOT / "photos").exists() else []
     manifest.update({
         "schemaVersion": SCHEMA_VERSION, "cycleId": checkpoint_state.get("cycleId") or datetime.now(timezone.utc).strftime("%Y%m"), "mode": args.mode, "generatedAt": generated_at, "updatedAt": generated_at, "catalogCount": len(catalog),
-        "detailCount": len(list((DATA_ROOT / "details").glob("*/*.json"))) if (DATA_ROOT / "details").exists() else 0,
-        "photoManifestCount": len(list((DATA_ROOT / "photos").glob("*/*.json"))) if (DATA_ROOT / "photos").exists() else 0,
+        "detailCount": len(detail_ids), "detailIds": detail_ids,
+        "photoManifestCount": len(photo_ids), "photoIds": photo_ids,
         "evaluationCount": load_json(DATA_ROOT / "evaluations.json", {}).get("count", 0),
         "completedShards": sorted(set(completed_shards)),
         "lastRun": {"mode": args.mode, "scope": sorted(scopes), "targets": len(targets), "processed": processed_count, "detailSuccess": detail_success, "photoSuccess": photo_success, "updated": detail_updated + photo_updated, "unchanged": unchanged_count, "failures": len(failures), "apiCalls": client.calls, "shardIndex": args.shard_index, "shardCount": args.shard_count},

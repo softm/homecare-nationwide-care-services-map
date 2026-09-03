@@ -57,6 +57,16 @@ for (const html of ['nationwide-daycare-map.html', 'nationwide-care-services-map
 }
 if (exists('services/vercel-api/api/geocode.js') || exists('services/vercel-api/api/reverse-geocode.js')) fail('삭제 대상 주소 변환 서버 API 파일이 남아 있습니다.');
 
+/** SOFTM-NHIS-DETAIL-FALLBACK-CHECK START 날짜:20260903 : 상세 수집 진행 중에도 두 지도에서 공단 기준자료가 오류 대신 표시되도록 검사 */
+const careSource = read('nationwide-care-services-map.html');
+const daycareSource = read('nationwide-daycare-map.html');
+const nhisLoaderSource = read('nhis-static-data.js');
+if (!careSource.includes('officialSummaryTabData') || !careSource.includes('공단 기준자료 우선 표시')) fail('전국 요양 공단 상세 기준자료 대체 표시 누락');
+if (!daycareSource.includes('daycareSummaryDetailHtml') || !daycareSource.includes('daycareOfficialType(center)')) fail('전국 주간 공단 상세 구현 또는 실제 급여코드 조회 누락');
+if (/NhisStaticData\.detail\(id\s*,\s*['"]B03['"]\)/.test(daycareSource)) fail('전국 주간 공단 상세 급여코드 B03 고정 호출이 남아 있습니다.');
+if (!nhisLoaderSource.includes("collected('detail'") || !nhisLoaderSource.includes('code?(details[code]||null)')) fail('공단 상세 수집목록 검사 또는 급여코드 오조회 방지 누락');
+/** SOFTM-NHIS-DETAIL-FALLBACK-CHECK END */
+
 async function verifyGeocoderModule() {
   const storage = new Map();
   let geocodeCalls = 0;

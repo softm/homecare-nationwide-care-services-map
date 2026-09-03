@@ -26,6 +26,10 @@ def main():
     assert manifest.get("schemaVersion") == 1, "manifest schemaVersion이 1이 아닙니다."
     assert isinstance(manifest.get("completedShards"), list), "manifest completedShards가 없습니다."
     assert all(isinstance(manifest.get(key), int) for key in ("updatedCount", "unchangedCount", "failureCount")), "manifest 처리 건수 필드가 없습니다."
+    detail_ids = sorted(path.stem for path in (DATA / "details").glob("*/*.json"))
+    photo_ids = sorted(path.stem for path in (DATA / "photos").glob("*/*.json"))
+    assert manifest.get("detailIds") == detail_ids and manifest.get("detailCount") == len(detail_ids), "manifest 상세 수집목록이 실제 파일과 다릅니다."
+    assert manifest.get("photoIds") == photo_ids and manifest.get("photoManifestCount") == len(photo_ids), "manifest 사진 수집목록이 실제 파일과 다릅니다."
     institutions = catalog.get("institutions", [])
     assert catalog.get("count") == len(institutions), "catalog count와 실제 행 수가 다릅니다."
     assert len(institutions) >= 29_000, "시설현황 기관 수가 비정상적으로 적습니다."
