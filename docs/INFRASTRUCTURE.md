@@ -66,7 +66,7 @@
 | `NHIS_MAX_PHOTOS_PER_INSTITUTION` | GitHub Actions job env | 예 | 기관별 사진 수 상한 | 수집 정책 변경 시 |
 | `NHIS_PHOTO_MODE` | GitHub Actions job env | 예 | 공개 사진을 원격 URL 방식으로 기록 | 사진 저장 정책 변경 시 |
 
-네이버 Maps Application의 Web 서비스 URL에는 최소 `https://softm.github.io`와 `http://localhost:3000`을 등록한다. `http://127.0.0.1:3000`은 별도 Origin이므로 이 주소로 브라우저 검증하려면 별도로 등록해야 한다. Vercel Directions 함수의 CORS 허용 Origin은 현재 세 주소를 모두 포함한다.
+네이버 Maps Application의 Web 서비스 URL에는 최소 `https://homecare.designboard.net`, 레거시 `https://softm.github.io`, `http://localhost:3000`을 등록한다. `http://127.0.0.1:3000`은 별도 Origin이므로 이 주소로 브라우저 검증하려면 별도로 등록해야 한다. Vercel Directions 함수의 CORS 허용 Origin도 같은 공개·로컬 주소를 포함한다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 공식 공개 도메인에서 지도와 길찾기가 모두 허용되도록 Origin 기준을 동기화 -->
 
 ## 로컬 실행 표
 
@@ -84,7 +84,7 @@
 
 | 변경 대상 | 함께 확인할 항목 |
 |---|---|
-| 프런트 공개 Origin | 네이버 Web 서비스 URL, Vercel `ALLOWED_ORIGINS`, canonical·OG URL |
+| 프런트 공개 Origin | `CNAME`, 네이버 Web 서비스 URL, Vercel `ALLOWED_ORIGINS`, canonical·OG·구조화 데이터, `robots.txt`, `sitemap.xml` | <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 도메인 변경 시 검색엔진 제출 정보까지 함께 점검 -->
 | 네이버 Maps Key ID | 두 HTML의 SDK URL, `services/vercel-api` 환경변수, `scripts/validate-project.mjs` |
 | Directions 배포 주소 | 두 HTML의 `DIRECTIONS_PROXY`, Vercel CORS, `/api/directions` 회귀검사 |
 | 공단 정적 스키마 | 수집기, `nhis-static-data.js`, 두 지도 상세 UI, `validate_nhis_static.py` |
