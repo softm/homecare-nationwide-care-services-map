@@ -45,13 +45,17 @@ Actions 목록의 `WORKFLOW` 열은 공통 워크플로 이름을 표시하고 `
 | 범위 | 수집·생성 내용 | 외부 출처 | 저장 위치 |
 |---|---|---|---|
 | `catalog` | 기관명, 주소, 전화, 지역, 지정일, 급여종류, 정원 | 기관 검색 API·시설별 현황 XLSX | `data/nhis/catalog.json`, `changes.json` |
-| `details` | 일반현황, 정원, 인력, 시설, 비급여, 프로그램, 협약, 복지용구, 기타 | 시설별 상세조회 API | `data/nhis/details/NN/{기관기호}.json` |
+| `details` | 일반현황, 정원, 인력, 시설, 비급여, 프로그램, 협약, 복지용구, 기타 + 화면 기본정보·근속·CCTV | 시설별 상세조회 API + 공단 공개 상세 페이지의 11·14·19 탭 | `data/nhis/details/NN/{기관기호}.json` |
 | `evaluations` | 평가등급·총점·영역별 평가 | 평가 결과 CSV | `data/nhis/evaluations.json` |
 | `photos` | 사진 키, 제목, 날짜, 공단 원본 URL | 공단 공개 사진 페이지 | `data/nhis/photos/NN/{기관기호}.json` |
 | 실행상태 | 수집 ID, 실패, 샤드 체크포인트, 최근 결과 | 수집기 자체 생성 | `manifest.json`, `failures/*.json`, `checkpoints/*.json` |
 | 원본 | 시설별 현황·평가 원본 | 공공데이터포털 파일 | `source-data/` |
 
 사진 JSON은 사진 메타데이터와 공단 원본 URL을 저장하며 이미지 파일 자체는 저장하지 않는다.
+
+`details`는 공단 페이지 HTML 자체를 저장하지 않는다. 기본정보 탭의 이름·주소·전화·이메일·제공서비스·통합재가·홈페이지·지정/설치일·교통·운영시간·주차·보험·최종변경일과 인력/근속 및 CCTV 표의 셀·병합 정보를 JSON으로 구조화한다. 정원·시설·비급여·프로그램 등은 공식 시설별 상세조회 OpenAPI를 기준으로 결합하므로 브라우저나 Vercel에서 공단을 실시간 호출하지 않는다. <!-- SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 공단 원문과 정적 스냅샷의 수집 범위를 오해하지 않도록 명시 -->
+
+기관·급여 조합 하나의 `details` 갱신에는 공공데이터 상세 API 최대 9회와 공단 공개 화면 3회가 필요하다. `lastRun.apiCalls`와 `--max-calls`는 공공데이터 API 호출만 집계하며, 공개 화면 요청은 재시도와 짧은 요청 간격을 별도로 적용한다. 상세 규격은 `detailProfile`로 기록하고 값이 바뀌면 예전 전체수집 체크포인트를 이어받지 않는다. <!-- SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 실행 시간과 체크포인트 초기화 조건을 운영자가 예측하도록 기록 -->
 
 ## 자동 실행 주기
 
@@ -108,10 +112,12 @@ gh workflow run refresh-nhis-static.yml \
   --repo softm/homecare-nationwide-care-services-map \
   -f mode=institution \
   -f scope=details \
-  -f institution_id=24119001267 \
+  -f institution_id=24121000299 \
   -f service_type=B03 \
   -f force=true
 ```
+
+위 명령 한 번으로 해당 기관의 OpenAPI 상세와 공단 화면 기본·근속·CCTV가 함께 갱신된다. 사진은 `scope=photos`를 별도로 실행할 때만 갱신된다. <!-- SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 상세 수집과 사진 수집의 실행 범위를 분리 -->
 
 ### 특정 기관 사진 수집
 

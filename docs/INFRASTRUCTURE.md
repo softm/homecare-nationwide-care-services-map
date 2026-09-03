@@ -12,7 +12,7 @@
 | 지도·주소 변환 | 사용자 브라우저 | 네이버 Maps JavaScript SDK, `naver-geocoder.js` | 지도 표시, 주소→좌표, 좌표→주소 | 네이버 SDK 직접 호출 | `ncpKeyId=etfcybk8vf`, Maps Application의 Web 서비스 URL 제한 |
 | 기관 기본 데이터 | GitHub Pages 정적 파일 | `nationwide-daycare-data-*.js`, `nationwide-care-data/*.js`, 각 매니페스트 | 지도 목록·마커·필터의 기본 자료 | 예, 상대경로 정적 파일 | 없음 |
 | 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 JSON | 브라우저 인증정보 없음 |
-| 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py` | 공공데이터와 공단 공개 사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | `DATA_GO_KR_SERVICE_KEY` |
+| 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | `DATA_GO_KR_SERVICE_KEY` |
 | 길찾기 서버 | Vercel Functions | `services/vercel-api/api/directions.js` | 네이버 Directions 15 자동차 경로 중계 | `POST /api/directions`만 호출 | `NAVER_MAPS_API_KEY_ID`, `NAVER_MAPS_API_SECRET` |
 | 광고 설정 | GitHub Pages 정적 파일 및 광고 사업자 | `index-ad-config.js`, `nationwide-daycare-ad-config.js`, `nationwide-care-ad-config.js` | 화면별 PC·모바일·목록 광고 슬롯 설정 | 예 | 광고 설정 파일의 공개 클라이언트 값만 사용 | <!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 인덱스 승인 단위가 다른 지도 광고와 섞이지 않도록 인프라 경계를 명시 -->
 | 로컬 정적 서버 | 개발자 PC | `npm run serve` → `python3 -m http.server 3000` | HTML을 `file://`이 아닌 HTTP Origin으로 검증 | `http://localhost:3000` | 없음 |
@@ -30,6 +30,7 @@
 | 공단 사진 | 브라우저 | `data/nhis/photos/{기관기호 앞 2자리}/{기관기호}.json` | 사진 탭을 열 때 정적 사진 매니페스트 로드 | 원본 이미지는 공단 공개 URL 사용 가능 |
 | 자동차 길찾기 | 브라우저→Vercel | `https://daycare-directions-proxy.vercel.app/api/directions` | Vercel이 Secret을 붙여 네이버 Directions 15 호출 | 유일하게 유지하는 런타임 서버 API |
 | 공단 원천 수집 | GitHub Actions→공공데이터 | 기관검색·시설상세 API, 시설현황·평가 파일 | Python 수집기가 재시도·호출 예산·샤드 체크포인트를 적용 | 키를 HTML·JSON·로그에 기록하지 않음 |
+| 공단 화면 보완 수집 | GitHub Actions→공단 공개 상세 페이지 | 기본정보(11)·인력/근속(14)·CCTV(19) 탭 | 공개 표의 항목·셀 구조를 상세 JSON에 병합 | 브라우저 실시간 호출 금지 |
 | 공단 사진 수집 | GitHub Actions→공단 공개 페이지 | `longtermcare.or.kr` 상세·썸네일 | 공개 페이지에서 사진 키와 메타데이터만 정규화 | 페이지 구조 변경 시 파서와 화면을 함께 검사 |
 
 ## 공단 데이터 파이프라인
@@ -38,7 +39,7 @@
 |---:|---|---|---|---|
 | 1 | 공공데이터 시설별 현황·평가 원문 | 최신 파일 확인 및 원본 보존 | `source-data/nhis-longtermcare-*.xlsx`, `source-data/nhis_longtermcare_evaluations_*.csv` | 원본을 덮어쓰거나 수동 가공하지 않음 |
 | 2 | 시설별 현황 XLSX + 기관 검색 API | 기관·급여 조합 병합과 변경 감지 | `data/nhis/catalog.json`, `data/nhis/changes.json` | 기관 기본 목록의 수집 기준 |
-| 3 | 시설별 상세조회 API 최대 9개 operation | 기관기호·급여코드별 상세 정규화 | `data/nhis/details/NN/{id}.json` | 성공한 기존 섹션은 병합 보존 |
+| 3 | 시설별 상세조회 API 최대 9개 operation + 공단 상세 11·14·19 탭 | 기관기호·급여코드별 상세와 화면 고유 기본·근속·CCTV 정규화 | `data/nhis/details/NN/{id}.json` | 성공한 기존 섹션은 병합 보존 |
 | 4 | 평가 CSV | 기관기호별 평가 정규화 | `data/nhis/evaluations.json` | 상세 화면의 평가 자료 |
 | 5 | 공단 공개 사진 페이지 | 기관별 사진 키·URL·메타데이터 정규화 | `data/nhis/photos/NN/{id}.json` | 기본 상한 10장 |
 | 6 | 수집 결과 | 성공 ID, 실패, 샤드 진행상태 기록 | `manifest.json`, `failures/*.json`, `checkpoints/*.json` | 중단된 순환 수집을 이어서 실행 |
