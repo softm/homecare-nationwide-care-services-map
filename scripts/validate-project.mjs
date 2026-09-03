@@ -46,6 +46,38 @@ if (indexAdConfig?.kakao?.desktop?.unit !== 'DAN-q4nR1JpPnBFtotbe') fail('인덱
 if (indexAdConfig?.kakao?.mobile?.unit !== 'DAN-fmQS1GFVu1j2yBow') fail('인덱스 모바일 광고 단위가 승인값과 다릅니다.'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 모바일 인덱스의 승인 단위가 유지되는지 확인
 /** SOFTM-INDEX-ENTRY-CHECK END */
 
+/** SOFTM-SEO-DOMAIN-CHECK START 날짜:20260903 : 공개 도메인·사이트맵·페이지 검색 정보가 다시 서로 다른 주소를 가리키지 않도록 자동 검증 */
+const publicOrigin = 'https://homecare.designboard.net';
+if (read('CNAME').trim() !== new URL(publicOrigin).hostname) fail('CNAME과 검색 대표 Origin이 다릅니다.');
+const robotsSource = read('robots.txt');
+const sitemapDirectives = [...robotsSource.matchAll(/^Sitemap:\s*(\S+)/gim)].map(match => match[1]);
+if (sitemapDirectives.length !== 1 || sitemapDirectives[0] !== `${publicOrigin}/sitemap.xml`) fail('robots.txt는 공개 도메인의 단일 sitemap.xml만 안내해야 합니다.');
+const sitemapSource = read('sitemap.xml');
+const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
+const expectedSitemapUrls = [
+  `${publicOrigin}/`,
+  `${publicOrigin}/nationwide-daycare-map.html`,
+  ...indexCategories.map(category => `${publicOrigin}/nationwide-care-services-map.html?type=${category}`)
+];
+if (sitemapUrls.length !== expectedSitemapUrls.length || expectedSitemapUrls.some(url => !sitemapUrls.includes(url))) fail('sitemap.xml 공개 페이지 목록이 누락되거나 불필요한 URL을 포함합니다.');
+for (const [htmlFile, canonical] of [
+  ['index.html', `${publicOrigin}/`],
+  ['nationwide-daycare-map.html', `${publicOrigin}/nationwide-daycare-map.html`],
+  ['nationwide-care-services-map.html', `${publicOrigin}/nationwide-care-services-map.html?type=daycare`]
+]) {
+  const source = read(htmlFile);
+  if (!source.includes('<meta name="robots" content="index,follow')) fail(`${htmlFile}: 검색 허용 robots 메타 누락`);
+  if (!source.includes('rel="canonical"') || !source.includes(`href="${canonical}"`)) fail(`${htmlFile}: 공개 도메인 canonical 누락`);
+  if (!source.includes(`content="${canonical}"`)) fail(`${htmlFile}: 공개 도메인 OG URL 누락`);
+  const jsonLdBlocks = [...source.matchAll(/<script\s+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)];
+  if (!jsonLdBlocks.length) fail(`${htmlFile}: JSON-LD 구조화 데이터 누락`);
+  for (const block of jsonLdBlocks) JSON.parse(block[1]);
+}
+const directionsSource = read('services/vercel-api/api/directions.js');
+if (!directionsSource.includes(`"${publicOrigin}"`)) fail('길찾기 API의 공식 공개 Origin 허용 누락');
+if (['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'robots.txt', 'sitemap.xml'].some(file => read(file).includes('https://softm.github.io'))) fail('검색 설정에 예전 GitHub Pages 대표 주소가 남아 있습니다.');
+/** SOFTM-SEO-DOMAIN-CHECK END */
+
 /** SOFTM-GEOCODER-CHECK START 날짜:20260902 : 서버 주소 API 재유입과 SDK·캐시 응답 형식 회귀를 자동 검증 */
 for (const html of ['nationwide-daycare-map.html', 'nationwide-care-services-map.html']) {
   const source = read(html);
