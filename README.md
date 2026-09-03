@@ -101,6 +101,22 @@ Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.m
 
 정적 파일은 저장소 루트 구조 그대로 게시할 수 있습니다. 새 프로젝트 저장소에서 Pages 주소가 `/nationwide-care-maps/`처럼 하위 경로가 되더라도 내부 데이터 파일은 상대경로라 동작합니다. 다만 `nationwide-care-services-map.html`의 canonical·OG URL은 실제 공개 주소로 변경해야 합니다.
 
+현재 공식 공개 주소와 검색 대표 Origin은 `https://homecare.designboard.net`입니다. `CNAME`, 세 HTML의 canonical·OG·구조화 데이터, `robots.txt`, `sitemap.xml`, 네이버 Maps Web 서비스 URL과 Vercel `ALLOWED_ORIGINS`를 함께 맞춰야 합니다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 도메인 변경 때 검색 대표 주소와 브라우저 호출 허용 출처가 분리되지 않도록 확인 범위를 명시 -->
+
+## 검색엔진 등록
+
+<!-- SOFTM-SEARCH-REGISTRATION START 날짜:20260903 : 배포 후 소유권 확인과 사이트맵 제출 절차를 반복 가능하게 기록 -->
+
+1. [Google Search Console](https://search.google.com/search-console/)에 `https://homecare.designboard.net/` URL 접두어 속성을 추가하고 소유권을 확인합니다.
+2. `sitemap.xml`을 제출하고 URL 검사에서 홈·전국 주간·전국 요양 대표 페이지의 색인을 요청합니다.
+3. [네이버 서치어드바이저](https://searchadvisor.naver.com/)에 `https://homecare.designboard.net`을 추가하고 소유권을 확인합니다.
+4. 네이버 요청 메뉴에서 `robots.txt`를 검증한 뒤 `https://homecare.designboard.net/sitemap.xml`을 제출합니다.
+5. 필요하면 [Bing Webmaster Tools](https://www.bing.com/webmasters/)에서 Google Search Console 속성을 가져옵니다.
+
+소유권 확인용 HTML 파일이나 메타 태그는 각 관리 도구가 발급한 실제 값만 사용하며, 확인 후에도 임의로 삭제하지 않습니다.
+
+<!-- SOFTM-SEARCH-REGISTRATION END -->
+
 ## 검사
 
 ```bash

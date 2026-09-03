@@ -51,6 +51,7 @@
 - 비교표는 컬럼 정렬과 엑셀 다운로드를 유지한다.
 - 목록 광고는 전국 요양에서 6개마다 슬롯을 만들고 각 슬롯을 독립적으로 바인딩한다.
 - 통합 `index.html`은 전국 요양 8개 `type` 카테고리 직행 링크를 표시하고, `index-ad-config.js`의 인덱스 전용 PC 728×90·모바일 320×100 상단 배너를 사용한다. 전국 요양 광고 단위를 재사용하지 않는다. <!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 화면별 광고 승인과 집계가 서로 섞이지 않도록 설정 경계를 고정 -->
+- 검색 대표 Origin은 `https://homecare.designboard.net`이며 canonical·OG·구조화 데이터·`robots.txt`·`sitemap.xml`과 Vercel CORS 허용 Origin을 함께 유지한다. 검색엔진 등록에는 루트의 단일 `sitemap.xml`만 제출한다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 검색 신호와 공개 서비스 호출 출처가 예전 GitHub 주소로 갈라지지 않도록 운영 기준을 고정 -->
 
 ## 데이터 원칙
 
