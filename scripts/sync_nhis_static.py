@@ -37,6 +37,12 @@ PHOTO_URL = "https://www.longtermcare.or.kr/npbs/attachfile/sendFileThumbnailTop
 MAX_DAILY_CALLS = 8_000
 SCHEMA_VERSION = 1
 
+# /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : OpenAPI에 없는 기본정보·근속·CCTV도 공단 상세 화면과 같은 항목으로 보존 */
+OFFICIAL_DETAIL_TABS = (11, 14, 19)
+OFFICIAL_TAB_LABELS = {11: "기본정보", 14: "인력현황", 19: "CCTV현황"}
+DETAIL_PROFILE = "official-page-tabs-11-14-19-v1"
+# /** SOFTM-NHIS-OFFICIAL-PAGE END */
+
 PROVINCE_CODES = ["11", "26", "27", "28", "29", "30", "31", "36", "41", "42", "43", "44", "45", "46", "47", "48", "50"]
 CATEGORY_CODES = {
     "facility": {"A01", "A02", "A03", "A04", "A05"},
@@ -375,7 +381,128 @@ def normalise_detail_section(section: str, rows: list[dict[str, str]]) -> Any:
     return rows
 
 
-def fetch_detail(client: DataGoClient, institution: dict[str, Any], service_code: str) -> dict[str, Any]:
+# /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : 공단 상세 화면에서 OpenAPI 비제공 표와 기본 항목을 구조화 */
+class OfficialDetailTableParser(HTMLParser):
+    """공단 상세 탭의 표를 표시 순서와 셀 병합 정보까지 보존한다."""
+
+    def __init__(self):
+        super().__init__()
+        self.tables: list[dict[str, Any]] = []
+        self.table: dict[str, Any] | None = None
+        self.row: list[dict[str, Any]] | None = None
+        self.cell: dict[str, Any] | None = None
+        self.cell_parts: list[str] = []
+        self.in_caption = False
+        self.caption_parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        if tag == "table" and self.table is None:
+            self.table = {"caption": "", "rows": []}
+        elif tag == "caption" and self.table is not None:
+            self.in_caption, self.caption_parts = True, []
+        elif tag == "tr" and self.table is not None:
+            self.row = []
+        elif tag in {"th", "td"} and self.row is not None:
+            self.cell = {
+                "header": tag == "th",
+                "colspan": max(1, int(values.get("colspan") or 1)),
+                "rowspan": max(1, int(values.get("rowspan") or 1)),
+            }
+            self.cell_parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self.cell is not None:
+            self.cell_parts.append(data)
+        elif self.in_caption:
+            self.caption_parts.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in {"th", "td"} and self.cell is not None and self.row is not None:
+            self.cell["text"] = clean("".join(self.cell_parts))
+            self.row.append(self.cell)
+            self.cell, self.cell_parts = None, []
+        elif tag == "tr" and self.row is not None and self.table is not None:
+            if self.row:
+                self.table["rows"].append({"cells": self.row})
+            self.row = None
+        elif tag == "caption" and self.in_caption and self.table is not None:
+            self.table["caption"] = clean("".join(self.caption_parts))
+            self.in_caption, self.caption_parts = False, []
+        elif tag == "table" and self.table is not None:
+            if self.table["rows"]:
+                self.tables.append(self.table)
+            self.table = None
+
+
+def is_facility_service(service_code: str) -> bool:
+    return service_code in {"A01", "A02", "A03", "A04", "A05", "B03", "B04", "C03", "C04", "S41"} or bool(re.fullmatch(r"[GHIM][3-9][1-9]", service_code))
+
+
+def parse_official_detail_tab(page_html: str, tab: int, service_code: str) -> dict[str, Any]:
+    parser = OfficialDetailTableParser()
+    parser.feed(page_html)
+    tables = parser.tables
+    if tab == 14 and len(tables) >= 4:
+        tables = tables[:2] if is_facility_service(service_code) else tables[2:4]
+    changed_match = re.search(r"최종변경일\s*:\s*(20\d{2}[.\-/]\d{2}[.\-/]\d{2})", page_html)
+    result: dict[str, Any] = {
+        "tab": tab, "label": OFFICIAL_TAB_LABELS[tab], "collectedAt": now_iso(),
+        "lastModifiedDate": iso_date(changed_match.group(1)) if changed_match else "", "tables": tables,
+    }
+    if tab == 11:
+        fields: dict[str, str] = {}
+        for row in (tables[0].get("rows", []) if tables else []):
+            cells = row.get("cells", [])
+            if len(cells) >= 2 and clean(cells[0].get("text")):
+                fields[clean(cells[0]["text"])] = clean(" ".join(cell.get("text", "") for cell in cells[1:]))
+        result["fields"] = fields
+    return result
+
+
+def request_official_detail_tab(session: requests.Session, institution_id: str, service_code: str, tab: int) -> str:
+    params = {
+        "aTab": str(tab), "adminPttnCd": service_code, "ltcAdminSym": institution_id,
+        "paymtVltClsfcTypeCd": "", "paymtVltClsfcTypeCdSusi": "", "paymtVltMgmtNo": "",
+        "paymtVltMgmtNo2": "", "paymtVltMgmtNoOld": "", "showVlt": "Y", "vltMgmtYyyy": "",
+    }
+    last_error: Exception | None = None
+    for attempt in range(4):
+        try:
+            response = session.get(PHOTO_PAGE, params=params, timeout=(8, 30))
+            response.raise_for_status()
+            if institution_id not in response.text or f'id="tab_{tab}"' not in response.text:
+                raise RuntimeError(f"공단 상세 탭 {tab} 응답 형식이 올바르지 않습니다.")
+            return response.text
+        except (requests.RequestException, RuntimeError) as error:
+            last_error = error
+            if attempt < 3:
+                time.sleep(min(6, (2 ** attempt) + random.uniform(0.1, 0.5)))
+    raise RuntimeError(f"공단 상세 탭 {tab} 요청 실패: {last_error}")
+
+
+def collect_official_detail_page(institution: dict[str, Any], service_code: str) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    session = requests.Session()
+    session.headers.update({"User-Agent": "NationwideCareStaticCollector/1.0", "Accept-Language": "ko-KR,ko;q=0.9"})
+    tabs: dict[str, Any] = {}
+    failures: list[dict[str, str]] = []
+    for tab in OFFICIAL_DETAIL_TABS:
+        try:
+            parsed = parse_official_detail_tab(request_official_detail_tab(session, institution["id"], service_code, tab), tab, service_code)
+            if not parsed.get("tables") or (tab == 11 and not parsed.get("fields")):
+                raise RuntimeError(f"공단 상세 탭 {tab}에서 표시 항목을 찾지 못했습니다.")
+            tabs[str(tab)] = parsed
+        except Exception as error:
+            failures.append({"section": f"officialPage:{tab}", "message": str(error)[:300]})
+        time.sleep(random.uniform(0.08, 0.18))
+    return {
+        "source": "longtermcare.or.kr:selectLtcoSrchDetail", "collectedAt": now_iso(),
+        "institutionId": institution["id"], "serviceCode": service_code, "tabs": tabs,
+    }, failures
+# /** SOFTM-NHIS-OFFICIAL-PAGE END */
+
+
+def fetch_detail(client: DataGoClient, institution: dict[str, Any], service_code: str, include_official_page: bool = True) -> dict[str, Any]:
     institution_id = institution["id"]
     sections: dict[str, Any] = {}
     failures = []
@@ -387,16 +514,32 @@ def fetch_detail(client: DataGoClient, institution: dict[str, Any], service_code
             raise
         except Exception as error:
             failures.append({"section": section, "message": str(error)[:300]})
-    unavailable = ["cctv", "photos"]
+    # /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : OpenAPI 누락 항목은 공단 공개 상세 페이지 탭에서 보완 */
+    official_page, official_failures = collect_official_detail_page(institution, service_code) if include_official_page else ({"tabs": {}}, [])
+    failures.extend(official_failures)
+    if official_page.get("tabs", {}).get("19"):
+        sections["cctv"] = official_page["tabs"]["19"].get("tables", [])
+    unavailable = ["photos"] + ([] if sections.get("cctv") is not None else ["cctv"])
+    # /** SOFTM-NHIS-OFFICIAL-PAGE END */
     return {
         "serviceCode": service_code, "collectedAt": now_iso(), "sections": sections,
         "availableSections": [key for key, value in sections.items() if value not in (None, [], {})],
-        "unavailableSections": unavailable, "failures": failures,
+        "unavailableSections": unavailable, "failures": failures, "officialPage": official_page,
     }
 
 
 def merge_detail_document(existing: dict[str, Any], institution: dict[str, Any], detail: dict[str, Any], evaluations: dict[str, Any]) -> dict[str, Any]:
     service_details = existing.get("serviceDetails", {}) if existing.get("id") == institution["id"] else {}
+    # /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : 일시적인 공단 탭 장애가 이전에 성공한 화면 스냅샷을 지우지 않도록 병합 */
+    previous_detail = service_details.get(detail["serviceCode"], {})
+    previous_tabs = previous_detail.get("officialPage", {}).get("tabs", {})
+    official_page = detail.get("officialPage", {})
+    official_page["tabs"] = {**previous_tabs, **official_page.get("tabs", {})}
+    detail["officialPage"] = official_page
+    if "19" in official_page["tabs"]:
+        detail["sections"]["cctv"] = official_page["tabs"]["19"].get("tables", [])
+        detail["unavailableSections"] = [item for item in detail["unavailableSections"] if item != "cctv"]
+    # /** SOFTM-NHIS-OFFICIAL-PAGE END */
     service_details[detail["serviceCode"]] = detail
     sections = detail["sections"]
     fetched_at = now_iso()
@@ -404,11 +547,12 @@ def merge_detail_document(existing: dict[str, Any], institution: dict[str, Any],
         "schemaVersion": SCHEMA_VERSION, "institutionId": institution["id"], "id": institution["id"],
         "institutionTypeCode": detail["serviceCode"], "name": institution.get("name", ""),
         "fetchedAt": fetched_at, "collectedAt": fetched_at,
-        "sources": {"catalog": "data-go-kr:15059029", "facilityFile": "data-go-kr:15124763", "detail": "data-go-kr:15058856", "evaluation": "data-go-kr:15104801"},
+        "sources": {"catalog": "data-go-kr:15059029", "facilityFile": "data-go-kr:15124763", "detail": "data-go-kr:15058856", "evaluation": "data-go-kr:15104801", "officialPage": "longtermcare.or.kr:selectLtcoSrchDetail"}, # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 화면 고유 항목의 출처를 OpenAPI와 구분
         "basic": {**institution, **(sections.get("general") or {})}, "services": institution.get("services", []),
         "capacity": sections.get("capacity"), "staff": sections.get("staff"), "facility": sections.get("facilities"),
         "nonCovered": sections.get("nonCovered") or [], "programs": sections.get("programs") or [],
-        "agreements": sections.get("agreements") or [], "cctv": None, "evaluation": evaluations.get(institution["id"], []),
+        "agreements": sections.get("agreements") or [], "cctv": sections.get("cctv"), "evaluation": evaluations.get(institution["id"], []),
+        "officialPage": detail.get("officialPage", {}), # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 대표 급여의 공단 화면 스냅샷도 기존 호환 필드와 함께 제공
         "availableSections": detail["availableSections"], "unavailableSections": detail["unavailableSections"],
         "errors": detail["failures"], "serviceDetails": service_details,
     }
@@ -563,7 +707,7 @@ def resume_shard(args: argparse.Namespace, targets: list[dict[str, Any]]) -> tup
         return targets, {}, None
     path = DATA_ROOT / "checkpoints" / f"{args.mode}-{args.shard_index:02d}.json"
     state = {} if args.force else load_json(path, {})
-    compatible = state.get("mode") == args.mode and state.get("shard") == {"index": args.shard_index, "count": args.shard_count}
+    compatible = state.get("mode") == args.mode and state.get("shard") == {"index": args.shard_index, "count": args.shard_count} and state.get("detailProfile") == DETAIL_PROFILE # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 예전 상세 규격 완료 체크포인트가 새 화면 수집을 건너뛰지 않도록 구분
     if not compatible:
         state = {}
     elif state.get("completed"):
@@ -584,6 +728,7 @@ def save_checkpoint(path: Path | None, args: argparse.Namespace, state: dict[str
         return
     write_json(path, {
         "schemaVersion": SCHEMA_VERSION, "updatedAt": now_iso(), "cycleId": state.get("cycleId"), "mode": args.mode,
+        "detailProfile": DETAIL_PROFILE, # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 상세 수집 규격 변경 시 샤드를 안전하게 새로 시작
         "scope": sorted(item.strip() for item in args.scope.split(",") if item.strip()),
         "shard": {"index": args.shard_index, "count": args.shard_count}, "processed": int(state.get("processed", 0)) + processed,
         "lastId": last_id, "apiCalls": int(state.get("apiCalls", 0)) + api_calls, "completed": completed,
@@ -661,7 +806,15 @@ def main() -> int:
             path = DATA_ROOT / "details" / shard / f"{institution['id']}.json"
             existing = load_json(path, {})
             requested_codes = [args.type.upper()] if args.type and args.type.upper() in [service["code"] for service in institution.get("services", [])] else [service["code"] for service in institution.get("services", [])]
-            complete = bool(requested_codes) and existing.get("id") == institution["id"] and all(code in existing.get("serviceDetails", {}) and not existing["serviceDetails"][code].get("failures") and set(DETAIL_OPERATIONS).issubset(existing["serviceDetails"][code].get("sections", {})) for code in requested_codes)
+            # /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : 화면 탭 보완 전의 기존 상세 JSON은 완료로 오인하지 않고 순차 갱신 */
+            complete = bool(requested_codes) and existing.get("id") == institution["id"] and all(
+                code in existing.get("serviceDetails", {})
+                and not existing["serviceDetails"][code].get("failures")
+                and set(DETAIL_OPERATIONS).issubset(existing["serviceDetails"][code].get("sections", {}))
+                and (args.mode == "fixture" or set(map(str, OFFICIAL_DETAIL_TABS)).issubset(existing["serviceDetails"][code].get("officialPage", {}).get("tabs", {})))
+                for code in requested_codes
+            )
+            # /** SOFTM-NHIS-OFFICIAL-PAGE END */
             if complete and not args.force and args.mode not in {"rotation", "full"} and institution["id"] not in changed_ids:
                 detail_success += 1
                 unchanged_count += 1
@@ -669,7 +822,7 @@ def main() -> int:
                 try:
                     document = existing
                     for code in requested_codes or [service_code]:
-                        detail = fetch_detail(client, institution, code)
+                        detail = fetch_detail(client, institution, code, include_official_page=args.mode != "fixture") # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : fixture는 외부 화면을 호출하지 않고 실제 수집만 보완
                         document = merge_detail_document(document, institution, detail, evaluations)
                         for item in detail.get("failures", []):
                             failures.append({"id": institution["id"], "scope": "details", "serviceCode": code, "section": item.get("section", ""), "message": item.get("message", "")})
@@ -720,7 +873,7 @@ def main() -> int:
     detail_ids = sorted(path.stem for path in (DATA_ROOT / "details").glob("*/*.json")) if (DATA_ROOT / "details").exists() else []
     photo_ids = sorted(path.stem for path in (DATA_ROOT / "photos").glob("*/*.json")) if (DATA_ROOT / "photos").exists() else []
     manifest.update({
-        "schemaVersion": SCHEMA_VERSION, "cycleId": checkpoint_state.get("cycleId") or datetime.now(timezone.utc).strftime("%Y%m"), "mode": args.mode, "generatedAt": generated_at, "updatedAt": generated_at, "catalogCount": len(catalog),
+        "schemaVersion": SCHEMA_VERSION, "detailProfile": DETAIL_PROFILE, "cycleId": checkpoint_state.get("cycleId") or datetime.now(timezone.utc).strftime("%Y%m"), "mode": args.mode, "generatedAt": generated_at, "updatedAt": generated_at, "catalogCount": len(catalog), # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 배포 데이터가 공단 화면 보완 규격인지 확인 가능하게 기록
         "detailCount": len(detail_ids), "detailIds": detail_ids,
         "photoManifestCount": len(photo_ids), "photoIds": photo_ids,
         "evaluationCount": load_json(DATA_ROOT / "evaluations.json", {}).get("count", 0),
@@ -730,6 +883,7 @@ def main() -> int:
         "sources": {
             "catalogApi": "https://www.data.go.kr/data/15059029/openapi.do", "detailApi": "https://www.data.go.kr/data/15058856/openapi.do",
             "facilityFile": "https://www.data.go.kr/data/15124763/fileData.do", "evaluationFile": "https://www.data.go.kr/data/15104801/fileData.do",
+            "officialDetailPage": PHOTO_PAGE, # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 기본·근속·CCTV 화면 항목의 실제 수집 출처
         },
     })
     write_json(DATA_ROOT / "manifest.json", manifest)

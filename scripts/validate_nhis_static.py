@@ -24,6 +24,7 @@ def main():
     manifest = read(DATA / "manifest.json")
     catalog = read(DATA / "catalog.json")
     assert manifest.get("schemaVersion") == 1, "manifest schemaVersion이 1이 아닙니다."
+    assert manifest.get("detailProfile") == "official-page-tabs-11-14-19-v1", "공단 화면 보완 상세 규격이 아닙니다." # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 예전 상세 규격의 배포를 차단
     assert isinstance(manifest.get("completedShards"), list), "manifest completedShards가 없습니다."
     assert all(isinstance(manifest.get(key), int) for key in ("updatedCount", "unchangedCount", "failureCount")), "manifest 처리 건수 필드가 없습니다."
     detail_ids = sorted(path.stem for path in (DATA / "details").glob("*/*.json"))
@@ -53,6 +54,19 @@ def main():
     service = detail.get("serviceDetails", {}).get("B03", {})
     assert service.get("sections", {}).get("general", {}).get("phone") == "02-2039-1508", "필수 검증기관 전화번호가 다릅니다."
     assert {"general", "capacity", "staff", "programs"}.issubset(service.get("availableSections", [])), "필수 상세 섹션이 없습니다."
+
+    # /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : 공단 화면 고유 항목과 근속·CCTV 탭이 실제 정적 JSON에 보존되는지 고정 검증 */
+    official_detail = read(DATA / "details" / "24" / "24121000299.json")
+    official_service = official_detail.get("serviceDetails", {}).get("B03", {})
+    official_tabs = official_service.get("officialPage", {}).get("tabs", {})
+    assert {"11", "14", "19"}.issubset(official_tabs), "공단 화면 기본·인력·CCTV 탭 스냅샷이 없습니다."
+    official_fields = official_tabs["11"].get("fields", {})
+    assert official_fields.get("이메일주소") == "kimsnur@nate.com", "공단 화면 이메일 항목이 다릅니다."
+    assert official_fields.get("전문인배상책임보험") == "Y" and official_fields.get("손해배상책임보험") == "Y", "공단 화면 보험 항목이 다릅니다."
+    assert official_tabs["11"].get("lastModifiedDate") == "2026-08-20", "공단 화면 최종변경일이 다릅니다."
+    assert any(table.get("caption") == "근속현황" for table in official_tabs["14"].get("tables", [])), "근속현황 표가 없습니다."
+    assert any(table.get("caption") == "CCTV현황" for table in official_tabs["19"].get("tables", [])), "CCTV현황 표가 없습니다."
+    # /** SOFTM-NHIS-OFFICIAL-PAGE END */
 
     photo_files = list((DATA / "photos").glob("*/*.json"))
     photo_counts = []
