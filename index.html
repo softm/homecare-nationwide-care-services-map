@@ -4,19 +4,97 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>전국 노인돌봄 기관 지도</title>
-  <meta name="description" content="전국 주야간보호센터와 전국 요양기관을 공식 데이터로 검색합니다.">
+  <meta name="description" content="전국 주야간보호센터와 요양시설·재가급여·요양병원을 카테고리별 공식 데이터로 검색합니다.">
   <style>
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f3f6fa;color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}.wrap{width:min(900px,100%)}h1{margin:0 0 9px;font-size:clamp(27px,5vw,44px)}p{margin:0;color:#657287;line-height:1.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:25px}.card{display:block;padding:25px;border:1px solid #d9e2ec;border-radius:18px;background:#fff;color:inherit;text-decoration:none;box-shadow:0 8px 28px rgba(23,50,77,.08);transition:.18s}.card:hover{transform:translateY(-3px);border-color:#8ab6dc;box-shadow:0 13px 34px rgba(23,50,77,.14)}.card b{display:block;margin-bottom:8px;font-size:22px}.card span{color:#657287;line-height:1.55}.day b{color:#087650}.care b{color:#6d35dc}@media(max-width:640px){.grid{grid-template-columns:1fr}.card{padding:21px}}
+    /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 첫 화면에서 광고와 기관 유형별 지도를 바로 찾을 수 있도록 반응형 진입 구조를 제공 */
+    :root{--ink:#172033;--muted:#657287;--line:#d9e2ec;--day:#087650;--care:#6d35dc}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;padding:48px 24px;background:#f3f6fa;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+    .wrap{width:min(980px,100%);margin:0 auto}
+    .hero{text-align:center}
+    h1{margin:0 0 9px;font-size:clamp(27px,5vw,44px);letter-spacing:-.04em}
+    p{margin:0;color:var(--muted);line-height:1.65}
+    .ad-zone{width:100%;margin:24px auto 0;padding:7px 10px 10px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+    .ad-zone[hidden]{display:none}
+    .ad-label{display:block;margin:0 0 5px;color:#7a8798;font-size:9px;font-weight:900;letter-spacing:.08em;text-align:left}
+    .ad-host{min-height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .ad-host iframe{display:block;max-width:100%}
+    .ad-loading{color:#8491a3;font-size:11px}
+    .house-banner{width:min(100%,728px);min-height:90px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:13px 17px;border:1px solid #cfe1f2;border-radius:12px;background:linear-gradient(135deg,#eff8ff,#f3fbf7);text-align:left}
+    .house-banner small{display:block;margin-bottom:4px;color:#176b9f;font-size:10px;font-weight:900}
+    .house-banner b{display:block;color:#17324d;font-size:15px}
+    .house-banner p{margin-top:5px;font-size:11px}
+    .ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 13px;border-radius:9px;background:#17324d;color:#fff;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}
+    .grid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:16px;margin-top:18px;align-items:stretch}
+    .card{padding:25px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 8px 28px rgba(23,50,77,.08)}
+    .card h2{margin:0 0 8px;font-size:22px}
+    .card>p{font-size:14px}
+    .day h2{color:var(--day)}
+    .care h2{color:var(--care)}
+    .primary-link{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px;padding:15px 16px;border-radius:13px;background:#eaf7f1;color:#086447;text-decoration:none;font-weight:900;transition:.18s}
+    .primary-link:hover,.primary-link:focus-visible{background:#d8f1e6;transform:translateY(-2px)}
+    .category-title{margin:20px 0 9px;color:#526176;font-size:12px;font-weight:900}
+    .categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .category-link{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;border:1px solid #e1e5ef;border-radius:12px;background:#faf9ff;color:#35245e;text-decoration:none;transition:.18s}
+    .category-link:hover,.category-link:focus-visible{border-color:#b8a3ed;background:#f2edff;transform:translateY(-2px)}
+    .category-link b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+    .category-link span{flex:0 0 auto;color:#7a6b99;font-size:10px;font-weight:800}
+    @media(max-width:700px){body{padding:28px 14px}.grid{grid-template-columns:1fr}.card{padding:21px}.ad-zone{padding:6px}.ad-host{min-height:100px}.house-banner{min-height:100px;grid-template-columns:1fr;padding:12px 14px}.house-banner .ad-cta{justify-self:start}}
+    @media(max-width:390px){.categories{grid-template-columns:1fr}}
+    /** SOFTM-INDEX-CATEGORY-ADS END */
   </style>
 </head>
 <body>
   <main class="wrap">
-    <h1>전국 노인돌봄 기관 지도</h1>
-    <p>공식 기관정보와 평가자료를 기준으로 필요한 돌봄기관을 찾아보세요.</p>
+    <header class="hero">
+      <h1>전국 노인돌봄 기관 지도</h1>
+      <p>공식 기관정보와 평가자료를 기준으로 필요한 돌봄기관을 찾아보세요.</p>
+    </header>
+    <!-- /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 광고 뒤에서 전국 주간과 전국 요양 8개 카테고리로 곧바로 이동할 수 있게 구성 */ -->
+    <aside class="ad-zone" id="indexAdZone" aria-label="광고" hidden>
+      <span class="ad-label">광고</span>
+      <div class="ad-host" id="indexAdHost"><span class="ad-loading">광고를 준비하고 있습니다.</span></div>
+    </aside>
     <div class="grid">
-      <a class="card day" href="nationwide-daycare-map.html"><b>전국 주간</b><span>전국 주야간보호센터 검색·비교 지도</span></a>
-      <a class="card care" href="nationwide-care-services-map.html?type=daycare"><b>전국 요양</b><span>요양시설·재가급여·요양병원 통합 검색 지도</span></a>
+      <section class="card day">
+        <h2>전국 주간</h2>
+        <p>전국 주야간보호센터를 한 지도에서 검색하고 공식 평가와 인력 정보를 비교합니다.</p>
+        <a class="primary-link" href="nationwide-daycare-map.html"><span>주야간보호센터 찾기</span><span id="daycareCount">5,751곳 →</span></a>
+      </section>
+      <section class="card care">
+        <h2>전국 요양</h2>
+        <p>필요한 급여·기관 유형을 선택하면 해당 카테고리 지도로 바로 이동합니다.</p>
+        <div class="category-title">기관 카테고리</div>
+        <nav class="categories" aria-label="전국 요양 기관 카테고리">
+          <a class="category-link" data-category="facility" href="nationwide-care-services-map.html?type=facility"><b>요양시설</b><span data-count>지도 열기</span></a>
+          <a class="category-link" data-category="daycare" href="nationwide-care-services-map.html?type=daycare"><b>주야간보호</b><span data-count>지도 열기</span></a>
+          <a class="category-link" data-category="home-care" href="nationwide-care-services-map.html?type=home-care"><b>방문요양</b><span data-count>지도 열기</span></a>
+          <a class="category-link" data-category="home-nursing" href="nationwide-care-services-map.html?type=home-nursing"><b>방문간호</b><span data-count>지도 열기</span></a>
+          <a class="category-link" data-category="home-bath" href="nationwide-care-services-map.html?type=home-bath"><b>방문목욕</b><span data-count>지도 열기</span></a>
+          <a class="category-link" data-category="short-stay" href="nationwide-care-services-map.html?type=short-stay"><b>단기보호</b><span data-count>지도 열기</span></a>
+          <a class="category-link" data-category="dementia" href="nationwide-care-services-map.html?type=dementia"><b>치매전담</b><span data-count>지도 열기</span></a>
+          <a class="category-link" data-category="nursing-hospital" href="nationwide-care-services-map.html?type=nursing-hospital"><b>요양병원</b><span data-count>지도 열기</span></a>
+        </nav>
+      </section>
     </div>
+    <!-- /** SOFTM-INDEX-CATEGORY-ADS END */ -->
   </main>
+  <script src="nationwide-care-ad-config.js?v=20260903-1"></script>
+  <script src="nationwide-care-manifest.js"></script>
+  <script>
+    /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 기존 요양 지도 광고 단위를 재사용하고 실제 데이터 수를 링크에 표시해 설정 중복을 방지 */
+    const manifest=window.NATIONAL_CARE_MANIFEST||{};
+    const adConfig=window.CARE_AD_CONFIG||{enabled:false,mode:'off',placements:{}};
+    const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    function safeAdUrl(value){try{const url=new URL(value,location.href);return ['https:','http:','mailto:'].includes(url.protocol)?url.href:'#'}catch{return'#'}}
+    function directAd(){return (adConfig.direct?.items||[]).find(item=>item?.active&&item.title&&item.url)}
+    function directAdHtml(item){return item?`<div class="house-banner"><div><small>${escapeHtml(item.eyebrow||'돌봄 생활 정보')}</small><b>${escapeHtml(item.title)}</b><p>${escapeHtml(item.description||'')}</p></div><a class="ad-cta" href="${escapeHtml(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${escapeHtml(item.cta||'자세히 보기')}</a></div>`:''}
+    function renderDirectAd(){const zone=document.getElementById('indexAdZone'),host=document.getElementById('indexAdHost'),item=directAd();host.innerHTML=directAdHtml(item);zone.hidden=!item}
+    function initIndexAds(){const zone=document.getElementById('indexAdZone'),host=document.getElementById('indexAdHost'),mode=adConfig.enabled&&adConfig.mode!=='off'?adConfig.mode:'off';if(mode==='off'||!adConfig.placements?.banner){zone.hidden=true;return}const slot=matchMedia('(max-width:640px)').matches?adConfig.kakao?.mobile:adConfig.kakao?.desktop;if(mode==='direct'||!slot?.unit){renderDirectAd();return}host.style.minHeight=`${Number(slot.height)||90}px`;host.innerHTML=`<ins class="kakao_ad_area" style="display:none" data-ad-unit="${escapeHtml(slot.unit)}" data-ad-width="${Number(slot.width)}" data-ad-height="${Number(slot.height)}"></ins>`;zone.hidden=false;const script=document.createElement('script');script.id='indexKakaoAdFit';script.async=true;script.src=adConfig.kakao?.script||'https://t1.daumcdn.net/kas/static/ba.min.js';script.onerror=()=>{if(adConfig.fallbackToDirect)renderDirectAd()};document.head.appendChild(script);if(adConfig.fallbackToDirect)setTimeout(()=>{if(!host.querySelector('iframe'))renderDirectAd()},5200)}
+    for(const link of document.querySelectorAll('[data-category]')){const meta=manifest[link.dataset.category],count=link.querySelector('[data-count]');if(meta?.count&&count)count.textContent=`${Number(meta.count).toLocaleString()}곳 →`}
+    if(manifest.daycare?.count)document.getElementById('daycareCount').textContent=`${Number(manifest.daycare.count).toLocaleString()}곳 →`;
+    initIndexAds();
+    /** SOFTM-INDEX-CATEGORY-ADS END */
+  </script>
 </body>
 </html>
