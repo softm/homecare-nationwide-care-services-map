@@ -49,6 +49,7 @@ Vercel 프로젝트 이름은 Git 저장소와 동일한 `nationwide-care-servic
 
 현재 다음 Origin을 허용합니다.
 
+- `https://homecare.designboard.net` <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 공식 공개 도메인의 길찾기 요청 허용 -->
 - `https://softm.github.io`
 - `http://localhost:3000`
 - `http://127.0.0.1:3000`

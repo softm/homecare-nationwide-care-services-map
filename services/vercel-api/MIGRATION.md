@@ -28,7 +28,7 @@ Vercel에서 새 Git 저장소를 가져오거나 로컬에서 `npx vercel link`
 
 ```bash
 curl -i -X POST 'https://nationwide-care-services-api.vercel.app/api/directions' \
-  -H 'Origin: https://softm.github.io' \
+  -H 'Origin: https://homecare.designboard.net' \
   -H 'Content-Type: application/json' \
   --data '{"start":{"lat":37.48145,"lng":126.84805},"goal":{"lat":37.4782,"lng":126.8644},"waypoints":[],"option":"traoptimal"}'
 ```
@@ -50,7 +50,7 @@ https://daycare-directions-proxy.vercel.app
 ## 5. 완료 조건
 
 - 새 Vercel 프로젝트의 directions API가 응답함
-- 허용된 GitHub Pages Origin에서 CORS 오류가 없음
+- 공식 공개 Origin `https://homecare.designboard.net`에서 CORS 오류가 없음 <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 배포 검증 대상이 실제 사용자 접속 도메인과 일치하도록 명시 -->
 - 두 지도에서 Maps JavaScript SDK 주소 검색과 행정구역 자동 검색이 동작함
 - 경로 찾기가 동작함
 - 정적 공단 상세 기본정보와 원본 사진이 열림
