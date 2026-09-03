@@ -19,7 +19,7 @@ on:
         required: true
         default: all
         type: choice
-        options: [catalog, details, photos, evaluations, all]
+        options: [catalog, details, photos, evaluations, all, "catalog,details,evaluations"] # SOFTM-NHIS-NO-PHOTOS 날짜:20260903 : 사진 요청 없이 목록·상세·평가만 전체 갱신할 수 있도록 허용
       institution_id:
         description: institution 모드 기관기호(쉼표 구분)
         required: false
