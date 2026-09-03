@@ -38,10 +38,12 @@ const indexCategories = ['facility', 'daycare', 'home-care', 'home-nursing', 'ho
 for (const category of indexCategories) {
   if (!indexSource.includes(`nationwide-care-services-map.html?type=${category}`)) fail(`index.html: ${category} 카테고리 링크 누락`);
 }
-if (!indexSource.includes('nationwide-care-ad-config.js') || !indexSource.includes('initIndexAds()')) fail('index.html: 인덱스 광고 초기화 누락');
-const indexAdConfig = runFiles(['nationwide-care-ad-config.js']).CARE_AD_CONFIG;
+if (!indexSource.includes('index-ad-config.js') || !indexSource.includes('initIndexAds()')) fail('index.html: 인덱스 전용 광고 초기화 누락'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 요양 광고 설정을 잘못 재사용하지 않도록 전용 설정 파일을 검사
+const indexAdConfig = runFiles(['index-ad-config.js']).INDEX_AD_CONFIG; // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 광고 크기와 단위를 독립 검증
 if (indexAdConfig?.kakao?.desktop?.width !== 728 || indexAdConfig?.kakao?.desktop?.height !== 90) fail('인덱스 PC 광고는 728×90 배너여야 합니다.');
 if (indexAdConfig?.kakao?.mobile?.width !== 320 || indexAdConfig?.kakao?.mobile?.height !== 100) fail('인덱스 모바일 광고는 320×100 배너여야 합니다.');
+if (indexAdConfig?.kakao?.desktop?.unit !== 'DAN-q4nR1JpPnBFtotbe') fail('인덱스 PC 광고 단위가 승인값과 다릅니다.'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 광고 화면별 집계가 섞이지 않도록 승인 단위를 고정
+if (indexAdConfig?.kakao?.mobile?.unit !== 'DAN-fmQS1GFVu1j2yBow') fail('인덱스 모바일 광고 단위가 승인값과 다릅니다.'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 모바일 인덱스의 승인 단위가 유지되는지 확인
 /** SOFTM-INDEX-ENTRY-CHECK END */
 
 /** SOFTM-GEOCODER-CHECK START 날짜:20260902 : 서버 주소 API 재유입과 SDK·캐시 응답 형식 회귀를 자동 검증 */
