@@ -65,7 +65,7 @@ npm run check
 
 ## 공단 정적 데이터
 
-브라우저는 공단 상세 페이지나 공공데이터 API를 실시간 호출하지 않습니다. GitHub Actions가 공식 [기관 검색 API](https://www.data.go.kr/data/15059029/openapi.do), [시설별 상세조회 API](https://www.data.go.kr/data/15058856/openapi.do), [시설별 현황](https://www.data.go.kr/data/15124763/fileData.do), [평가 결과](https://www.data.go.kr/data/15104801/fileData.do)와 공개 사진 페이지를 수집하고 `data/nhis`에 정규화합니다. 두 지도는 같은 기관별 상세·사진 JSON을 사용하며, 사진 탭을 열 때만 사진 매니페스트를 읽습니다. // SOFTM-NHIS-DOC 날짜:20260903 : 실시간 서버 대신 배포 전 생성된 공단 스냅샷을 단일 기준으로 사용
+브라우저는 공단 상세 페이지나 공공데이터 API를 실시간 호출하지 않습니다. GitHub Actions가 공식 [기관 검색 API](https://www.data.go.kr/data/15059029/openapi.do), [시설별 상세조회 API](https://www.data.go.kr/data/15058856/openapi.do), [시설별 현황](https://www.data.go.kr/data/15124763/fileData.do), [평가 결과](https://www.data.go.kr/data/15104801/fileData.do)와 공단 공개 상세 페이지를 수집하고 `data/nhis`에 정규화합니다. 상세 페이지에서는 OpenAPI에 없는 기본정보(이메일·운영시간·보험·최종변경일), 인력 근속현황, CCTV현황을 보완하며 사진은 별도 JSON으로 수집합니다. 두 지도는 같은 기관별 상세·사진 JSON을 사용하며, 사진 탭을 열 때만 사진 매니페스트를 읽습니다. // SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 공단 화면과 동일한 공개 항목을 Vercel 없이 정적 수집
 
 자동·수동 수집 종류, 실행 주기, 명령, Run ID 확인과 전체 완료 판정은 [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md)를 기준으로 운영합니다. <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 실행 중복과 체크포인트 누락 없이 수집을 이어가도록 운영 절차를 단일 문서로 연결 -->
 
