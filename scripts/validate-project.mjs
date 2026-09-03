@@ -32,6 +32,18 @@ function runFiles(files, initial = {}) {
 
 for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html']) localScripts(html);
 
+/** SOFTM-INDEX-ENTRY-CHECK START 날짜:20260903 : 인덱스 광고 크기와 모든 요양 카테고리 직행 링크가 함께 유지되도록 자동 검사 */
+const indexSource = read('index.html');
+const indexCategories = ['facility', 'daycare', 'home-care', 'home-nursing', 'home-bath', 'short-stay', 'dementia', 'nursing-hospital'];
+for (const category of indexCategories) {
+  if (!indexSource.includes(`nationwide-care-services-map.html?type=${category}`)) fail(`index.html: ${category} 카테고리 링크 누락`);
+}
+if (!indexSource.includes('nationwide-care-ad-config.js') || !indexSource.includes('initIndexAds()')) fail('index.html: 인덱스 광고 초기화 누락');
+const indexAdConfig = runFiles(['nationwide-care-ad-config.js']).CARE_AD_CONFIG;
+if (indexAdConfig?.kakao?.desktop?.width !== 728 || indexAdConfig?.kakao?.desktop?.height !== 90) fail('인덱스 PC 광고는 728×90 배너여야 합니다.');
+if (indexAdConfig?.kakao?.mobile?.width !== 320 || indexAdConfig?.kakao?.mobile?.height !== 100) fail('인덱스 모바일 광고는 320×100 배너여야 합니다.');
+/** SOFTM-INDEX-ENTRY-CHECK END */
+
 /** SOFTM-GEOCODER-CHECK START 날짜:20260902 : 서버 주소 API 재유입과 SDK·캐시 응답 형식 회귀를 자동 검증 */
 for (const html of ['nationwide-daycare-map.html', 'nationwide-care-services-map.html']) {
   const source = read(html);
