@@ -73,6 +73,19 @@
 - 공단 상세·사진은 브라우저 실시간 API를 만들지 않고 GitHub Actions에서 정적 JSON으로 수집한다. Client Secret이 필요한 길찾기만 Vercel 서버에 유지한다.
 - 프런트 API 주소를 변경할 때 전국 주간과 전국 요양을 모두 검색해 교체한다.
 
+## 인프라 구조
+
+<!-- SOFTM-INFRA-MEMORY START 날짜:20260903 : 서버와 정적 데이터의 책임 경계를 이후 작업에서도 일관되게 적용 -->
+
+- 상세 구성표와 데이터 흐름은 `docs/INFRASTRUCTURE.md`를 단일 인수인계 문서로 사용하고 인프라 변경 시 코드와 함께 갱신한다.
+- 공개 화면은 GitHub Pages 정적 호스팅, 로컬 화면은 저장소 루트의 `npm run serve`(`http://localhost:3000`)로 실행한다.
+- 브라우저의 동적 외부 호출은 네이버 Maps JavaScript SDK와 Vercel `/api/directions`로 제한한다. 주소 변환은 SDK, 공단 상세·사진은 정적 JSON이 담당한다.
+- 공단 수집은 GitHub Actions의 `refresh-nhis-static.yml`과 `scripts/sync_nhis_static.py`가 담당하며 결과를 `source-data`와 `data/nhis`에 커밋한다.
+- 비밀값은 공공데이터 `DATA_GO_KR_SERVICE_KEY`와 Vercel의 `NAVER_MAPS_API_SECRET`이며 HTML·정적 JSON·로그·문서에 실제 값을 남기지 않는다.
+- 정적 서버와 Vercel 로컬 개발 서버는 기본 포트가 겹칠 수 있으므로 동시에 검증할 때 한쪽 포트를 명시적으로 변경한다.
+
+<!-- SOFTM-INFRA-MEMORY END -->
+
 ## 완료 전 검사
 
 - `npm run check`

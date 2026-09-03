@@ -86,6 +86,8 @@ npm run check
 
 ## 서버 구분
 
+프런트 호스팅, 공단 수집, 정적 데이터, 길찾기 서버의 전체 연결 표는 [`docs/INFRASTRUCTURE.md`](docs/INFRASTRUCTURE.md)를 참고합니다. <!-- SOFTM-INFRA-LINK 날짜:20260903 : 운영 구성 변경 시 확인할 단일 인수인계 문서로 연결 -->
+
 | 위치 | 주요 API | 현재 프런트 연결 |
 |---|---|---|
 | `services/vercel-api` | directions | `daycare-directions-proxy.vercel.app` |
