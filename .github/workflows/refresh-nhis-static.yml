@@ -1,5 +1,9 @@
 name: Refresh NHIS static data
 
+# SOFTM-NHIS-RUN-NAME 날짜:20260903 : 동일 워크플로의 실행 목적과 범위를 Actions 목록에서 즉시 구분
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch' && format('NHIS 수동 · mode={0} · scope={1} · 기관={2} · shard={3}', inputs.mode, inputs.scope, inputs.institution_id || '전체', inputs.shard_count) || github.event.schedule == '23 18 * * *' && 'NHIS 자동 · 매일 증분 · scope=all' || github.event.schedule == '41 19 * * *' && 'NHIS 자동 · 매일 순환 · scope=details,photos' || 'NHIS 자동 · 월간 원본 · scope=catalog,evaluations' }}
+
 # SOFTM-NHIS-ACTIONS START 날짜:20260903 : 공단 API 키를 브라우저에 노출하지 않고 일일 호출 상한 안에서 정적 스냅샷을 단계적으로 갱신
 on:
   schedule:
