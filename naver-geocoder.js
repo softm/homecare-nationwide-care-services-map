@@ -8,6 +8,7 @@
     const addressMemoryCache = new Map();
     const reverseMemoryCache = new Map();
     const addressTasks = new Map();
+    const institutionTasks = new Map(); // SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 지도 표시와 방문 경로의 동시 상세주소 조회를 합침
     const queryTasks = new Map();
     const reverseTasks = new Map();
     const requestQueue = [];
@@ -33,6 +34,10 @@
             .trim();
         const road = clean.match(/^(.+?(?:대로|로|길)\s*\d+(?:-\d+)?)(?:\s|$)/);
         if (road) return road[1].trim();
+        /** SOFTM-INSTITUTION-ADDRESS START 날짜:20260905 : 지번의 번지·호를 보존하면서 건물명·층수를 좌표 검색에서 분리 */
+        const parcel = clean.match(/^(.+?(?:동|리|가)\s+(?:산\s*)?\d+)(?:번지(?:\s*(\d+)\s*호)?|-(\d+))?(?=\s|$)/);
+        if (parcel) return parcel[1].trim() + (parcel[2] || parcel[3] ? `-${parcel[2] || parcel[3]}` : '');
+        /** SOFTM-INSTITUTION-ADDRESS END */
         return clean.replace(/\s+(?:지하\s*)?\d+(?:층|호)(?:\s.*)?$/u, '').trim();
     }
 
@@ -152,6 +157,41 @@
         addressTasks.set(addressKey, task);
         return task;
     }
+
+    /** SOFTM-INSTITUTION-ADDRESS START 날짜:20260905 : 행정동 주소 검색 실패 시 같은 기관의 수집된 법정동 주소로 복구 */
+    async function geocodeInstitution(row) {
+        const address = String(row?.a || '').trim(), id = String(row?.i || '');
+        if (!address || row.addressMissing) return null;
+        const taskKey = `${id}:${normalizeAddressKey(address)}`;
+        if (institutionTasks.has(taskKey)) return institutionTasks.get(taskKey);
+        const task = (async () => {
+            const known = await geocodeAddress(address);
+            if (known) return known;
+            if (!/^\d{11}$/.test(id) || !global.NhisStaticData?.detail) return null;
+            try {
+                const { document } = await global.NhisStaticData.detail(id);
+                const basic = document?.basic;
+                if (String(basic?.id || '') !== id) return null;
+                const region = String(basic.region || '').trim(), detail = String(basic.detailAddress || '').trim();
+                const fullAddress = String(basic.address || '').replace(/([가-힣0-9·.]+(?:동|리|가))\[([가-힣0-9·.]+(?:동|리|가))\]/gu, '$2');
+                const candidates = [region && /^(?:산\s*)?\d/.test(detail) ? `${region} ${detail}` : '', fullAddress];
+                const seen = new Set([normalizeAddressKey(address), normalizeAddressKey(simplifyAddress(address))]);
+                for (const candidate of candidates) {
+                    const query = simplifyAddress(candidate), key = normalizeAddressKey(query);
+                    if (!key || seen.has(key) || !/(?:대로|로|길|동|리|가)\s+(?:산\s*)?\d/.test(query)) continue;
+                    seen.add(key);
+                    const value = await geocodeAddress(query);
+                    if (!value) continue;
+                    storageWrite(ADDRESS_CACHE_PREFIX + normalizeAddressKey(address), value, addressMemoryCache);
+                    return value;
+                }
+            } catch { /* 상세 미수집·통신 실패는 임의 좌표로 대체하지 않고 다음 시도에서 재확인 */ }
+            return null;
+        })().finally(() => institutionTasks.delete(taskKey));
+        institutionTasks.set(taskKey, task);
+        return task;
+    }
+    /** SOFTM-INSTITUTION-ADDRESS END */
 
     /** SOFTM-ORIGIN-SEARCH START 날짜:20260905 : 출발지 주소는 첫 결과를 임의 선택하지 않고 사용자가 후보를 확인 */
     async function searchAddresses(query) {
@@ -317,6 +357,7 @@
     global.NaverGeocoder = {
         searchAddresses, // SOFTM-ORIGIN-SEARCH 날짜:20260905 : 기관 좌표 캐시와 별도로 출발지 주소 후보 제공
         geocodeAddress,
+        geocodeInstitution, // SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도가 같은 공단 상세주소 보완 경로를 사용
         reverseGeocode,
         normalizeAddressKey,
         simplifyAddress,

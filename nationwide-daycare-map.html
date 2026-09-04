@@ -116,7 +116,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="region-bounds.js?v=20260904-1"></script>
 <script src="viewport-regions.js?v=20260904-1"></script>
 <!-- SOFTM-VIEWPORT-REGIONS END -->
-<script src="naver-geocoder.js?v=20260905-2"></script> <!-- SOFTM-WORKSPACE 날짜:20260905 : 검색·담은 기관·출발지 선택을 같은 버전으로 적용 -->
+<script src="naver-geocoder.js?v=20260905-3"></script> <!-- SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도에 법정동 상세주소 보완을 함께 적용 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
 <script src="advanced-search.js?v=20260904-2"></script><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 전국 요양과 동일한 상세검색 판정을 사용 -->
@@ -443,7 +443,7 @@ function cachedCoord(c){for(const key of coordCacheKeys(c)){try{const v=JSON.par
 function saveCoord(c,v){for(const key of coordCacheKeys(c)){try{localStorage.setItem(key,JSON.stringify(v))}catch{}}}
 /** SOFTM-COORD-CACHE END */
 function coordFor(c){if(c._coord)return c._coord;const p=PRESET_COORDS[c.i];if(p)return c._coord={lat:p[0],lng:p[1]};const hit=cachedCoord(c);return hit?(c._coord=hit):null}
-async function geocodeCenter(c){const known=coordFor(c);if(known)return known;if(c.addressMissing)return null;const v=await geocodeAddress(c.a);if(v){c._coord=v;saveCoord(c,v)}return v} // SOFTM-DATA-UNIFIED 날짜:20260904 : 주소 없는 수집 기관을 잘못된 위치로 변환하지 않음
+async function geocodeCenter(c){const known=coordFor(c);if(known)return known;if(c.addressMissing)return null;const v=await NaverGeocoder.geocodeInstitution(c);if(v){c._coord=v;saveCoord(c,v)}return v} // SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 목록 주소로 찾지 못한 기관은 같은 기관의 공식 상세주소를 확인
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 마커 강조 중 닫기와 연속 선택을 취소하고 상세 종료 뒤 화면을 복원 */
 function closeMapPopup(restoreView=true){daycareDetailGeneration++;clearTimeout(daycareDetailTimer);daycareDetailTimer=null;if(daycareEmphasizedMarker&&daycareOriginalIcon){daycareEmphasizedMarker.setIcon(daycareOriginalIcon);daycareEmphasizedMarker=null;daycareOriginalIcon=null}document.querySelector('.map-wrap')?.classList.remove('popup-active');const mobileLayer=$('mobilePopupLayer');if(mobileLayer){mobileLayer.hidden=true;$('mobilePopupContent').innerHTML=''}document.body.classList.remove('mobile-popup-open');if(infoWindow){infoWindow.close();infoWindow=null}if(restoreView&&popupViewState&&mapReady){skipIdleUntil=Date.now()+900;const view=popupViewState;popupViewState=null;naverMap.setCenter(new naver.maps.LatLng(view.lat,view.lng));if(naverMap.getZoom()!==view.zoom)naverMap.setZoom(view.zoom)}else if(!restoreView){popupViewState=null};if(restoreView)CareMapExperience.finishDetail()}
 /** SOFTM-MAP-EXPERIENCE END */
