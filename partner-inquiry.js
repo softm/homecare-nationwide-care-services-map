@@ -7,6 +7,26 @@
     let submitting = false;
     const config = () => window.PARTNER_INQUIRY_CONFIG || {};
 
+    /** SOFTM-PARTNER-SUCCESS START 날짜:20260904 : 문의창을 닫아도 접수 완료를 크게 확인하도록 공통 토스트를 표시 */
+    let successToast;
+    let successToastTimer;
+
+    function hideSuccessToast() {
+        clearTimeout(successToastTimer);
+        if (successToast) {
+            successToast.hidden = true;
+            successToast.textContent = '';
+        }
+    }
+
+    function showSuccessToast() {
+        hideSuccessToast();
+        successToast.hidden = false;
+        successToast.innerHTML = '<span aria-hidden="true">✓</span><strong>접수되었습니다.</strong>';
+        successToastTimer = setTimeout(hideSuccessToast, 4500);
+    }
+    /** SOFTM-PARTNER-SUCCESS END */
+
     function setStatus(message, state = '') {
         const status = dialog.querySelector('.partner-status');
         status.textContent = message;
@@ -63,11 +83,22 @@
         });
         dialog.querySelector('form').addEventListener('submit', submit);
         document.body.appendChild(dialog);
+        /** SOFTM-PARTNER-SUCCESS START 날짜:20260904 : 닫히는 대화상자 밖에 접수 알림을 두어 지도에서도 결과를 전달 */
+        successToast = document.createElement('div');
+        successToast.id = 'partnerInquiryToast';
+        successToast.className = 'partner-success-toast';
+        successToast.setAttribute('role', 'status');
+        successToast.setAttribute('aria-live', 'polite');
+        successToast.setAttribute('aria-atomic', 'true');
+        successToast.hidden = true;
+        document.body.appendChild(successToast);
+        /** SOFTM-PARTNER-SUCCESS END */
     }
 
     function open(trigger) {
         mount();
         if (dialog.open) return;
+        hideSuccessToast(); // SOFTM-PARTNER-SUCCESS 날짜:20260904 : 새 문의를 시작할 때 이전 접수 알림이 겹치지 않도록 정리
         opener = trigger || document.activeElement;
         openedFromList = Boolean(opener?.closest('#list'));
         dialog.showModal();
@@ -138,8 +169,12 @@
                     : '문의가 접수되지 않았습니다. 입력 내용은 유지됩니다. 다시 시도하거나 아래 이메일로 문의해 주세요.', 'error');
                 return;
             }
+            /** SOFTM-PARTNER-SUCCESS START 날짜:20260904 : 성공 응답을 받은 뒤 입력창을 닫고 큰 접수 완료 토스트로 안내 */
             form.reset();
-            setStatus('문의가 접수되었습니다. 남겨 주신 이메일로 답변드리겠습니다.', 'success');
+            setStatus('');
+            dialog.close();
+            showSuccessToast();
+            /** SOFTM-PARTNER-SUCCESS END */
         } catch (error) {
             setStatus(error.name === 'AbortError'
                 ? '응답이 늦어 접수 여부를 확인하지 못했습니다. 중복 문의를 피하려면 잠시 후 확인해 주세요. 입력 내용은 유지됩니다.'
