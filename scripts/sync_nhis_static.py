@@ -680,6 +680,50 @@ def parse_photos(page_html: str, max_photos: int, page_number: int = 1) -> list[
     return photos
 
 
+# /** SOFTM-PHOTO-FULL-TITLE START 날짜:20260904 : 공단 목록에서 이미 잘린 제목은 사진 게시글의 원래 제목으로 보완 */
+class PhotoTitleParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.depth = 0
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        if self.depth:
+            if tag == "br":
+                self.parts.append(" ")
+            if tag not in {"br", "img", "hr", "input", "meta", "link"}:
+                self.depth += 1
+        elif tag == "span" and "tbl_tit" in (dict(attrs).get("class") or "").split():
+            self.depth = 1
+
+    def handle_endtag(self, tag):
+        if self.depth and tag not in {"br", "img", "hr", "input", "meta", "link"}:
+            self.depth -= 1
+
+    def handle_data(self, value):
+        if self.depth:
+            self.parts.append(value)
+
+
+def needs_photo_title(photo):
+    return photo.get("titleSource") != "detail" and bool(re.search(r"(?:\.{3}|…)\s*$", photo.get("title") or photo.get("alt") or ""))
+
+
+def fill_photo_title(session, photo):
+    if not needs_photo_title(photo):
+        return
+    response = session.get(photo["detailUrl"], timeout=(8, 25))
+    response.raise_for_status()
+    parser = PhotoTitleParser()
+    parser.feed(response.text)
+    title = clean("".join(parser.parts))
+    if not title:
+        raise ValueError("사진 게시글의 전체 제목을 찾지 못했습니다.")
+    photo.update(title=title, alt=title, titleSource="detail")
+    photo.pop("titleStatus", None)
+# /** SOFTM-PHOTO-FULL-TITLE END */
+
+
 def collect_photos(institution: dict[str, Any], service_code: str, max_photos: int, mode: str) -> dict[str, Any]:
     params = {"ltcAdminSym": institution["id"], "adminPttnCd": service_code, "aTab": "18"}
     session = requests.Session()
@@ -700,6 +744,13 @@ def collect_photos(institution: dict[str, Any], service_code: str, max_photos: i
         photos.extend(photo for photo in parse_photos(page_response.text, max_photos - len(photos), page_number) if photo["key"] not in existing_keys)
         page_number += 1
         time.sleep(random.uniform(0.15, 0.45))
+    # /** SOFTM-PHOTO-FULL-TITLE START 날짜:20260904 : 이후 사진 수집에서도 줄임표가 포함된 목록 제목을 그대로 저장하지 않도록 보완 */
+    for photo in photos:
+        try:
+            fill_photo_title(session, photo)
+        except ValueError:
+            photo["titleStatus"] = "unavailable"
+    # /** SOFTM-PHOTO-FULL-TITLE END */
     checked_at = now_iso()
     return {"schemaVersion": SCHEMA_VERSION, "institutionId": institution["id"], "id": institution["id"], "institutionTypeCode": service_code, "serviceCode": service_code, "checkedAt": checked_at, "collectedAt": checked_at, "mode": mode, "categoryContext": "전체", "photos": photos, "count": len(photos), "source": "longtermcare.or.kr public photo page"}
 
