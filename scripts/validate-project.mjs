@@ -87,7 +87,7 @@ for (const [htmlFile, canonical] of indexablePages) {
   for (const block of jsonLdBlocks) JSON.parse(block[1]);
 }
 const careMapSource = read('nationwide-care-services-map.html');
-if (!careMapSource.includes('<meta name="robots" content="noindex,follow')) fail('전국 요양 지도 도구는 검색 대표 페이지와 중복 색인되지 않아야 합니다.');
+if (!careMapSource.includes('<meta name="robots" content="index,follow')) fail('전국 요양 지도는 검색 등록을 허용하는 index,follow 메타를 유지해야 합니다.'); // SOFTM-SEO-INDEX 날짜:20260904 : 지도 검색 등록을 차단했던 noindex 설정이 다시 적용되지 않도록 검사
 if (!careMapSource.includes('const LANDING_URLS=') || !careMapSource.includes('canonicalUrl=new URL(LANDING_URLS[TYPE]')) fail('전국 요양 지도와 검색 대표 페이지의 유형별 canonical 연결 누락');
 for (const [category, landingPage] of Object.entries(categoryLandingPages)) {
   if (!careMapSource.includes(`${category}:'${landingPage}'`) && !careMapSource.includes(`'${category}':'${landingPage}'`)) fail(`전국 요양 지도: ${category} 검색 대표 페이지 연결 누락`);
