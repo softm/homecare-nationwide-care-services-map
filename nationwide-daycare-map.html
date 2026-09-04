@@ -59,7 +59,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 두 지도에서 같은 제휴 문의 화면을 사용 -->
 <link rel="stylesheet" href="partner-inquiry.css?v=20260904-3"><!-- SOFTM-PARTNER-SUCCESS 날짜:20260904 : 접수 후 자동 닫기와 큰 토스트가 이전 캐시 없이 함께 적용되도록 갱신 -->
 <!-- SOFTM-PARTNER-ASSETS END -->
-<link rel="stylesheet" href="photo-viewer.css?v=20260904-1"> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 두 지도의 확대 사진을 같은 화면 크기와 조작 위치로 제공 -->
+<link rel="stylesheet" href="photo-viewer.css?v=20260904-2"> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 두 지도의 확대 사진을 같은 화면 크기와 조작 위치로 제공 -->
 </head>
 <body>
 <header><h1>전국 주야간보호센터 찾기·평가 비교</h1><p>돌봄한눈은 국민건강보험공단 2026년 6월 10일 공개자료를 기반으로 전국 주야간보호기관을 검색합니다.</p><p><a style="color:#fff" href="index.html">돌봄한눈 홈</a> · <a style="color:#fff" href="gwangmyeong-daycare-center-map.html">광명·구로 상세 비교지도로 이동</a></p></header>
@@ -436,7 +436,16 @@ async function findOptimalRoute(){
 }
 function initNaver(){if(!window.naver?.maps)return;naverMap=new naver.maps.Map('naverMap',{center:new naver.maps.LatLng(37.48145,126.84805),zoom:14,zoomControl:true,zoomControlOptions:{position:naver.maps.Position.RIGHT_BOTTOM,style:naver.maps.ZoomControlStyle.SMALL},scrollWheel:true,pinchZoom:true,disableDoubleTapZoom:false,disableTwoFingerTapZoom:false,minZoom:6,maxZoom:21});mapReady=true;hideMapLoad();setMapStatus('전국 좌표 자동연결');naver.maps.Event.addListener(naverMap,'click',()=>{closeMapPopup()});naver.maps.Event.addListener(naverMap,'dragstart',()=>{clearTimeout(dragSearchTimer);closeMapPopup(false);showMapProgress('지도 이동 중');setMapStatus('지도 이동 중')});naver.maps.Event.addListener(naverMap,'dragend',()=>{clearTimeout(dragSearchTimer);const center=naverMap.getCenter();setBasePoint({lat:center.lat(),lng:center.lng()},'지도 중심 기준 위치');skipIdleUntil=Date.now()+1200;setMapStatus('지도 중심 기준 지정 · 자동 검색 대기');showMapProgress('화면 중앙 기준 · 자동 검색 준비');dragSearchTimer=setTimeout(()=>searchCurrentMap(),420)});naver.maps.Event.addListener(naverMap,'idle',scheduleBoundsMarkers);if(sharedState){apply(true,false);if(sharedState.lat!==null&&sharedState.lng!==null&&sharedState.zoom!==null){skipIdleUntil=Date.now()+500;naverMap.setCenter(new naver.maps.LatLng(sharedState.lat,sharedState.lng));naverMap.setZoom(sharedState.zoom);setTimeout(async()=>{skipIdleUntil=0;await loadMarkersInCurrentBounds();if(sharedState.mapSearch)searchCurrentMap();showToast('공유된 조회상태를 불러왔습니다.','success')},650)}else{apply(false,false);showToast('공유된 조회조건을 불러왔습니다.','success')}}else{$('province').value='경기도';updateCities();$('city').value='광명시';apply(true);setBasePoint(PRESET_ADDRESSES['경기도 광명시 오리로 1034-1'],'기본 위치');useCurrentLocation(true)}}
 function loadNaver(){const s=document.createElement('script');s.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=etfcybk8vf&submodules=geocoder&callback=initNaver';s.onerror=()=>{showMapLoad('네이버지도를 불러오지 못했습니다. Web 서비스 URL과 지도 API 인증을 확인하세요.');setMapStatus('지도 인증 실패')};document.head.appendChild(s)} // SOFTM-MAPS-KEY 날짜:20260902 : Geocoding 권한이 연결된 신규 Maps API Key ID로 SDK 인증을 통일
-['q','capacity','staff','sort'].forEach(id=>$(id).addEventListener(id==='q'?'input':'change',()=>{page=1;apply(false,id!=='sort')}));$('province').addEventListener('change',()=>{clearMapSearch(false);updateCities();page=1;apply()});$('city').addEventListener('change',()=>{clearMapSearch(false);page=1;apply()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMapPopup();closeCompare()}});
+['q','capacity','staff','sort'].forEach(id=>$(id).addEventListener(id==='q'?'input':'change',()=>{page=1;apply(false,id!=='sort')}));$('province').addEventListener('change',()=>{clearMapSearch(false);updateCities();page=1;apply()});$('city').addEventListener('change',()=>{clearMapSearch(false);page=1;apply()});
+/** SOFTM-POPUP-ESC START 날짜:20260904 : 사진 확대창을 우선 닫고 비교표·기관 팝업도 한 번에 하나씩 닫기 */
+document.addEventListener('keydown',event=>{
+ if(event.key!=='Escape'||event.defaultPrevented||document.querySelector('dialog[open]'))return;
+ if(!$('compareLayer').hidden)closeCompare();
+ else if(infoWindow||!$('mobilePopupLayer').hidden)closeMapPopup();
+ else return;
+ event.preventDefault();
+});
+/** SOFTM-POPUP-ESC END */
 initFilters();sharedState=readSharedState();if(sharedState)restoreSharedControls(sharedState);else updateCities();apply(true,false);initAds();loadNaver();
 </script>
 </body></html>

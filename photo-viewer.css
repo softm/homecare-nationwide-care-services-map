@@ -8,7 +8,7 @@ html.photo-viewer-open,html.photo-viewer-open body{overflow:hidden;overscroll-be
 .photo-viewer-layout{display:grid;grid-template-rows:auto minmax(0,1fr) auto;width:100%;height:100%;padding:max(16px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));gap:14px}
 .photo-viewer-header{display:flex;align-items:center;justify-content:space-between;gap:20px;min-width:0;padding:0;background:none;color:inherit}
 .photo-viewer-heading{min-width:0}
-.photo-viewer-institution{margin:0 0 3px;color:#b8c6d8;font-size:14px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-viewer-institution{margin:0 0 3px;color:#b8c6d8;font-size:14px;line-height:1.5;white-space:normal;overflow-wrap:anywhere} /* SOFTM-PHOTO-TITLE 날짜:20260904 : 긴 기관명도 줄바꿈하여 전체 표시 */
 .photo-viewer h2{margin:0;color:#fff;font-size:20px;line-height:1.35;letter-spacing:-.025em}
 .photo-viewer button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:100px;min-height:48px;margin:0;padding:10px 18px;border:1px solid #60728a;border-radius:12px;background:#243247;color:#fff;font-family:inherit;font-size:15px;font-weight:700;line-height:1.4;cursor:pointer;touch-action:manipulation}
 .photo-viewer button:hover{background:#354a64}
@@ -19,7 +19,7 @@ html.photo-viewer-open,html.photo-viewer-open body{overflow:hidden;overscroll-be
 .photo-viewer-image{display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain}
 .photo-viewer-message{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:24px;color:#d3dfed;text-align:center;font-size:15px;line-height:1.7}
 .photo-viewer-footer{width:min(100%,760px);justify-self:center;min-width:0;text-align:center}
-.photo-viewer-caption{max-height:3em;overflow:auto;margin:0 0 10px;color:#e8eef6;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.photo-viewer-caption{margin:0 0 10px;color:#e8eef6;font-size:15px;line-height:1.5;white-space:normal;overflow-wrap:anywhere} /* SOFTM-PHOTO-TITLE 날짜:20260904 : 확대 사진 제목의 줄 수 제한을 없애 전체 표시 */
 .photo-viewer-controls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
 .photo-viewer-previous{justify-self:end}
 .photo-viewer-next{justify-self:start}
@@ -29,7 +29,10 @@ html.photo-viewer-open,html.photo-viewer-open body{overflow:hidden;overscroll-be
 .popup-static-photo>button[data-photo-viewer]{display:block;width:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent;cursor:zoom-in}
 [data-photo-viewer]:focus-visible{outline:3px solid #176fd1;outline-offset:-3px}
 .photo-gallery-hint{margin:0 0 9px;color:#53657a;font-size:11px;line-height:1.5}
+/** SOFTM-PHOTO-TITLE START 날짜:20260904 : 두 지도 썸네일에서도 제목을 생략하지 않고 줄바꿈으로 표시 */
+.official-photo figcaption,.popup-static-photo figcaption{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+/** SOFTM-PHOTO-TITLE END */
 @media(pointer:coarse){.photo-viewer-keyboard-hint{display:none}.photo-viewer-touch-hint{display:inline}}
 @media(max-width:640px){.photo-viewer-layout{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:10px}.photo-viewer-header{gap:12px}.photo-viewer h2{font-size:17px}.photo-viewer-institution{font-size:12px}.photo-viewer-caption{font-size:14px}.photo-viewer-controls{gap:12px}.photo-viewer button{min-width:92px;padding:10px 14px}.photo-viewer .photo-viewer-close{min-width:76px}.photo-viewer-keyboard-hint{display:none}.photo-viewer-touch-hint{display:inline}}
-@media(max-height:480px){.photo-viewer-layout{gap:6px;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}.photo-viewer-institution,.photo-viewer-help{display:none}.photo-viewer-caption{max-height:1.5em;margin-bottom:4px}.photo-viewer h2{font-size:16px}}
+@media(max-height:480px){.photo-viewer-layout{gap:6px;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}.photo-viewer-help{display:none}.photo-viewer-caption{margin-bottom:4px}.photo-viewer h2{font-size:16px}} /* SOFTM-PHOTO-TITLE 날짜:20260904 : 가로 화면에서도 기관명과 제목을 숨기거나 한 줄로 제한하지 않음 */
 /** SOFTM-PHOTO-VIEWER END */
