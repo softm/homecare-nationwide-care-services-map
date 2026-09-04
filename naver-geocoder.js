@@ -153,6 +153,33 @@
         return task;
     }
 
+    /** SOFTM-ORIGIN-SEARCH START 날짜:20260905 : 출발지 주소는 첫 결과를 임의 선택하지 않고 사용자가 후보를 확인 */
+    async function searchAddresses(query) {
+        const text = String(query || '').trim();
+        if (!text) return [];
+        return enqueue(async () => {
+            const service = await serviceFor('geocode');
+            if (!service) throw new Error('주소 검색을 준비하지 못했습니다. 잠시 후 다시 검색해 주세요.');
+            return new Promise((resolve, reject) => {
+                const timer = setTimeout(() => reject(new Error('주소 검색이 지연되고 있습니다. 다시 검색해 주세요.')), 10000);
+                try {
+                    service.geocode({ query: text }, (status, response) => {
+                        clearTimeout(timer);
+                        if (status !== service.Status.OK) { reject(new Error('주소 검색에 실패했습니다. 도로명과 건물번호를 확인해 주세요.')); return; }
+                        const seen = new Set();
+                        const candidates = (response?.v2?.addresses || []).map(item => ({ label: item.roadAddress || item.jibunAddress || '', point: { lat: Number(item.y), lng: Number(item.x) } })).filter(item => {
+                            const key = `${item.label}:${item.point.lat}:${item.point.lng}`;
+                            if (!item.label || !validCoord(item.point) || seen.has(key)) return false;
+                            seen.add(key); return true;
+                        });
+                        resolve(candidates);
+                    });
+                } catch (error) { clearTimeout(timer); reject(error); }
+            });
+        });
+    }
+    /** SOFTM-ORIGIN-SEARCH END */
+
     function areaName(region, key) {
         return String(region?.[key]?.name || '').trim();
     }
@@ -288,6 +315,7 @@
     }
 
     global.NaverGeocoder = {
+        searchAddresses, // SOFTM-ORIGIN-SEARCH 날짜:20260905 : 기관 좌표 캐시와 별도로 출발지 주소 후보 제공
         geocodeAddress,
         reverseGeocode,
         normalizeAddressKey,
