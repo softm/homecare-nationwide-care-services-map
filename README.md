@@ -79,6 +79,8 @@ npm run check
 
 로컬 키는 `.env.local`의 `DATA_GO_KR_SERVICE_KEY`에만 저장합니다. 저장소에는 빈 예제만 있고, GitHub Actions에는 같은 이름의 Repository Secret을 등록합니다.
 
+로컬에서 아직 없는 사진정보만 전체 수집하려면 `.venv/bin/python -u scripts/collect_missing_nhis_photos.py --workers 3 --max-photos 10`을 실행합니다. 기존 사진과 상세 완료 기록을 보존하고 사진 전용 진행 기록으로 재개합니다. <!-- SOFTM-NHIS-MISSING-PHOTOS 날짜:20260904 : 완료된 상세 샤드 때문에 사진 수집이 생략되지 않도록 전용 명령 안내 -->
+
 ```bash
 # 특정 기관 전체 강제 갱신
 .venv/bin/python scripts/sync_nhis_static.py --mode institution --scope all --institution 24119001267 --type B03 --force

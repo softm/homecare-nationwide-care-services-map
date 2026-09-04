@@ -5,6 +5,7 @@
 - 수정한 경우 검증 후 변경사항을 커밋하고 git에 푸시한다.
 - 설명은 한글로 해줘
 - 표면적인 결과에서 판단을 끝내지 말고 사용자 의도, 근본 원인, 현재 작업과의 관련성, 영향 범위와 후속 결과까지 연결해 깊이 판단한다. 오류 문구를 전달하기 전에 실제 원인과 작업 완료에 미치는 영향을 확인하고, 무관한 문제를 이번 수정의 실패나 반영 차단 사유로 묶지 않는다. 설명은 판단에 필요한 핵심만 전달한다. <!-- SOFTM-REASONING-DEPTH 날짜:20260904 : 한 단계 판단에 그쳐 사용자 목표와 무관한 문제를 앞세우는 일을 방지 -->
+- 답변은 사용자가 묻는 현재 논점만 다루며, 같은 관점의 예외나 제한이 아닌 내용을 `다만`으로 덧붙이거나 사용자가 묻지 않은 범위로 확장하지 않는다.
 - "커밋해줘","커밋" 명령시 : Git Commit message Rule : "codex_" + versionCode + "_" + "수정내용" + "_날짜시분초"
 - 코드 수정후, 빌드 -> 설치
 
@@ -80,6 +81,7 @@
 - `details` 수집은 시설별 상세조회 OpenAPI와 공단 공개 상세 페이지의 기본정보(11)·인력/근속(14)·CCTV(19)를 결합한다. 화면 고유 항목도 `data/nhis/details`에 정적으로 저장하고 브라우저 실시간 크롤링으로 되돌리지 않는다. // SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 공단 원문 링크와 같은 공개 정보 범위를 Vercel 없이 유지
 - 상세 수집 규격을 바꾸면 `DETAIL_PROFILE`도 변경해 완료된 예전 샤드 체크포인트가 새 필드 수집을 건너뛰지 않게 한다. // SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 장기 전체수집의 규격 전환 누락을 방지
 - 기관별 공단 상세는 `data/nhis/details/NN/{기관기호}.json.gz`로 직접 저장하고 비압축 상세 JSON은 배포하지 않는다. `nhis-static-data.js`, 매니페스트, 검증기의 확장자를 함께 유지한다. // SOFTM-NHIS-GZIP 날짜:20260903 : 전체 상세가 GitHub Pages 용량 한도를 넘지 않도록 압축 배포 규격을 고정
+- 로컬 사진 미수집분은 `scripts/collect_missing_nhis_photos.py`로 최대 3개 동시 수집하고 `checkpoints/photos-missing.json`·`manifest.photoCollection`으로 진행을 구분한다. 기존 빈 사진 목록도 보존하며 상세 `full-XX.json` 완료 기록을 사진에 재사용하지 않는다. // SOFTM-NHIS-MISSING-PHOTOS 날짜:20260904 : 서로 다른 수집 범위의 완료 판정과 재개 위치가 섞이는 것을 방지
 - 공공데이터 서비스키는 로컬 `.env.local`과 GitHub Actions Secret `DATA_GO_KR_SERVICE_KEY`에만 두며 HTML·정적 JSON·로그에 넣지 않는다.
 
 ## 서버 원칙
