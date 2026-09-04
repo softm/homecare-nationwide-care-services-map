@@ -70,8 +70,14 @@ test('빈 비교함·누락 주소·17곳·통신 실패를 안내하고 1곳과
     }
     await h.mode.show([row('1')], { route: true, origin }); assert.equal(h.requests[0].body.waypoints.length, 0);
     await h.mode.show(Array.from({ length: 16 }, (_, i) => row(String(i))), { route: true, origin }); assert.equal(h.requests[1].body.waypoints.length, 15);
-    h.adapter.fetch = async () => { throw new Error('network'); };
+    h.adapter.fetch = async () => { throw new Error('route'); };
     await h.mode.show([row('1')], { route: true, origin }); assert.equal(h.route, null); assert.match(h.mode.state().error, /불러오지 못/);
+    /** SOFTM-ROUTE-ERROR START 날짜:20260905 : 서버 거부 응답과 브라우저 연결 실패를 서로 다른 안내로 전달 */
+    h.adapter.fetch = async () => ({ ok: false, json: async () => ({ error: '허용되지 않은 호출 출처입니다.' }) });
+    await h.mode.show([row('1')], { route: true, origin }); assert.equal(h.mode.state().error, '허용되지 않은 호출 출처입니다.');
+    h.adapter.fetch = async () => { throw new TypeError('Failed to fetch'); };
+    await h.mode.show([row('1')], { route: true, origin }); assert.match(h.mode.state().error, /서버에 연결할 수 없습니다/);
+    /** SOFTM-ROUTE-ERROR END */
 });
 test('도로가 기관 밖으로 돌아가도 출발지·기관·전체 경로를 화면에 포함', async () => {
     const h = harness(), path = [[126.8, 37.2], [128, 38], [127, 37.01]];
