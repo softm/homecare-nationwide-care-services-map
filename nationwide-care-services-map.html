@@ -83,6 +83,10 @@
 <script src="partner-inquiry.js?v=20260904-3"></script><!-- SOFTM-PARTNER-SUCCESS 날짜:20260904 : 접수 후 자동 닫기와 큰 토스트가 이전 캐시 없이 함께 적용되도록 갱신 -->
 <!-- SOFTM-PARTNER-ASSETS END -->
 <script src="nationwide-care-manifest.js"></script>
+<!-- SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 두 지도의 화면영역 검색이 같은 경계 자료로 빠짐없이 지역을 판별 -->
+<script src="region-bounds.js?v=20260904-1"></script>
+<script src="viewport-regions.js?v=20260904-1"></script>
+<!-- SOFTM-VIEWPORT-REGIONS END -->
 <script src="naver-geocoder.js?v=20260902-1"></script><!-- SOFTM-GEOCODER-SDK 날짜:20260902 : 두 지도에서 같은 브라우저 주소 변환 모듈을 공유하기 위해 추가 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
@@ -181,10 +185,9 @@ function coordCacheKeys(c){return TYPE==='daycare'?[`daycareCoord:${c.i}`,`careC
 function cachedCoord(c){if(c._coord)return c._coord;const preset=PRESET_COORDS[c.i];if(preset)return c._coord={lat:preset[0],lng:preset[1]};for(const key of coordCacheKeys(c)){try{const v=JSON.parse(localStorage.getItem(key)||'null');if(v&&Number.isFinite(v.lat)&&Number.isFinite(v.lng))return c._coord=v}catch{}}return null}
 function saveCoord(c,v){c._coord=v;for(const key of coordCacheKeys(c)){try{localStorage.setItem(key,JSON.stringify(v))}catch{}}}
 async function geocode(c){const known=cachedCoord(c);if(known)return known;const v=await geocodeAddress(c.a);if(v)saveCoord(c,v);return v} // SOFTM-GEOCODER-SDK 날짜:20260902 : 공용 SDK 함수가 상세주소 단순화 재시도까지 한 번만 담당
-function matchDataRegionValue(values,name){return values.find(v=>v===name)||values.find(v=>v.includes(name)||name.includes(v))||''}
-async function reversePoint(point){return reverseGeocode(point.lat(),point.lng())} // SOFTM-REVERSE-SDK 날짜:20260902 : 경계지역 샘플 좌표를 공용 SDK 캐시로 판별
-async function viewportRegions(){const bounds=map.getBounds(),ne=bounds.getNE(),sw=bounds.getSW(),points=[];for(let y=0;y<3;y++)for(let x=0;x<3;x++)points.push(new window.naver.maps.LatLng(sw.lat()+(ne.lat()-sw.lat())*(y/2),sw.lng()+(ne.lng()-sw.lng())*(x/2)));const results=await Promise.allSettled(points.map(reversePoint)),provinces=[...new Set(DATA.map(c=>c.p))],regions=[],seen=new Set();results.forEach(result=>{if(result.status!=='fulfilled')return;const raw=result.value,province=matchDataRegionValue(provinces,raw.province||'');if(!province)return;const cities=[...new Set(DATA.filter(c=>c.p===province).map(c=>c.c))],city=matchDataRegionValue(cities,raw.city||'');if(!city)return;const key=province+'|'+city;if(!seen.has(key)){seen.add(key);regions.push({province,city})}});if(!regions.length)throw new Error('현재 지도 영역의 행정구역을 확인하지 못했습니다.');return regions}
-function regionMatch(c,region){return c.p===region.province&&c.c===region.city}
+/** SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 역주소 9점 사이의 지역도 실제 경계와 화면의 교차로 후보에 포함 */
+function viewportCandidates(){return MapViewportSearch.select(applyFilters(true),map.getBounds(),cachedCoord)}
+/** SOFTM-VIEWPORT-REGIONS END */
 function markerIcon(c,rank,route=false,blink=false){const grade=c.g||'U',main=Number.isFinite(c.es)?c.es.toFixed(1):(isNew(c)?'신설':'—'),r=routeOrder.length?routeOrder.indexOf(c.i)+1:rank;return{content:`<div class="map-marker grade-${grade} ${route?'route':''} ${blink?'marker-blink':''}"><span>${esc(main)}</span><i class="marker-rank">${r}</i></div>`,anchor:new window.naver.maps.Point(25,43)}}
 function markerRank(c){const index=areaRows.findIndex(x=>x.i===c.i);return index>=0?index+1:1}
 function restoreBlinkedMarker(){if(!blinkedMarkerId)return;const c=DATA.find(x=>x.i===blinkedMarkerId),marker=markers.get(blinkedMarkerId);if(c&&marker){marker.setIcon(markerIcon(c,markerRank(c),routeOrder.includes(c.i)));marker.setZIndex(1000)}blinkedMarkerId=null}
@@ -204,7 +207,7 @@ async function loadMarkers(candidates,{fit=false,regionText=''}={}){
  const bounds=map.getBounds(),center={lat:map.getCenter().lat(),lng:map.getCenter().lng()},known=[],unknown=[];
  for(const c of candidates){const p=cachedCoord(c);if(p){c._mapCenterDistance=hav(center,p);known.push(c)}else unknown.push(c)}
  known.sort((a,b)=>a._mapCenterDistance-b._mapCenterDistance);
- const limit=fit?Math.min(MAP_CANDIDATE_LIMIT,Math.max(PAGE_LIMIT,candidates.length)):map.getZoom()>=11?candidates.length:Math.min(MAP_CANDIDATE_LIMIT,candidates.length);
+ const limit=fit?Math.min(MAP_CANDIDATE_LIMIT,Math.max(PAGE_LIMIT,candidates.length)):candidates.length; // SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 화면영역 검색에서 확대 수준에 따른 후보 잘림으로 지역이 다시 누락되지 않도록 전체 확인
  const list=[...known,...unknown].slice(0,limit),placed=[],fitBounds=new window.naver.maps.LatLngBounds();
  let resolvedCount=0;
  showLoading('기관 데이터를 확인하는 중',`기관 데이터 · 0 / ${list.length}`);
@@ -234,13 +237,13 @@ async function loadMarkers(candidates,{fit=false,regionText=''}={}){
  }finally{if(token===refreshToken)hideLoading()}
 }
 async function searchByControls(){applyFilters();if(!$('q').value.trim()&&!$('province').value&&!$('city').value){showDataPreview(filtered,'전국 데이터');toast('전국 목록을 표시했습니다. 지역이나 기관명으로 좁히면 마커가 표시됩니다.');return}await loadMarkers(filtered,{fit:true,regionText:`조회조건 · ${filtered.length.toLocaleString()}곳`})}
-/** SOFTM-GEOCODER-FALLBACK START 날짜:20260902 : SDK 역주소 장애에도 기존 좌표로 화면 마커와 필터를 계속 갱신 */
+/** SOFTM-VIEWPORT-FALLBACK START 날짜:20260904 : 경계 자료 로드 실패에도 기존 좌표로 화면 마커와 필터를 계속 갱신 */
 async function refreshFromMap(){
  if(!mapReady||Date.now()<skipIdleUntil)return;
- try{showLoading('현재 지도 영역을 확인하는 중','선택한 필터를 유지해 화면에 걸친 지역을 찾고 있습니다.');const regions=await viewportRegions(),candidates=applyFilters(true).filter(c=>regions.some(region=>regionMatch(c,region))),labels=regions.map(region=>`${region.province||''} ${region.city||''}`.trim()),text=`지도 영역 · ${labels.join(' · ')}`;$('areaBadge').textContent=text;await loadMarkers(candidates,{fit:false,regionText:text})}
+ try{showLoading('현재 지도 영역을 확인하는 중','선택한 필터를 유지해 화면에 걸친 지역을 찾고 있습니다.');const {regions,candidates}=viewportCandidates(),labels=regions.map(region=>`${region.province||''} ${region.city||''}`.trim()),text=`지도 영역 · ${labels.join(' · ')}`;$('areaBadge').textContent=text;await loadMarkers(candidates,{fit:false,regionText:text})} // SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 경계와 좌표로 고른 모든 화면 후보에 기존 필터를 유지
  catch(error){const bounds=map.getBounds(),candidates=applyFilters(true).filter(c=>{const point=cachedCoord(c);return point&&bounds.hasLatLng(new window.naver.maps.LatLng(point.lat,point.lng))});await loadMarkers(candidates,{fit:false,regionText:'현재 화면 · 기존 좌표'});setStatus(`현재 화면 ${markers.size.toLocaleString()}곳 표시`,`${error.message} · 기존 좌표로 계속 표시합니다.`)}
 }
-/** SOFTM-GEOCODER-FALLBACK END */
+/** SOFTM-VIEWPORT-FALLBACK END */
 function scheduleRefresh(){if(Date.now()<skipIdleUntil)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(refreshFromMap,650)}
 function setBase(v,label,pan=true,isCurrent=false){basePoint=v;if(baseMarker)baseMarker.setMap(null);const pos=new window.naver.maps.LatLng(v.lat,v.lng),content=isCurrent?'<div class="current-position-pin"><span></span></div>':'<div class="base-marker">기준</div>',anchor=isCurrent?new window.naver.maps.Point(11,11):new window.naver.maps.Point(19,19);baseMarker=new window.naver.maps.Marker({map,position:pos,title:label,zIndex:5000,icon:{content,anchor}});if(pan){skipIdleUntil=Date.now()+900;map.setCenter(pos);if(isCurrent)map.setZoom(14)}for(const c of DATA){const p=cachedCoord(c);if(p)c._distance=hav(v,p)}setStatus(isCurrent?'현재 위치 지정':'지도 중심 기준 위치 지정',label)}
 function useCurrentLocation(initial=false){if(!navigator.geolocation){if(initial){showDataPreview(filtered,'전국 데이터');setStatus('전국 화면','현재 위치를 지원하지 않아 전국 목록을 표시합니다.')}return}showLoading('현재 위치를 확인하는 중','공식 데이터 목록은 이미 사용할 수 있습니다.');navigator.geolocation.getCurrentPosition(async p=>{hideLoading();setBase({lat:p.coords.latitude,lng:p.coords.longitude},'현재 위치',true,true);await new Promise(r=>setTimeout(r,500));skipIdleUntil=0;await refreshFromMap()},()=>{hideLoading();if(initial){skipIdleUntil=Date.now()+600;map.setCenter(new window.naver.maps.LatLng(36.35,127.8));map.setZoom(7);showDataPreview(filtered,'전국 데이터');setStatus('전국 데이터 표시','위치 권한이 없어 전국 목록에서 시작합니다. 지역이나 기관명을 검색하세요.')}else toast('현재 위치 권한을 확인해 주세요.')},{enableHighAccuracy:true,timeout:8000,maximumAge:60000})}

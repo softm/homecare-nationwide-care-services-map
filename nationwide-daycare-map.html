@@ -111,6 +111,10 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="nationwide-daycare-data-gyeongnam.js"></script>
 <script src="nationwide-daycare-data-jeju.js"></script>
 <script src="nationwide-daycare-evaluations.js"></script>
+<!-- SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 두 지도의 화면영역 검색이 같은 경계 자료로 빠짐없이 지역을 판별 -->
+<script src="region-bounds.js?v=20260904-1"></script>
+<script src="viewport-regions.js?v=20260904-1"></script>
+<!-- SOFTM-VIEWPORT-REGIONS END -->
 <script src="naver-geocoder.js?v=20260902-1"></script><!-- SOFTM-GEOCODER-SDK 날짜:20260902 : 두 지도에서 같은 브라우저 주소 변환 모듈을 공유하기 위해 추가 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
@@ -357,30 +361,13 @@ function findSelectValue(id,name){const values=[...$(id).options].map(o=>o.value
 function matchDataRegionValue(values,name){return values.find(v=>v===name)||values.find(v=>v.includes(name)||name.includes(v))||''}
 async function reverseRegionAt(lat,lng){return reverseGeocode(lat,lng)} // SOFTM-REVERSE-SDK 날짜:20260902 : 지도 영역 판별을 네이버 SDK 역주소 결과로 유지
 async function reverseMapRegion(){const center=naverMap.getCenter();return reverseRegionAt(center.lat(),center.lng())}
-async function reverseVisibleMapRegions(bounds){
- const sw=bounds.getSW(),ne=bounds.getNE(),points=[];
- for(let y=0;y<3;y++)for(let x=0;x<3;x++)points.push({lat:sw.lat()+(ne.lat()-sw.lat())*(y/2),lng:sw.lng()+(ne.lng()-sw.lng())*(x/2)});
- const results=await Promise.allSettled(points.map(p=>reverseRegionAt(p.lat,p.lng))),provinces=[...new Set(DATA.map(c=>c.p))],regions=[],seen=new Set();
- results.forEach(result=>{if(result.status!=='fulfilled')return;const raw=result.value,province=matchDataRegionValue(provinces,raw.province||'');if(!province)return;const cities=[...new Set(DATA.filter(c=>c.p===province).map(c=>c.c))],city=matchDataRegionValue(cities,raw.city||'');if(!city)return;const key=province+'|'+city;if(!seen.has(key)){seen.add(key);regions.push({province,city})}});
- if(!regions.length)throw new Error('현재 화면의 행정구역을 확인하지 못했습니다.');
- return regions
-}
-function visibleRegionCandidates(regions){const keys=new Set(regions.map(r=>r.province+'|'+r.city));return DATA.filter(c=>keys.has(c.p+'|'+c.c)&&matchesActiveNonSpatialFilters(c))}
+/** SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 두 지도에 같은 지역 판별을 적용하고 이전 선택 밖의 새 화면 기관도 검색 */
+function viewportCandidates(bounds){return MapViewportSearch.select(DATA.filter(matchesActiveNonSpatialFilters),bounds,coordFor)}
 async function loadMarkersInCurrentBounds(){
- if(!mapReady||regionMapLoading||routeOrder.length||Date.now()<skipIdleUntil)return;
- if(mapSearchIds){await searchCurrentMap(false);return;}
- regionMapLoading=true;const bounds=naverMap.getBounds();showMapProgress('현재 화면 마커 갱신 중');
- try{
-  const regions=await reverseVisibleMapRegions(bounds),rows=visibleRegionCandidates(regions).filter(c=>selected.has(c.i)),visibleLimit=naverMap.getZoom()>=11?rows.length:MAP_AREA_LIMIT;
-  await displayCenters(rows,false,false,false,bounds,visibleLimit);
-  const names=regions.map(r=>r.city).join(' · ');
-  setMapStatus(`${names} · 현재 영역 ${mapMarkers.length}곳`);
-  $('routeNote').textContent=`지도 이동 위치의 ${names} 기관을 미리 표시했습니다. 시·도/시·군·구 목록값과 검색결과 목록은 변경하지 않습니다.`;
- }catch(error){
-  const rows=DATA.filter(c=>selected.has(c.i)&&matchesActiveNonSpatialFilters(c)&&coordFor(c)&&bounds.hasLatLng(new naver.maps.LatLng(coordFor(c).lat,coordFor(c).lng))).slice(0,MAP_AREA_LIMIT);
-  await displayCenters(rows,false,false,false,bounds,MAP_AREA_LIMIT);setMapStatus(`현재 영역 ${mapMarkers.length}곳 · ${error.message}`);showToast(`현재 지도 행정구역 확인 실패: ${error.message}`,'error');
- }finally{regionMapLoading=false}
+ if(!mapReady||routeOrder.length||Date.now()<skipIdleUntil)return;
+ await searchCurrentMap(false);
 }
+/** SOFTM-VIEWPORT-REGIONS END */
 function scheduleBoundsMarkers(){if(popupViewState||Date.now()<skipIdleUntil)return;clearTimeout(boundsTimer);boundsTimer=setTimeout(loadMarkersInCurrentBounds,650)}
 async function showOnMap(id){const c=DATA.find(x=>x.i===id);if(!c)return;if(!mapReady){window.open(naverUrl(c),'_blank');return}closeMapPopup(false);if(!selected.has(c.i)){selected.add(c.i);render()}if(window.innerWidth<=1000)document.querySelector('.map-card')?.scrollIntoView({behavior:'auto',block:'start'});showMapProgress(`목록 ${listRank(c)||'-'}번 마커로 이동 중`);let found=mapMarkers.find(m=>m.centerId===id);if(!found){const v=await geocodeCenter(c);if(!v){hideMapProgress();window.open(naverUrl(c),'_blank');return}found=createCenterMarker(c,v,listRank(c)||1)}skipIdleUntil=Date.now()+1800;found.setZIndex(3500);naverMap.panTo(found.getPosition());if(naverMap.getZoom()<15)naverMap.setZoom(15,true);setMapStatus(`목록 ${listRank(c)||'-'}번 · ${c.n}`);setTimeout(()=>{openCenter(c,found);found.setZIndex(1200);hideMapProgress()},320)}
 async function searchCurrentMap(notify=true){
@@ -388,11 +375,11 @@ async function searchCurrentMap(notify=true){
  clearTimeout(boundsTimer);boundsTimer=null;skipIdleUntil=Date.now()+800;closeMapPopup();
  const bounds=naverMap.getBounds();setMapStatus('현재 화면의 기관 좌표 확인 중');showMapProgress('현재 화면 행정구역 조회 중');
  let regions=[],rows=[];
- /** SOFTM-REVERSE-FALLBACK START 날짜:20260902 : 역주소 장애 시 전국 기관 재변환 대신 화면 안 기존 좌표만 사용해 대량 요청을 방지 */
- try{regions=await reverseVisibleMapRegions(bounds);rows=visibleRegionCandidates(regions)}
+ /** SOFTM-VIEWPORT-FALLBACK START 날짜:20260904 : 경계 자료 로드 실패 시 화면 안 기존 좌표로 계속 표시해 대량 재변환을 방지 */
+ try{const result=viewportCandidates(bounds);regions=result.regions;rows=result.candidates} // SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 화면에 걸친 지역과 이미 확인한 좌표를 함께 검색
  catch(error){rows=DATA.filter(c=>{const point=coordFor(c);return point&&matchesActiveNonSpatialFilters(c)&&bounds.hasLatLng(new naver.maps.LatLng(point.lat,point.lng))});showToast(`${error.message||'현재 화면의 행정구역 확인 실패'} · 기존 좌표로 계속 표시합니다.`,'warning')}
- /** SOFTM-REVERSE-FALLBACK END */
- const visibleLimit=naverMap.getZoom()>=11?rows.length:MAP_AREA_LIMIT;
+ /** SOFTM-VIEWPORT-FALLBACK END */
+ const visibleLimit=rows.length; // SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 축소 화면에서도 후보 제한 때문에 일부 지역만 남지 않도록 전체 확인
  await displayCenters(rows,false,false,false,bounds,visibleLimit);
  mapSearchIds=new Set(mapMarkers.map(m=>m.centerId));$('mapSearchClear').style.display='block';page=1;apply(true);
  const names=regions.length?regions.map(r=>r.city).join(' · '):'현재 화면';
