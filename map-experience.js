@@ -24,14 +24,14 @@
         const publish = values => { state = { ...state, ...values }; change(state); return state; };
         async function run(kind, query) {
             const token = ++generation;
-            publish({ phase: 'loading', origin: null, candidates: [], error: '' });
+            publish({ phase: 'loading', origin: null, candidates: [], error: '', reason: '' }); // SOFTM-LOCATION 날짜:20260905 : 재시도에서 이전 권한 오류 안내를 제거
             try {
                 if (kind === 'address') {
                     const candidates = await provider.search(query);
                     if (token !== generation) return state;
                     publish({ phase: candidates.length ? 'choices' : 'error', candidates, error: candidates.length ? '' : '검색한 주소가 없습니다. 도로명과 건물번호를 확인해 주세요.' });
                 } else {
-                    const point = await provider.locate();
+                    const point = await provider.locate({ isCurrent: () => token === generation }); // SOFTM-LOCATION 날짜:20260905 : 화면을 떠난 뒤 위치 자동 재시도를 시작하지 않도록 보호
                     if (token !== generation) return state;
                     if (!point || !Number.isFinite(point.lat) || !Number.isFinite(point.lng) || point.lat < 32 || point.lat > 40 || point.lng < 123 || point.lng > 133) throw new Error('국내에서 이용할 출발지를 주소로 입력해 주세요.');
                     let label = `현재 위치 (${point.lat.toFixed(4)}, ${point.lng.toFixed(4)})`;
@@ -39,7 +39,7 @@
                     if (token !== generation) return state;
                     publish({ phase: 'ready', origin: { point, label }, candidates: [] });
                 }
-            } catch (error) { if (token === generation) publish({ phase: 'error', error: error.message || '출발지를 확인하지 못했습니다. 다시 선택해 주세요.' }); }
+            } catch (error) { if (token === generation) publish({ phase: 'error', error: error.message || '출발지를 확인하지 못했습니다. 다시 선택해 주세요.', reason: error.reason || '' }); } // SOFTM-LOCATION 날짜:20260905 : 실제 위치 차단일 때만 설정 안내를 함께 표시
             return state;
         }
         return { state: () => state, search: query => run('address', query), locate: () => run('location'),
@@ -197,7 +197,7 @@
     }
     function renderOrigin() {
         bar.querySelector('.care-origin-selection').textContent = originState.origin ? `출발: ${originState.origin.label}` : '출발지를 선택해 주세요.';
-        bar.querySelector('.care-origin-status').textContent = originState.phase === 'loading' ? '출발지를 확인하고 있습니다…' : originState.error || '';
+        bar.querySelector('.care-origin-status').textContent = originState.phase === 'loading' ? '출발지를 확인하고 있습니다…' : [originState.error, originState.reason === 'denied' ? root.CareLocation.permissionHelp : ''].filter(Boolean).join(' '); // SOFTM-LOCATION 날짜:20260905 : 출발지도 지도 현재 위치와 같은 오류별 안내를 제공
         bar.querySelector('.care-origin-candidates').innerHTML = originState.candidates.map((item, index) => `<li><button type="button" data-origin-choice="${index}">${escape(item.label)}<span>출발지로 선택</span></button></li>`).join('');
         bar.querySelector('[data-origin-locate]').disabled = originState.phase === 'loading';
         bar.querySelector('[data-origin-search]').disabled = originState.phase === 'loading';
@@ -410,10 +410,7 @@
         originController = createOrigin({
             search: query => root.NaverGeocoder.searchAddresses(query),
             describe: async point => (await root.NaverGeocoder.reverseGeocode(point.lat, point.lng)).address,
-            locate: () => new Promise((resolve, reject) => {
-                if (!root.navigator.geolocation) { reject(new Error('현재 위치를 지원하지 않습니다. 주소를 입력해 주세요.')); return; }
-                root.navigator.geolocation.getCurrentPosition(position => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }), error => reject(new Error(error.code === 1 ? '위치 권한이 꺼져 있습니다. 주소를 입력하거나 브라우저에서 위치 권한을 허용해 주세요.' : '현재 위치를 확인하지 못했습니다. 다시 시도하거나 주소를 입력해 주세요.')), { timeout: 10000, maximumAge: 60000 });
-            })
+            locate: options => root.CareLocation.request(options) // SOFTM-LOCATION 날짜:20260905 : 위치 재시도와 오류 구분을 두 지도의 출발지에 공유
         }, state => {
             const previous = originState.origin; originState = state;
             if (previous !== state.origin) { routeRevision++; if (workspace === 'saved' && routePanel) showSaved({ fit: false }); }

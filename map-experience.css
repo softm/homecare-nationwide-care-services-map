@@ -38,6 +38,16 @@
 .care-map-page [data-basket-open] { background:#175cb5; color:#fff; border-color:#175cb5; }
 .care-map-page [data-basket-open]:disabled { background:#eef2f6; color:#66798a; border-color:#dce5ee; cursor:default; }
 .care-map-page .results { min-width:0; }
+/** SOFTM-LOCATION START 날짜:20260905 : 사라지는 토스트 대신 위치 오류와 재시도를 지도 위의 읽을 수 있는 영역에 제공 */
+.care-location-notice { margin:0 0 12px; padding:14px; border:1px solid #e5cfae; border-radius:12px; background:#fffaf2; color:#654b2c; overflow-wrap:anywhere; }
+.care-location-notice[hidden],.care-location-notice details[hidden] { display:none; }
+.care-location-notice strong { font-size:16px; line-height:1.5; }
+.care-location-notice p { margin:6px 0 10px; font-size:14px; line-height:1.65; }
+.care-location-notice summary { cursor:pointer; font-size:14px; padding:6px 0; }
+.care-location-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.care-location-actions button { min-height:44px; border:1px solid #c5d4e2; border-radius:8px; background:#fff; color:#244c76; padding:8px 10px; font-size:14px; cursor:pointer; }
+.care-map-page [aria-busy="true"] { cursor:progress; }
+/** SOFTM-LOCATION END */
 .care-map-page .row p,.care-map-page .row .details { font-size:16px; line-height:1.65; }
 .care-map-page .row .chip { font-size:13px; line-height:1.5; }
 /** SOFTM-LIST-CONTROLS START 날짜:20260905 : 체크박스를 설명과 같은 줄에 놓고 담기와 지도 표시의 조작 크기를 구분 */

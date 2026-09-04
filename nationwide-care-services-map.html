@@ -56,7 +56,7 @@
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 두 지도에서 읽기 크기와 비용·비교 흐름을 동일하게 제공 -->
 <link rel="stylesheet" href="care-theme.css?v=20260904-1">
 <link rel="stylesheet" href="care-cost.css?v=20260904-1">
-<link rel="stylesheet" href="map-experience.css?v=20260905-4"> <!-- SOFTM-LIST-CONTROLS 날짜:20260905 : 목록의 지도 체크 설명과 행동 배치를 함께 적용 -->
+<link rel="stylesheet" href="map-experience.css?v=20260905-5"> <!-- SOFTM-LOCATION 날짜:20260905 : 위치 실패 안내와 재시도 배치를 함께 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 </head>
 <body>
@@ -100,6 +100,7 @@
 <script src="region-bounds.js?v=20260904-1"></script>
 <script src="viewport-regions.js?v=20260904-1"></script>
 <!-- SOFTM-VIEWPORT-REGIONS END -->
+<script src="care-location.js?v=20260905-1"></script> <!-- SOFTM-LOCATION 날짜:20260905 : 두 지도와 방문 출발지의 모바일 위치 처리를 공유 -->
 <script src="naver-geocoder.js?v=20260905-3"></script> <!-- SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도에 법정동 상세주소 보완을 함께 적용 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
@@ -110,7 +111,7 @@
 <script src="care-cost-engine.js?v=20260904-1"></script>
 <script src="care-cost-ui.js?v=20260904-1"></script>
 <script src="care-basket-map.js?v=20260905-2"></script> <!-- SOFTM-WORKSPACE 날짜:20260905 : 검색·담은 기관·출발지 선택을 같은 버전으로 적용 -->
-<script src="map-experience.js?v=20260905-3"></script> <!-- SOFTM-TAB-FEEDBACK 날짜:20260905 : 탭 선택 구조와 담은 개수 반응을 함께 적용 -->
+<script src="map-experience.js?v=20260905-4"></script> <!-- SOFTM-LOCATION 날짜:20260905 : 방문 출발지도 같은 위치 오류·재시도로 처리 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -353,24 +354,26 @@ async function refreshFromMap(query){
 /** SOFTM-SEARCH-FEEDBACK END */
 function scheduleRefresh(){if(CareMapExperience.isBasketMap())return;/* SOFTM-BASKET-MAP 날짜:20260904 : 비교함 지도 이동은 담은 기관만 유지 */if(Date.now()<skipIdleUntil)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(refreshFromMap,650)}
 function setBase(v,label,pan=true,isCurrent=false){basePoint=v;if(baseMarker)baseMarker.setMap(null);const pos=new window.naver.maps.LatLng(v.lat,v.lng),content=isCurrent?'<div class="current-position-pin"><span></span></div>':'<div class="base-marker">기준</div>',anchor=isCurrent?new window.naver.maps.Point(11,11):new window.naver.maps.Point(19,19);baseMarker=new window.naver.maps.Marker({map,position:pos,title:label,zIndex:5000,icon:{content,anchor}});if(pan){skipIdleUntil=Date.now()+900;map.setCenter(pos);if(isCurrent)map.setZoom(14)}for(const c of DATA){const p=cachedCoord(c);if(p)c._distance=hav(v,p)}setStatus(isCurrent?'현재 위치 지정':'지도 중심 기준 위치 지정',label)}
-/** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 늦게 도착한 위치 권한 응답이 사용자가 선택한 상세조건 결과를 덮지 않도록 보호 */
-function useCurrentLocation(initial=false){
- const query=beginCareQuery();
- if(!navigator.geolocation){if(initial){showDataPreview(filtered,'전국 데이터',query);setStatus('전국 화면','현재 위치를 지원하지 않아 전국 목록을 표시합니다.')}return}
+/** SOFTM-LOCATION START 날짜:20260905 : 모바일 위치 지연을 권한 거절로 오인하지 않고 조회 취소와 재시도를 함께 처리 */
+async function useCurrentLocation(initial=false){
+ const button=$('locateBtn');if(!mapReady||button.disabled)return;
+ const query=beginCareQuery();button.disabled=true;button.setAttribute('aria-busy','true');CareLocation.hideNotice();
  showLoading('현재 위치를 확인하는 중','공식 데이터 목록은 이미 사용할 수 있습니다.');
- navigator.geolocation.getCurrentPosition(async p=>{
+ try{
+  const point=await CareLocation.request({isCurrent:()=>query.current()});
   if(!query.current())return;
-  hideLoading();setBase({lat:p.coords.latitude,lng:p.coords.longitude},'현재 위치',true,true);
+  hideLoading();setBase(point,'현재 위치',true,true);
   await new Promise(r=>setTimeout(r,500));if(!query.current())return;
   skipIdleUntil=0;await refreshFromMap(query);
- },()=>{
+ }catch(error){
   if(!query.current())return;
   hideLoading();
-  if(initial){skipIdleUntil=Date.now()+600;map.setCenter(new window.naver.maps.LatLng(36.35,127.8));map.setZoom(7);showDataPreview(filtered,'전국 데이터',query);setStatus('전국 데이터 표시','위치 권한이 없어 전국 목록에서 시작합니다. 지역이나 기관명을 검색하세요.')}
-  else toast('현재 위치 권한을 확인해 주세요.');
- },{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+  if(initial){skipIdleUntil=Date.now()+600;map.setCenter(new window.naver.maps.LatLng(36.35,127.8));map.setZoom(7);showDataPreview(filtered,'전국 데이터',query)}
+  const detail=CareLocation.info(error);setStatus(detail.title,initial?'현재 위치 없이 전국 목록에서 시작합니다. 지역이나 기관명을 검색하세요.':detail.message);
+  CareLocation.showNotice(error,()=>useCurrentLocation(false));
+ }finally{button.disabled=false;button.removeAttribute('aria-busy')}
 }
-/** SOFTM-SEARCH-FEEDBACK END */
+/** SOFTM-LOCATION END */
 function naverUrl(c){return `https://map.naver.com/p/search/${encodeURIComponent(c.n+' '+c.a)}`}function kakaoUrl(c){return `https://map.kakao.com/link/search/${encodeURIComponent(c.n+' '+c.a)}`}
 function officialUrl(c){if(CONFIG.source==='hira')return `https://www.hira.or.kr/ra/hosp/hospInfoAjax.do?ykiho=${encodeURIComponent(c.i)}`;const type=(c.t||'').split(',')[0],params=new URLSearchParams({aTab:'11',adminPttnCd:type,ltcAdminSym:c.i,paymtVltClsfcTypeCd:'',paymtVltClsfcTypeCdSusi:'',paymtVltMgmtNo:'',paymtVltMgmtNo2:'',paymtVltMgmtNoOld:'',showVlt:'Y',vltMgmtYyyy:''});return `https://www.longtermcare.or.kr/npbs/r/a/201/selectLtcoSrchDetail.web?${params}`}
 async function copy(value,message){try{await navigator.clipboard.writeText(value);toast(message)}catch{const t=document.createElement('textarea');t.value=value;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast(message)}}
