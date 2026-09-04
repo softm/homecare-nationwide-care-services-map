@@ -126,3 +126,63 @@ test('SDK 주소 후보의 이름·좌표·중복을 처리하며 첫 후보 자
     assert.deepEqual(JSON.parse(JSON.stringify(candidates)), [{ label: '주소 A', point: { lat: 37, lng: 127 } }, { label: '주소 B', point: { lat: 38, lng: 128 } }]);
 });
 /** SOFTM-WORKSPACE-TEST END */
+
+/** SOFTM-INSTITUTION-ADDRESS-TEST START 날짜:20260905 : 실제 지번 표기 실패의 복구·캐시·기관 동일성·재시도를 검증 */
+function institutionHarness({ basic, resolveQuery = () => null, detailError = false } = {}) {
+    const queries = [], details = [], storage = new Map();
+    const context = { window: {
+        localStorage: { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value) },
+        NhisStaticData: { async detail(id) { details.push(id); if (detailError) throw new Error('unavailable'); return { document: { basic } }; } },
+        naver: { maps: { Service: { Status: { OK: 'OK' }, geocode({ query }, callback) {
+            queries.push(query); const point = resolveQuery(query);
+            callback('OK', { v2: { addresses: point ? [{ x: String(point.lng), y: String(point.lat) }] : [] } });
+        } } } }
+    }, console, setTimeout, clearTimeout };
+    vm.runInNewContext(readFileSync(new URL('../naver-geocoder.js', import.meta.url), 'utf8'), context);
+    return { api: context.window.NaverGeocoder, queries, details };
+}
+const oldAddressRow = { i: '21153000292', n: '우리들주야간보호센터', a: '서울특별시 구로구 고척제2동 72번지 7호 문화골든타워 9층' };
+const officialBasic = { id: oldAddressRow.i, region: '서울특별시 구로구 고척동', detailAddress: '72번지 7호', address: '서울특별시 구로구 고척제2동[고척동] 72번지 7호 문화골든타워 9층' };
+test('행정동 검색 실패를 공식 법정동과 지번으로 복구하고 같은 요청·성공 캐시를 공유', async () => {
+    const point = { lat: 37.498, lng: 126.862 }, h = institutionHarness({ basic: officialBasic, resolveQuery: query => query === '서울특별시 구로구 고척동 72-7' ? point : null });
+    const [first, second] = await Promise.all([h.api.geocodeInstitution(oldAddressRow), h.api.geocodeInstitution(oldAddressRow)]);
+    assert.deepEqual(JSON.parse(JSON.stringify(first)), point); assert.deepEqual(first, second);
+    assert.deepEqual(h.details, [oldAddressRow.i]); assert.ok(h.queries.includes('서울특별시 구로구 고척동 72-7'));
+    const count = h.queries.length;
+    await h.api.geocodeInstitution(oldAddressRow); await h.api.geocodeAddress(oldAddressRow.a);
+    assert.equal(h.queries.length, count); assert.equal(h.details.length, 1);
+    const route = harness(); route.adapter.geocode = () => h.api.geocodeInstitution(oldAddressRow);
+    await route.mode.show([oldAddressRow], { route: true, origin });
+    assert.equal(route.mode.state().phase, 'success');
+    assert.deepEqual(JSON.parse(JSON.stringify(route.requests[0].body.goal)), point);
+});
+test('도로명 건물번호·지번 부번·산번지와 법정동 숫자를 보존', () => {
+    const { api } = institutionHarness();
+    for (const [input, expected] of [
+        ['서울특별시 구로구 고척동 72번지 7호 문화골든타워 9층', '서울특별시 구로구 고척동 72-7'],
+        ['서울특별시 구로구 고척동 72-7 문화골든타워 9층', '서울특별시 구로구 고척동 72-7'],
+        ['경기도 광주시 도척면 진우리 산 12번지 3호 2층', '경기도 광주시 도척면 진우리 산 12-3'],
+        ['서울특별시 종로구 종로3가 12번지 4호 3층', '서울특별시 종로구 종로3가 12-4'],
+        ['서울특별시 구로구 고척로25길 72 7층', '서울특별시 구로구 고척로25길 72'],
+        ['서울특별시 구로구 경인로 373 9층', '서울특별시 구로구 경인로 373']
+    ]) assert.equal(api.simplifyAddress(input), expected);
+});
+test('목록 주소 성공 시 상세를 읽지 않고 다른 기관·주소 누락은 추정하지 않음', async () => {
+    const h = institutionHarness({ resolveQuery: () => origin.point });
+    assert.ok(await h.api.geocodeInstitution(oldAddressRow)); assert.equal(h.details.length, 0);
+    assert.equal(await h.api.geocodeInstitution({ ...oldAddressRow, a: '', addressMissing: true }), null);
+    const wrong = institutionHarness({ basic: { ...officialBasic, id: '00000000000' } });
+    assert.equal(await wrong.api.geocodeInstitution(oldAddressRow), null);
+    assert.equal(wrong.queries.some(query => query.includes('고척동')), false);
+});
+test('수집된 법정동 표기를 사용하고 상세 누락·전체 검색 실패는 다음 시도에서 재확인', async () => {
+    const bracket = institutionHarness({ basic: { id: oldAddressRow.i, address: officialBasic.address }, resolveQuery: query => query === '서울특별시 구로구 고척동 72-7' ? origin.point : null });
+    assert.ok(await bracket.api.geocodeInstitution(oldAddressRow));
+    for (const detailError of [false, true]) {
+        const h = institutionHarness({ basic: officialBasic, detailError });
+        assert.equal(await h.api.geocodeInstitution(oldAddressRow), null);
+        assert.equal(await h.api.geocodeInstitution(oldAddressRow), null);
+        assert.equal(h.details.length, 2);
+    }
+});
+/** SOFTM-INSTITUTION-ADDRESS-TEST END */
