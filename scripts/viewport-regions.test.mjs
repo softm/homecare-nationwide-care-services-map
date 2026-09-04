@@ -96,7 +96,10 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
         cachedCoord: row => row._coord, hav: () => 0, PAGE_LIMIT: 90, MAP_CANDIDATE_LIMIT: 300,
         geocode: async row => row._coord, basePoint: null, showLoading() {}, hideLoading() {},
         $: () => node, areaRows: [], selected: new Set(), sortRows() {}, markers: placed,
-        markerIcon() {}, renderList() {}, setStatus() {}, rows
+        /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 조회 완료 계약을 제공하면서 기존 전체 화면 후보 검증을 유지 */
+        markerIcon() {}, renderList() {}, setStatus() {}, rows, resultCount: 0,
+        beginCareQuery: () => ({ current: () => true }), publishCareResult: (query, outcome) => outcome
+        /** SOFTM-SEARCH-FEEDBACK END */
     });
     vm.runInContext(declaration, sandbox);
     await vm.runInContext('loadMarkers(rows)', sandbox);
@@ -118,9 +121,15 @@ test('전용 지도도 축소 화면에서 800번째 이후 기관까지 최종 
             assert.equal(fit, false);
             receivedLimit = limit;
             sandbox.mapMarkers = candidates.slice(0, limit).map(row => ({ centerId: row.i }));
+            return { count: candidates.length, markerCount: candidates.length, visibleIds: candidates.map(row => row.i), unresolvedIds: [] }; // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 실제 완료된 기관 집합으로 목록 갱신을 검증
         },
         mapMarkers: [], mapSearchIds: null, $: () => ({ style: {} }), page: 1,
-        apply() {}, filtered: rows, hideMapProgress() {}, showToast() {}
+        /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 최신 조회 완료 계약을 제공하면서 기존 800개 초과 후보 검증을 유지 */
+        apply() {}, filtered: rows, hideMapProgress() {}, showToast() {},
+        beginDaycareSearch: () => ({ isCurrent: () => true }),
+        finishDaycareSearch: (query, outcome) => outcome,
+        daycareSearchOutcome: extra => ({ count: rows.length, ...extra })
+        /** SOFTM-SEARCH-FEEDBACK END */
     });
     vm.runInContext(declaration, sandbox);
     await vm.runInContext('searchCurrentMap(false)', sandbox);
