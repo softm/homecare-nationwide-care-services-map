@@ -147,6 +147,24 @@ gh workflow run refresh-nhis-static.yml \
   -f force=true
 ```
 
+### 로컬 미수집 사진정보 전체 수집
+
+<!-- SOFTM-NHIS-MISSING-PHOTOS START 날짜:20260904 : 상세 전체 완료 기록을 사진 수집이 재사용해 건너뛰거나 지우지 않도록 실행 경로를 분리 -->
+
+```bash
+.venv/bin/python -u scripts/collect_missing_nhis_photos.py --workers 3 --max-photos 10
+```
+
+- `catalog.json` 중 유효한 사진 JSON이 없는 기관만 처리한다. 사진이 없다는 조회 결과도 기존 수집 결과로 보존한다.
+- 기존 `sync_nhis_static.py`의 사진 파서를 재사용하며 기관당 최대 10장의 URL·제목·날짜만 저장한다. 이미지 파일은 다운로드하지 않는다.
+- 동시 수집은 최대 3개이며 일시적인 통신 오류는 최대 3회 시도한다. HTTP 403·429는 추가 기관 요청을 중지한다.
+- 재실행하면 저장된 결과를 건너뛰고 미수집 기관부터 이어간다. 같은 실행기의 중복 프로세스는 잠금으로 차단한다. 다른 공단 수집기와 동시에 실행하지 않는다.
+- 진행 기록은 `data/nhis/checkpoints/photos-missing.json`, 실패는 `data/nhis/failures/photos.json`이다. 25곳 처리마다와 종료 시 갱신한다.
+- `manifest.json`의 `photoCollection`은 이번 실행의 처리·성공·실패·빈 목록 수를 구분하고, `remaining`은 전체 미수집 기관 수다. 기존 상세 `full-00.json`부터 `full-13.json`까지와 상세 완료 정보는 유지한다.
+- 전체 완료는 `photoCollection.status=complete`, `photoCollection.remaining=0`, 사진 실패 목록 0건으로 판정한다. 로컬 생성물은 별도 커밋·푸시 전까지 공개 사이트에 반영되지 않는다.
+
+<!-- SOFTM-NHIS-MISSING-PHOTOS END -->
+
 ### 실패 기관 상세 재처리
 
 ```bash
