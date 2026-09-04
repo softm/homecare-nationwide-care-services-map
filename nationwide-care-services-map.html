@@ -8,7 +8,7 @@
 <meta name="description" id="metaDescription" content="전국 주야간보호센터를 지도에서 찾고 공단 공개 평가·인력·정원을 비교하는 돌봄한눈 지도 도구입니다.">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"> <!-- SOFTM-SEO-INDEX 날짜:20260904 : 사용자 요청에 따라 지도 페이지의 검색 등록 차단을 해제 -->
 <!-- SOFTM-SEO-LANDING START 날짜:20260903 : 검색용 정적 소개 페이지와 지도 도구의 역할을 분리해 중복 URL이 검색결과에서 경쟁하지 않도록 구성 -->
-<link rel="canonical" id="canonicalUrl" href="https://homecare.designboard.net/nationwide-daycare-map.html">
+<link rel="canonical" id="canonicalUrl" href="https://homecare.designboard.net/daycare-map.html"> <!-- SOFTM-DAYCARE-LANDING 날짜:20260904 : 지도와 안내의 검색 대표 주소를 통일 -->
 <meta property="og:locale" content="ko_KR">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="돌봄한눈">
@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" id="twitterTitle" content="전국 주야간보호센터 지도 | 돌봄한눈">
 <meta name="twitter:description" id="twitterDescription" content="전국 주야간보호센터 공개자료 지도 검색·선택 비교 서비스">
-<script type="application/ld+json" id="structuredData">{"@context":"https://schema.org","@type":"WebApplication","name":"전국 주야간보호센터 지도","url":"https://homecare.designboard.net/nationwide-daycare-map.html","description":"전국 주야간보호센터를 지도에서 찾고 공단 공개 평가, 인력, 정원 정보를 비교하는 돌봄한눈 웹 서비스","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"JavaScript","isAccessibleForFree":true,"inLanguage":"ko-KR","dateModified":"2026-09-03","isPartOf":{"@type":"WebSite","name":"돌봄한눈","url":"https://homecare.designboard.net/"},"featureList":["현재 지도영역 기관 검색","공단 공개 평가등급 및 총점 필터","선택기관 비교표","선택기관 엑셀 다운로드","최적 순회경로"]}</script>
+<script type="application/ld+json" id="structuredData">{"@context":"https://schema.org","@type":"WebApplication","name":"전국 주야간보호센터 지도","url":"https://homecare.designboard.net/daycare-map.html","description":"전국 주야간보호센터를 지도에서 찾고 공단 공개 평가, 인력, 정원 정보를 비교하는 돌봄한눈 웹 서비스","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"JavaScript","isAccessibleForFree":true,"inLanguage":"ko-KR","dateModified":"2026-09-03","isPartOf":{"@type":"WebSite","name":"돌봄한눈","url":"https://homecare.designboard.net/"},"featureList":["현재 지도영역 기관 검색","공단 공개 평가등급 및 총점 필터","선택기관 비교표","선택기관 엑셀 다운로드","최적 순회경로"]}</script> <!-- SOFTM-DAYCARE-LANDING 날짜:20260904 : 구조화 데이터에서도 안내 페이지를 검색 대표로 연결 -->
 <!-- SOFTM-SEO-LANDING END -->
 <style>
 :root{--navy:#173f6b;--blue:#2679df;--ink:#172235;--muted:#69798d;--line:#d9e3ee;--bg:#f2f6fa;--green:#0c9b65;--shadow:0 12px 34px rgba(24,55,87,.13)}
@@ -88,7 +88,7 @@ const TYPE=MANIFEST[requested]?requested:'daycare',CONFIG=MANIFEST[TYPE];
 const PUBLIC_ORIGIN='https://homecare.designboard.net'; // SOFTM-SEO-DOMAIN 날짜:20260903 : 미러 주소로 접속해도 검색 대표 주소가 공개 도메인에서 흔들리지 않도록 고정
 /** SOFTM-SEO-LANDING START 날짜:20260903 : 검색용 정적 소개 페이지와 실제 지도 공유 주소를 유형별로 정확히 연결 */
 const SEARCH_LABELS={facility:'요양원',daycare:'주야간보호센터','home-care':'방문요양센터','home-nursing':'방문간호센터','home-bath':'방문목욕기관','short-stay':'단기보호센터',dementia:'치매전담기관','nursing-hospital':'요양병원'};
-const LANDING_URLS={facility:'nursing-home-map.html',daycare:'nationwide-daycare-map.html','home-care':'home-care-map.html','home-nursing':'home-nursing-map.html','home-bath':'home-bath-map.html','short-stay':'short-stay-care-map.html',dementia:'dementia-care-map.html','nursing-hospital':'nursing-hospital-map.html'};
+const LANDING_URLS={facility:'nursing-home-map.html',daycare:'daycare-map.html','home-care':'home-care-map.html','home-nursing':'home-nursing-map.html','home-bath':'home-bath-map.html','short-stay':'short-stay-care-map.html',dementia:'dementia-care-map.html','nursing-hospital':'nursing-hospital-map.html'}; // SOFTM-DAYCARE-LANDING 날짜:20260904 : 통합 지도에서도 주야간보호의 검색 대표를 새 안내로 연결
 /** SOFTM-SEO-LANDING END */
 const DIRECTIONS_PROXY='https://daycare-directions-proxy.vercel.app/api/directions';
 const PAGE_LIMIT=90,MAP_CANDIDATE_LIMIT=300;

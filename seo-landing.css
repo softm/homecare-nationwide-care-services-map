@@ -111,3 +111,32 @@ footer span { display: inline-block; margin-left: 14px; color: var(--muted); fon
   footer span { display: block; margin: 4px 0 0; }
 }
 /** SOFTM-CATEGORY-FLOW END */
+/** SOFTM-LANDING-ADS START 날짜:20260904 : 제목과 지도 버튼 다음에 독립 광고 영역을 두고 320px 화면에서도 배너 원본 크기를 확보 */
+.landing-ad { padding-top: 28px; }
+.landing-ad[hidden], .landing-ad [hidden] { display: none; }
+.landing-ad-inner { width: min(1080px, calc(100% - 48px)); margin-inline: auto; }
+.landing-ad-label { display: block; margin-bottom: 6px; color: var(--muted); font-size: .75rem; }
+.landing-ad-host { display: flex; justify-content: center; min-height: 90px; }
+.landing-ad-mount { width: 728px; min-height: 90px; }
+.landing-ad-mount iframe { display: block; border: 0; }
+.landing-house { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 728px; min-height: 90px; padding: 14px 20px; border: 1px solid var(--line); border-radius: 10px; background: #f6f8fa; }
+.landing-house strong { display: block; font-size: 1rem; }
+.landing-house p { margin: 4px 0 0; color: var(--muted); font-size: .875rem; }
+.landing-house button { flex-shrink: 0; min-height: 44px; padding: 9px 14px; border: 1px solid #91a4b9; border-radius: 8px; background: #fff; color: var(--ink); font-family: inherit; font-size: .875rem; font-weight: 600; line-height: 1.5; cursor: pointer; }
+.landing-house button:hover { border-color: var(--blue); color: var(--blue); }
+.landing-house button:focus-visible { outline: 3px solid #ba6400; outline-offset: 3px; }
+@media (max-width: 799px) {
+  .landing-ad-inner { width: min(360px, 100%); }
+  .landing-ad-label { margin-inline: 12px; }
+  .landing-ad-host, .landing-ad-mount { min-height: 100px; }
+  .landing-ad-mount, .landing-house { width: 320px; }
+  .landing-house { min-height: 100px; gap: 12px; padding: 12px; }
+  .landing-house strong { font-size: .875rem; }
+  .landing-house p { font-size: .8125rem; }
+  .landing-house button { padding-inline: 10px; }
+}
+@media (max-width: 319px) {
+  .landing-house { width: 100%; flex-wrap: wrap; }
+  .landing-ad-mount { display: none; }
+}
+/** SOFTM-LANDING-ADS END */
