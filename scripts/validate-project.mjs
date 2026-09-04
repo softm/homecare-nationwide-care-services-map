@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { gunzipSync } from 'node:zlib'; // SOFTM-DATA-UNIFIED 날짜:20260904 : 실제 배포하는 JSON 압축 자료를 검사
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { getRegionalSeoPages } from './build-regional-seo.mjs'; // SOFTM-SEO-REGIONAL-CHECK 날짜:20260904 : 실제 데이터로 생성한 지역 목록만 검색 대표에 포함하도록 검사
@@ -205,30 +206,37 @@ async function verifyGeocoderModule() {
 await verifyGeocoderModule();
 /** SOFTM-GEOCODER-CHECK END */
 
-const daycareFiles = fs.readdirSync(root).filter(name => /^nationwide-daycare-data-.*\.js$/.test(name)).sort();
-const daycare = runFiles(daycareFiles).NATIONAL_DAYCARE_DATA || [];
-if (daycare.length !== 5757) fail(`전국 주간 기관 수 오류: ${daycare.length}`); // SOFTM-CARE-CATEGORIES 날짜:20260904 : 일반 급여 코드가 없는 치매전담 주야간보호 6곳의 누락을 방지
-if (new Set(daycare.map(row => row.i)).size !== daycare.length) fail('전국 주간 기관기호 중복');
-
-const evaluations = runFiles(['nationwide-daycare-evaluations.js']).NATIONAL_DAYCARE_EVALUATIONS || {};
-if (Object.keys(evaluations).length !== 3355) fail(`전국 주간 평가 수 오류: ${Object.keys(evaluations).length}`); // SOFTM-CARE-CATEGORIES 날짜:20260904 : 추가 기관의 공식 평가도 함께 연결되었는지 확인
-
-const manifest = runFiles(['nationwide-care-manifest.js']).NATIONAL_CARE_MANIFEST;
-if (!manifest) fail('전국 요양 매니페스트 누락');
-let careDaycare = [];
-const categoryRows = {}; // SOFTM-CARE-CATEGORIES 날짜:20260904 : 특화기관이 해당 기본 급여에도 포함되는지 교차 검증
+/** SOFTM-DATA-UNIFIED START 날짜:20260904 : JS 실행 결과 대신 수집 JSON 기반 검색 자료와 실제 공용 로더를 검증 */
+const manifest = JSON.parse(read('data/care/manifest.json'));
+const categoryRows = {};
 for (const [category, meta] of Object.entries(manifest)) {
-  for (const file of meta.files) if (!exists(file)) fail(`${category}: 데이터 파일 누락 ${file}`);
-  const rows = runFiles(meta.files).NATIONAL_CARE_DATA || [];
-  categoryRows[category] = rows; // SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 배포 데이터로 분류 누락을 확인
+  const file = `data/care/${meta.file}`;
+  if (!exists(file)) fail(`${category}: 검색 자료 누락 ${file}`);
+  const rows = JSON.parse(gunzipSync(fs.readFileSync(path.join(root, file))));
+  categoryRows[category] = rows;
   if (rows.length !== meta.count) fail(`${category}: ${rows.length}곳, 매니페스트 ${meta.count}곳`);
+  if (rows.filter(row => row.g).length !== meta.evaluationCount) fail(`${category}: 평가 연결 수 불일치`);
   if (new Set(rows.map(row => row.i)).size !== rows.length) fail(`${category}: 기관기호 중복`);
-  if (category === 'daycare') careDaycare = rows;
 }
+const careDaycare = categoryRows.daycare;
+const loaderContext = vm.createContext({ window: {}, document: { baseURI: 'https://example.test/' }, URL, Blob, Response, TextDecoder, DecompressionStream, Uint8Array,
+  fetch: async url => { const file = path.join(root, new URL(url).pathname); return new Response(fs.readFileSync(file)); }
+});
+vm.runInContext(read('care-data.js'), loaderContext);
+const daycare = await loaderContext.window.CareData.category('daycare');
+const evaluations = Object.fromEntries(daycare.filter(row => row.ev).map(row => [row.i, row.ev]));
+for (const file of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html']) {
+  if (!read(file).includes('care-data.js')) fail(`${file}: 수집 JSON 공용 로더 누락`);
+  if (/nationwide-(?:care-data|care-manifest|daycare-data|daycare-evaluations)/.test(read(file))) fail(`${file}: 폐기한 기관 데이터 JS 참조`);
+}
+if (exists('nationwide-care-data') || exists('nationwide-care-manifest.js') || exists('nationwide-daycare-evaluations.js') || fs.readdirSync(root).some(file => /^nationwide-daycare-data-.*\.js$/.test(file))) fail('이전 기관 데이터 JS가 다시 생성되었습니다.');
+execFileSync('python3', [path.join(root, 'scripts/test_care_data.py')], { stdio: 'inherit' });
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-data.test.mjs')], { stdio: 'inherit' });
+/** SOFTM-DATA-UNIFIED END */
 
 /** SOFTM-CARE-CATEGORIES START 날짜:20260904 : 기관 수가 맞아도 특정 급여·치매전담 기관이 잘못 분류되는 회귀를 차단 */
 if (Object.keys(manifest).length !== indexCategories.length || indexCategories.some(category => !manifest[category])) fail('안내 페이지와 데이터 카테고리 불일치');
-if (categoryRows.facility.length !== 6481 || categoryRows['welfare-equipment'].length !== 1851) fail('요양시설 또는 복지용구 기준 기관 수 불일치');
+if (!categoryRows.facility.length || !categoryRows['welfare-equipment'].length) fail('요양시설 또는 복지용구 자료가 비어 있습니다.'); // SOFTM-DATA-UNIFIED 날짜:20260904 : 기관 수는 과거 엑셀 상수 대신 현재 수집목록과 대조
 if (categoryRows['welfare-equipment'].some(row => row.t.split(',').some(code => !['B06', 'C06'].includes(code)))) fail('복지용구에 다른 급여가 혼입되었습니다.');
 for (const record of categoryRows.dementia) {
   for (const code of record.t.split(',')) {

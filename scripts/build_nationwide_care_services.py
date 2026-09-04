@@ -1,291 +1,190 @@
-import csv
+# /** SOFTM-DATA-UNIFIED START 날짜:20260904 : 지도 자료를 수집 JSON에서만 생성해 별도 엑셀 기준과 화면 정보가 갈라지지 않도록 통일 */
+"""Build small, reproducible map indexes from the collected data directory."""
+import gzip
+import hashlib
 import json
 import re
-from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-import openpyxl
-from care_categories import CATEGORY_CODES, is_dementia  # SOFTM-CARE-CATEGORIES 날짜:20260904 : 기본 급여와 치매전담 분류가 수집기와 달라지지 않도록 공유
-
+from care_categories import CATEGORY_CODES, DEMENTIA_CODES
 
 ROOT = Path(__file__).resolve().parent.parent
-NHIS_XLSX = ROOT / "source-data" / "nhis-longtermcare-20260610.xlsx"
-HIRA_CSV = ROOT / "source-data" / "hira-facilities-20251231.csv"
-EVAL_CSV = ROOT / "source-data" / "nhis_longtermcare_evaluations_20260625.csv"
-OUT_DIR = ROOT / "nationwide-care-data"
-TARGET_CHARS = 155_000
-
-PROVINCES = [
-    "서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시",
-    "대전광역시", "울산광역시", "세종특별자치시", "경기도", "강원특별자치도",
-    "충청북도", "충청남도", "전북특별자치도", "전라남도", "경상북도",
-    "경상남도", "제주특별자치도",
-]
-
-# /** SOFTM-CARE-CATEGORIES START 날짜:20260904 : 실제 포함 기관에 맞는 명칭과 복지용구 진입점을 제공 */
+DATA_ROOT = ROOT / "data"
+OUT_DIR = DATA_ROOT / "care"
 CATEGORIES = {
-    "facility": {"label": "요양원·공동생활가정", "sourceDate": "2026-06-10", "source": "nhis"},
-    "daycare": {"label": "주·야간보호", "sourceDate": "2026-06-10", "source": "nhis"},
-    "home-care": {"label": "방문요양", "sourceDate": "2026-06-10", "source": "nhis"},
-    "home-nursing": {"label": "방문간호", "sourceDate": "2026-06-10", "source": "nhis"},
-    "home-bath": {"label": "방문목욕", "sourceDate": "2026-06-10", "source": "nhis"},
-    "short-stay": {"label": "단기보호", "sourceDate": "2026-06-10", "source": "nhis"},
-    "welfare-equipment": {"label": "복지용구", "sourceDate": "2026-06-10", "source": "nhis"},
-    "dementia": {"label": "치매전담형", "sourceDate": "2026-06-10", "source": "nhis"},
-    "nursing-hospital": {"label": "요양병원(의료기관)", "sourceDate": "2025-12-31", "source": "hira"},
+    "facility": ("요양원·공동생활가정", "nursing-home-map.html", ("입소시설",)),
+    "daycare": ("주·야간보호", "daycare-map.html", ("주야간보호",)),
+    "home-care": ("방문요양", "home-care-map.html", ("방문요양",)),
+    "home-nursing": ("방문간호", "home-nursing-map.html", ("방문간호",)),
+    "home-bath": ("방문목욕", "home-bath-map.html", ("방문목욕",)),
+    "short-stay": ("단기보호", "short-stay-care-map.html", ("단기보호",)),
+    "welfare-equipment": ("복지용구", "welfare-equipment-map.html", ("복지용구",)),
+    "dementia": ("치매전담형", "dementia-care-map.html", ("입소시설", "주야간보호")),
+    "nursing-hospital": ("요양병원(의료기관)", "nursing-hospital-map.html", ()),
 }
-# /** SOFTM-CARE-CATEGORIES END */
-
-EVAL_KEYWORDS = {
-    "facility": ("입소시설",),
-    "daycare": ("주야간보호",),
-    "home-care": ("방문요양",),
-    "home-nursing": ("방문간호",),
-    "home-bath": ("방문목욕",),
-    "short-stay": ("단기보호",),
-    "welfare-equipment": ("복지용구",),  # SOFTM-CARE-CATEGORIES 날짜:20260904 : 복지용구 평가는 동일 급여의 공개 평가만 연결
-    "dementia": ("입소시설", "주야간보호"),
-}
+STAFF_FIELDS = {"s": "socialWorker", "rn": "nurse", "na": "nursingAssistant", "pt": "physicalTherapist", "ot": "occupationalTherapist", "cw": "careWorker"}
+PROVINCE_NAMES = {"서울": "서울특별시", "부산": "부산광역시", "대구": "대구광역시", "인천": "인천광역시", "광주": "광주광역시", "대전": "대전광역시", "울산": "울산광역시", "세종": "세종특별자치시", "경기": "경기도", "강원": "강원특별자치도", "충북": "충청북도", "충남": "충청남도", "전북": "전북특별자치도", "전남": "전라남도", "경북": "경상북도", "경남": "경상남도", "제주": "제주특별자치도", "강원도": "강원특별자치도", "전라북도": "전북특별자치도", "제주도": "제주특별자치도"}
 
 
-def clean(value):
-    return " ".join(str(value or "").split())
+def read_json(path):
+    if path.suffix == ".gz":
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            return json.load(handle)
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def number(value, default=0):
-    if value in (None, ""):
-        return default
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def iso_date(value):
-    text = re.sub(r"\D", "", str(value or ""))
-    return f"{text[:4]}-{text[4:6]}-{text[6:8]}" if len(text) >= 8 else ""
-
-
-def normalize_id(value):
-    return re.sub(r"\D", "", str(value or ""))
+def write_json(path, value):
+    payload = (json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n").encode()
+    if path.suffix == ".gz":
+        payload = gzip.compress(payload, mtime=0)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists() or path.read_bytes() != payload:
+        path.write_bytes(payload)
+    return hashlib.sha256(payload).hexdigest()[:16]
 
 
 def split_region(region, address=""):
-    text = clean(region or address)
-    parts = text.split()
-    province = parts[0] if parts else ""
-    if province == "강원도":
-        province = "강원특별자치도"
-    if province == "전라북도":
-        province = "전북특별자치도"
+    parts = (region or address).split()
+    if not parts:
+        return "", ""
+    province = PROVINCE_NAMES.get(parts[0], parts[0])
     if province == "세종특별자치시":
         return province, "세종시"
-    if len(parts) < 2:
-        return province, ""
-    city = parts[1]
-    if province not in {"서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시"}:
-        if city.endswith("시") and len(parts) > 2 and parts[2].endswith("구"):
-            city += " " + parts[2]
+    city = parts[1] if len(parts) > 1 else ""
+    if province not in {"서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시"} and city.endswith("시") and len(parts) > 2 and parts[2].endswith("구"):
+        city += " " + parts[2]
     return province, city
 
 
-def newest_evaluations():
-    rows = defaultdict(dict)
-    with EVAL_CSV.open("r", encoding="cp949", newline="") as handle:
-        for row in csv.DictReader(handle):
-            inst_id = normalize_id(row.get("장기요양기관기호"))
-            service = clean(row.get("급여종류"))
-            date = clean(row.get("평가일자"))
-            date_key = date or "0000-00-00"
-            for category, keywords in EVAL_KEYWORDS.items():
-                if not any(keyword in service for keyword in keywords):
-                    continue
-                previous = rows[category].get(inst_id)
-                if previous and previous[0] >= date_key:
-                    continue
-                year_match = re.search(r"(20\d{2})", row.get("평가구분") or "")
-                rows[category][inst_id] = (date_key, {
-                    "g": clean(row.get("평가등급")),
-                    "es": number(row.get("평가총점"), None),
-                    "ey": int(year_match.group(1)) if year_match else None,
-                    "ed": date,
-                    "et": service.split(".", 1)[-1] if "." in service else service,
-                })
-    return {category: {key: value for key, (_, value) in items.items()} for category, items in rows.items()}
+def evaluation_for(evaluations, category):
+    candidates = [row for row in evaluations if any(word in row.get("service", "") for word in CATEGORIES[category][2])]
+    if not candidates:
+        return None
+    chosen = max(candidates, key=lambda row: row.get("date") or "")
+    year = re.search(r"20\d{2}", chosen.get("evaluation", ""))
+    return {**chosen, "year": int(year.group()) if year else None}
 
 
-def merge_numeric(target, row):
-    target["s"] += number(row[5])
-    target["rn"] += number(row[8])
-    target["na"] += number(row[9])
-    target["pt"] += number(row[11])
-    target["ot"] += number(row[12])
-    target["cw"] += number(row[13])
+def build_record(institution, detail, evaluations, category):
+    codes = DEMENTIA_CODES if category == "dementia" else CATEGORY_CODES[category]
+    services = {row["code"]: row for row in institution.get("services", []) if row.get("code") in codes}
+    if not services:
+        return None
+    basic = {**institution, **{key: value for key, value in detail.get("basic", {}).items() if value not in (None, "")}}
+    # OpenAPI가 도로명 코드만 준 신규 기관도 이미 수집한 공단 원문 주소로 검색 가능하게 한다.
+    pages = [value for code, value in detail.get("serviceDetails", {}).items() if code in services]
+    pages.sort(key=lambda value: value.get("collectedAt", ""), reverse=True)
+    addresses = [value.get("officialPage", {}).get("tabs", {}).get("11", {}).get("fields", {}).get("주소", "") for value in pages]
+    address = next((value for value in addresses if re.match(r"^[가-힣]+(?:시|도)\s", value)), basic.get("address", ""))
+    province, city = split_region(institution.get("region", ""), address)
+    row = {"i": institution["id"], "n": basic.get("name", institution["name"]), "p": province, "c": city, "a": address,
+           "d": basic.get("designationDate", ""), "t": ",".join(services), "tn": " · ".join(s.get("name", code) for code, s in services.items()),
+           "z": 0, **{key: 0 for key in STAFF_FIELDS}}
+    row["_regionCode"] = "|".join(str(basic.get("regionCodes", {}).get(key, "")) for key in ("province", "city"))
+    row["_needsRegion"] = not institution.get("region")
+    row["_roadCode"] = basic.get("roadNameCode", "")
+    row["_buildingNumber"] = basic.get("buildingNumber", "")
+    for code, service in services.items():
+        sections = detail.get("serviceDetails", {}).get(code, {}).get("sections", {})
+        capacity = (sections.get("capacity") or {}).get("capacity")
+        row["z"] += capacity if capacity is not None else service.get("capacity") or 0
+        staff = sections.get("staff") or {}
+        for key, source in STAFF_FIELDS.items():
+            row[key] += staff.get(source) or 0
+        if not staff:
+            row["staffMissing"] = True
+    evaluation = evaluation_for(evaluations, category)
+    if evaluation:
+        row.update({"ev": evaluation, "g": evaluation.get("grade"), "es": evaluation.get("score"), "ey": evaluation["year"], "ed": evaluation.get("date"), "et": evaluation.get("service", "").split(".", 1)[-1]})
+    return {key: value for key, value in row.items() if value not in (None, "")}
 
 
-def base_record(general, category, evals):
-    code, name, _zip, _pc, _cc, _dc, region, designated, _installed, address = general
-    province, city = split_region(region, address)
-    record = {
-        "i": str(code), "n": clean(name), "p": province, "c": city,
-        "a": clean(address), "d": iso_date(designated), "t": "", "tn": "",
-        "z": 0, "s": 0, "rn": 0, "na": 0, "pt": 0, "ot": 0, "cw": 0,
-    }
-    record.update(evals.get(category, {}).get(str(code), {}))
-    return record
+def build_records(data_root=DATA_ROOT):
+    catalog = read_json(data_root / "nhis/catalog.json")
+    evaluations = read_json(data_root / "nhis/evaluations.json")
+    hospitals = read_json(data_root / "hira/nursing-hospitals.json")
+    records = {category: [] for category in CATEGORIES}
+    region_lookup, road_lookup = {}, {}
+    for institution in catalog["institutions"]:
+        key = institution["id"]
+        path = data_root / "nhis/details" / key[:2] / (key + ".json.gz")
+        detail = read_json(path) if path.exists() else {}
+        basic = detail.get("basic", {})
+        region_code = "|".join(str(basic.get("regionCodes", {}).get(field, "")) for field in ("province", "city"))
+        if institution.get("region") and region_code != "|":
+            region_lookup[region_code] = split_region(institution["region"])
+        road = re.match(r"(.+(?:대로|로|길))\s+\d+(?:-\d+)?(?:\s|$)", institution.get("address", ""))
+        if road and basic.get("roadNameCode"):
+            road_lookup[basic["roadNameCode"]] = road[1]
+        for category in CATEGORY_CODES.keys() | {"dementia"}:
+            row = build_record(institution, detail, evaluations["institutions"].get(key, []), category)
+            if row:
+                records[category].append(row)
+    for rows in records.values():
+        for row in rows:
+            # 지역명 변경·빈 도로명은 같은 수집 자료의 행정코드·도로명코드로 연결한다.
+            if row.pop("_needsRegion") and row["_regionCode"] in region_lookup:
+                row["p"], row["c"] = region_lookup[row["_regionCode"]]
+            if not row.get("a"):
+                road = road_lookup.get(row.get("_roadCode"))
+                if road and row.get("_buildingNumber"):
+                    row["a"] = f'{road} {row["_buildingNumber"]}'
+                else:
+                    row["a"], row["addressMissing"] = "주소 미확인", True
+            for field in ("_regionCode", "_roadCode", "_buildingNumber"):
+                row.pop(field, None)
+    records["nursing-hospital"] = hospitals["institutions"]
+    for rows in records.values():
+        rows.sort(key=lambda row: (row.get("p", ""), row.get("c", ""), row["n"], row["i"]))
+    return records, catalog["generatedAt"][:10], hospitals["sourceDate"]
 
 
-def build_ltc_records():
-    wb = openpyxl.load_workbook(NHIS_XLSX, read_only=True, data_only=True)
-    general = {str(row[0]): row for row in wb["일반현황"].iter_rows(min_row=2, values_only=True) if row[0]}
-    capacities = defaultdict(list)
-    for row in wb["입소인원"].iter_rows(min_row=2, values_only=True):
-        if row[0] and row[1]:
-            capacities[str(row[0])].append(row)
-    staffing = defaultdict(list)
-    for row in wb["인력현황"].iter_rows(min_row=2, values_only=True):
-        if row[0] and row[1]:
-            staffing[str(row[0])].append(row)
-
-    evals = newest_evaluations()
-    output = {category: {} for category in EVAL_KEYWORDS}
-    dementia = is_dementia  # SOFTM-CARE-CATEGORIES 날짜:20260904 : 치매전담 바로가기는 기본 급여에 포함된 기관을 다시 모아 제공
-
-    for category, codes in CATEGORY_CODES.items():
-        # 입소인원 시트의 서비스 유형을 운영기관 판정 기준으로 사용한다.
-        # 인력 시트는 인력 수치 보강에만 쓰며, 인력 신고만 남은 기관을 중복 포함하지 않는다.
-        ids = {inst_id for inst_id, rows in capacities.items() if any(row[1] in codes for row in rows)}
-        for inst_id in sorted(ids):
-            if inst_id not in general:
-                continue
-            record = base_record(general[inst_id], category, evals)
-            types = []
-            for row in capacities.get(inst_id, []):
-                if row[1] in codes:
-                    types.append((row[1], clean(row[2])))
-                    record["z"] += number(row[3])
-            for row in staffing.get(inst_id, []):
-                if row[1] in codes:
-                    types.append((row[1], clean(row[2])))
-                    merge_numeric(record, row)
-            unique_types = list(dict.fromkeys(types))
-            record["t"] = ",".join(code for code, _ in unique_types)
-            record["tn"] = " · ".join(name for _, name in unique_types)
-            output[category][inst_id] = record
-
-    ids = {inst_id for inst_id, rows in capacities.items() if any(dementia(row[1]) for row in rows)}
-    for inst_id in sorted(ids):
-        if inst_id not in general:
-            continue
-        record = base_record(general[inst_id], "dementia", evals)
-        types = []
-        for row in capacities.get(inst_id, []):
-            if dementia(row[1]):
-                types.append((row[1], clean(row[2])))
-                record["z"] += number(row[3])
-        for row in staffing.get(inst_id, []):
-            if dementia(row[1]):
-                types.append((row[1], clean(row[2])))
-                merge_numeric(record, row)
-        unique_types = list(dict.fromkeys(types))
-        record["t"] = ",".join(code for code, _ in unique_types)
-        record["tn"] = " · ".join(name for _, name in unique_types)
-        output["dementia"][inst_id] = record
-    return {key: list(value.values()) for key, value in output.items()}
-
-
-def build_hospitals():
-    rows = []
-    with HIRA_CSV.open("r", encoding="cp949", newline="") as handle:
-        for row in csv.DictReader(handle):
-            if clean(row.get("요양종별")) != "요양병원":
-                continue
-            encrypted_id = clean(row.get("암호화된요양기호"))
-            # 원본에는 기준일 이후 폐업 안내 문구가 요양기호 칸에 들어간 5개 행이 있다.
-            # 상세페이지 연결이 불가능한 해당 행은 통합지도에서 제외한다.
-            if not encrypted_id.startswith("JD"):
-                continue
-            province = clean(row.get("시도명"))
-            city = clean(row.get("시군구명"))
-            rows.append({
-                "i": encrypted_id, "n": clean(row.get("요양기관명")),
-                "p": province, "c": city, "a": clean(row.get("도로명주소")),
-                "d": iso_date(row.get("개설일자")), "t": "HOSP", "tn": "요양병원",
-                "z": 0, "s": 0, "rn": 0, "na": 0, "pt": 0, "ot": 0, "cw": 0,
-            })
-    return rows
-
-
-def compact_number(value):
-    if isinstance(value, float) and value.is_integer():
-        return int(value)
-    return value
-
-
-# /** SOFTM-CARE-DATA START 날짜:20260904 : 변경 데이터만 갱신하고 두 주야간보호 지도를 동일 원본으로 재생성 */
-def write_generated(path, source):
-    existing = path.read_text(encoding="utf-8") if path.exists() else ""
-    if existing.split(" // SOFTM-CARE-DATA")[0].strip() == source.strip():
-        return
-    path.write_text(source.rstrip() + f" // SOFTM-CARE-DATA 날짜:{datetime.now():%Y%m%d} : 공식 급여 분류 누락을 방지한 원본 재생성\n", encoding="utf-8")
-
-
-def write_daycare_files(rows):
-    slugs = ["seoul", "busan", "daegu", "incheon", "gwangju", "daejeon", "ulsan", "sejong", "gyeonggi", "gangwon", "chungbuk", "chungnam", "jeonbuk", "jeonnam", "gyeongbuk", "gyeongnam", "jeju"]
-    keys = ("i", "n", "p", "c", "a", "d", "t", "z", "s", "rn", "na", "pt", "ot", "cw")
-    for province, slug in zip(PROVINCES, slugs):
-        regional = sorted((row for row in rows if row["p"] == province), key=lambda row: (row["c"], row["n"]))
-        payload = json.dumps([{key: compact_number(row[key]) for key in keys} for row in regional], ensure_ascii=False, separators=(",", ":"))
-        write_generated(ROOT / f"nationwide-daycare-data-{slug}.js", "window.NATIONAL_DAYCARE_DATA=(window.NATIONAL_DAYCARE_DATA||[]).concat(" + payload + ");")
-# /** SOFTM-CARE-DATA END */
-
-
-def write_chunks(category, rows):
-    rows = [{key: compact_number(value) for key, value in row.items() if value not in (None, "")} for row in rows]
-    rows.sort(key=lambda row: (PROVINCES.index(row.get("p", "")) if row.get("p", "") in PROVINCES else 99, row.get("c", ""), row.get("n", "")))
-    chunks = []
-    current = []
-    current_size = 0
-    for row in rows:
-        encoded = json.dumps(row, ensure_ascii=False, separators=(",", ":"))
-        if current and current_size + len(encoded) + 1 > TARGET_CHARS:
-            chunks.append(current)
-            current, current_size = [], 0
-        current.append(row)
-        current_size += len(encoded) + 1
-    if current:
-        chunks.append(current)
-
-    files = []
-    for index, chunk in enumerate(chunks, 1):
-        filename = f"{category}-{index:02d}.js"
-        payload = json.dumps(chunk, ensure_ascii=False, separators=(",", ":"))
-        write_generated(OUT_DIR / filename, "window.NATIONAL_CARE_DATA=(window.NATIONAL_CARE_DATA||[]).concat(" + payload + ");")  # SOFTM-CARE-DATA 날짜:20260904 : 변경되지 않은 유형의 생성 파일은 그대로 유지
-        files.append("nationwide-care-data/" + filename)
-    return files
+def update_landing_counts(manifest):
+    marker = f"<!-- SOFTM-DATA-UNIFIED 날짜:{datetime.now():%Y%m%d} : 안내의 기관 수와 기준일을 수집 자료 기반 지도와 일치 -->"
+    for category, meta in manifest.items():
+        path = ROOT / CATEGORIES[category][1]
+        html = path.read_text(encoding="utf-8")
+        first = re.search(r'<ul class="data-summary"[\s\S]*?<strong>([\d,]+)곳</strong>', html)
+        if first:
+            html = html.replace(first[1] + "곳", f'{meta["count"]:,}곳')
+        html = re.sub(r'(공단 평가정보 <strong>)[\d,]+곳', lambda m: m[1] + f'{meta["evaluationCount"]:,}곳', html)
+        if meta["source"] == "nhis":
+            html = re.sub(r'시설현황 <time datetime="[^"]+">[^<]+</time> 기준', f'수집목록 <time datetime="{meta["sourceDate"]}">{meta["sourceDate"].replace("-", ".")}</time> 기준', html)
+            html = re.sub(r'수집목록 <time datetime="[^"]+">[^<]+</time> 기준', f'수집목록 <time datetime="{meta["sourceDate"]}">{meta["sourceDate"].replace("-", ".")}</time> 기준', html)
+        original = path.read_text(encoding="utf-8")
+        if html != original:
+            # 변경된 HTML 각 줄에만 주석을 붙여 자동 갱신 근거를 남긴다.
+            old_lines = original.splitlines()
+            html = "\n".join(line + (" " + marker if i < len(old_lines) and line != old_lines[i] and "SOFTM-DATA-UNIFIED" not in line else "") for i, line in enumerate(html.splitlines())) + "\n"
+            path.write_text(html, encoding="utf-8")
+    index_path = ROOT / "index.html"
+    index = index_path.read_text(encoding="utf-8")
+    for category, meta in manifest.items():
+        index = re.sub(r'(data-category="' + re.escape(category) + r'"[\s\S]*?<span data-count>)[\d,]+곳', lambda match: match[1] + f'{meta["count"]:,}곳', index)
+    if index != index_path.read_text(encoding="utf-8"):
+        index_path.write_text(index, encoding="utf-8")
+    daycare_path = ROOT / "nationwide-daycare-map.html"
+    daycare = daycare_path.read_text(encoding="utf-8")
+    updated = re.sub(r"(전국 주야간보호센터 )[\d,]+곳", lambda match: match[1] + f'{manifest["daycare"]["count"]:,}곳', daycare)
+    if updated != daycare:
+        daycare_path.write_text(updated, encoding="utf-8")
 
 
 def main():
-    OUT_DIR.mkdir(exist_ok=True)
-    records = build_ltc_records()
-    records["nursing-hospital"] = build_hospitals()
+    records, nhis_date, hira_date = build_records()
     manifest = {}
-    for category, meta in CATEGORIES.items():
-        rows = records[category]
-        files = write_chunks(category, rows)
-        eval_count = sum(1 for row in rows if row.get("g"))
-        manifest[category] = {**meta, "count": len(rows), "evaluationCount": eval_count, "files": files}
-    # /** SOFTM-CARE-DATA START 날짜:20260904 : 현재 청크만 남기고 주간 전용 지도도 같은 급여 집합으로 생성 */
-    expected_files = {ROOT / filename for meta in manifest.values() for filename in meta["files"]}
-    for old in OUT_DIR.glob("*.js"):
-        if old not in expected_files:
-            old.unlink()
-    write_generated(ROOT / "nationwide-care-manifest.js", "window.NATIONAL_CARE_MANIFEST=" + json.dumps(manifest, ensure_ascii=False, separators=(",", ":")) + ";")
-    write_daycare_files(records["daycare"])
-    # /** SOFTM-CARE-DATA END */
-    print(json.dumps(manifest, ensure_ascii=False, indent=2))
+    for category, rows in records.items():
+        filename = f"{category}.json.gz"
+        revision = write_json(OUT_DIR / filename, rows)
+        source = "hira" if category == "nursing-hospital" else "nhis"
+        manifest[category] = {"label": CATEGORIES[category][0], "source": source, "sourceDate": hira_date if source == "hira" else nhis_date,
+                              "count": len(rows), "evaluationCount": sum(bool(row.get("g")) for row in rows), "file": filename, "revision": revision}
+    write_json(OUT_DIR / "manifest.json", manifest)
+    update_landing_counts(manifest)
+    print(json.dumps({key: {"count": len(rows), "missingStaff": sum(bool(row.get("staffMissing")) for row in rows)} for key, rows in records.items()}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
     main()
+# /** SOFTM-DATA-UNIFIED END */

@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { gunzipSync } from 'node:zlib'; // SOFTM-DATA-UNIFIED 날짜:20260904 : 새 기관을 포함한 수집 기반 검색 자료로 화면영역 회귀검사
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -9,14 +10,14 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const context = vm.createContext({ window: {} });
-for (const file of ['region-bounds.js', 'viewport-regions.js', 'nationwide-care-manifest.js']) vm.runInContext(read(file), context);
+/** SOFTM-DATA-UNIFIED START 날짜:20260904 : 폐기한 JS 대신 실제 지도와 같은 data/care 자료를 사용 */
+for (const file of ['region-bounds.js', 'viewport-regions.js']) vm.runInContext(read(file), context);
 const api = context.window.MapViewportSearch;
 const data = {};
-for (const [type, config] of Object.entries(context.window.NATIONAL_CARE_MANIFEST)) {
-    context.window.NATIONAL_CARE_DATA = [];
-    for (const file of config.files) vm.runInContext(read(file), context);
-    data[type] = context.window.NATIONAL_CARE_DATA;
+for (const [type, config] of Object.entries(JSON.parse(read('data/care/manifest.json')))) {
+    data[type] = JSON.parse(gunzipSync(fs.readFileSync(path.join(root, 'data/care', config.file))));
 }
+/** SOFTM-DATA-UNIFIED END */
 const point = (lat, lng) => ({ lat: () => lat, lng: () => lng });
 const bounds = (west, south, east, north) => ({ getSW: () => point(south, west), getNE: () => point(north, east) });
 const viewport = bounds(126.550704, 37.2821996, 127.029296, 37.6473545);
