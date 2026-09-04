@@ -55,6 +55,8 @@ localScripts('about.html'); // SOFTM-BRAND-IDENTITY 날짜:20260904 : 신규 소
 localScripts('care-cost.html'); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 공통 비용 화면의 스크립트와 공식 요금 계산 경계도 배포 전에 확인
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-cost.test.mjs')], { stdio: 'inherit' }); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 감경·면제·한도·등급 조건의 예산 회귀를 정기 검사에 포함
 
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-basket.test.mjs')], { stdio: 'inherit' }); // SOFTM-BASKET-TEST 날짜:20260904 : 비교함 순서·검색 복귀·늦은 경로 취소를 정기 검사에 포함
+
 /** SOFTM-INDEX-ENTRY-CHECK START 날짜:20260903 : 인덱스 광고 크기와 모든 요양 카테고리 직행 링크가 함께 유지되도록 자동 검사 */
 const indexSource = read('index.html');
 for (const category of indexCategories) {
