@@ -1,0 +1,1 @@
+{"failures":[{"error":"ValueError","id":"11130500352","key":"ST004582841","status":null},{"error":"ValueError","id":"33017000274","key":"ST003631545","status":null}],"institutions":11391,"processed":11391,"remaining":2,"resolved":38432,"scope":"photo-titles","startedAt":"2026-09-04T11:05:11Z","status":"partial","targets":38434,"updatedAt":"2026-09-04T11:15:32Z","workers":3}
