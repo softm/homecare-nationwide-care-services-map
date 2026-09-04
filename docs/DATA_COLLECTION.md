@@ -226,5 +226,15 @@ gh api \
 <!-- SOFTM-NHIS-COLLECTION-DOC END -->
 
 <!-- SOFTM-CARE-CATEGORIES START 날짜:20260904 : 수집 카탈로그와 지도 생성기의 분류 책임을 일치 -->
-기본 급여 분류는 `scripts/care_categories.py`를 공용으로 사용한다. 복지용구 B06/C06, 시설 치매전담실 G/M·치매전담형 공동생활가정 S41, 주야간보호 치매전담실 H/I를 해당 기본 급여에 포함한다. 다음 카탈로그 생성부터 같은 분류를 사용하며 기존 상세 JSON·체크포인트·수집 규격은 유지한다. 지도 데이터는 `scripts/build_nationwide_care_services.py`로 두 지도를 함께 재생성한 뒤 `scripts/build_daycare_evaluations.py`와 `npm run check`를 실행한다.
+기본 급여 분류는 `scripts/care_categories.py`를 공용으로 사용한다. 복지용구 B06/C06, 시설 치매전담실 G/M·치매전담형 공동생활가정 S41, 주야간보호 치매전담실 H/I를 해당 기본 급여에 포함한다. 다음 카탈로그 생성부터 같은 분류를 사용하며 기존 상세 JSON·체크포인트·수집 규격은 유지한다. 지도 데이터는 `scripts/build_nationwide_care_services.py`로 두 지도를 함께 재생성한 뒤 `npm run check`를 실행한다. 평가도 같은 수집 JSON에서 두 지도에 함께 연결한다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 별도 평가 JS 재생성을 제거 -->
 <!-- SOFTM-CARE-CATEGORIES END -->
+
+<!-- SOFTM-DATA-UNIFIED START 날짜:20260904 : 수집 결과와 지도 목록이 따로 갱신되지 않도록 검색 자료 생성 절차를 고정 -->
+## 수집 후 지도 반영
+
+Actions는 수집 완료 후 `python scripts/build_nationwide_care_services.py`를 실행하고 검사한 뒤 `data`와 유형 안내를 함께 반영합니다. 로컬에서 목록·상세·평가를 수집했다면 같은 명령을 실행하고 `npm run check`로 확인합니다. 사진만 변경했다면 기관별 사진 JSON을 직접 읽으므로 검색 인덱스를 다시 만들 필요가 없습니다.
+
+검색 인덱스의 입력은 `data/nhis`와 `data/hira`입니다. 공단 XLSX·CSV는 수집기의 원본 보관용으로 유지하며 지도 생성기가 직접 읽지 않습니다. `data/care`는 이 수집 자료에서 재생성하는 압축 검색 인덱스입니다. 기관기호·급여별 최신 평가·인력 연결과 기존 기관 누락을 확인하며, 기관 수를 이전 엑셀의 고정 수치에 맞추지 않습니다. 수집 체크포인트·실패 기록은 검색 자료 생성으로 변경하지 않습니다.
+
+심평원 원본을 교체한 경우 `python scripts/import_hira_hospitals.py`로 `data/hira/nursing-hospitals.json`을 갱신한 다음 검색 자료를 생성합니다.
+<!-- SOFTM-DATA-UNIFIED END -->
