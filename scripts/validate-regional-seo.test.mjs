@@ -93,4 +93,14 @@ test('인코딩한 상위 디렉터리나 실행형 링크를 내부 파일로 �
   assert.throws(() => localLinkPath('javascript:alert(1)', input.meta.url, input.rootDir), /실행형/);
   assert.equal(localLinkPath('https://www.longtermcare.or.kr/', input.meta.url, input.rootDir), null);
 });
+/** SOFTM-DATA-REGIONS START 날짜:20260904 : 수집된 일부 인원이 완전한 인력으로 표시되는 회귀를 방지 */
+test('일부 급여 인력이 누락되면 양수 합계도 일부 미확인으로 표시한다', t => {
+  const input = fixture(t);
+  const rows = input.rows.map((row, index) => index ? row : { ...row, cw: 12, staffMissing: true });
+  const html = input.html.replace('</dl>', '<dt>요양보호사</dt><dd data-field="cw">일부 미확인</dd></dl>');
+  assert.deepEqual(inspectRegionalPage({ ...input, rows, html }).issues, []);
+  const incorrect = html.replace('<dd data-field="cw">일부 미확인</dd>', '<dd data-field="cw">12명</dd>');
+  assert.ok(inspectRegionalPage({ ...input, rows, html: incorrect }).issues.some(issue => issue.includes('인력')));
+});
+/** SOFTM-DATA-REGIONS END */
 /** SOFTM-REGIONAL-VALIDATION-TEST END */

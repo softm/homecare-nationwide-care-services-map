@@ -1,7 +1,7 @@
 /** SOFTM-REGIONAL-VALIDATION START 날짜:20260904 : 생성 성공만으로 검색 품질을 판단하지 않도록 원본 기관자료와 실제 노출 HTML을 독립 대조 */
 import fs from 'node:fs';
 import path from 'node:path';
-import vm from 'node:vm';
+import { gunzipSync } from 'node:zlib'; // SOFTM-DATA-REGIONS 날짜:20260904 : 지도와 지역 목록이 같은 압축 JSON을 읽도록 통일
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -126,7 +126,7 @@ export function inspectRegionalPage({ html, meta, rows, sitemapUrls, rootDir = R
     check(meta.type !== 'home-care' || !children.some(node => node.attrs['data-field'] === 'z'), `${id}: 방문요양에 입소 정원을 표시했습니다.`);
     for (const field of children.filter(node => node.attrs['data-field'] && ['z', 's', 'rn', 'na', 'pt', 'ot', 'cw'].includes(node.attrs['data-field']))) {
       const value = row[field.attrs['data-field']];
-      const expected = Number.isFinite(value) && value > 0 ? `${value.toLocaleString('ko-KR')}명` : '미확인';
+      const expected = field.attrs['data-field'] !== 'z' && row.staffMissing ? '일부 미확인' : Number.isFinite(value) && value > 0 ? `${value.toLocaleString('ko-KR')}명` : '미확인'; // SOFTM-DATA-REGIONS 날짜:20260904 : 급여별 인력 수집 누락이 확정 인원으로 노출되는 회귀를 검사
       check(textOf(field) === expected, `${id}: 정원 또는 인력이 원본 또는 미확인 표시와 다릅니다.`);
     }
     try {
@@ -184,11 +184,13 @@ export function inspectRegionalPage({ html, meta, rows, sitemapUrls, rootDir = R
 }
 
 function sourceData(rootDir, type) {
-  const context = vm.createContext({ window: {} });
-  new vm.Script(fs.readFileSync(path.join(rootDir, 'nationwide-care-manifest.js'), 'utf8')).runInContext(context);
-  const manifest = context.window.NATIONAL_CARE_MANIFEST[type];
-  for (const file of manifest.files) new vm.Script(fs.readFileSync(path.join(rootDir, file), 'utf8'), { filename: file }).runInContext(context);
-  return { manifest, rows: Array.from(context.window.NATIONAL_CARE_DATA) };
+  /** SOFTM-DATA-REGIONS START 날짜:20260904 : 생성기와 별도로 압축 JSON을 읽어 기관 목록의 누락과 표시값을 대조 */
+  const dataDir = path.join(rootDir, 'data/care');
+  const manifest = JSON.parse(fs.readFileSync(path.join(dataDir, 'manifest.json'), 'utf8'))[type];
+  if (manifest?.file !== `${type}.json.gz`) throw new Error(`지역 검증 자료 경로 확인 필요: ${type}`);
+  const rows = JSON.parse(gunzipSync(fs.readFileSync(path.join(dataDir, manifest.file))).toString('utf8'));
+  return { manifest, rows };
+  /** SOFTM-DATA-REGIONS END */
 }
 
 export async function auditRegionalSeo(rootDir = ROOT) {
