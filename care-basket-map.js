@@ -2,6 +2,13 @@
 (function (root) {
     'use strict';
     const validPoint = p => p && Number.isFinite(p.lat) && Number.isFinite(p.lng) && p.lat >= 32 && p.lat <= 40 && p.lng >= 123 && p.lng <= 133;
+    /** SOFTM-ROUTE-ERROR START 날짜:20260905 : 브라우저가 받은 통신 오류를 사용자가 조치 가능한 연결 상태로 구분 */
+    function routeErrorMessage(error) {
+        if (error?.name === 'TypeError') return '길찾기 서버에 연결할 수 없습니다. 서버 연결 상태를 확인한 뒤 다시 탐색해 주세요.';
+        if (error?.name === 'SyntaxError') return '길찾기 서버 응답을 확인할 수 없습니다. 잠시 후 다시 탐색해 주세요.';
+        return '도로 경로를 불러오지 못했습니다. 다시 탐색해 주세요.';
+    }
+    /** SOFTM-ROUTE-ERROR END */
     function create(adapter) {
         let snapshot = null, generation = 0, controller = null, timer = null, ids = [], fitted = [];
         let state = { phase: 'idle', count: 0, placed: 0, missing: [], result: null };
@@ -59,7 +66,7 @@
                 adapter.fit(fitted);
                 publish('success', { result: { distance, duration, origin, stops: rows.map(row => ({ id: String(row.i), name: row.n })) } });
             } catch (error) {
-                if (current() && (error.name !== 'AbortError' || timedOut)) publish('error', { error: timedOut ? '경로 응답이 지연되고 있습니다. 다시 탐색해 주세요.' : '도로 경로를 불러오지 못했습니다. 다시 탐색해 주세요.' });
+                if (current() && (error.name !== 'AbortError' || timedOut)) publish('error', { error: timedOut ? '경로 응답이 지연되고 있습니다. 다시 탐색해 주세요.' : routeErrorMessage(error) }); // SOFTM-ROUTE-ERROR 날짜:20260905 : 통신·응답 형식·처리 오류를 같은 문구로 숨기지 않음
             } finally { if (current()) { clearTimeout(timer); controller = null; } }
             return state;
         }
