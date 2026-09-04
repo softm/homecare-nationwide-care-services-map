@@ -66,7 +66,7 @@ export async function auditSite(origin = publicOrigin) {
       results.push({ url: `${publicOrigin}${pathname}`, status: response.status, issues });
     } catch (error) { results.push({ url: `${publicOrigin}${pathname}`, issues: [error.message] }); }
   }
-  const pages = [...urls.map(url => [url, url]), [`${publicOrigin}/nationwide-care-services-map.html`, `${publicOrigin}/nationwide-daycare-map.html`]];
+  const pages = [...urls.map(url => [url, url]), ...['nationwide-care-services-map.html', 'nationwide-daycare-map.html'].map(page => [`${publicOrigin}/${page}`, `${publicOrigin}/daycare-map.html`])]; // SOFTM-DAYCARE-LANDING 날짜:20260904 : 두 지도와 주야간보호 안내의 검색 대표 연결을 같이 검사
   for (const [url, expectedCanonical] of pages) {
     try { results.push(inspectPage({ url, expectedCanonical, ...await fetchPath(new URL(url).pathname) })); }
     catch (error) { results.push({ url, issues: [error.message] }); }

@@ -33,7 +33,7 @@ function runFiles(files, initial = {}) {
 /** SOFTM-SEO-LANDING START 날짜:20260903 : 검색 대표 페이지와 실제 지도 유형의 연결 관계를 한 곳에서 검증 */
 const categoryLandingPages = {
   facility: 'nursing-home-map.html',
-  daycare: 'nationwide-daycare-map.html',
+  daycare: 'daycare-map.html', // SOFTM-DAYCARE-LANDING 날짜:20260904 : 주야간보호도 공통 안내를 거치는 진입 경로를 검증
   'home-care': 'home-care-map.html',
   'home-nursing': 'home-nursing-map.html',
   'home-bath': 'home-bath-map.html',
@@ -45,14 +45,21 @@ const indexCategories = Object.keys(categoryLandingPages);
 const landingPages = [...new Set(Object.values(categoryLandingPages))];
 /** SOFTM-SEO-LANDING END */
 
-for (const html of ['index.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html);
+for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html); // SOFTM-DAYCARE-LANDING 날짜:20260904 : 안내와 분리된 기존 전용 지도의 스크립트 검사도 유지
 
 /** SOFTM-INDEX-ENTRY-CHECK START 날짜:20260903 : 인덱스 광고 크기와 모든 요양 카테고리 직행 링크가 함께 유지되도록 자동 검사 */
 const indexSource = read('index.html');
 for (const category of indexCategories) {
   const landingPage = categoryLandingPages[category];
   if (!indexSource.includes(`href="${landingPage}"`)) fail(`index.html: ${category} 검색 대표 페이지 링크 누락`);
-  if (category !== 'daycare' && !read(landingPage).includes(`nationwide-care-services-map.html?type=${category}`)) fail(`${landingPage}: ${category} 지도 링크 누락`);
+  /** SOFTM-DAYCARE-LANDING START 날짜:20260904 : 안내 페이지가 각 유형의 실제 지도와 광고 영역으로 이어지는지 함께 검증 */
+  const mapPage = category === 'daycare' ? 'nationwide-daycare-map.html' : `nationwide-care-services-map.html?type=${category}`;
+  const landing = read(landingPage);
+  if (!landing.includes(`href="${mapPage}"`)) fail(`${landingPage}: ${category} 지도 링크 누락`);
+  if (!landing.includes(`data-care-category="${category}"`)) fail(`${landingPage}: 제휴 문의 기관 유형 누락`);
+  if ((landing.match(/id="categoryAdZone"/g) || []).length !== 1 || !landing.includes('category-landing-ads.js') || !landing.includes('category-landing-ad-config.js')) fail(`${landingPage}: 2단계 전용 광고 영역·설정 누락`);
+  if (category !== 'daycare' && (!landing.includes('href="daycare-map.html"') || landing.includes('href="nationwide-daycare-map.html"'))) fail(`${landingPage}: 주야간보호 안내 진입 누락`);
+  /** SOFTM-DAYCARE-LANDING END */
 }
 if (!indexSource.includes('index-ad-config.js') || !indexSource.includes('initIndexAds()')) fail('index.html: 인덱스 전용 광고 초기화 누락'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 요양 광고 설정을 잘못 재사용하지 않도록 전용 설정 파일을 검사
 const indexAdConfig = runFiles(['index-ad-config.js']).INDEX_AD_CONFIG; // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 광고 크기와 단위를 독립 검증
@@ -61,6 +68,17 @@ if (indexAdConfig?.kakao?.mobile?.width !== 320 || indexAdConfig?.kakao?.mobile?
 if (indexAdConfig?.kakao?.desktop?.unit !== 'DAN-q4nR1JpPnBFtotbe') fail('인덱스 PC 광고 단위가 승인값과 다릅니다.'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 광고 화면별 집계가 섞이지 않도록 승인 단위를 고정
 if (indexAdConfig?.kakao?.mobile?.unit !== 'DAN-fmQS1GFVu1j2yBow') fail('인덱스 모바일 광고 단위가 승인값과 다릅니다.'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 모바일 인덱스의 승인 단위가 유지되는지 확인
 /** SOFTM-INDEX-ENTRY-CHECK END */
+
+/** SOFTM-LANDING-ADS START 날짜:20260904 : 안내 광고가 기존 수익 슬롯을 재사용하거나 잘못된 크기로 요청되지 않도록 검증 */
+if (indexSource.includes('href="nationwide-daycare-map.html"')) fail('index.html: 주야간보호는 안내 페이지를 거쳐야 합니다.');
+const landingAdConfig = runFiles(['category-landing-ad-config.js']).CATEGORY_LANDING_AD_CONFIG;
+const existingAdUnits = ['index-ad-config.js', 'nationwide-care-ad-config.js', 'nationwide-daycare-ad-config.js'].flatMap(file => [...read(file).matchAll(/unit:\s*['"]([^'"]+)['"]/g)].map(match => match[1]));
+for (const [device, width, height] of [['desktop', 728, 90], ['mobile', 320, 100]]) {
+  const slot = landingAdConfig.kakao[device];
+  if (slot.width !== width || slot.height !== height) fail(`안내 ${device} 광고 크기 불일치`);
+  if (slot.unit && existingAdUnits.includes(slot.unit)) fail(`안내 ${device} 광고에 인덱스·지도 광고 단위 재사용`);
+}
+/** SOFTM-LANDING-ADS END */
 
 /** SOFTM-SEO-LANDING-CHECK START 날짜:20260903 : 공개 도메인·브랜드·검색 대표 페이지와 지도 도구의 색인 경계가 다시 섞이지 않도록 자동 검증 */
 const publicOrigin = 'https://homecare.designboard.net';
