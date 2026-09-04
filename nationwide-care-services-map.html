@@ -418,7 +418,17 @@ function basicInfoHtml(data){const fields=data.fields||{},phone=basicField(field
 async function loadBasicInfo(c){const host=$('basicLive');if(CONFIG.source!=='nhis'||!host)return;const token=++basicInfoToken;try{const data=await fetchOfficialTab(c,11);if(token!==basicInfoToken||activeDetail?.i!==c.i||!host.isConnected)return;host.innerHTML=basicInfoHtml(data)}catch(error){if(token!==basicInfoToken||activeDetail?.i!==c.i||!host.isConnected)return;host.innerHTML=`<div class="basic-live-message">저장된 연락정보가 없습니다. <a href="${officialUrl(c)}" target="_blank" rel="noopener">공단 원문에서 확인</a></div>`}}
 async function loadOfficialTab(c,tab){if(CONFIG.source!=='nhis'||!$('officialPanel'))return;officialActiveTab=tab;document.querySelectorAll('[data-official-tab]').forEach(button=>{const active=Number(button.dataset.officialTab)===tab;button.classList.toggle('active',active);button.setAttribute('aria-selected',active?'true':'false')});const panel=$('officialPanel'),token=++officialDetailToken;panel.innerHTML=`<div class="official-loading">${tab===18?'저장된 공단 등록사진을 확인하고 있습니다.':'저장된 공단 상세정보를 확인하고 있습니다.'}</div>`;try{const data=tab===18?await fetchNhisPhotos(c):await fetchOfficialTab(c,tab);if(token!==officialDetailToken||activeDetail?.i!==c.i||officialActiveTab!==tab)return;panel.innerHTML=officialPanelHtml(data,c)}catch(error){if(token!==officialDetailToken||activeDetail?.i!==c.i)return;const missing=String(error.message).includes('아직 정적 데이터에 수집되지 않았습니다.'),label=tab===18?(missing?'사진 정보 미수집':'사진 주소 확인 실패'):'공단 상세정보 표시 실패';panel.innerHTML=`<div class="official-empty"><div><b>${label}</b><br>${esc(error.message)}<br><br><a href="${officialUrl(c)}" target="_blank" rel="noopener">공단 원문에서 확인</a></div></div>`}}
 /** SOFTM-NHIS-STATIC END */
-function switchDetailView(c,view){const official=view==='official';document.querySelectorAll('[data-detail-view]').forEach(button=>{const active=button.dataset.detailView===view;button.classList.toggle('active',active);button.setAttribute('aria-selected',active?'true':'false')});const basic=$('detailBasic'),details=$('detailOfficial');if(basic)basic.hidden=official;if(details)details.hidden=!official;if(official&&CONFIG.source==='nhis')void loadOfficialTab(c,officialActiveTab||11)}
+/** SOFTM-POPUP-TOP START 날짜:20260904 : 탭을 바꾸면 이전 내용의 하단 위치가 이어지지 않도록 팝업 본문만 처음으로 이동 */
+function switchDetailView(c,view){
+ const official=view==='official';
+ document.querySelectorAll('[data-detail-view]').forEach(button=>{const active=button.dataset.detailView===view;button.classList.toggle('active',active);button.setAttribute('aria-selected',active?'true':'false')});
+ const basic=$('detailBasic'),details=$('detailOfficial');
+ if(basic)basic.hidden=official;
+ if(details)details.hidden=!official;
+ $('detailBody').scrollTo({top:0,behavior:'instant'});
+ if(official&&CONFIG.source==='nhis')void loadOfficialTab(c,officialActiveTab||11);
+}
+/** SOFTM-POPUP-TOP END */
 function mainStaffCount(c){return['s','rn','na','pt','ot','cw'].reduce((sum,key)=>sum+(Number(c[key])||0),0)}
 function operationPeriod(value){if(!value)return'미확인';const start=new Date(`${String(value).slice(0,10)}T00:00:00`);if(Number.isNaN(start.getTime()))return'미확인';const today=new Date(),months=Math.max(0,(today.getFullYear()-start.getFullYear())*12+today.getMonth()-start.getMonth()-(today.getDate()<start.getDate()?1:0)),years=Math.floor(months/12),remain=months%12;return years?`${years}년${remain?` ${remain}개월`:''}`:`${Math.max(1,remain)}개월`}
 function openDetail(c,reveal=true){
