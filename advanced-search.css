@@ -30,3 +30,28 @@
 .advanced-search [disabled]{opacity:.5;cursor:not-allowed}
 @media(max-width:640px){.advanced-summary-help{display:block;margin:5px 0 0 15px;font-size:11px}.advanced-body{padding:0 10px 12px}.advanced-toolbar{align-items:flex-start}.advanced-toolbar p{margin-top:0}.advanced-basic{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.advanced-address{grid-column:1/-1}.advanced-groups{grid-template-columns:1fr}.advanced-group{padding:8px 10px 10px}.advanced-group legend{font-size:12px}.advanced-option{font-size:12px}.advanced-option small{font-size:10px}}
 /** SOFTM-ADVANCED-SEARCH END */
+
+/** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 긴 상세조건에서도 조회 중과 완료를 같은 위치에서 확인하고 결과로 이동하게 함 */
+.advanced-feedback{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:190;width:min(480px,calc(100vw - 24px));box-sizing:border-box;padding:15px 16px;border:1px solid #aecce4;border-top:4px solid #176cc1;border-radius:14px;background:#fff;color:#173f6b;box-shadow:0 10px 38px rgba(20,47,74,.25);font-family:inherit;line-height:1.5;isolation:isolate}
+.advanced-feedback[hidden],.advanced-feedback [hidden]{display:none!important}
+.advanced-feedback-title{display:block;padding-right:32px;font-size:15px;font-weight:850;overflow-wrap:anywhere}
+.advanced-feedback.pending .advanced-feedback-title{padding-right:0}
+.advanced-feedback-detail{margin:5px 0 0;font-size:12px;color:#4e657b;overflow-wrap:anywhere}
+.advanced-feedback-track{height:5px;margin-top:12px;overflow:hidden;border-radius:999px;background:#e2edf7}
+.advanced-feedback-track>span{display:block;width:0;height:100%;border-radius:inherit;background:#176cc1;transition:width .18s ease-out}
+.advanced-feedback.indeterminate .advanced-feedback-track>span{width:38%;animation:advanced-search-progress 1.15s ease-in-out infinite}
+.advanced-feedback-actions{display:flex;justify-content:flex-end;margin-top:10px}
+.advanced-feedback.pending .advanced-feedback-actions{display:none}
+.advanced-feedback button{box-sizing:border-box;min-height:44px;font:inherit;font-size:13px;font-weight:800;line-height:1.3;cursor:pointer;touch-action:manipulation}
+.advanced-feedback-view{padding:9px 15px;border:1px solid #aac9e2;border-radius:9px;background:#edf6ff;color:#145991}
+.advanced-feedback-close{position:absolute;right:5px;top:5px;width:44px;height:44px;min-width:44px;padding:0;border:0;border-radius:50%;background:transparent;color:#486177;font-size:25px!important}
+.advanced-feedback-view:hover{background:#dfeffc}.advanced-feedback-close:hover{background:#edf2f7}
+.advanced-feedback button:focus-visible{outline:3px solid #176fd1;outline-offset:2px}
+.advanced-feedback.success{border-top-color:#087650}.advanced-feedback.success .advanced-feedback-title{color:#086444}
+.advanced-feedback.warning{border-top-color:#a46509}.advanced-feedback.warning .advanced-feedback-title{color:#805009}
+.advanced-feedback.error{border-top-color:#b42318}.advanced-feedback.error .advanced-feedback-title{color:#a32017}
+.advanced-feedback-live{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@keyframes advanced-search-progress{from{transform:translateX(-110%)}to{transform:translateX(290%)}}
+@media(max-width:640px){.advanced-feedback{padding:13px 14px}.advanced-feedback-title{font-size:14px}.advanced-feedback-detail{font-size:12px}.advanced-feedback-actions{margin-top:8px}}
+@media(prefers-reduced-motion:reduce){.advanced-feedback-track>span{transition:none}.advanced-feedback.indeterminate .advanced-feedback-track>span{animation:none;width:100%;opacity:.55}}
+/** SOFTM-SEARCH-FEEDBACK END */

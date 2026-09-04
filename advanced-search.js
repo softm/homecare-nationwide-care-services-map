@@ -97,7 +97,7 @@
         return indexTask;
     }
 
-    async function mount({ host, type, rows, onChange, region }) {
+    async function mount({ host, type, rows, onChange, region, resultTarget }) { // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 실제 조회 결과를 알리고 같은 결과 영역으로 이동하도록 연결
         let state = readState(new URLSearchParams(location.search), type);
         let index = null;
         let loadError = false;
@@ -121,8 +121,100 @@
             <label class="advanced-address">상세 주소<input data-state="address" list="advanced-address-options" placeholder="읍·면·동 입력 또는 선택" autocomplete="off"><datalist id="advanced-address-options"></datalist></label></div>
             <p class="advanced-help">상세 주소는 선택 지역의 주소에 기록된 명칭으로 찾습니다.${type !== 'nursing-hospital' ? ' 설립주체 ‘미확인’은 공단 검색 자료에서 확인되지 않은 기관입니다.' : ''}</p>
             ${groups.length ? `<p class="advanced-logic">같은 묶음에서는 하나 이상, 서로 다른 묶음은 모두 충족하는 기관을 찾습니다. 각 조건 옆 기관 수는 현재 급여종류의 전국 기준입니다.</p><div class="advanced-groups">${groups.map(groupHtml).join('')}</div><p class="advanced-source">공단 검색 확인 ${date || '미완료'} · <a href="https://www.longtermcare.or.kr/npbs/r/a/201/selectLtcoSrch.web" target="_blank" rel="noopener">공단 조건 안내</a></p>` : ''}
-            <p class="advanced-status" role="status" aria-live="polite"></p></div></details><div class="advanced-selected" aria-label="선택한 상세조건"></div>`;
+            <p class="advanced-status">현재 조회 결과를 준비하고 있습니다.</p></div></details><div class="advanced-selected" aria-label="선택한 상세조건"></div>`; // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 전국 예상 수와 실제 조회 결과를 혼동하거나 안내를 중복해서 읽지 않도록 분리
         const control = key => host.querySelector(`[data-state="${key}"]`);
+        /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 조건 조작부터 실제 반영 완료까지 두 지도에서 동일한 피드백을 제공 */
+        const notice = document.createElement('div');
+        notice.className = 'advanced-feedback';
+        notice.hidden = true;
+        notice.innerHTML = '<div class="advanced-feedback-copy"><strong class="advanced-feedback-title"></strong><p class="advanced-feedback-detail"></p></div><div class="advanced-feedback-track" role="progressbar" aria-label="상세조건 조회 진행"><span></span></div><div class="advanced-feedback-actions"><button type="button" class="advanced-feedback-view">결과 보기</button><button type="button" class="advanced-feedback-close" aria-label="조회 알림 닫기">×</button></div>';
+        const live = document.createElement('div');
+        live.className = 'advanced-feedback-live';
+        live.setAttribute('role', 'status');
+        live.setAttribute('aria-live', 'polite');
+        live.setAttribute('aria-atomic', 'true');
+        document.body.append(notice, live);
+        const noticeTitle = notice.querySelector('.advanced-feedback-title');
+        const noticeDetail = notice.querySelector('.advanced-feedback-detail');
+        const progressTrack = notice.querySelector('.advanced-feedback-track');
+        const progressBar = progressTrack.querySelector('span');
+        const viewButton = notice.querySelector('.advanced-feedback-view');
+        const closeButton = notice.querySelector('.advanced-feedback-close');
+        let generation = 0;
+        let hideTimer;
+        let inputTimer;
+        let pending = false;
+        let returnFocus = null;
+        const signature = () => JSON.stringify([state.owner, state.facility, state.address ? state.addressMode : '', normalize(state.address), [...state.features].sort()]);
+        let lastSignature = signature();
+        const setBusy = value => resultTarget?.setAttribute('aria-busy', String(value));
+        function hideNotice(restoreFocus = false) {
+            clearTimeout(hideTimer);
+            const focused = notice.contains(document.activeElement);
+            notice.hidden = true;
+            if (restoreFocus && focused) (returnFocus?.isConnected ? returnFocus : host.querySelector('summary')).focus({ preventScroll: true });
+        }
+        function scheduleHide() {
+            clearTimeout(hideTimer);
+            if (!pending && !notice.contains(document.activeElement) && !notice.matches(':hover')) hideTimer = setTimeout(() => hideNotice(), 4000);
+        }
+        function cancel() {
+            generation++;
+            clearTimeout(inputTimer);
+            pending = false;
+            setBusy(false);
+            hideNotice(true);
+            live.textContent = '';
+        }
+        function describe(outcome) {
+            const count = Math.max(0, Number(outcome.count) || 0);
+            const partial = Boolean(outcome.partial || outcome.unresolved);
+            const title = `조회 결과 ${count.toLocaleString()}곳`;
+            const details = [];
+            if (outcome.scope) details.push(outcome.scope);
+            if (!outcome.mapReady) details.push('지도 연결 전 · 목록 조회 완료');
+            else if (Number.isFinite(outcome.markerCount) && outcome.markerCount !== count) details.push(`지도 표시 ${outcome.markerCount.toLocaleString()}곳`);
+            if (outcome.unresolved) details.push(`위치 미확인 ${Number(outcome.unresolved).toLocaleString()}곳 포함`);
+            else if (outcome.partial) details.push('일부 자료만 확인했습니다.');
+            if (count === 0 && !partial) details.push('조건에 맞는 기관이 없습니다. 조건을 줄여 다시 조회해 주세요.');
+            return { title, detail: details.join(' · '), partial, count };
+        }
+        function report(outcome) {
+            if (!outcome || outcome.cancelled) return;
+            const result = describe(outcome);
+            host.querySelector('.advanced-status').textContent = [result.title, result.detail].filter(Boolean).join(' · ');
+        }
+        function updateProgress(token, { current, total, message } = {}) {
+            if (token !== generation) return;
+            const determinate = Number.isFinite(current) && Number.isFinite(total) && total > 0;
+            notice.classList.toggle('indeterminate', !determinate);
+            noticeDetail.textContent = message || '선택한 조건으로 목록과 지도를 확인하고 있습니다.';
+            if (determinate) {
+                const value = Math.max(0, Math.min(total, current));
+                progressTrack.setAttribute('aria-valuemin', '0');
+                progressTrack.setAttribute('aria-valuemax', String(total));
+                progressTrack.setAttribute('aria-valuenow', String(value));
+                progressBar.style.width = `${value / total * 100}%`;
+                noticeDetail.textContent += ` · ${value.toLocaleString()}/${total.toLocaleString()}곳`;
+            } else {
+                for (const name of ['aria-valuemin', 'aria-valuemax', 'aria-valuenow']) progressTrack.removeAttribute(name);
+                progressBar.style.width = '';
+            }
+        }
+        viewButton.addEventListener('click', () => {
+            if (!resultTarget) return;
+            hideNotice();
+            if (!resultTarget.hasAttribute('tabindex')) resultTarget.setAttribute('tabindex', '-1');
+            resultTarget.focus({ preventScroll: true });
+            const offset = (document.querySelector('.category-nav')?.getBoundingClientRect().height || 0) + 16;
+            window.scrollTo({ top: window.scrollY + resultTarget.getBoundingClientRect().top - offset, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        });
+        closeButton.addEventListener('click', () => hideNotice(true));
+        notice.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+        notice.addEventListener('mouseleave', scheduleHide);
+        notice.addEventListener('focusin', () => clearTimeout(hideTimer));
+        notice.addEventListener('focusout', () => setTimeout(scheduleHide, 0));
+        /** SOFTM-SEARCH-FEEDBACK END */
         function suggestions() {
             const area = region();
             const values = new Set(rows.filter(row => (!area.province || row.p === area.province) && (!area.city || row.c === area.city)).flatMap(row => addressParts(row, state.addressMode)));
@@ -130,6 +222,11 @@
             control('address').placeholder = state.addressMode === 'road' ? '도로명 입력 또는 선택' : '읍·면·동 입력 또는 선택';
         }
         function sync() {
+            /** SOFTM-SEARCH-FOCUS START 날짜:20260904 : 조건칩을 다시 그려도 키보드로 이어서 해제할 수 있도록 포커스를 보존 */
+            const activeChip = document.activeElement?.closest('[data-remove]');
+            const chipKey = activeChip && host.contains(activeChip) ? activeChip.dataset.remove : null;
+            const chipPosition = chipKey ? [...host.querySelectorAll('[data-remove]')].indexOf(activeChip) : -1;
+            /** SOFTM-SEARCH-FOCUS END */
             for (const key of ['owner', 'facility', 'addressMode', 'address']) if (control(key)) control(key).value = state[key];
             host.querySelectorAll('[data-feature]').forEach(input => { input.checked = state.features.includes(input.dataset.feature); });
             host.querySelectorAll('[data-group]').forEach(input => {
@@ -145,10 +242,73 @@
             if (state.address) selected.push(['address', `${state.addressMode === 'road' ? '도로명' : '읍·면·동'}: ${state.address}`]);
             for (const group of groups) for (const option of group.options) if (state.features.includes(option[0])) selected.push([option[0], `${group.label === option[1] ? '' : group.label + ' · '}${option[1]}`]);
             host.querySelector('.advanced-selected').innerHTML = selected.map(([key, label]) => `<button type="button" data-remove="${key}" aria-label="${escape(label)} 조건 해제">${escape(label)} <span aria-hidden="true">×</span></button>`).join('');
-            const count = rows.filter(row => model.matches(row, state)).length;
-            host.querySelector('.advanced-status').textContent = loadError && hasDataFilter() ? '선택한 공단 조건을 확인할 수 없어 결과를 표시하지 않습니다. 다시 불러오거나 상세조건을 초기화해 주세요.' : `상세조건에 맞는 기관: 전국 ${count.toLocaleString()}곳 · 지도·지역·등급 조건은 추가로 적용됩니다.`;
+            /** SOFTM-SEARCH-FOCUS START 날짜:20260904 : 사라진 조건칩은 옆 칩 또는 초기화 버튼으로 안전하게 포커스를 넘김 */
+            if (chipKey) {
+                const chips = [...host.querySelectorAll('[data-remove]')];
+                const next = chips.find(button => button.dataset.remove === chipKey) || chips[Math.min(chipPosition, chips.length - 1)] || host.querySelector('.advanced-reset');
+                next.focus({ preventScroll: true });
+            }
+            if (loadError && hasDataFilter()) host.querySelector('.advanced-status').textContent = '선택한 공단 조건을 확인할 수 없어 결과를 표시하지 않습니다. 다시 불러오거나 상세조건을 초기화해 주세요.';
+            /** SOFTM-SEARCH-FOCUS END */
         }
-        function changed() { sync(); onChange(); }
+        /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 마지막 조건의 실제 완료만 알리고 빠른 조회에서도 진행 표시를 인지하게 함 */
+        async function changed() {
+            clearTimeout(inputTimer);
+            const nextSignature = signature();
+            if (nextSignature === lastSignature) return;
+            lastSignature = nextSignature;
+            sync();
+            const token = ++generation;
+            const started = performance.now();
+            const isCurrent = () => token === generation;
+            pending = true;
+            returnFocus = document.activeElement;
+            clearTimeout(hideTimer);
+            notice.className = 'advanced-feedback pending indeterminate';
+            notice.hidden = false;
+            progressTrack.hidden = false;
+            viewButton.hidden = true;
+            closeButton.hidden = true;
+            noticeTitle.textContent = '상세조건 적용 중…';
+            updateProgress(token);
+            setBusy(true);
+            host.querySelector('.advanced-status').textContent = '선택한 상세조건으로 조회하고 있습니다.';
+            live.textContent = '상세조건을 적용하고 있습니다.';
+            try {
+                const outcome = await onChange({ isCurrent, progress: value => updateProgress(token, value) });
+                if (!isCurrent()) return;
+                if (outcome?.cancelled) { cancel(); return; }
+                if (!outcome || !Number.isFinite(outcome.count)) throw new Error('조회 결과를 확인하지 못했습니다.');
+                report(outcome);
+                setBusy(false);
+                await new Promise(resolve => setTimeout(resolve, Math.max(0, 300 - (performance.now() - started))));
+                if (!isCurrent()) return;
+                pending = false;
+                const result = describe(outcome);
+                notice.className = `advanced-feedback ${result.partial ? 'warning' : result.count === 0 ? 'empty' : 'success'}`;
+                noticeTitle.textContent = result.partial ? result.title : `조건 적용 완료 · ${result.title}`;
+                noticeDetail.textContent = result.detail || '목록과 지도에 반영했습니다.';
+                progressTrack.hidden = true;
+                viewButton.hidden = !resultTarget;
+                closeButton.hidden = false;
+                live.textContent = `${noticeTitle.textContent} ${noticeDetail.textContent}`;
+                scheduleHide();
+            } catch (error) {
+                if (!isCurrent()) return;
+                pending = false;
+                setBusy(false);
+                notice.className = 'advanced-feedback error';
+                noticeTitle.textContent = '조건을 적용하지 못했습니다.';
+                noticeDetail.textContent = '잠시 후 조건을 다시 선택해 주세요.';
+                progressTrack.hidden = true;
+                viewButton.hidden = true;
+                closeButton.hidden = false;
+                host.querySelector('.advanced-status').textContent = `${noticeTitle.textContent} ${noticeDetail.textContent}`;
+                live.textContent = host.querySelector('.advanced-status').textContent;
+                scheduleHide();
+            }
+        }
+        /** SOFTM-SEARCH-FEEDBACK END */
         host.addEventListener('change', event => {
             const input = event.target;
             if (input.dataset.state) {
@@ -164,10 +324,10 @@
             } else return;
             changed();
         });
-        let inputTimer;
         control('address').addEventListener('input', event => {
             state.address = event.target.value.trim().slice(0, 80);
             clearTimeout(inputTimer);
+            if (signature() !== lastSignature) cancel(); // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 새 주소를 입력하는 동안 이전 조회의 완료 알림을 남기지 않음
             inputTimer = setTimeout(changed, 180);
         });
         host.addEventListener('click', event => {
@@ -181,15 +341,20 @@
                 changed();
             } else if (button.matches('.advanced-retry')) location.reload();
         });
+        /** SOFTM-SEARCH-REGION START 날짜:20260904 : 기본 지역조회가 한 번만 실행되면서 새 지역의 상세주소 조건을 사용하도록 먼저 정리 */
         for (const id of ['province', 'city']) document.getElementById(id)?.addEventListener('change', () => {
+            clearTimeout(inputTimer);
+            cancel();
             state.address = '';
             suggestions();
-            changed();
-        });
+            sync();
+            lastSignature = signature();
+        }, true);
+        /** SOFTM-SEARCH-REGION END */
         sync();
         suggestions();
         if (countActive()) host.querySelector('details').open = true;
-        return { matches: row => !(loadError && hasDataFilter()) && model.matches(row, state), write: params => writeState(params, state), state: () => ({ ...state, features: [...state.features] }) };
+        return { matches: row => !(loadError && hasDataFilter()) && model.matches(row, state), write: params => writeState(params, state), state: () => ({ ...state, features: [...state.features] }), report, cancel }; // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 기본조회 완료와 상세조회 취소도 공용 상태에 반영
     }
     const api = { mount, createMatcher, readState, writeState, sanitize, addressParts, groupsFor, emptyState };
     root.CareAdvancedSearch = Object.freeze(api);
