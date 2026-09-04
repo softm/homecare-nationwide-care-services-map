@@ -118,6 +118,7 @@ if (!careSource.includes('officialSummaryTabData') || !careSource.includes('공�
 if (!daycareSource.includes('daycareSummaryDetailHtml') || !daycareSource.includes('daycareOfficialType(center)')) fail('전국 주간 공단 상세 구현 또는 실제 급여코드 조회 누락');
 if (/NhisStaticData\.detail\(id\s*,\s*['"]B03['"]\)/.test(daycareSource)) fail('전국 주간 공단 상세 급여코드 B03 고정 호출이 남아 있습니다.');
 if (!nhisLoaderSource.includes("collected('detail'") || !nhisLoaderSource.includes('code?(details[code]||null)')) fail('공단 상세 수집목록 검사 또는 급여코드 오조회 방지 누락');
+if (!nhisLoaderSource.includes('.json.gz') || !nhisLoaderSource.includes("new DecompressionStream('gzip')")) fail('공단 상세 gzip 경로 또는 브라우저 압축 해제 로직 누락'); // SOFTM-NHIS-GZIP 날짜:20260903 : 비압축 상세가 다시 배포되어 GitHub Pages 용량을 초과하지 않도록 검사
 /** SOFTM-NHIS-DETAIL-FALLBACK-CHECK END */
 
 async function verifyGeocoderModule() {

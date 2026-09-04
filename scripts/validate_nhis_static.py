@@ -2,6 +2,7 @@
 """정적 공단 데이터의 스키마와 필수 표본을 검증한다."""
 
 # /** SOFTM-NHIS-VALIDATE START 날짜:20260903 : 불완전한 수집물이 배포되어 상세 팝업을 깨뜨리지 않도록 사전 검증 */
+import gzip
 import json
 import re
 import sys
@@ -15,8 +16,11 @@ ID_PATTERN = re.compile(r"^\d{11}$")
 
 def read(path):
     try:
+        if path.suffix == ".gz":
+            with gzip.open(path, "rt", encoding="utf-8") as stream:
+                return json.load(stream)
         return json.loads(path.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError) as error:
+    except (FileNotFoundError, OSError, json.JSONDecodeError) as error:
         raise AssertionError(f"JSON을 읽을 수 없습니다: {path.relative_to(ROOT)} ({error})") from error
 
 
@@ -27,7 +31,11 @@ def main():
     assert manifest.get("detailProfile") == "official-page-tabs-11-14-19-v1", "공단 화면 보완 상세 규격이 아닙니다." # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 예전 상세 규격의 배포를 차단
     assert isinstance(manifest.get("completedShards"), list), "manifest completedShards가 없습니다."
     assert all(isinstance(manifest.get(key), int) for key in ("updatedCount", "unchangedCount", "failureCount")), "manifest 처리 건수 필드가 없습니다."
-    detail_ids = sorted(path.stem for path in (DATA / "details").glob("*/*.json"))
+    # /** SOFTM-NHIS-GZIP START 날짜:20260903 : 배포 용량을 줄인 압축 상세의 수량·기관기호·내부 실패를 전체 검사 */
+    detail_files = sorted((DATA / "details").glob("*/*.json.gz"))
+    legacy_detail_files = sorted((DATA / "details").glob("*/*.json"))
+    detail_ids = [path.name.removesuffix(".json.gz") for path in detail_files]
+    assert not legacy_detail_files, f"비압축 상세 JSON이 남아 있습니다: {len(legacy_detail_files):,}개"
     photo_ids = sorted(path.stem for path in (DATA / "photos").glob("*/*.json"))
     assert manifest.get("detailIds") == detail_ids and manifest.get("detailCount") == len(detail_ids), "manifest 상세 수집목록이 실제 파일과 다릅니다."
     assert manifest.get("photoIds") == photo_ids and manifest.get("photoManifestCount") == len(photo_ids), "manifest 사진 수집목록이 실제 파일과 다릅니다."
@@ -43,12 +51,21 @@ def main():
         assert item.get("name") and isinstance(item.get("services"), list), f"필수 기관 필드 누락: {institution_id}"
         categories.update(service.get("category") for service in item["services"])
     assert len(ids) == len(set(ids)), "catalog에 기관기호 중복이 있습니다."
+    assert set(detail_ids) == set(ids), f"카탈로그와 상세 기관기호 불일치: 누락 {len(set(ids) - set(detail_ids)):,}개 · 초과 {len(set(detail_ids) - set(ids)):,}개"
+    embedded_failures = []
+    for path in detail_files:
+        payload = read(path)
+        for service_code, service_detail in payload.get("serviceDetails", {}).items():
+            for failure in service_detail.get("failures", []) or []:
+                embedded_failures.append(f"{path.name}:{service_code}:{failure.get('section', '')}")
+    assert not embedded_failures, f"상세 내부 수집 실패가 남아 있습니다: {len(embedded_failures):,}건 ({', '.join(embedded_failures[:3])})"
+    # /** SOFTM-NHIS-GZIP END */
     required_categories = {"facility", "daycare", "home-care", "home-nursing", "home-bath", "short-stay"}
     assert required_categories.issubset(categories), f"급여종류 누락: {sorted(required_categories - categories)}"
 
     required = next((item for item in institutions if item["id"] == "24119001267"), None)
     assert required and required["name"] == "효명노인주야간보호센터", "필수 검증기관 이름 또는 기관기호가 다릅니다."
-    detail = read(DATA / "details" / "24" / "24119001267.json")
+    detail = read(DATA / "details" / "24" / "24119001267.json.gz")
     assert detail.get("institutionId") == "24119001267" and detail.get("institutionTypeCode") == "B03", "통합 상세 스키마 식별자가 없습니다."
     assert detail.get("sources", {}).get("detail") == "data-go-kr:15058856", "통합 상세 출처가 없습니다."
     service = detail.get("serviceDetails", {}).get("B03", {})
@@ -56,7 +73,7 @@ def main():
     assert {"general", "capacity", "staff", "programs"}.issubset(service.get("availableSections", [])), "필수 상세 섹션이 없습니다."
 
     # /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : 공단 화면 고유 항목과 근속·CCTV 탭이 실제 정적 JSON에 보존되는지 고정 검증 */
-    official_detail = read(DATA / "details" / "24" / "24121000299.json")
+    official_detail = read(DATA / "details" / "24" / "24121000299.json.gz")
     official_service = official_detail.get("serviceDetails", {}).get("B03", {})
     official_tabs = official_service.get("officialPage", {}).get("tabs", {})
     assert {"11", "14", "19"}.issubset(official_tabs), "공단 화면 기본·인력·CCTV 탭 스냅샷이 없습니다."

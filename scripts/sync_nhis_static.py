@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gzip
 import hashlib
 import html
 import json
@@ -34,7 +35,7 @@ DETAIL_BASE = "https://apis.data.go.kr/B550928/getLtcInsttDetailInfoService02"
 SEARCH_BASE = "https://apis.data.go.kr/B550928/searchLtcInsttService02/getLtcInsttSeachList02"
 PHOTO_PAGE = "https://www.longtermcare.or.kr/npbs/r/a/201/selectLtcoSrchDetail.web"
 PHOTO_URL = "https://www.longtermcare.or.kr/npbs/attachfile/sendFileThumbnailTop.web?keyValue={key}"
-MAX_DAILY_CALLS = 8_000
+MAX_DAILY_CALLS = 900_000  # SOFTM-NHIS-API-LIMIT 날짜:20260903 : 운영계정 일일 한도 100만 회 확인 후 10% 여유를 남기고 전체 상세 수집이 중단되지 않도록 상향
 SCHEMA_VERSION = 1
 
 # /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : OpenAPI에 없는 기본정보·근속·CCTV도 공단 상세 화면과 같은 항목으로 보존 */
@@ -43,7 +44,7 @@ OFFICIAL_TAB_LABELS = {11: "기본정보", 14: "인력현황", 19: "CCTV현황"}
 DETAIL_PROFILE = "official-page-tabs-11-14-19-v1"
 # /** SOFTM-NHIS-OFFICIAL-PAGE END */
 
-PROVINCE_CODES = ["11", "26", "27", "28", "29", "30", "31", "36", "41", "42", "43", "44", "45", "46", "47", "48", "50"]
+PROVINCE_CODES = ["11", "26", "27", "28", "29", "30", "31", "36", "41", "43", "44", "46", "47", "48", "50", "51", "52"]  # SOFTM-NHIS-REGION-CODE 날짜:20260903 : 특별자치도 전환 뒤 강원·전북 기관이 목록 수집에서 누락되지 않도록 현행 시도코드 사용
 CATEGORY_CODES = {
     "facility": {"A01", "A02", "A03", "A04", "A05"},
     "daycare": {"B03", "C03"},
@@ -120,9 +121,25 @@ def write_json(path: Path, value: Any) -> bool:
 
 def load_json(path: Path, default: Any) -> Any:
     try:
+        if path.suffix == ".gz":
+            with gzip.open(path, "rt", encoding="utf-8") as stream:
+                return json.load(stream)
         return json.loads(path.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
         return default
+
+
+def write_gzip_json(path: Path, payload: Any) -> None:
+    """상세 정적 파일을 재현 가능한 gzip으로 원자 저장한다."""
+    # /** SOFTM-NHIS-GZIP START 날짜:20260903 : 전체 상세가 GitHub Pages 용량 한도를 넘지 않도록 기관별 JSON을 직접 압축 저장 */
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    encoded = (json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
+    with temporary.open("wb") as raw_stream:
+        with gzip.GzipFile(filename="", mode="wb", compresslevel=9, fileobj=raw_stream, mtime=0) as gzip_stream:
+            gzip_stream.write(encoded)
+    os.replace(temporary, path)
+    # /** SOFTM-NHIS-GZIP END */
 
 
 def load_local_env() -> None:
@@ -223,8 +240,12 @@ class DataGoClient:
         for attempt in range(5):
             try:
                 response = self.session.get(url, params=query, timeout=(8, 25))
-                if response.status_code in {429, 500, 502, 503, 504}:
+                # /** SOFTM-NHIS-API-LIMIT START 날짜:20260903 : 실제 일일 호출 제한에 도달하면 불필요한 재시도와 실패 문서 생성을 즉시 중단 */
+                if response.status_code == 429:
+                    raise ApiBudgetExceeded("공공데이터 API가 HTTP 429 호출 제한을 반환했습니다.")
+                if response.status_code in {500, 502, 503, 504}:
                     raise requests.HTTPError(f"HTTP {response.status_code}", response=response)
+                # /** SOFTM-NHIS-API-LIMIT END */
                 response.raise_for_status()
                 root = ET.fromstring(response.content)
                 code = root.findtext(".//resultCode") or "00"
@@ -232,6 +253,8 @@ class DataGoClient:
                     message = root.findtext(".//resultMsg") or "공공데이터 API 오류"
                     raise RuntimeError(f"API {code}: {message}")
                 return root
+            except ApiBudgetExceeded:  # SOFTM-NHIS-API-LIMIT 날짜:20260903 : HTTP 429를 일반 통신 오류로 다시 잡지 않고 전체 수집 체크포인트까지 즉시 전달
+                raise
             except (requests.RequestException, ET.ParseError, RuntimeError) as error:
                 last_error = error
                 if attempt == 4:
@@ -769,7 +792,11 @@ def main() -> int:
     fixture_dir = FIXTURE_ROOT if args.mode == "fixture" or not service_key else None
     client = DataGoClient(service_key, min(MAX_DAILY_CALLS, args.max_calls), fixture_dir)
     old_catalog = load_json(DATA_ROOT / "catalog.json", {"institutions": []}).get("institutions", [])
-    catalog = build_xlsx_catalog()
+    # /** SOFTM-NHIS-DETAIL-TARGET START 날짜:20260903 : 기관목록 수집 뒤 상세 수집이 같은 최종 기관목록 전체를 대상으로 이어지도록 보장 */
+    catalog = build_xlsx_catalog() if "catalog" in scopes else old_catalog
+    if not catalog:
+        catalog = build_xlsx_catalog()
+    # /** SOFTM-NHIS-DETAIL-TARGET END */
     live_seen: set[str] = set()
     if "catalog" in scopes and service_key and args.mode in {"incremental", "full"}:
         catalog, live_seen = merge_live_catalog(client, catalog)
@@ -803,8 +830,9 @@ def main() -> int:
             continue
         shard = institution["id"][:2]
         if "details" in scopes:
-            path = DATA_ROOT / "details" / shard / f"{institution['id']}.json"
-            existing = load_json(path, {})
+            path = DATA_ROOT / "details" / shard / f"{institution['id']}.json.gz"
+            legacy_path = path.with_suffix("")
+            existing = load_json(path, {}) if path.exists() else load_json(legacy_path, {})  # SOFTM-NHIS-GZIP 날짜:20260903 : 압축 전환 중에도 기존 JSON 체크포인트 결과를 이어받기 위한 호환 읽기
             requested_codes = [args.type.upper()] if args.type and args.type.upper() in [service["code"] for service in institution.get("services", [])] else [service["code"] for service in institution.get("services", [])]
             # /** SOFTM-NHIS-OFFICIAL-PAGE START 날짜:20260903 : 화면 탭 보완 전의 기존 상세 JSON은 완료로 오인하지 않고 순차 갱신 */
             complete = bool(requested_codes) and existing.get("id") == institution["id"] and all(
@@ -826,7 +854,7 @@ def main() -> int:
                         document = merge_detail_document(document, institution, detail, evaluations)
                         for item in detail.get("failures", []):
                             failures.append({"id": institution["id"], "scope": "details", "serviceCode": code, "section": item.get("section", ""), "message": item.get("message", "")})
-                    write_json(path, document)
+                    write_gzip_json(path, document)  # SOFTM-NHIS-GZIP 날짜:20260903 : 상세 생성 단계부터 압축해 비압축 파일이 다시 누적되지 않도록 저장
                     detail_success += 1
                     detail_updated += 1
                 except ApiBudgetExceeded as error:
@@ -870,7 +898,7 @@ def main() -> int:
         checkpoint = load_json(checkpoint_file, {})
         if checkpoint.get("completed") and checkpoint.get("shard", {}).get("count") == args.shard_count:
             completed_shards.append(checkpoint["shard"]["index"])
-    detail_ids = sorted(path.stem for path in (DATA_ROOT / "details").glob("*/*.json")) if (DATA_ROOT / "details").exists() else []
+    detail_ids = sorted(path.name.removesuffix(".json.gz") for path in (DATA_ROOT / "details").glob("*/*.json.gz")) if (DATA_ROOT / "details").exists() else []  # SOFTM-NHIS-GZIP 날짜:20260903 : 매니페스트가 실제 압축 상세 파일을 기준으로 기관기호를 기록
     photo_ids = sorted(path.stem for path in (DATA_ROOT / "photos").glob("*/*.json")) if (DATA_ROOT / "photos").exists() else []
     manifest.update({
         "schemaVersion": SCHEMA_VERSION, "detailProfile": DETAIL_PROFILE, "cycleId": checkpoint_state.get("cycleId") or datetime.now(timezone.utc).strftime("%Y%m"), "mode": args.mode, "generatedAt": generated_at, "updatedAt": generated_at, "catalogCount": len(catalog), # SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 배포 데이터가 공단 화면 보완 규격인지 확인 가능하게 기록
