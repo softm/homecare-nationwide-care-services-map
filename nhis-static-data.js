@@ -40,7 +40,7 @@
  window.NhisStaticData=Object.freeze({
   baseUrl:BASE.href,
   detail(id,serviceCode=''){const key=institutionId(id);return collected('detail',key,'공단 상세정보').then(()=>fetchGzipJson(`details/${key.slice(0,2)}/${key}.json.gz`,'공단 상세정보')).then(document=>({document,detail:serviceDetail(document,serviceCode)}))}, // SOFTM-NHIS-GZIP 날짜:20260903 : 상세 팝업이 기관별 압축 파일만 요청하도록 경로 전환
-  photos(id){const key=institutionId(id);return collected('photo',key,'공단 등록사진').then(()=>fetchJson(`photos/${key.slice(0,2)}/${key}.json`,'공단 등록사진'))},
+  photos(id){const key=institutionId(id);return fetchJson(`photos/${key.slice(0,2)}/${key}.json`,'공단 등록사진')}, // SOFTM-PHOTO-COLLECTED 날짜:20260904 : 전체 수집된 사진은 기관별 JSON을 바로 읽어 이전 수집목록 캐시가 표시를 막지 않도록 처리
   manifest(){return fetchJson('manifest.json','공단 데이터 수집 현황')},
   clear(){memory.clear();tasks.clear()}
  })
