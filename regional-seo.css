@@ -1,0 +1,61 @@
+/** SOFTM-REGIONAL-SEO START 날짜:20260904 : 지역별 실제 기관 정보를 긴 표의 가로 스크롤 없이 PC와 모바일에서 읽고 지도로 이어갈 수 있도록 공용 안내 서식을 확장 */
+.regional-list-link { display: block; padding-top: 14px; color: var(--blue); text-align: center; font-size: .9375rem; }
+.regional-context { margin-bottom: 36px; padding: 24px; border-left: 4px solid var(--blue); border-radius: 0 12px 12px 0; background: #f7f9fc; }
+.regional-context h2 { font-size: 1.125rem; }
+.regional-context p { margin: 10px 0 0; color: var(--muted); }
+.district-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 24px 0 0; padding: 0; list-style: none; }
+.district-list li { min-width: 0; }
+.district-list a { display: flex; height: 100%; flex-direction: column; padding: 20px; border: 1px solid var(--line); border-radius: 12px; text-decoration: none; }
+.district-list a:hover { border-color: var(--blue); background: var(--soft); }
+.district-list h3 { margin: 0 0 10px; }
+.district-count { color: var(--ink); font-weight: 750; }
+.district-evaluation-count { color: var(--muted); font-size: .875rem; }
+.district-action { margin-top: 16px; color: var(--blue); font-size: .875rem; }
+.evaluation-summary { margin: 20px 0; padding: 20px; border: 1px solid var(--line); border-radius: 12px; }
+.evaluation-summary h3 { margin: 0 0 12px; font-size: 1rem; }
+.evaluation-summary p { margin: 12px 0 0; color: var(--muted); font-size: .875rem; }
+.evaluation-counts { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; list-style: none; }
+.evaluation-counts li { padding: 5px 10px; border-radius: 6px; background: var(--soft); font-size: .875rem; }
+.institution-list { margin: 24px 0 0; padding: 0; list-style: none; }
+.institution-card { margin-bottom: 16px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; }
+.institution-title { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.institution-title h3 { margin: 0; font-size: 1.1875rem; }
+.institution-title a { color: var(--blue); }
+.institution-map-note { flex-shrink: 0; color: var(--muted); font-size: .8125rem; }
+.institution-address { margin: 10px 0 4px; }
+.institution-service { margin: 0; color: var(--muted); font-size: .8125rem; }
+.institution-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 20px; margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
+.institution-facts > div { min-width: 0; }
+.institution-facts dt { color: var(--muted); font-size: .8125rem; }
+.institution-facts dd { margin: 3px 0 0; font-size: .9375rem; font-weight: 650; }
+.regional-related { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--line); }
+.regional-related > ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 20px 0; padding: 0; list-style: none; }
+.regional-related > ul a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; padding: 8px 0; color: var(--blue); }
+.regional-related > ul span { flex-shrink: 0; color: var(--muted); font-size: .875rem; }
+.regional-back { display: inline-block; min-height: 44px; padding-block: 10px; color: var(--blue); }
+.province-navigation { margin-top: 28px; }
+.province-navigation h3 { margin: 0 0 12px; font-size: 1rem; }
+.province-navigation ul { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; }
+.province-navigation a { display: inline-block; min-height: 44px; padding-block: 10px; color: var(--muted); font-size: .875rem; }
+@media (max-width: 860px) {
+  .district-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .regional-related > ul { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .regional-context { margin-bottom: 28px; padding: 20px; font-size: .9375rem; }
+  .institution-card { padding: 20px; }
+  .institution-title { display: block; }
+  .institution-title h3 { font-size: 1.125rem; }
+  .institution-map-note { display: inline-block; margin-top: 4px; }
+  .institution-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .institution-address { font-size: .9375rem; }
+  .evaluation-summary { padding: 16px; }
+  .regional-related { margin-top: 32px; padding-top: 24px; }
+}
+@media (max-width: 480px) {
+  .district-list { grid-template-columns: 1fr; gap: 12px; }
+  .district-list a { padding: 18px; }
+  .site-head-inner { align-items: flex-start; gap: 12px; padding-block: 14px; }
+  .home-link { min-height: 36px; text-align: right; }
+}
+/** SOFTM-REGIONAL-SEO END */

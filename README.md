@@ -111,6 +111,12 @@ Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.m
 
 ## 검색엔진 등록
 
+<!-- SOFTM-SEO-REGIONAL START 날짜:20260904 : 기관 자료가 바뀔 때 검색 페이지와 사이트맵을 함께 갱신하도록 운영 명령을 기록 -->
+주간보호센터·요양원·방문요양센터의 지역별 검색 페이지는 `regions/`에 실제 기관 목록을 담은 HTML로 배포합니다. 시도 페이지는 시군구별 기관 수와 목록 링크를, 시군구 페이지는 해당 지역 전체 기관의 주소·공개 평가연도와 지도 연결을 제공합니다.
+
+기관 데이터를 재생성한 후에는 `npm run build`로 지역 페이지·유형별 탐색 링크·단일 사이트맵을 갱신하고 `npm run check`로 검증합니다. 생성된 지역 HTML은 직접 수정하지 않습니다. 공개 반영 확인은 `npm run check:search`로 수행하며, 검색엔진 접수·실제 노출·클릭은 아래 관리 도구에서 별도로 확인합니다.
+<!-- SOFTM-SEO-REGIONAL END -->
+
 <!-- SOFTM-SEARCH-REGISTRATION START 날짜:20260903 : 배포 후 소유권 확인과 사이트맵 제출 절차를 반복 가능하게 기록 -->
 
 1. [Google Search Console](https://search.google.com/search-console/)에 `https://homecare.designboard.net/` URL 접두어 속성을 추가하고 소유권을 확인합니다.

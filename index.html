@@ -3,19 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>돌봄한눈 | 전국 요양원·주야간보호센터 찾기</title> <!-- SOFTM-SEARCH-BRAND 날짜:20260904 : 사이트명 검색에서 고유 브랜드를 먼저 식별하도록 제목을 일치 -->
-  <meta name="description" content="국민건강보험공단·건강보험심사평가원 공개자료로 전국 요양원, 주야간보호센터, 방문요양기관과 요양병원을 지도에서 찾고 평가·인력·정원을 비교합니다.">
+  <!-- SOFTM-SEO-KEYWORDS START 날짜:20260904 : 보호자의 기관 찾기 검색어와 실제 제공하는 공개정보 범위를 검색 결과에 전달 -->
+  <title>돌봄한눈 | 전국 요양원·주간보호센터 찾기</title>
+  <meta name="description" content="우리 동네 요양원·주간보호센터·방문요양센터를 지역별 목록과 지도에서 찾으세요. 공단 공개 평가연도·정원·인력을 확인하고 비교할 수 있습니다. 요양병원은 심평원 공개 기관정보와 위치를 안내합니다.">
+  <!-- SOFTM-SEO-KEYWORDS END -->
   <!-- SOFTM-SEO-BRAND START 날짜:20260903 : 설명형 일반명 대신 고유 브랜드와 이용자 검색어를 분리해 검색결과에서 일관되게 인식되도록 구성 -->
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <link rel="canonical" href="https://homecare.designboard.net/">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="돌봄한눈">
-  <meta property="og:title" content="돌봄한눈 | 전국 요양원·주야간보호센터 찾기"> <!-- SOFTM-SEARCH-BRAND 날짜:20260904 : 공유 제목과 검색 제목의 브랜드 표기를 일치 -->
+  <meta property="og:title" content="돌봄한눈 | 전국 요양원·주간보호센터 찾기"> <!-- SOFTM-SEO-KEYWORDS 날짜:20260904 : 공유 제목을 보호자가 찾는 기관 용어와 일치 -->
   <meta property="og:description" content="공단·심평원 공개자료로 우리 부모님께 필요한 요양·돌봄기관을 찾고 비교하세요.">
   <meta property="og:url" content="https://homecare.designboard.net/">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="돌봄한눈 | 전국 요양원·주야간보호센터 찾기"> <!-- SOFTM-SEARCH-BRAND 날짜:20260904 : 공유 경로에 따라 이전 사이트명이 전달되지 않도록 일치 -->
+  <meta name="twitter:title" content="돌봄한눈 | 전국 요양원·주간보호센터 찾기"> <!-- SOFTM-SEO-KEYWORDS 날짜:20260904 : 공유 경로에 따라 검색 대표 제목이 달라지지 않도록 일치 -->
   <meta name="twitter:description" content="공단·심평원 공개자료로 전국 요양·돌봄기관을 지도에서 찾고 평가·인력·정원을 비교합니다.">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"돌봄한눈","alternateName":"우리 부모님 요양·돌봄기관 찾기","url":"https://homecare.designboard.net/","description":"국민건강보험공단과 건강보험심사평가원 공개자료로 전국 요양·돌봄기관을 찾고 비교하는 웹 서비스","inLanguage":"ko-KR"}</script>
   <!-- SOFTM-SEO-BRAND END -->
@@ -61,6 +63,7 @@
     /** SOFTM-INDEX-UNIFIED END */
     /** SOFTM-INDEX-CATEGORY-ADS END */
   </style>
+<link rel="stylesheet" href="seo-entrypoints.css?v=20260904-1"> <!-- SOFTM-SEO-ENTRYPOINTS 날짜:20260904 : 지역 탐색 링크를 작은 화면에서도 읽고 선택할 수 있도록 전용 서식을 연결 -->
 </head>
 <body>
   <main class="wrap">
@@ -124,6 +127,18 @@
     </section>
     <!-- /** SOFTM-INDEX-UNIFIED END */ -->
     <!-- /** SOFTM-INDEX-CATEGORY-ADS END */ -->
+<!-- SOFTM-SEO-HOME START 날짜:20260904 : 기관 유형 선택 다음에 지역별 실제 목록을 탐색할 수 있는 경로를 제공 -->
+    <section class="seo-home-content" aria-labelledby="regional-title">
+      <h2 id="regional-title">우리 동네 돌봄기관을 찾으세요</h2>
+      <p>요양원·주간보호센터·방문요양센터를 지역별 목록에서 살펴보세요. 기관 주소와 공단 평가연도를 확인한 뒤 지도에서 비교할 수 있습니다.</p>
+      <nav class="seo-region-grid" aria-label="지역별 기관 목록 바로가기">
+        <a href="daycare-map.html#regions"><strong>지역별 주간보호센터</strong><span>주야간보호센터 주소·평가 확인</span></a>
+        <a href="nursing-home-map.html#regions"><strong>지역별 요양원</strong><span>공개 평가·정원·시설 유형 확인</span></a>
+        <a href="home-care-map.html#regions"><strong>지역별 방문요양센터</strong><span>기관 소재지·공개 평가 확인</span></a>
+      </nav>
+      <p class="seo-service-note">돌봄한눈은 공단·심평원 공개자료를 바탕으로 정보를 제공하는 독립 검색·비교 서비스입니다. 장기요양기관은 공개 평가정보가 있는 경우에만 평가를 표시하며, 요양병원은 심평원 개설현황과 위치를 안내합니다.</p>
+    </section>
+<!-- SOFTM-SEO-HOME END -->
   </main>
   <script src="index-ad-config.js?v=20260903-1"></script><!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 전용 광고 단위만 이 화면에서 사용 -->
   <script src="nationwide-care-manifest.js"></script>

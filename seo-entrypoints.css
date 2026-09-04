@@ -1,0 +1,17 @@
+/** SOFTM-SEO-ENTRYPOINTS START 날짜:20260904 : 지역별 실제 목록을 키보드와 모바일에서도 쉽게 선택하도록 탐색 영역을 구성 */
+.seo-regions { margin-bottom: 44px; scroll-margin-top: 24px; }
+.seo-region-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.seo-region-grid a { display: flex; flex-direction: column; justify-content: center; min-height: 88px; padding: 16px; border: 1px solid #dce5ee; border-radius: 10px; background: #fff; color: #172c43; text-decoration: none; overflow-wrap: anywhere; }
+.seo-region-grid a:hover { background: #f2f6fb; border-color: #175cb5; }
+.seo-region-grid a:focus-visible { outline: 3px solid #ba6400; outline-offset: 3px; }
+.seo-region-grid strong { font-size: 1rem; line-height: 1.5; }
+.seo-region-grid span { margin-top: 6px; color: #53667b; font-size: .875rem; line-height: 1.6; }
+.seo-comparison-note { margin-top: 24px; padding: 20px 24px; border-radius: 12px; background: #f6f8fa; }
+.seo-comparison-note h3 { margin: 0 0 8px; }
+.seo-comparison-note p { color: #53667b; margin: 8px 0 0; }
+.seo-home-content { margin-top: 36px; padding-top: 28px; border-top: 1px solid #d9e2ec; word-break: keep-all; overflow-wrap: anywhere; }
+.seo-home-content h2 { margin: 0 0 12px; font-size: 24px; letter-spacing: -.04em; }
+.seo-home-content .seo-service-note { margin-top: 24px; font-size: 13px; }
+@media (max-width: 850px) { .seo-region-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .seo-region-grid { grid-template-columns: 1fr; } .seo-region-grid a { min-height: 76px; } .seo-comparison-note { padding: 18px; } }
+/** SOFTM-SEO-ENTRYPOINTS END */
