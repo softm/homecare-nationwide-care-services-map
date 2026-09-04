@@ -24,6 +24,7 @@ window.INDEX_AD_CONFIG = {
       {
         id: 'index-partner-recruit',
         active: true,
+        action: 'partner-inquiry', // SOFTM-PARTNER-BANNER 날짜:20260904 : 홈 제휴 카드도 메일 앱 대신 공통 문의창을 사용
         eyebrow: '요양·돌봄 서비스 사업자',
         title: '돌봄기관을 찾는 이용자에게 서비스를 알리세요',
         description: '요양시설, 주야간보호, 방문요양과 돌봄 서비스의 지역별 제휴 광고를 모집합니다.',

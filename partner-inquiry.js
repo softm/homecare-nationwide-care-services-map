@@ -142,7 +142,12 @@
             message: data.message.trim(),
             consent: '제휴 상담 및 회신을 위한 정보 전송 동의',
             page: `${location.origin}${location.pathname}`,
-            category: document.body.dataset.careCategory || new URLSearchParams(location.search).get('type') || 'daycare', // SOFTM-LANDING-ADS 날짜:20260904 : 안내 페이지의 문의도 주야간보호로 잘못 분류되지 않도록 실제 기관 유형을 전달
+            /** SOFTM-PARTNER-CONTEXT START 날짜:20260904 : 새 문의 배너의 유입 위치와 실제 선택 유형을 수신자가 구분하도록 전달 */
+            category: document.querySelector('[data-care-cost-page] [name="service"]')?.value
+                || document.body.dataset.careCategory || new URLSearchParams(location.search).get('type')
+                || (location.pathname.endsWith('-map.html') ? 'daycare' : 'general'),
+            placement: opener?.dataset.partnerPlacement || (openedFromList ? '지도 목록' : '페이지 광고·제휴'),
+            /** SOFTM-PARTNER-CONTEXT END */
             botcheck: false
         };
         submitting = true;

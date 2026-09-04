@@ -22,6 +22,10 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://homecare.designboard.net/#website","name":"돌봄한눈","alternateName":"우리 부모님 요양·돌봄기관 찾기","url":"https://homecare.designboard.net/","description":"국민건강보험공단과 건강보험심사평가원 공개자료로 전국 요양·돌봄기관을 찾고 비교하는 독립 정보 서비스","inLanguage":"ko-KR"}</script> <!-- SOFTM-BRAND-IDENTITY 날짜:20260904 : 소개 페이지가 같은 사이트를 가리키도록 식별자를 연결하고 실제 설명과 일치 -->
   <!-- SOFTM-SEO-BRAND END -->
   <link rel="stylesheet" href="care-theme.css?v=20260904-1"> <!-- SOFTM-CARE-THEME 날짜:20260904 : 안내와 지도에서도 같은 글자·색상을 이어서 사용 -->
+  <!-- SOFTM-PARTNER-BANNER START 날짜:20260904 : 홈에서도 메일 앱 없이 공통 문의창으로 제휴를 접수 -->
+  <link rel="stylesheet" href="partner-banner.css?v=20260904-1">
+  <link rel="stylesheet" href="partner-inquiry.css?v=20260904-3">
+  <!-- SOFTM-PARTNER-BANNER END -->
   <style>
     /** SOFTM-HOME-DESIGN START 날짜:20260904 : 돌봄 유형과 비용을 처음 찾는 보호자도 큰 글자와 일관된 선택 영역으로 탐색하도록 구성 */
     *{box-sizing:border-box}
@@ -65,7 +69,7 @@
     .house-banner small{display:block;margin-bottom:3px;color:var(--care-blue);font-size:12px;font-weight:650}
     .house-banner b{display:block;font-size:16px}
     .house-banner p{margin:4px 0 0;color:var(--care-muted);font-size:14px}
-    .ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:8px 14px;border-radius:9px;background:var(--care-ink);color:#fff;text-decoration:none;white-space:nowrap;font-size:14px;font-weight:650}
+    .ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:8px 14px;border:0;border-radius:9px;background:var(--care-ink);color:#fff;text-decoration:none;white-space:nowrap;font:650 14px/1.5 var(--care-font);cursor:pointer} /* SOFTM-PARTNER-BANNER 날짜:20260904 : 팝업을 여는 버튼도 기존 광고 행동과 같은 크기·서체를 유지 */
     .care-help{margin:0 0 36px;border:1px solid var(--care-line);border-radius:16px;background:#fff}
     .care-help summary{padding:20px 24px;cursor:pointer;font-size:17px;font-weight:650;min-height:64px}
     .care-help summary span{margin-left:8px;color:var(--care-muted);font-size:14px;font-weight:400}
@@ -112,6 +116,9 @@
     @media(max-width:640px){.wrap,.home-head-inner{width:calc(100% - 32px)}.home-head-inner{min-height:72px;gap:12px}.home-brand{font-size:22px;gap:8px}.brand-symbol{width:36px;height:36px}.home-nav{gap:14px}.home-nav a{font-size:14px}.home-nav .about-nav{display:none}.hero{grid-template-columns:1fr;gap:24px;padding:32px 0}.hero-description{font-size:16px;margin-top:16px}.hero-actions{margin-top:22px;gap:10px}.primary-link,.secondary-link{padding-inline:16px;gap:12px}.journey{padding:20px}.journey h2{font-size:20px;margin-bottom:16px}.journey ol{gap:14px}.care-help{margin-bottom:28px}.care-help summary{padding:18px;font-size:16px}.care-help summary span{display:block;margin:5px 0 0 18px}.help-options{grid-template-columns:1fr;padding:0 16px 16px}.help-options a{padding:15px}.category-heading{align-items:flex-start;gap:12px}.category-heading h2{font-size:25px}.category-heading p{font-size:15px}.category-heading>span{margin-top:5px}.categories{grid-template-columns:1fr;gap:12px}.category-link{padding:20px;display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:16px;row-gap:7px}.category-icon{grid-row:1/3;margin:0}.category-link b,.category-description{grid-column:2}.category-description{font-size:15px}.category-footer{grid-column:1/-1;margin-top:6px;padding-top:12px}.cost-guide{grid-template-columns:1fr;gap:22px;margin:32px 0;padding:24px 20px}.cost-guide h2{font-size:25px}.cost-guide p{font-size:15px}.service-identity,.wrap .seo-home-content{padding:22px 20px}.service-identity h2{font-size:22px}.ad-zone{padding:6px;margin-bottom:24px}.ad-host{min-height:100px}.house-banner{min-height:100px;grid-template-columns:1fr;padding:12px 14px}.house-banner .ad-cta{justify-self:start}.home-footer strong{display:block;margin-bottom:6px}}
     @media(prefers-reduced-motion:reduce){.category-link{transition:none}}
     /** SOFTM-HOME-DESIGN END */
+    /** SOFTM-AD-FIT START 날짜:20260904 : 320px 화면에서도 승인된 모바일 광고를 축소하거나 양옆을 자르지 않도록 실제 너비를 확보 */
+    @media(max-width:799px){.ad-zone{width:100vw;max-width:none;margin-inline:calc((100% - 100vw)/2);padding-inline:0;border-inline:0;border-radius:0}.ad-label{margin-inline:16px}.house-banner{width:calc(100% - 32px)}}
+    /** SOFTM-AD-FIT END */
   </style>
 <link rel="stylesheet" href="seo-entrypoints.css?v=20260904-1"> <!-- SOFTM-SEO-ENTRYPOINTS 날짜:20260904 : 지역 탐색 링크를 작은 화면에서도 읽고 선택할 수 있도록 전용 서식을 연결 -->
 </head>
@@ -264,11 +271,29 @@
       <a href="about.html">돌봄한눈 소개 · 자료 출처와 이용 안내 →</a>
     </section>
     <!-- SOFTM-BRAND-IDENTITY END -->
+    <!-- SOFTM-PARTNER-BANNER START 날짜:20260904 : 카카오 광고가 노출 중이어도 홈 끝에서 사업자가 문의 경로를 찾도록 상시 제공 -->
+    <aside class="partner-banner" aria-label="사업자 광고·제휴 문의">
+      <div>
+        <p class="partner-banner-label"><span>광고·제휴</span> 센터·돌봄 서비스 사업자</p>
+        <h2>돌봄이 필요한 가족에게<br>우리 서비스를 알려보세요</h2>
+        <p class="partner-banner-description">요양시설·주야간보호센터부터 복지용구, 이동·식사·간병 서비스까지. 원하는 지역의 이용자에게 알릴 제휴 광고를 모집합니다.</p>
+      </div>
+      <div class="partner-banner-actions">
+        <button type="button" data-partner-inquiry data-partner-placement="홈 하단" aria-haspopup="dialog">제휴 문의하기 <span aria-hidden="true">→</span></button>
+        <small>남겨 주신 이메일로 답변드립니다</small>
+      </div>
+      <p class="partner-banner-note">기관 검색순위와 공단평가에는 영향을 주지 않는 별도 광고입니다.</p>
+    </aside>
+    <!-- SOFTM-PARTNER-BANNER END -->
   </main>
   <!-- SOFTM-HOME-FOOTER START 날짜:20260904 : 페이지 끝에서도 서비스 성격과 소개로 이어지는 경로를 명확히 제공 -->
   <footer class="home-footer"><div class="wrap"><strong>돌봄한눈</strong>우리 부모님을 위한 돌봄기관 찾기 · 공개자료 기반 독립 정보 서비스</div></footer>
   <!-- SOFTM-HOME-FOOTER END -->
-  <script src="index-ad-config.js?v=20260903-1"></script><!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 전용 광고 단위만 이 화면에서 사용 -->
+  <!-- SOFTM-PARTNER-BANNER START 날짜:20260904 : 홈 상단·하단 문의를 같은 수신처와 성공 알림에 연결 -->
+  <script src="index-ad-config.js?v=20260904-2"></script>
+  <script src="partner-inquiry-config.js?v=20260904-2"></script>
+  <script src="partner-inquiry.js?v=20260904-4"></script>
+  <!-- SOFTM-PARTNER-BANNER END -->
   <script src="care-data.js?v=20260904-data"></script> <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 지도와 같은 JSON 목록으로 기관 수를 표시 -->
   <script>
     /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 인덱스 전용 광고 단위와 실제 데이터 수를 사용해 화면별 광고 집계를 분리 */
@@ -276,9 +301,43 @@
     const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     function safeAdUrl(value){try{const url=new URL(value,location.href);return ['https:','http:','mailto:'].includes(url.protocol)?url.href:'#'}catch{return'#'}}
     function directAd(){return (adConfig.direct?.items||[]).find(item=>item?.active&&item.title&&item.url)}
-    function directAdHtml(item){return item?`<div class="house-banner"><div><small>${escapeHtml(item.eyebrow||'돌봄 생활 정보')}</small><b>${escapeHtml(item.title)}</b><p>${escapeHtml(item.description||'')}</p></div><a class="ad-cta" href="${escapeHtml(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${escapeHtml(item.cta||'자세히 보기')}</a></div>`:''}
+    /** SOFTM-PARTNER-BANNER START 날짜:20260904 : 제휴 문의는 공통 팝업으로 열고 실제 유료 제휴 링크의 기존 이동 동작도 유지 */
+    function directAdHtml(item){
+      if(!item)return '';
+      const cta=escapeHtml(item.cta||'자세히 보기');
+      const action=item.action==='partner-inquiry'
+        ?`<button class="ad-cta" type="button" data-partner-inquiry data-partner-placement="홈 상단" aria-haspopup="dialog">${cta}</button>`
+        :`<a class="ad-cta" href="${escapeHtml(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${cta}</a>`;
+      return `<div class="house-banner"><div><small>${escapeHtml(item.eyebrow||'돌봄 생활 정보')}</small><b>${escapeHtml(item.title)}</b><p>${escapeHtml(item.description||'')}</p></div>${action}</div>`;
+    }
+    /** SOFTM-PARTNER-BANNER END */
     function renderDirectAd(){const zone=document.getElementById('indexAdZone'),host=document.getElementById('indexAdHost'),item=directAd();host.innerHTML=directAdHtml(item);zone.hidden=!item}
-    function initIndexAds(){const zone=document.getElementById('indexAdZone'),host=document.getElementById('indexAdHost'),mode=adConfig.enabled&&adConfig.mode!=='off'?adConfig.mode:'off';if(mode==='off'||!adConfig.placements?.banner){zone.hidden=true;return}const slot=matchMedia('(max-width:640px)').matches?adConfig.kakao?.mobile:adConfig.kakao?.desktop;if(mode==='direct'||!slot?.unit){renderDirectAd();return}host.style.minHeight=`${Number(slot.height)||90}px`;host.innerHTML=`<ins class="kakao_ad_area" style="display:none" data-ad-unit="${escapeHtml(slot.unit)}" data-ad-width="${Number(slot.width)}" data-ad-height="${Number(slot.height)}"></ins>`;zone.hidden=false;const script=document.createElement('script');script.id='indexKakaoAdFit';script.async=true;script.src=adConfig.kakao?.script||'https://t1.daumcdn.net/kas/static/ba.min.js';script.onerror=()=>{if(adConfig.fallbackToDirect)renderDirectAd()};document.head.appendChild(script);if(adConfig.fallbackToDirect)setTimeout(()=>{if(!host.querySelector('iframe'))renderDirectAd()},5200)}
+    /** SOFTM-AD-FIT START 날짜:20260904 : 홈의 기존 광고 ID를 유지하며 미노출·화면 회전에도 잘림이나 빈 광고 대신 제휴 문의를 제공 */
+    function initIndexAds(){
+      const zone=document.getElementById('indexAdZone'),host=document.getElementById('indexAdHost');
+      const mode=adConfig.enabled&&adConfig.mode!=='off'?adConfig.mode:'off';
+      if(mode==='off'||!adConfig.placements?.banner){zone.hidden=true;return}
+      zone.hidden=false;
+      const desktop=matchMedia('(min-width:800px)');
+      const slot=desktop.matches?adConfig.kakao?.desktop:adConfig.kakao?.mobile;
+      const expected=desktop.matches?[728,90]:[320,100];
+      if(mode==='direct'||!/^DAN-[A-Za-z0-9]+$/.test(slot?.unit||'')||slot.width!==expected[0]||slot.height!==expected[1]||host.clientWidth<slot.width){renderDirectAd();return}
+      host.style.minHeight=`${slot.height}px`;
+      host.innerHTML=`<ins class="kakao_ad_area" style="display:none" data-ad-unit="${escapeHtml(slot.unit)}" data-ad-width="${slot.width}" data-ad-height="${slot.height}" data-ad-onfail="indexAdFailed"></ins>`;
+      const ad=host.querySelector('ins');
+      let timeout;
+      const fallback=()=>{clearTimeout(timeout);if(adConfig.fallbackToDirect)renderDirectAd();else zone.hidden=true};
+      window.indexAdFailed=failedAd=>{if(failedAd===ad)fallback()};
+      desktop.addEventListener('change',fallback);
+      window.addEventListener('resize',()=>{if(host.clientWidth<slot.width)fallback()},{passive:true});
+      const script=document.createElement('script');
+      script.id='indexKakaoAdFit';script.async=true;script.charset='utf-8';
+      script.src=adConfig.kakao?.script||'https://t1.kakaocdn.net/kas/static/ba.min.js';
+      script.onerror=fallback;
+      timeout=setTimeout(()=>{if(!host.querySelector('iframe'))fallback()},10000);
+      document.body.appendChild(script);
+    }
+    /** SOFTM-AD-FIT END */
     /** SOFTM-INDEX-UNIFIED START 날짜:20260904 : 유형별 기관 수를 중복 카드 없이 각 선택 항목의 한 위치에만 갱신 */
     CareData.manifest().then(manifest=>{for(const link of document.querySelectorAll('[data-category]')){const meta=manifest[link.dataset.category],count=link.querySelector('[data-count]');if(meta?.count&&count)count.textContent=`${Number(meta.count).toLocaleString()}곳`}}).catch(error=>console.warn(error.message)); // SOFTM-DATA-UNIFIED 날짜:20260904 : 두 지도가 동일한 수집 JSON을 읽어 목록·평가·인력이 따로 갱신되지 않도록 통일
     /** SOFTM-INDEX-UNIFIED END */

@@ -1,0 +1,46 @@
+/** SOFTM-PARTNER-BANNER START 날짜:20260904 : 사업자용 문의를 기관 찾기와 구분하고 작은 화면에서도 누르기 쉬운 크기로 제공 */
+.partner-banner {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px 32px;
+  margin: 32px 0;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid #cddbd3;
+  border-radius: 16px;
+  background: #edf3ee;
+  color: #172c43;
+  font-family: var(--care-font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  text-align: left;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.partner-banner [hidden], .partner-banner[hidden] { display: none; }
+.partner-banner .partner-banner-label { margin: 0 0 10px; color: #43604c; font-size: 13px; font-weight: 700; line-height: 1.6; }
+.partner-banner-label span { display: inline-block; margin-right: 7px; padding: 2px 7px; border: 1px solid #a9bfae; border-radius: 5px; background: #fff; }
+.partner-banner h2 { margin: 0; color: #172c43; font-size: clamp(20px, 2.5vw, 24px); line-height: 1.5; letter-spacing: -.035em; }
+.partner-banner .partner-banner-description { max-width: 680px; margin: 10px 0 0; color: #41594a; font-size: 15px; line-height: 1.75; }
+.partner-banner-actions { display: grid; justify-items: center; gap: 8px; }
+.partner-banner button { display: inline-flex; justify-content: center; align-items: center; gap: 22px; min-height: 50px; padding: 12px 20px; border: 0; border-radius: 10px; background: #244c38; color: #fff; font: 700 16px/1.5 var(--care-font, sans-serif); white-space: nowrap; cursor: pointer; touch-action: manipulation; }
+.partner-banner button:hover { background: #183d2a; }
+.partner-banner button:focus-visible { outline: 3px solid #175cb5; outline-offset: 4px; }
+.partner-banner-actions small { color: #41594a; font-size: 13px; }
+.partner-banner .partner-banner-note { grid-column: 1 / -1; margin: 0; padding-top: 14px; border-top: 1px solid #cddbd3; color: #53665a; font-size: 13px; line-height: 1.7; }
+.content-ad { margin-top: 36px; padding-top: 24px; border-top: 1px solid #dce3e3; }
+.content-ad[hidden], .content-ad [hidden] { display: none; }
+.content-ad-label { display: block; margin-bottom: 8px; color: #53667b; font-size: 12px; }
+.content-ad-host { display: grid; justify-items: center; min-height: 100px; }
+.content-ad-host > .partner-banner { width: 100%; margin: 0; }
+.content-ad-mount iframe { display: block; border: 0; }
+@media (max-width: 699px) {
+  .partner-banner { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .partner-banner-actions { justify-items: stretch; text-align: center; }
+  .partner-banner button { width: 100%; }
+}
+@media (max-width: 600px) {
+  .cost-page .content-ad { margin-inline: -18px; }
+  .cost-page .content-ad-label { margin-inline: 18px; }
+  .cost-page .content-ad-host > .partner-banner { width: calc(100% - 36px); }
+}
+/** SOFTM-PARTNER-BANNER END */
