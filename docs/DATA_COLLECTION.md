@@ -238,3 +238,6 @@ Actions는 수집 완료 후 `python scripts/build_nationwide_care_services.py`�
 
 심평원 원본을 교체한 경우 `python scripts/import_hira_hospitals.py`로 `data/hira/nursing-hospitals.json`을 갱신한 다음 검색 자료를 생성합니다.
 <!-- SOFTM-DATA-UNIFIED END -->
+
+<!-- SOFTM-DATA-REGIONS 날짜:20260904 : 수집 후 지역 검색 페이지에 이전 기관 자료가 남지 않도록 생성 순서를 함께 기록 -->
+지도·지역 검색 자료 전체 갱신은 `npm run build`로 실행합니다. 수집 JSON → `data/care` → 지역별 기관 목록 → 유형 안내·사이트맵 순서이며, 정기 수집도 같은 명령으로 갱신한 생성물을 함께 반영합니다.
