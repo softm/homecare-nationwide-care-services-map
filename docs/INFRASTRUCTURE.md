@@ -122,5 +122,9 @@
 요양병원은 `scripts/import_hira_hospitals.py`가 심평원 원본을 `data/hira/nursing-hospitals.json`으로 가져온 뒤 같은 생성 경로에 참여합니다. 공단 평가와 혼합하지 않습니다. 기존 기관 데이터 JS는 사용·배포·재생성하지 않습니다. 기관명·주소는 수집 상세와 공단 원문 주소를, 정원·인력은 해당 급여의 상세를 사용합니다. 없는 인력은 일부 미확인으로 표시합니다. 기존 좌표 캐시·상세·사진·광고 경로는 유지합니다.
 <!-- SOFTM-DATA-UNIFIED END -->
 
+<!-- SOFTM-ADVANCED-SEARCH START 날짜:20260904 : 검색 조건 확인과 일반 이용자의 외부 호출 경계를 유지 -->
+공단 상세검색은 `scripts/collect_nhis_search.py`가 공개 검색 결과를 수집하여 `source-data/nhis-search/YYYYMMDD/`에 원문을 보존하고 `data/nhis/search-index.json.gz`로 압축합니다. 두 지도는 `advanced-search.js`에서 이 파일만 읽어 설립주체와 서비스 조건을 판정합니다. 브라우저의 공단 실시간 요청이나 Vercel 검색 프록시는 추가하지 않습니다. 상세검색 확인일은 기본 목록 기준일과 별도로 표시합니다.
+<!-- SOFTM-ADVANCED-SEARCH END -->
+
 <!-- SOFTM-DATA-REGIONS 날짜:20260904 : 수집 후 지역 검색 페이지에 이전 기관 자료가 남지 않도록 생성 순서를 함께 기록 -->
 지도·지역 검색 자료 전체 갱신은 `npm run build`로 실행합니다. 수집 JSON → `data/care` → 지역별 기관 목록 → 유형 안내·사이트맵 순서이며, 정기 수집도 같은 명령으로 갱신한 생성물을 함께 반영합니다.

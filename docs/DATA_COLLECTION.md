@@ -239,5 +239,27 @@ Actions는 수집 완료 후 `python scripts/build_nationwide_care_services.py`�
 심평원 원본을 교체한 경우 `python scripts/import_hira_hospitals.py`로 `data/hira/nursing-hospitals.json`을 갱신한 다음 검색 자료를 생성합니다.
 <!-- SOFTM-DATA-UNIFIED END -->
 
+<!-- SOFTM-ADVANCED-SEARCH START 날짜:20260904 : 상세조건의 원문 보존·전국 완전성·재개 절차를 고정 -->
+## 공단 상세검색 조건 갱신
+
+```bash
+python3 scripts/collect_nhis_search.py
+npm run check
+```
+
+이 수집은 기존 목록·상세·사진 수집과 별개로 필요할 때 실행합니다. 공단 공개 검색 화면의 현재 시도 선택값을 읽고 설립주체 5종 및 제공서비스 조건 13종으로 전국을 조회합니다. 기본 2개 요청을 동시에 실행하고(`--workers 1~3` 지정 가능) 각 요청 후 0.4초 쉬며 실패는 최대 3회 시도합니다. API 비밀키는 사용하지 않습니다.
+
+`source-data/nhis-search/YYYYMMDD/`에 검색 화면, 조건별 결과 원문(`.html.gz`), 요청 조건·수집시각·기관기호/급여코드 목록(`.json`)을 보존합니다. 화면에 보이는 첫 10개 행이 아닌 공단 결과의 전체 `adminList`를 사용하고 `totCntMap`과 건수·중복·조건 반영 여부를 대조합니다. 일부 요청이 실패하면 기존 배포 인덱스는 그대로 유지됩니다. 같은 날짜로 다시 실행하면 저장된 요청은 재사용하며 빠진 요청을 이어 수집합니다.
+
+```bash
+python3 scripts/collect_nhis_search.py --date 20260904
+python3 scripts/collect_nhis_search.py --date 20260904 --build-only
+```
+
+모든 시도·조건이 원문 검사를 통과해야 `data/nhis/search-index.json.gz`를 교체합니다. 설립주체는 `0=미확인, 1=국가, 2=지방자치단체, 3=법인, 4=개인, 5=기타`이고 제공서비스는 인덱스의 `features` 순서에 따른 비트값입니다. 기록은 기관기호 단위이며 현재 선택 급여종류의 기관 목록과 교차하여 검색합니다. 기관 검색 자료에 없다는 이유로 폐업으로 판정하거나 목록에서 제거하지 않습니다.
+
+수집 원본·인덱스·검사 결과를 함께 검토합니다. 기본 목록의 수집일과 서비스 확인일은 다를 수 있으므로 상세검색에 확인일을 별도로 표시합니다. 청구그린기관과 기관 패널은 평가등급이나 품질 가점으로 사용하지 않습니다.
+<!-- SOFTM-ADVANCED-SEARCH END -->
+
 <!-- SOFTM-DATA-REGIONS 날짜:20260904 : 수집 후 지역 검색 페이지에 이전 기관 자료가 남지 않도록 생성 순서를 함께 기록 -->
 지도·지역 검색 자료 전체 갱신은 `npm run build`로 실행합니다. 수집 JSON → `data/care` → 지역별 기관 목록 → 유형 안내·사이트맵 순서이며, 정기 수집도 같은 명령으로 갱신한 생성물을 함께 반영합니다.
