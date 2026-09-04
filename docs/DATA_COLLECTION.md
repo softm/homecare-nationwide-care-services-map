@@ -224,3 +224,7 @@ gh api \
 - 사진 저장 정책 또는 공단 원본 URL 사용 방식
 
 <!-- SOFTM-NHIS-COLLECTION-DOC END -->
+
+<!-- SOFTM-CARE-CATEGORIES START 날짜:20260904 : 수집 카탈로그와 지도 생성기의 분류 책임을 일치 -->
+기본 급여 분류는 `scripts/care_categories.py`를 공용으로 사용한다. 복지용구 B06/C06, 시설 치매전담실 G/M·치매전담형 공동생활가정 S41, 주야간보호 치매전담실 H/I를 해당 기본 급여에 포함한다. 다음 카탈로그 생성부터 같은 분류를 사용하며 기존 상세 JSON·체크포인트·수집 규격은 유지한다. 지도 데이터는 `scripts/build_nationwide_care_services.py`로 두 지도를 함께 재생성한 뒤 `scripts/build_daycare_evaluations.py`와 `npm run check`를 실행한다.
+<!-- SOFTM-CARE-CATEGORIES END -->

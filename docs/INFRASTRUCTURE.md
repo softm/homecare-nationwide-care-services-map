@@ -6,10 +6,10 @@
 
 | 영역 | 실행 위치 | 구성 파일·서비스 | 역할 | 브라우저 호출 여부 | 인증정보 |
 |---|---|---|---|---:|---|
-| 통합 시작 화면 | GitHub Pages 또는 로컬 정적 서버 | `index.html` | 8개 유형을 한 번씩 선택 → 유형 안내 → 통합 지도 진입 | 예 | 없음 | <!-- SOFTM-INDEX-UNIFIED 날짜:20260904 : 주야간보호도 같은 시작 흐름으로 연결 -->
-| 기관 유형 안내 | GitHub Pages 또는 로컬 정적 서버 | `daycare-map.html` 등 8개 안내, `seo-landing.css` | 유형별 소개 → 통합 지도의 해당 `type` 진입·광고 | 예 | 없음 | <!-- SOFTM-LANDING-ADS 날짜:20260904 : 모든 유형의 2단계 안내와 지도 역할을 구분 -->
-| 전국 주간 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-daycare-map.html` | 주야간보호 5,751곳 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
-| 전국 요양 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-care-services-map.html` | 8개 기관 유형 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
+| 통합 시작 화면 | GitHub Pages 또는 로컬 정적 서버 | `index.html` | 9개 유형을 한 번씩 선택 → 유형 안내 → 통합 지도 진입 | 예 | 없음 | <!-- SOFTM-INDEX-UNIFIED 날짜:20260904 : 주야간보호도 같은 시작 흐름으로 연결 -->
+| 기관 유형 안내 | GitHub Pages 또는 로컬 정적 서버 | `daycare-map.html` 등 9개 안내, `seo-landing.css` | 유형별 소개 → 통합 지도의 해당 `type` 진입·광고 | 예 | 없음 | <!-- SOFTM-LANDING-ADS 날짜:20260904 : 모든 유형의 2단계 안내와 지도 역할을 구분 -->
+| 전국 주간 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-daycare-map.html` | 주야간보호 5,757곳 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
+| 전국 요양 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-care-services-map.html` | 9개 기관 유형 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 지도·주소 변환 | 사용자 브라우저 | 네이버 Maps JavaScript SDK, `naver-geocoder.js` | 지도 표시, 주소→좌표, 좌표→주소 | 네이버 SDK 직접 호출 | `ncpKeyId=etfcybk8vf`, Maps Application의 Web 서비스 URL 제한 |
 | 지도 화면영역 판별 | GitHub Pages 정적 파일·사용자 브라우저 | `region-bounds.js`, `viewport-regions.js` | 화면과 겹치는 시군구를 모두 후보로 조회한 뒤 실제 기관 좌표로 판별 | 로컬 정적 자료, 역주소 표본 조회 없음 | 없음 | <!-- SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 지도 화면의 검색 누락을 막는 경계 자료의 책임과 호출 경로를 명시 -->
 | 기관 기본 데이터 | GitHub Pages 정적 파일 | `nationwide-daycare-data-*.js`, `nationwide-care-data/*.js`, 각 매니페스트 | 지도 목록·마커·필터의 기본 자료 | 예, 상대경로 정적 파일 | 없음 |
@@ -17,7 +17,7 @@
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | `DATA_GO_KR_SERVICE_KEY` |
 | 길찾기 서버 | Vercel Functions | `services/vercel-api/api/directions.js` | 네이버 Directions 15 자동차 경로 중계 | `POST /api/directions`만 호출 | `NAVER_MAPS_API_KEY_ID`, `NAVER_MAPS_API_SECRET` |
 | 광고 설정 | GitHub Pages 정적 파일 및 광고 사업자 | `index-ad-config.js`, `category-landing-ad-config.js`, `category-landing-ads.js`, 두 지도 광고 설정 | 화면별 PC·모바일·목록 광고 슬롯 설정 | 예 | 광고 설정 파일의 공개 클라이언트 값만 사용 | <!-- SOFTM-INDEX-AD-UNIT 날짜:20260904 : 인덱스 승인 단위가 다른 지도 광고와 섞이지 않도록 인프라 경계를 명시 -->
-| 광고·제휴 문의 | 사용자 브라우저→Web3Forms | `partner-inquiry-config.js`, `partner-inquiry.js`, `partner-inquiry.css` | 두 지도와 8개 안내의 공통 오버레이에서 이메일 문의 접수 | 제출할 때만 `POST https://api.web3forms.com/submit` | 수신 주소로 발급한 공개 Access Key | <!-- SOFTM-PARTNER-INFRA 날짜:20260904 : 제휴 메일 접수에 별도 런타임 서버가 필요하지 않도록 브라우저 호출을 명시 -->
+| 광고·제휴 문의 | 사용자 브라우저→Web3Forms | `partner-inquiry-config.js`, `partner-inquiry.js`, `partner-inquiry.css` | 두 지도와 9개 안내의 공통 오버레이에서 이메일 문의 접수 | 제출할 때만 `POST https://api.web3forms.com/submit` | 수신 주소로 발급한 공개 Access Key | <!-- SOFTM-PARTNER-INFRA 날짜:20260904 : 제휴 메일 접수에 별도 런타임 서버가 필요하지 않도록 브라우저 호출을 명시 -->
 | 로컬 정적 서버 | 개발자 PC | `npm run serve` → `python3 -m http.server 3000` | HTML을 `file://`이 아닌 HTTP Origin으로 검증 | `http://localhost:3000` | 없음 |
 | 정합성 검사 | 로컬 또는 GitHub Actions | `npm run check` | HTML 의존성, JS·Python 구문, 기관 수·중복·정적 NHIS 스키마 검사 | 아니오 | fixture 검사에는 없음 |
 
