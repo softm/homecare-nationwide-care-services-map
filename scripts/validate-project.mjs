@@ -51,11 +51,14 @@ for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-car
 const indexSource = read('index.html');
 for (const category of indexCategories) {
   const landingPage = categoryLandingPages[category];
-  if (!indexSource.includes(`href="${landingPage}"`)) fail(`index.html: ${category} 검색 대표 페이지 링크 누락`);
+  /** SOFTM-INDEX-UNIFIED START 날짜:20260904 : 홈에서 특정 유형이 중복 노출되거나 지도 진입이 누락되는 회귀를 방지 */
+  const entryLinks = [...indexSource.matchAll(/<a\b[^>]*href="([^"]+)"/g)].filter(match => match[1] === landingPage);
+  if (entryLinks.length !== 1) fail(`index.html: ${category} 안내 링크는 정확히 한 개여야 합니다.`);
+  /** SOFTM-INDEX-UNIFIED END */
   /** SOFTM-DAYCARE-LANDING START 날짜:20260904 : 안내 페이지가 각 유형의 실제 지도와 광고 영역으로 이어지는지 함께 검증 */
-  const mapPage = category === 'daycare' ? 'nationwide-daycare-map.html' : `nationwide-care-services-map.html?type=${category}`;
+  const mapPage = `nationwide-care-services-map.html?type=${category}`; // SOFTM-DAYCARE-UNIFIED 날짜:20260904 : 주야간보호에도 다른 유형과 같은 통합 지도 연결을 검증
   const landing = read(landingPage);
-  if (!landing.includes(`href="${mapPage}"`)) fail(`${landingPage}: ${category} 지도 링크 누락`);
+  if (!landing.includes(`href="${mapPage}"`) || landing.includes('href="nationwide-daycare-map.html"')) fail(`${landingPage}: ${category} 통합 지도 연결 불일치`); // SOFTM-DAYCARE-UNIFIED 날짜:20260904 : 안내에서 이전 전용 지도로 다시 분기되지 않도록 검사
   if (!landing.includes(`data-care-category="${category}"`)) fail(`${landingPage}: 제휴 문의 기관 유형 누락`);
   if ((landing.match(/id="categoryAdZone"/g) || []).length !== 1 || !landing.includes('category-landing-ads.js') || !landing.includes('category-landing-ad-config.js')) fail(`${landingPage}: 2단계 전용 광고 영역·설정 누락`);
   if (category !== 'daycare' && (!landing.includes('href="daycare-map.html"') || landing.includes('href="nationwide-daycare-map.html"'))) fail(`${landingPage}: 주야간보호 안내 진입 누락`);
