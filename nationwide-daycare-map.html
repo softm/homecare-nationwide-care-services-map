@@ -59,6 +59,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 두 지도에서 같은 제휴 문의 화면을 사용 -->
 <link rel="stylesheet" href="partner-inquiry.css?v=20260904-3"><!-- SOFTM-PARTNER-SUCCESS 날짜:20260904 : 접수 후 자동 닫기와 큰 토스트가 이전 캐시 없이 함께 적용되도록 갱신 -->
 <!-- SOFTM-PARTNER-ASSETS END -->
+<link rel="stylesheet" href="photo-viewer.css?v=20260904-1"> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 두 지도의 확대 사진을 같은 화면 크기와 조작 위치로 제공 -->
 </head>
 <body>
 <header><h1>전국 주야간보호센터 찾기·평가 비교</h1><p>돌봄한눈은 국민건강보험공단 2026년 6월 10일 공개자료를 기반으로 전국 주야간보호기관을 검색합니다.</p><p><a style="color:#fff" href="index.html">돌봄한눈 홈</a> · <a style="color:#fff" href="gwangmyeong-daycare-center-map.html">광명·구로 상세 비교지도로 이동</a></p></header>
@@ -112,6 +113,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="nationwide-daycare-evaluations.js"></script>
 <script src="naver-geocoder.js?v=20260902-1"></script><!-- SOFTM-GEOCODER-SDK 날짜:20260902 : 두 지도에서 같은 브라우저 주소 변환 모듈을 공유하기 위해 추가 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
+<script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
 <script>
 const DATA=window.NATIONAL_DAYCARE_DATA||[],PAGE=30,MAP_LIMIT=100,MAP_AREA_LIMIT=800;
 const DIRECTIONS_PROXY='https://daycare-directions-proxy.vercel.app/api/directions';
@@ -284,7 +286,18 @@ function daycareStaticDetailHtml(payload,c){
 }
 /** SOFTM-NHIS-OFFICIAL-PAGE END */
 function markDaycarePhotoFailure(image){const grid=image.closest('.popup-static-photos'),figure=image.closest('figure');if(figure)figure.remove();if(grid&&!grid.querySelector('img'))grid.outerHTML='<div class="popup-static-message">사진 파일 로드 실패</div>'}
-function daycareStaticPhotosHtml(data){const photos=data.photos||[];if(!photos.length)return'<div class="popup-static-message">등록된 사진 없음</div>';const cards=photos.map((photo,index)=>{const url=safeAdUrl(photo.url||'');return url==='#'?'':`<figure class="popup-static-photo"><img src="${esc(url)}" alt="${esc(photo.alt||`기관 등록사진 ${index+1}`)}" loading="lazy" referrerpolicy="no-referrer" onerror="markDaycarePhotoFailure(this)"><figcaption>${esc(photo.alt||`기관 등록사진 ${index+1}`)}</figcaption></figure>`}).filter(Boolean);if(!cards.length)return'<div class="popup-static-message">사진 주소 확인 실패</div>';return `<div class="popup-static-photos">${cards.join('')}</div><p class="popup-static-source">사진 정적 목록 ${esc(new Date(data.collectedAt).toLocaleString('ko-KR'))}</p>`}
+/** SOFTM-PHOTO-VIEWER START 날짜:20260904 : 전용 지도 사진도 클릭·키보드로 같은 확대창에서 탐색하도록 실제 버튼으로 제공 */
+function daycareStaticPhotosHtml(data){
+ const photos=data.photos||[];
+ if(!photos.length)return'<div class="popup-static-message">등록된 사진 없음</div>';
+ const cards=photos.map((photo,index)=>{
+  const url=safeAdUrl(photo.url||''),label=photo.alt||`기관 등록사진 ${index+1}`;
+  return url==='#'?'':`<figure class="popup-static-photo"><button type="button" data-photo-viewer aria-haspopup="dialog" aria-label="${esc(label)} 크게 보기"><img src="${esc(url)}" alt="${esc(label)}" loading="lazy" referrerpolicy="no-referrer" onerror="markDaycarePhotoFailure(this)"></button><figcaption>${esc(label)}</figcaption></figure>`
+ }).filter(Boolean);
+ if(!cards.length)return'<div class="popup-static-message">사진 주소 확인 실패</div>';
+ return `<p class="photo-gallery-hint">사진을 누르면 크게 보고 앞뒤로 이동할 수 있습니다.</p><div class="popup-static-photos" data-photo-gallery>${cards.join('')}</div><p class="popup-static-source">사진 정적 목록 ${esc(new Date(data.collectedAt).toLocaleString('ko-KR'))}</p>`
+}
+/** SOFTM-PHOTO-VIEWER END */
 async function setDaycareInfoTab(id,tab){const root=document.querySelector(`[data-daycare-detail="${id}"]`);if(!root)return;root.querySelectorAll('[data-daycare-tab]').forEach(button=>button.classList.toggle('active',button.dataset.daycareTab===tab));const basic=root.querySelector('.popup-basic-panel'),panel=root.querySelector('.popup-static-panel'),center=DATA.find(item=>item.i===id)||{};basic.hidden=tab!=='basic';panel.hidden=tab==='basic';if(tab==='basic')return;panel.innerHTML=`<div class="popup-static-message">${tab==='photos'?'저장된 등록사진':'저장된 상세정보'}을 확인하고 있습니다.</div>`;try{panel.innerHTML=tab==='photos'?daycareStaticPhotosHtml(await NhisStaticData.photos(id)):daycareStaticDetailHtml(await NhisStaticData.detail(id,daycareOfficialType(center)),center)}catch(error){if(tab==='detail'){if(!String(error.message).includes('아직 정적 데이터에 수집되지 않았습니다.'))console.warn(`[공단 상세] ${id} 상세 파일을 읽지 못해 기준자료를 표시합니다.`,error);panel.innerHTML=daycareSummaryDetailHtml(center);return}const missing=String(error.message).includes('아직 정적 데이터에 수집되지 않았습니다.'),label=missing?'사진 정보 미수집':'사진 주소 확인 실패';panel.innerHTML=`<div class="popup-static-message">${esc(label)}<br>나머지 지도 기능은 계속 사용할 수 있습니다.</div>`}}
 function popup(c){
  const ev=c.ev,grade=ev?gradeText(ev.grade):(isNew(c)?'신설·미평가':'등급 미확인'),score=ev&&Number.isFinite(ev.score)?ev.score.toFixed(1):'—',distance=Number.isFinite(c._distance)?c._distance.toFixed(1)+'km':'미산출';

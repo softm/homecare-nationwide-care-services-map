@@ -46,6 +46,7 @@
 <!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 두 지도에서 같은 제휴 문의 화면을 사용 -->
 <link rel="stylesheet" href="partner-inquiry.css?v=20260904-3"><!-- SOFTM-PARTNER-SUCCESS 날짜:20260904 : 접수 후 자동 닫기와 큰 토스트가 이전 캐시 없이 함께 적용되도록 갱신 -->
 <!-- SOFTM-PARTNER-ASSETS END -->
+<link rel="stylesheet" href="photo-viewer.css?v=20260904-1"> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 두 지도의 확대 사진을 같은 화면 크기와 조작 위치로 제공 -->
 </head>
 <body>
 <header class="page-head"><div class="head-row"><div><h1 id="pageTitle">전국 주야간보호센터 지도</h1><p>돌봄한눈에서 현재 위치를 기준으로 공개 기관정보·평가·인력을 조회합니다.</p></div><a class="legacy-link" href="index.html">돌봄한눈 홈</a></div></header>
@@ -79,6 +80,7 @@
 <script src="nationwide-care-manifest.js"></script>
 <script src="naver-geocoder.js?v=20260902-1"></script><!-- SOFTM-GEOCODER-SDK 날짜:20260902 : 두 지도에서 같은 브라우저 주소 변환 모듈을 공유하기 위해 추가 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
+<script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <script>
 const CATEGORY_ORDER=['facility','daycare','home-care','home-nursing','home-bath','short-stay','dementia','nursing-hospital'];
@@ -248,7 +250,18 @@ function officialFieldValue(key,value){const v=String(value||'');if(key.includes
 function officialFieldsHtml(fields){const priority={'전화번호':1,'운영시간':2,'주차시설':3,'홈페이지 주소':4,'이메일주소':5,'제공서비스':6,'지정일자':7,'설치신고일자':8,'전문인배상책임보험':9,'손해배상책임보험':10,'교통편':20},entries=Object.entries(fields||{}).filter(([,v])=>String(v).trim()).sort((a,b)=>(priority[a[0]]||15)-(priority[b[0]]||15));return entries.length?`<div class="official-field-grid">${entries.map(([key,value])=>`<div class="official-field ${String(value).length>70||key==='교통편'?'wide':''}"><span>${esc(key)}</span>${officialFieldValue(key,value)}</div>`).join('')}</div>`:''}
 function officialTableHtml(table,index){const rows=table?.rows||[];if(!rows.length)return'';return `<section class="official-table-block"><h4>${esc(table.caption||`상세정보 ${index+1}`)}</h4><div class="official-table-wrap"><table class="official-table"><tbody>${rows.map((row,rowIndex)=>`<tr>${(row.cells||[]).map(cell=>{const tag=cell.header||rowIndex===0?'th':'td',colspan=Math.max(1,Math.min(12,Number(cell.colspan)||1)),rowspan=Math.max(1,Math.min(12,Number(cell.rowspan)||1));return `<${tag} colspan="${colspan}" rowspan="${rowspan}">${esc(cell.text||'—')}</${tag}>`}).join('')}</tr>`).join('')}</tbody></table></div></section>`}
 function markOfficialPhotoFailure(image){const grid=image.closest('.official-photo-grid'),figure=image.closest('figure');if(figure)figure.remove();if(grid&&!grid.querySelector('img'))grid.outerHTML='<div class="official-empty">사진 파일 로드 실패</div>'}
-function officialPhotosHtml(data){const images=Array.isArray(data?.images)?data.images:[],cards=images.map((item,index)=>{const src=safeExternalUrl(item.url||''),label=item.alt||`기관 사진 ${index+1}`;return src==='#'?'':`<figure class="official-photo"><button type="button" onclick="event.stopPropagation();this.closest('figure').classList.toggle('expanded')" aria-label="${esc(label)} 크게 보기"><img src="${esc(src)}" alt="${esc(label)}" loading="lazy" referrerpolicy="no-referrer" onerror="markOfficialPhotoFailure(this)"></button><figcaption>${esc(label)}</figcaption></figure>`}).filter(Boolean);if(images.length&&!cards.length)return'<div class="official-empty">사진 주소 확인 실패</div>';if(!cards.length)return'';return `<p class="official-photo-note">기관이 공단에 공개한 사진의 정적 목록입니다. 사진을 누르면 크게 볼 수 있습니다.</p><div class="official-photo-grid">${cards.join('')}</div>`}
+/** SOFTM-PHOTO-VIEWER START 날짜:20260904 : 기존 썸네일 순서에서 선택한 사진을 전체 화면 탐색으로 이어지게 연결 */
+function officialPhotosHtml(data){
+ const images=Array.isArray(data?.images)?data.images:[];
+ const cards=images.map((item,index)=>{
+  const src=safeExternalUrl(item.url||''),label=item.alt||`기관 사진 ${index+1}`;
+  return src==='#'?'':`<figure class="official-photo"><button type="button" data-photo-viewer aria-haspopup="dialog" aria-label="${esc(label)} 크게 보기"><img src="${esc(src)}" alt="${esc(label)}" loading="lazy" referrerpolicy="no-referrer" onerror="markOfficialPhotoFailure(this)"></button><figcaption>${esc(label)}</figcaption></figure>`
+ }).filter(Boolean);
+ if(images.length&&!cards.length)return'<div class="official-empty">사진 주소 확인 실패</div>';
+ if(!cards.length)return'';
+ return `<p class="official-photo-note">기관이 공단에 공개한 사진입니다. 사진을 누르면 크게 보고 앞뒤로 이동할 수 있습니다.</p><div class="official-photo-grid" data-photo-gallery>${cards.join('')}</div>`
+}
+/** SOFTM-PHOTO-VIEWER END */
 function officialPanelHtml(data,c){const isPhoto=data.tab===18,fields=data.tab===11?officialFieldsHtml(data.fields):'',tables=data.tab===11||isPhoto?'':(data.tables||[]).map(officialTableHtml).join(''),photos=isPhoto?officialPhotosHtml(data.photos||data):'',empty=data.message||'공단에 공개된 상세 항목이 없습니다.',body=photos||fields||tables||`<div class="official-empty">${esc(empty)}</div>`,notice=data.partial?'<div class="basic-live-message"><b>공단 기준자료 우선 표시</b><br>시설별 상세조회 OpenAPI 스냅샷이 수집되기 전까지 시설별 현황·평가 자료를 표시합니다.</div>':'',source=data.sourceLabel||(data.fetchedAt?`정적 수집 ${new Date(data.fetchedAt).toLocaleString('ko-KR')}`:'수집 시각 미확인');return `${notice}${body}<div class="official-source"><span>${esc(source)}</span><a href="${officialUrl(c)}" target="_blank" rel="noopener">공단 원문</a></div>`}
 function officialType(c){return String(c.t||'').split(',')[0]}
 function staticTable(caption,headers,rows){return{caption,rows:[{cells:headers.map(text=>({text,header:true}))},...rows.map(row=>({cells:row.map(value=>({text:value??'—'}))}))]}}
