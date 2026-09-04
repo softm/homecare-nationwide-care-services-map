@@ -52,6 +52,8 @@ const landingPages = [...new Set(Object.values(categoryLandingPages))];
 
 for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html); // SOFTM-DAYCARE-LANDING 날짜:20260904 : 안내와 분리된 기존 전용 지도의 스크립트 검사도 유지
 localScripts('about.html'); // SOFTM-BRAND-IDENTITY 날짜:20260904 : 신규 소개 문서의 로컬 참조·스크립트 오류도 검사
+localScripts('care-cost.html'); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 공통 비용 화면의 스크립트와 공식 요금 계산 경계도 배포 전에 확인
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-cost.test.mjs')], { stdio: 'inherit' }); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 감경·면제·한도·등급 조건의 예산 회귀를 정기 검사에 포함
 
 /** SOFTM-INDEX-ENTRY-CHECK START 날짜:20260903 : 인덱스 광고 크기와 모든 요양 카테고리 직행 링크가 함께 유지되도록 자동 검사 */
 const indexSource = read('index.html');
@@ -100,11 +102,13 @@ const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map(matc
 const expectedSitemapUrls = [
   `${publicOrigin}/`,
   `${publicOrigin}/about.html`, // SOFTM-BRAND-IDENTITY 날짜:20260904 : 유형 안내 외에 독립 서비스의 소개 문서도 검색 대표 목록에 포함
+  `${publicOrigin}/care-cost.html`, // SOFTM-CARE-COST-CHECK 날짜:20260904 : 비용 안내는 개인 입력이 없는 단일 대표 주소만 색인
   ...landingPages.map(page => `${publicOrigin}/${page}`),
   ...getRegionalSeoPages(root).pages.map(page => page.url) // SOFTM-SEO-REGIONAL-CHECK 날짜:20260904 : 지역별 실기관 페이지의 누락과 임의 주소 추가를 함께 차단
 ];
 if (sitemapUrls.length !== expectedSitemapUrls.length || expectedSitemapUrls.some(url => !sitemapUrls.includes(url))) fail('sitemap.xml 공개 페이지 목록이 누락되거나 불필요한 URL을 포함합니다.');
 const indexablePages = [['index.html', `${publicOrigin}/`], ['about.html', `${publicOrigin}/about.html`], ...landingPages.map(page => [page, `${publicOrigin}/${page}`])]; // SOFTM-BRAND-IDENTITY 날짜:20260904 : 소개 문서의 색인 허용·대표 주소·브랜드 메타도 같은 기준으로 검사
+indexablePages.push(['care-cost.html', `${publicOrigin}/care-cost.html`]); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 비용 안내의 브랜드·대표 주소·구조화 데이터도 함께 검사
 for (const [htmlFile, canonical] of indexablePages) {
   const source = read(htmlFile);
   if (!source.includes('<meta name="robots" content="index,follow')) fail(`${htmlFile}: 검색 허용 robots 메타 누락`);
