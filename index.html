@@ -19,7 +19,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="돌봄한눈 | 전국 요양원·주간보호센터 찾기"> <!-- SOFTM-SEO-KEYWORDS 날짜:20260904 : 공유 경로에 따라 검색 대표 제목이 달라지지 않도록 일치 -->
   <meta name="twitter:description" content="공단·심평원 공개자료로 전국 요양·돌봄기관을 지도에서 찾고 평가·인력·정원을 비교합니다.">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"돌봄한눈","alternateName":"우리 부모님 요양·돌봄기관 찾기","url":"https://homecare.designboard.net/","description":"국민건강보험공단과 건강보험심사평가원 공개자료로 전국 요양·돌봄기관을 찾고 비교하는 웹 서비스","inLanguage":"ko-KR"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://homecare.designboard.net/#website","name":"돌봄한눈","alternateName":"우리 부모님 요양·돌봄기관 찾기","url":"https://homecare.designboard.net/","description":"국민건강보험공단과 건강보험심사평가원 공개자료로 전국 요양·돌봄기관을 찾고 비교하는 독립 정보 서비스","inLanguage":"ko-KR"}</script> <!-- SOFTM-BRAND-IDENTITY 날짜:20260904 : 소개 페이지가 같은 사이트를 가리키도록 식별자를 연결하고 실제 설명과 일치 -->
   <!-- SOFTM-SEO-BRAND END -->
   <style>
     /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 첫 화면에서 광고와 기관 유형별 지도를 바로 찾을 수 있도록 반응형 진입 구조를 제공 */
@@ -62,6 +62,14 @@
     @media(max-width:360px){.categories{grid-template-columns:1fr}}
     /** SOFTM-INDEX-UNIFIED END */
     /** SOFTM-INDEX-CATEGORY-ADS END */
+    /** SOFTM-BRAND-IDENTITY START 날짜:20260904 : 기관 찾기 다음에 서비스 배경을 읽을 수 있게 하며 모바일에서도 안내 링크의 터치 영역을 확보 */
+    .service-identity{margin-top:32px;padding:24px;border:1px solid var(--line);border-radius:16px;background:#fff;word-break:keep-all;overflow-wrap:anywhere}
+    .service-identity h2{margin:0 0 12px;font-size:21px;letter-spacing:-.03em}
+    .service-identity p+p{margin-top:12px}
+    .service-identity a{display:inline-flex;align-items:center;min-height:44px;margin-top:10px;color:#175cb5;font-weight:700;text-underline-offset:4px}
+    .service-identity a:focus-visible{outline:3px solid #175cb5;outline-offset:3px}
+    @media(max-width:700px){.service-identity{padding:20px}.service-identity h2{font-size:19px}}
+    /** SOFTM-BRAND-IDENTITY END */
   </style>
 <link rel="stylesheet" href="seo-entrypoints.css?v=20260904-1"> <!-- SOFTM-SEO-ENTRYPOINTS 날짜:20260904 : 지역 탐색 링크를 작은 화면에서도 읽고 선택할 수 있도록 전용 서식을 연결 -->
 </head>
@@ -69,7 +77,7 @@
   <main class="wrap">
     <header class="hero">
       <h1>돌봄한눈 — 우리 부모님 돌봄기관 찾기</h1> <!-- SOFTM-SEARCH-BRAND 날짜:20260904 : 방문자에게 보이는 대표 제목에도 구조화 데이터와 같은 브랜드를 명시 -->
-      <p>필요한 돌봄 유형을 고르고, 가까운 기관의 공개정보를 지도에서 확인해 보세요.</p> <!-- SOFTM-INDEX-UNIFIED 날짜:20260904 : 유형 선택부터 시작하는 공통 흐름을 안내 -->
+      <p>돌봄한눈은 요양·돌봄기관의 공개정보를 찾고 비교하는 독립 정보 서비스입니다.<br>필요한 돌봄 유형을 고르고, 가까운 기관을 지도에서 확인해 보세요.</p> <!-- SOFTM-BRAND-IDENTITY 날짜:20260904 : 첫 화면에서 브랜드의 실제 역할을 설명하면서 유형 선택 동선을 유지 -->
     </header>
     <!-- /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 광고 뒤에서 검색용 기관 유형별 대표 페이지와 실제 지도로 이동할 수 있게 구성 */ -->
     <aside class="ad-zone" id="indexAdZone" aria-label="광고" hidden>
@@ -146,6 +154,14 @@
       <p class="seo-service-note">돌봄한눈은 공단·심평원 공개자료를 바탕으로 정보를 제공하는 독립 검색·비교 서비스입니다. 장기요양기관은 공개 평가정보가 있는 경우에만 평가를 표시하며, 요양병원은 심평원 개설현황과 위치를 안내합니다.</p>
     </section>
 <!-- SOFTM-SEO-HOME END -->
+    <!-- SOFTM-BRAND-IDENTITY START 날짜:20260904 : 정부 서비스와의 혼동을 줄이고 자료 제공 범위를 방문자에게 직접 설명 -->
+    <section class="service-identity" aria-labelledby="serviceIdentityTitle">
+      <h2 id="serviceIdentityTitle">돌봄한눈은 어떤 서비스인가요?</h2>
+      <p>돌봄한눈은 국민건강보험공단과 건강보험심사평가원의 공개자료를 바탕으로 요양·돌봄기관의 위치와 정보를 한곳에서 비교하도록 돕습니다. 정부·공단·심평원이 운영하는 공식 서비스가 아닙니다.</p>
+      <p>장기요양기관의 공개 평가·정원·인력과 요양병원의 개설현황을 구분해 제공합니다. 자료 기준일과 실제 운영 현황은 다를 수 있으므로 이용 가능 여부와 비용은 해당 기관에 확인해 주세요.</p>
+      <a href="about.html">돌봄한눈 소개 · 자료 출처와 이용 안내 →</a>
+    </section>
+    <!-- SOFTM-BRAND-IDENTITY END -->
   </main>
   <script src="index-ad-config.js?v=20260903-1"></script><!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 전용 광고 단위만 이 화면에서 사용 -->
   <script src="nationwide-care-manifest.js?v=20260904-categories"></script> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->

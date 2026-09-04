@@ -827,4 +827,5 @@
   <url><loc>https://homecare.designboard.net/regions/jeju-%EC%A0%9C%EC%A3%BC%EC%8B%9C-home-care.html</loc><lastmod>2026-09-04</lastmod></url>
   <url><loc>https://homecare.designboard.net/welfare-equipment-map.html</loc><lastmod>2026-09-04</lastmod><priority>0.8</priority></url> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 새 복지용구 안내를 단일 사이트맵에 등록 -->
   <!-- SOFTM-SEO-SITEMAP END -->
+  <url><loc>https://homecare.designboard.net/about.html</loc><lastmod>2026-09-04</lastmod><priority>0.5</priority></url> <!-- SOFTM-BRAND-IDENTITY 날짜:20260904 : 서비스 소개와 공개자료 출처도 같은 도메인의 검색 문서로 발견할 수 있도록 연결 -->
 </urlset>
