@@ -40,6 +40,7 @@ const categoryLandingPages = {
   'home-nursing': 'home-nursing-map.html',
   'home-bath': 'home-bath-map.html',
   'short-stay': 'short-stay-care-map.html',
+  'welfare-equipment': 'welfare-equipment-map.html', // SOFTM-CARE-CATEGORIES 날짜:20260904 : 복지용구도 안내·지도·사이트맵·광고 공통 경로를 검증
   dementia: 'dementia-care-map.html',
   'nursing-hospital': 'nursing-hospital-map.html'
 };
@@ -203,22 +204,37 @@ await verifyGeocoderModule();
 
 const daycareFiles = fs.readdirSync(root).filter(name => /^nationwide-daycare-data-.*\.js$/.test(name)).sort();
 const daycare = runFiles(daycareFiles).NATIONAL_DAYCARE_DATA || [];
-if (daycare.length !== 5751) fail(`전국 주간 기관 수 오류: ${daycare.length}`);
+if (daycare.length !== 5757) fail(`전국 주간 기관 수 오류: ${daycare.length}`); // SOFTM-CARE-CATEGORIES 날짜:20260904 : 일반 급여 코드가 없는 치매전담 주야간보호 6곳의 누락을 방지
 if (new Set(daycare.map(row => row.i)).size !== daycare.length) fail('전국 주간 기관기호 중복');
 
 const evaluations = runFiles(['nationwide-daycare-evaluations.js']).NATIONAL_DAYCARE_EVALUATIONS || {};
-if (Object.keys(evaluations).length !== 3349) fail(`전국 주간 평가 수 오류: ${Object.keys(evaluations).length}`);
+if (Object.keys(evaluations).length !== 3355) fail(`전국 주간 평가 수 오류: ${Object.keys(evaluations).length}`); // SOFTM-CARE-CATEGORIES 날짜:20260904 : 추가 기관의 공식 평가도 함께 연결되었는지 확인
 
 const manifest = runFiles(['nationwide-care-manifest.js']).NATIONAL_CARE_MANIFEST;
 if (!manifest) fail('전국 요양 매니페스트 누락');
 let careDaycare = [];
+const categoryRows = {}; // SOFTM-CARE-CATEGORIES 날짜:20260904 : 특화기관이 해당 기본 급여에도 포함되는지 교차 검증
 for (const [category, meta] of Object.entries(manifest)) {
   for (const file of meta.files) if (!exists(file)) fail(`${category}: 데이터 파일 누락 ${file}`);
   const rows = runFiles(meta.files).NATIONAL_CARE_DATA || [];
+  categoryRows[category] = rows; // SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 배포 데이터로 분류 누락을 확인
   if (rows.length !== meta.count) fail(`${category}: ${rows.length}곳, 매니페스트 ${meta.count}곳`);
   if (new Set(rows.map(row => row.i)).size !== rows.length) fail(`${category}: 기관기호 중복`);
   if (category === 'daycare') careDaycare = rows;
 }
+
+/** SOFTM-CARE-CATEGORIES START 날짜:20260904 : 기관 수가 맞아도 특정 급여·치매전담 기관이 잘못 분류되는 회귀를 차단 */
+if (Object.keys(manifest).length !== indexCategories.length || indexCategories.some(category => !manifest[category])) fail('안내 페이지와 데이터 카테고리 불일치');
+if (categoryRows.facility.length !== 6481 || categoryRows['welfare-equipment'].length !== 1851) fail('요양시설 또는 복지용구 기준 기관 수 불일치');
+if (categoryRows['welfare-equipment'].some(row => row.t.split(',').some(code => !['B06', 'C06'].includes(code)))) fail('복지용구에 다른 급여가 혼입되었습니다.');
+for (const record of categoryRows.dementia) {
+  for (const code of record.t.split(',')) {
+    const parent = /^[HI]/.test(code) ? 'daycare' : 'facility';
+    if (!categoryRows[parent].some(row => row.i === record.i && row.t.split(',').includes(code))) fail(`${record.i}: 치매전담 ${code}가 기본 ${parent}에서 누락되었습니다.`);
+  }
+}
+if (!indexSource.includes('요양원·공동생활가정') || !indexSource.includes('치매전담형') || !indexSource.includes('요양병원(의료기관)')) fail('실제 급여 범위를 설명하는 카테고리 명칭 누락');
+/** SOFTM-CARE-CATEGORIES END */
 
 const daycareIds = new Set(daycare.map(row => row.i));
 const careIds = new Set(careDaycare.map(row => row.i));
@@ -227,6 +243,7 @@ const missingInDaycare = [...careIds].filter(id => !daycareIds.has(id));
 if (missingInCare.length || missingInDaycare.length) fail(`주야간보호 기관 불일치: 전국 요양 누락 ${missingInCare.length}, 전국 주간 누락 ${missingInDaycare.length}`);
 const careDaycareById = new Map(careDaycare.map(row => [row.i, row]));
 if (daycare.some(row => careDaycareById.get(row.i)?.a !== row.a)) fail('전국 주간·전국 요양 주야간보호 주소 불일치'); // SOFTM-GEOCODER-CONSISTENCY 날짜:20260902 : 같은 기관이 같은 SDK 좌표를 얻도록 원본 주소까지 비교
+if (daycare.some(row => ['t', 'z', 's', 'rn', 'na', 'pt', 'ot', 'cw'].some(key => (careDaycareById.get(row.i)?.[key] ?? 0) !== row[key]))) fail('두 주야간보호 지도의 급여·정원·인력 불일치'); // SOFTM-CARE-CATEGORIES 날짜:20260904 : 같은 기관이라도 치매전담실 수치가 한쪽 지도에만 합산되는 오류를 방지
 
 for (const file of ['nationwide-daycare-ad-config.js', 'nationwide-care-ad-config.js', 'partner-inquiry-config.js', 'partner-inquiry.js']) new vm.Script(read(file), { filename: file }); // SOFTM-PARTNER-CHECK 날짜:20260904 : 공용 문의 스크립트의 구문 오류가 두 지도를 함께 중단하지 않도록 검사
 for (const file of ['naver-geocoder.js', 'nhis-static-data.js', 'services/vercel-api/api/directions.js']) { // SOFTM-NHIS-STATIC-CHECK 날짜:20260902 : 폐기한 공단 프록시 대신 공용 정적 데이터 모듈을 검사

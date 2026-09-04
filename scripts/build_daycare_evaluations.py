@@ -27,7 +27,7 @@ def normalize_id(value):
 facility_ids = set()
 for path in glob.glob(str(ROOT / "nationwide-daycare-data-*.js")):
     text = Path(path).read_text(encoding="utf-8")
-    match = re.search(r"\.concat\((\[.*\])\);\s*$", text, re.S)
+    match = re.search(r"\.concat\((\[.*\])\);", text, re.S)  # SOFTM-CARE-DATA 날짜:20260904 : 생성 근거 주석이 있어도 치매전담을 포함한 전체 기관에 평가를 연결
     if not match:
         raise RuntimeError(f"Cannot parse facility data: {path}")
     for item in json.loads(match.group(1)):
@@ -67,7 +67,7 @@ with CSV_PATH.open("r", encoding="cp949", newline="") as handle:
 evaluations = {key: value for key, (_, value) in sorted(latest.items())}
 payload = json.dumps(evaluations, ensure_ascii=False, separators=(",", ":"))
 OUT_PATH.write_text(
-    "window.NATIONAL_DAYCARE_EVALUATIONS=" + payload + ";\n",
+    "window.NATIONAL_DAYCARE_EVALUATIONS=" + payload + f"; // SOFTM-CARE-DATA 날짜:{datetime.now():%Y%m%d} : 치매전담실 포함 기관 집합의 공식 평가 연결\n",  # SOFTM-CARE-DATA 날짜:20260904 : 누락 기관을 포함한 평가 재생성 근거를 보존
     encoding="utf-8",
 )
 

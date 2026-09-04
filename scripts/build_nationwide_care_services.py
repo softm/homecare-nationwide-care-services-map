@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 import openpyxl
+from care_categories import CATEGORY_CODES, is_dementia  # SOFTM-CARE-CATEGORIES 날짜:20260904 : 기본 급여와 치매전담 분류가 수집기와 달라지지 않도록 공유
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -22,25 +23,19 @@ PROVINCES = [
     "경상남도", "제주특별자치도",
 ]
 
-CATEGORY_CODES = {
-    "facility": {"A01", "A02", "A03", "A04", "A05"},
-    "daycare": {"B03", "C03"},
-    "home-care": {"B01", "C01"},
-    "home-nursing": {"B05", "C05"},
-    "home-bath": {"B02", "C02"},
-    "short-stay": {"B04", "C04"},
-}
-
+# /** SOFTM-CARE-CATEGORIES START 날짜:20260904 : 실제 포함 기관에 맞는 명칭과 복지용구 진입점을 제공 */
 CATEGORIES = {
-    "facility": {"label": "요양시설", "sourceDate": "2026-06-10", "source": "nhis"},
-    "daycare": {"label": "주야간보호", "sourceDate": "2026-06-10", "source": "nhis"},
+    "facility": {"label": "요양원·공동생활가정", "sourceDate": "2026-06-10", "source": "nhis"},
+    "daycare": {"label": "주·야간보호", "sourceDate": "2026-06-10", "source": "nhis"},
     "home-care": {"label": "방문요양", "sourceDate": "2026-06-10", "source": "nhis"},
     "home-nursing": {"label": "방문간호", "sourceDate": "2026-06-10", "source": "nhis"},
     "home-bath": {"label": "방문목욕", "sourceDate": "2026-06-10", "source": "nhis"},
     "short-stay": {"label": "단기보호", "sourceDate": "2026-06-10", "source": "nhis"},
-    "dementia": {"label": "치매전담", "sourceDate": "2026-06-10", "source": "nhis"},
-    "nursing-hospital": {"label": "요양병원", "sourceDate": "2025-12-31", "source": "hira"},
+    "welfare-equipment": {"label": "복지용구", "sourceDate": "2026-06-10", "source": "nhis"},
+    "dementia": {"label": "치매전담형", "sourceDate": "2026-06-10", "source": "nhis"},
+    "nursing-hospital": {"label": "요양병원(의료기관)", "sourceDate": "2025-12-31", "source": "hira"},
 }
+# /** SOFTM-CARE-CATEGORIES END */
 
 EVAL_KEYWORDS = {
     "facility": ("입소시설",),
@@ -49,6 +44,7 @@ EVAL_KEYWORDS = {
     "home-nursing": ("방문간호",),
     "home-bath": ("방문목욕",),
     "short-stay": ("단기보호",),
+    "welfare-equipment": ("복지용구",),  # SOFTM-CARE-CATEGORIES 날짜:20260904 : 복지용구 평가는 동일 급여의 공개 평가만 연결
     "dementia": ("입소시설", "주야간보호"),
 }
 
@@ -154,7 +150,7 @@ def build_ltc_records():
 
     evals = newest_evaluations()
     output = {category: {} for category in EVAL_KEYWORDS}
-    dementia = lambda code: code.startswith(("G", "H", "I", "M")) or code == "S41"
+    dementia = is_dementia  # SOFTM-CARE-CATEGORIES 날짜:20260904 : 치매전담 바로가기는 기본 급여에 포함된 기관을 다시 모아 제공
 
     for category, codes in CATEGORY_CODES.items():
         # 입소인원 시트의 서비스 유형을 운영기관 판정 기준으로 사용한다.
@@ -227,6 +223,24 @@ def compact_number(value):
     return value
 
 
+# /** SOFTM-CARE-DATA START 날짜:20260904 : 변경 데이터만 갱신하고 두 주야간보호 지도를 동일 원본으로 재생성 */
+def write_generated(path, source):
+    existing = path.read_text(encoding="utf-8") if path.exists() else ""
+    if existing.split(" // SOFTM-CARE-DATA")[0].strip() == source.strip():
+        return
+    path.write_text(source.rstrip() + f" // SOFTM-CARE-DATA 날짜:{datetime.now():%Y%m%d} : 공식 급여 분류 누락을 방지한 원본 재생성\n", encoding="utf-8")
+
+
+def write_daycare_files(rows):
+    slugs = ["seoul", "busan", "daegu", "incheon", "gwangju", "daejeon", "ulsan", "sejong", "gyeonggi", "gangwon", "chungbuk", "chungnam", "jeonbuk", "jeonnam", "gyeongbuk", "gyeongnam", "jeju"]
+    keys = ("i", "n", "p", "c", "a", "d", "t", "z", "s", "rn", "na", "pt", "ot", "cw")
+    for province, slug in zip(PROVINCES, slugs):
+        regional = sorted((row for row in rows if row["p"] == province), key=lambda row: (row["c"], row["n"]))
+        payload = json.dumps([{key: compact_number(row[key]) for key in keys} for row in regional], ensure_ascii=False, separators=(",", ":"))
+        write_generated(ROOT / f"nationwide-daycare-data-{slug}.js", "window.NATIONAL_DAYCARE_DATA=(window.NATIONAL_DAYCARE_DATA||[]).concat(" + payload + ");")
+# /** SOFTM-CARE-DATA END */
+
+
 def write_chunks(category, rows):
     rows = [{key: compact_number(value) for key, value in row.items() if value not in (None, "")} for row in rows]
     rows.sort(key=lambda row: (PROVINCES.index(row.get("p", "")) if row.get("p", "") in PROVINCES else 99, row.get("c", ""), row.get("n", "")))
@@ -247,18 +261,13 @@ def write_chunks(category, rows):
     for index, chunk in enumerate(chunks, 1):
         filename = f"{category}-{index:02d}.js"
         payload = json.dumps(chunk, ensure_ascii=False, separators=(",", ":"))
-        (OUT_DIR / filename).write_text(
-            "window.NATIONAL_CARE_DATA=(window.NATIONAL_CARE_DATA||[]).concat(" + payload + ");\n",
-            encoding="utf-8",
-        )
+        write_generated(OUT_DIR / filename, "window.NATIONAL_CARE_DATA=(window.NATIONAL_CARE_DATA||[]).concat(" + payload + ");")  # SOFTM-CARE-DATA 날짜:20260904 : 변경되지 않은 유형의 생성 파일은 그대로 유지
         files.append("nationwide-care-data/" + filename)
     return files
 
 
 def main():
     OUT_DIR.mkdir(exist_ok=True)
-    for old in OUT_DIR.glob("*.js"):
-        old.unlink()
     records = build_ltc_records()
     records["nursing-hospital"] = build_hospitals()
     manifest = {}
@@ -267,10 +276,14 @@ def main():
         files = write_chunks(category, rows)
         eval_count = sum(1 for row in rows if row.get("g"))
         manifest[category] = {**meta, "count": len(rows), "evaluationCount": eval_count, "files": files}
-    (ROOT / "nationwide-care-manifest.js").write_text(
-        "window.NATIONAL_CARE_MANIFEST=" + json.dumps(manifest, ensure_ascii=False, separators=(",", ":")) + ";\n",
-        encoding="utf-8",
-    )
+    # /** SOFTM-CARE-DATA START 날짜:20260904 : 현재 청크만 남기고 주간 전용 지도도 같은 급여 집합으로 생성 */
+    expected_files = {ROOT / filename for meta in manifest.values() for filename in meta["files"]}
+    for old in OUT_DIR.glob("*.js"):
+        if old not in expected_files:
+            old.unlink()
+    write_generated(ROOT / "nationwide-care-manifest.js", "window.NATIONAL_CARE_MANIFEST=" + json.dumps(manifest, ensure_ascii=False, separators=(",", ":")) + ";")
+    write_daycare_files(records["daycare"])
+    # /** SOFTM-CARE-DATA END */
     print(json.dumps(manifest, ensure_ascii=False, indent=2))
 
 

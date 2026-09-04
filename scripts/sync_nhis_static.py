@@ -25,6 +25,7 @@ from urllib.parse import urljoin
 
 import openpyxl
 import requests
+from care_categories import CATEGORY_CODES, category_for  # SOFTM-CARE-CATEGORIES 날짜:20260904 : 지도와 수집 카탈로그에 동일한 기본 급여 분류를 적용
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -45,14 +46,6 @@ DETAIL_PROFILE = "official-page-tabs-11-14-19-v1"
 # /** SOFTM-NHIS-OFFICIAL-PAGE END */
 
 PROVINCE_CODES = ["11", "26", "27", "28", "29", "30", "31", "36", "41", "43", "44", "46", "47", "48", "50", "51", "52"]  # SOFTM-NHIS-REGION-CODE 날짜:20260903 : 특별자치도 전환 뒤 강원·전북 기관이 목록 수집에서 누락되지 않도록 현행 시도코드 사용
-CATEGORY_CODES = {
-    "facility": {"A01", "A02", "A03", "A04", "A05"},
-    "daycare": {"B03", "C03"},
-    "home-care": {"B01", "C01"},
-    "home-nursing": {"B05", "C05"},
-    "home-bath": {"B02", "C02"},
-    "short-stay": {"B04", "C04"},
-}
 DETAIL_OPERATIONS = {
     "general": "getGeneralSttusDetailInfoItem02",
     "capacity": "getAceptncNmprDetailInfoItem02",
@@ -65,11 +58,14 @@ DETAIL_OPERATIONS = {
     "other": "getInsttEtcDetailInfoItem02",
 }
 LIST_OPERATIONS = {"nonCovered", "programs", "agreements", "equipment"}
+# /** SOFTM-CARE-CATEGORIES START 날짜:20260904 : API 보충 목록도 공단 시설별 현황의 코드 정의와 같은 이름으로 표시 */
 TYPE_LABELS = {
-    "A01": "노인요양시설", "A02": "노인요양공동생활가정", "A03": "양로시설", "A04": "노인공동생활가정", "A05": "노인복지주택",
-    "B01": "방문요양", "B02": "방문목욕", "B03": "주야간보호", "B04": "단기보호", "B05": "방문간호",
-    "C01": "방문요양", "C02": "방문목욕", "C03": "주야간보호", "C04": "단기보호", "C05": "방문간호",
+    "A01": "노인요양시설", "A02": "노인전문요양시설", "A03": "노인요양시설(개정법)", "A04": "노인요양공동생활가정", "A05": "노인요양시설(단기보호 전환)",
+    "B01": "방문요양", "B02": "방문목욕", "B03": "주·야간보호", "B04": "단기보호", "B05": "방문간호", "B06": "복지용구",
+    "C01": "방문요양", "C02": "방문목욕", "C03": "주·야간보호", "C04": "단기보호", "C05": "방문간호", "C06": "복지용구",
+    "S41": "치매전담형노인요양공동생활가정",
 }
+# /** SOFTM-CARE-CATEGORIES END */
 FILE_SOURCES = {
     "facility": {"id": "15124763", "extension": "xlsx", "prefix": "nhis-longtermcare-"},
     "evaluation": {"id": "15104801", "extension": "csv", "prefix": "nhis_longtermcare_evaluations_"},
@@ -204,13 +200,6 @@ def latest_source(pattern: str, label: str) -> Path:
     if not paths:
         raise FileNotFoundError(f"{label} 원본 파일이 없습니다: source-data/{pattern}")
     return paths[-1]
-
-
-def category_for(code: str) -> str:
-    for category, codes in CATEGORY_CODES.items():
-        if code in codes:
-            return category
-    return "dementia" if code.startswith(("G", "H", "I", "M")) or code == "S41" else "other"
 
 
 class ApiBudgetExceeded(RuntimeError):
