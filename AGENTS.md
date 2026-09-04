@@ -49,7 +49,8 @@
 - 공단 상세는 기본정보·상세정보 탭 구조를 유지한다.
 - 모바일 상세·비교표는 화면 밖으로 잘리지 않아야 한다.
 - 비교표는 컬럼 정렬과 엑셀 다운로드를 유지한다.
-- 목록 광고는 전국 요양에서 6개마다 슬롯을 만들고 각 슬롯을 독립적으로 바인딩한다.
+- 두 지도 목록 광고는 기본 hybrid 모드에서 6번째 기관 뒤에 기존 카카오 목록 광고를 유지하고, 12번째부터 6개 간격으로 제휴 문의를 표시한다. 첫 광고 단위를 반복 슬롯에 재사용하거나 제휴 카드로 대체하지 않는다. <!-- SOFTM-LIST-AD-RESTORE 날짜:20260904 : 기존 광고 수익 슬롯과 제휴 모집 위치가 다시 뒤바뀌지 않도록 고정 -->
+- 제휴 문의는 `partner-inquiry.js`의 공통 오버레이에서 Web3Forms로 전송한다. `partner-inquiry-config.js`의 공개 Access Key는 수신 이메일로 발급한 값을 사용하며 빈 값이면 미연결 안내를 표시한다. 실제 전송 성공 응답 전에는 접수 완료로 표시하지 않는다. <!-- SOFTM-PARTNER-FORM 날짜:20260904 : 두 지도에서 수신처와 실패 처리 정책을 일치 -->
 - 통합 `index.html`은 전국 요양 8개 `type` 카테고리 직행 링크를 표시하고, `index-ad-config.js`의 인덱스 전용 PC 728×90·모바일 320×100 상단 배너를 사용한다. 전국 요양 광고 단위를 재사용하지 않는다. <!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 화면별 광고 승인과 집계가 서로 섞이지 않도록 설정 경계를 고정 -->
 - 검색 대표 Origin은 `https://homecare.designboard.net`이며 canonical·OG·구조화 데이터·`robots.txt`·`sitemap.xml`과 Vercel CORS 허용 Origin을 함께 유지한다. 검색엔진 등록에는 루트의 단일 `sitemap.xml`만 제출한다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 검색 신호와 공개 서비스 호출 출처가 예전 GitHub 주소로 갈라지지 않도록 운영 기준을 고정 -->
 - 공개 사이트 브랜드는 `돌봄한눈`으로 통일하고 유형별 정적 검색 대표 페이지와 `nationwide-care-services-map.html?type=...` 지도 도구를 분리한다. 주야간보호 검색 대표는 `nationwide-daycare-map.html`이며 지도 도구 쿼리 URL을 사이트맵에 다시 넣지 않는다. <!-- SOFTM-SEO-LANDING 날짜:20260903 : 브랜드 신호와 동일 데이터 페이지의 검색 순위가 분산되지 않도록 색인 경계를 고정 -->
@@ -84,7 +85,7 @@
 
 - 상세 구성표와 데이터 흐름은 `docs/INFRASTRUCTURE.md`를 단일 인수인계 문서로 사용하고 인프라 변경 시 코드와 함께 갱신한다.
 - 공개 화면은 GitHub Pages 정적 호스팅, 로컬 화면은 저장소 루트의 `npm run serve`(`http://localhost:3000`)로 실행한다.
-- 브라우저의 동적 외부 호출은 네이버 Maps JavaScript SDK와 Vercel `/api/directions`로 제한한다. 주소 변환은 SDK, 공단 상세·사진은 정적 JSON이 담당한다.
+- 브라우저의 서비스 외부 호출은 네이버 Maps JavaScript SDK, Vercel `/api/directions`, 사용자가 제휴 문의를 제출할 때의 Web3Forms `https://api.web3forms.com/submit`을 사용한다. 주소 변환은 SDK, 공단 상세·사진은 정적 JSON이 담당하고 광고는 기존 카카오 AdFit을 유지한다. <!-- SOFTM-PARTNER-INFRA 날짜:20260904 : 승인된 문의 메일 전송 경로를 기존 정적 서비스 구조에 반영 -->
 - 공단 수집은 GitHub Actions의 `refresh-nhis-static.yml`과 `scripts/sync_nhis_static.py`가 담당하며 결과를 `source-data`와 `data/nhis`에 커밋한다.
 - 공단 수집 종류·주기·명령·완료 판정은 `docs/DATA_COLLECTION.md`를 기준으로 하며 워크플로, 수집 범위, 호출 한도, 체크포인트 방식이 바뀌면 같은 작업에서 문서를 갱신한다. <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 실행 방식 변경 후 오래된 명령이 남지 않도록 문서 동기화를 필수화 -->
 - 전체 수집의 다음 회차는 이전 Actions 실행과 `github-actions[bot]` 커밋이 완료된 뒤 호출한다. 실행 중 미리 큐에 넣으면 이전 SHA를 사용해 체크포인트를 이어받지 못할 수 있다. <!-- SOFTM-NHIS-RUN-SEQUENCE 날짜:20260903 : 동일 구간 중복 수집과 push 충돌을 방지 -->

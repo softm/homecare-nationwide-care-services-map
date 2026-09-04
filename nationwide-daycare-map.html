@@ -56,6 +56,9 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 .ad-zone{position:relative;margin:0 0 12px;padding:8px 12px 10px;overflow:hidden}.ad-zone[hidden]{display:none}.ad-zone-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:23px;color:#778397;font-size:10px}.ad-zone-head span{padding:2px 7px;border:1px solid #d5dde7;border-radius:999px;background:#f7f9fc;font-weight:900;letter-spacing:.04em}.ad-close{min-height:24px;padding:1px 7px;border:0;background:transparent;color:#667085;font-size:11px}.ad-banner-host{min-height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden;text-align:center}.ad-banner-host iframe{display:block;max-width:100%}.ad-loading{color:#8a96a8;font-size:11px}.house-banner{width:min(100%,728px);min-height:90px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:18px;padding:14px 18px;border:1px solid #cfe1f2;border-radius:12px;background:linear-gradient(135deg,#eff8ff,#f3fbf7);text-align:left}.house-banner .ad-copy{min-width:0}.ad-kicker{display:block;margin-bottom:4px;color:#176b9f;font-size:10px;font-weight:900}.house-banner h3,.list-ad h3{margin:0;color:#17324d;font-size:16px;line-height:1.35}.house-banner p,.list-ad p{margin:5px 0 0;color:#53647a;font-size:11px;line-height:1.45}.ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 13px;border:0;border-radius:9px;background:#17324d;color:#fff;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}.list-ad{margin:10px;border:1px solid #bcd9d0;border-radius:12px;background:linear-gradient(145deg,#effaf6,#f4f8ff);padding:13px 14px;box-shadow:0 4px 12px rgba(23,50,77,.06)}.list-ad-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;color:#527064;font-size:10px}.list-ad-label{padding:3px 7px;border-radius:999px;background:#087650;color:#fff;font-weight:900}.list-ad .ad-cta{margin-top:10px;background:#087650}.ad-disclosure{display:block;margin-top:8px;color:#748194;font-size:9px;line-height:1.4}.ad-admin-toggle{position:fixed;z-index:14990;right:14px;bottom:14px;min-height:38px;border-color:#5d2fc2;background:#6d39df;color:#fff;box-shadow:0 6px 20px rgba(42,28,77,.28)}.ad-admin-layer{position:fixed;inset:0;z-index:15000;display:grid;place-items:center;padding:18px;background:rgba(15,23,42,.58)}.ad-admin-layer[hidden]{display:none}.ad-admin-card{width:min(480px,96vw);padding:18px;border-radius:16px;background:#fff;box-shadow:0 20px 70px rgba(0,0,0,.35)}.ad-admin-card h2{margin:0 0 5px}.ad-admin-card>p{margin:0 0 14px;color:#667085;font-size:11px;line-height:1.5}.ad-setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid #e7edf4;font-size:13px;font-weight:800}.ad-setting-row input[type=checkbox]{min-height:auto;width:19px;height:19px}.ad-setting-row select{min-width:150px}.ad-admin-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}.ad-admin-actions button{min-height:36px}
 @media(max-width:1000px){.filter-grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.map-shell{height:560px}.results{min-height:auto}.result-list{height:520px}}@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}.filter-grid{grid-template-columns:1fr}.filter-line strong{width:100%}.map-shell{height:470px}.map-toolbar button{font-size:11px;padding:7px}.map-search{top:10px;left:10px;transform:none}.map-share-icon{width:40px;height:40px;min-height:40px}.map-search-clear{top:56px}.map-scope-badge{left:10px;bottom:26px;max-width:calc(100% - 20px)}.row{grid-template-columns:25px 1fr}.route-actions .selected-badge{margin-left:0}.ad-zone{padding:7px 6px 8px}.ad-banner-host{min-height:100px}.house-banner{min-height:100px;grid-template-columns:1fr;padding:12px 14px;gap:9px}.house-banner h3{font-size:14px}.house-banner .ad-cta{justify-self:start}.list-ad{margin:8px}.ad-admin-toggle{right:10px;bottom:10px}}
 </style>
+<!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 두 지도에서 같은 제휴 문의 화면을 사용 -->
+<link rel="stylesheet" href="partner-inquiry.css?v=20260904-1">
+<!-- SOFTM-PARTNER-ASSETS END -->
 </head>
 <body>
 <header><h1>전국 주야간보호센터 찾기·평가 비교</h1><p>돌봄한눈은 국민건강보험공단 2026년 6월 10일 공개자료를 기반으로 전국 주야간보호기관을 검색합니다.</p><p><a style="color:#fff" href="index.html">돌봄한눈 홈</a> · <a style="color:#fff" href="gwangmyeong-daycare-center-map.html">광명·구로 상세 비교지도로 이동</a></p></header>
@@ -84,7 +87,11 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 </div>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
 <div class="modal" id="compareLayer" hidden onclick="if(event.target===this)closeCompare()"><div class="modal-card"><div class="modal-head"><h2>선택센터 비교표</h2><button onclick="closeCompare()" aria-label="비교표 닫기">×</button></div><div id="compareBody"></div></div></div>
-<script src="nationwide-daycare-ad-config.js"></script>
+<!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 목록 광고 복구 설정과 공통 문의 연결을 함께 갱신 -->
+<script src="nationwide-daycare-ad-config.js?v=20260904-1"></script>
+<script src="partner-inquiry-config.js?v=20260904-1"></script>
+<script src="partner-inquiry.js?v=20260904-1"></script>
+<!-- SOFTM-PARTNER-ASSETS END -->
 <script src="nationwide-daycare-data-seoul.js"></script>
 <script src="nationwide-daycare-data-busan.js"></script>
 <script src="nationwide-daycare-data-daegu.js"></script>
@@ -115,12 +122,56 @@ const AD_CONFIG=readAdConfig();
 const adMode=()=>AD_CONFIG.enabled&&AD_CONFIG.mode!=='off'?AD_CONFIG.mode:'off';
 const directAds=()=>((AD_CONFIG.direct?.items)||[]).filter(item=>item&&item.active&&item.title&&item.url);
 function safeAdUrl(value){try{const url=new URL(value,location.href);return ['https:','http:','mailto:'].includes(url.protocol)?url.href:'#'}catch{return '#'}}
-function directAdHtml(item,banner=false){if(!item)return'';const content=`<span class="ad-kicker">${esc(item.eyebrow||'돌봄 생활 정보')}</span><h3>${esc(item.title)}</h3><p>${esc(item.description||'')}</p>`;if(banner)return `<div class="house-banner"><div class="ad-copy">${content}</div><a class="ad-cta" href="${esc(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${esc(item.cta||'자세히 보기')}</a></div>`;return `<aside class="list-ad" aria-label="광고"><div class="list-ad-top"><span class="list-ad-label">${esc(item.label||'광고')}</span><span>${esc(item.eyebrow||'돌봄 생활 정보')}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.description||'')}</p><a class="ad-cta" href="${esc(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${esc(item.cta||'자세히 보기')}</a><small class="ad-disclosure">${esc(AD_CONFIG.direct?.disclosure||'광고 콘텐츠입니다.')}</small></aside>`}
+/** SOFTM-PARTNER-CTA START 날짜:20260904 : 제휴 문의는 메일 앱 실행 대신 현재 지도 위에서 접수 */
+function directAdHtml(item,banner=false){
+    if(!item)return'';
+    const action=item.action==='partner-inquiry'
+        ? `<button type="button" class="ad-cta" data-partner-inquiry aria-haspopup="dialog">${esc(item.cta||'제휴 문의')}</button>`
+        : `<a class="ad-cta" href="${esc(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${esc(item.cta||'자세히 보기')}</a>`;
+    const content=`<span class="ad-kicker">${esc(item.eyebrow||'돌봄 생활 정보')}</span><h3>${esc(item.title)}</h3><p>${esc(item.description||'')}</p>`;
+    if(banner)return `<div class="house-banner"><div class="ad-copy">${content}</div>${action}</div>`;
+    return `<aside class="partner-list-ad" aria-label="광고·제휴"><div class="partner-ad-top"><span class="partner-ad-label">${esc(item.label||'광고')}</span><span>${esc(item.eyebrow||'돌봄 생활 정보')}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.description||'')}</p>${action}<small>${esc(AD_CONFIG.direct?.disclosure||'광고 콘텐츠입니다.')}</small></aside>`;
+}
+/** SOFTM-PARTNER-CTA END */
 function renderDirectBanner(){const item=directAds()[0],host=$('adBannerHost');if(!host||!item){$('adBannerZone').hidden=true;return}host.innerHTML=directAdHtml(item,true);$('adBannerZone').hidden=false}
-function loadKakaoBanner(){const host=$('adBannerHost'),mobile=matchMedia('(max-width:600px)').matches,slot=mobile?AD_CONFIG.kakao?.mobile:AD_CONFIG.kakao?.desktop;if(!host||!slot?.unit){AD_CONFIG.fallbackToDirect?renderDirectBanner():$('adBannerZone').hidden=true;return}host.innerHTML=`<ins class="kakao_ad_area" style="display:none" data-ad-unit="${esc(slot.unit)}" data-ad-width="${Number(slot.width)}" data-ad-height="${Number(slot.height)}"></ins>`;$('adBannerZone').hidden=false;let script=document.getElementById('daycareKakaoAdFit');if(!script){script=document.createElement('script');script.id='daycareKakaoAdFit';script.async=true;script.src=AD_CONFIG.kakao?.script||'https://t1.daumcdn.net/kas/static/ba.min.js';script.onerror=()=>{if(AD_CONFIG.fallbackToDirect)renderDirectBanner()};document.head.appendChild(script)}setTimeout(()=>{if(!$('adBannerZone').hidden&&!host.querySelector('iframe')&&AD_CONFIG.fallbackToDirect)renderDirectBanner()},5000)}
+/** SOFTM-ADFIT-BIND START 날짜:20260904 : 상단과 목록 광고를 한 큐에서 바인딩해 목록 갱신 후에도 표시 */
+function loadKakaoBanner(){const host=$('adBannerHost'),mobile=matchMedia('(max-width:600px)').matches,slot=mobile?AD_CONFIG.kakao?.mobile:AD_CONFIG.kakao?.desktop;if(!host||!slot?.unit){AD_CONFIG.fallbackToDirect?renderDirectBanner():$('adBannerZone').hidden=true;return}host.innerHTML=`<ins class="kakao_ad_area" style="display:none" data-ad-unit="${esc(slot.unit)}" data-ad-width="${Number(slot.width)}" data-ad-height="${Number(slot.height)}"></ins>`;$('adBannerZone').hidden=false;queueDaycareAdFit();setTimeout(()=>{if(!$('adBannerZone').hidden&&!host.querySelector('iframe')&&AD_CONFIG.fallbackToDirect)renderDirectBanner()},5000)}
+/** SOFTM-ADFIT-BIND END */
 function initAds(){const zone=$('adBannerZone');if(!zone)return;let dismissed=false;try{dismissed=sessionStorage.getItem('daycare-ad-banner-dismissed')==='1'}catch{}if(adMode()==='off'||!AD_CONFIG.placements?.banner||dismissed){zone.hidden=true}else if(adMode()==='direct')renderDirectBanner();else loadKakaoBanner();const close=$('adBannerClose');if(close)close.hidden=!AD_CONFIG.allowViewerDismiss;mountAdSettings()}
 function dismissAdBanner(){try{sessionStorage.setItem('daycare-ad-banner-dismissed','1')}catch{}$('adBannerZone').hidden=true}
-function listAdHtml(rows){if(!AD_CONFIG.placements?.listNative||!['hybrid','direct'].includes(adMode())||rows.length<4)return'';const ads=directAds();if(!ads.length)return'';return directAdHtml(ads[(page-1)%ads.length])}
+/** SOFTM-LIST-AD-RESTORE START 날짜:20260904 : 첫 목록 카카오 광고를 복구하고 두 번째부터 제휴 문의를 반복 표시 */
+let daycareAdRefreshTimer;
+function queueDaycareAdFit(){
+    if(!['hybrid','kakao'].includes(adMode()))return;
+    clearTimeout(daycareAdRefreshTimer);
+    daycareAdRefreshTimer=setTimeout(()=>{
+        const pending=document.querySelectorAll('ins.kakao_ad_area:not([data-adfit-ready])');
+        if(!pending.length)return;
+        pending.forEach(ins=>ins.dataset.adfitReady='1');
+        const script=document.createElement('script');
+        script.async=true;
+        script.src=AD_CONFIG.kakao?.script||'https://t1.daumcdn.net/kas/static/ba.min.js';
+        script.onload=()=>script.remove();
+        script.onerror=()=>{pending.forEach(ins=>delete ins.dataset.adfitReady);script.remove()};
+        document.head.appendChild(script);
+    },80);
+}
+function destroyDaycareListAd(){
+    if(typeof window.adfit?.destroy!=='function')return;
+    for(const ins of $('list').querySelectorAll('ins.kakao_ad_area'))try{window.adfit.destroy(ins.dataset.adUnit)}catch{}
+}
+function listAdHtml(index){
+    const mode=adMode(),after=Math.max(4,Number(AD_CONFIG.placements?.listAfter)||6),repeat=Math.max(5,Number(AD_CONFIG.placements?.listRepeat)||6),position=index+1;
+    if(!AD_CONFIG.placements?.listNative||mode==='off'||position<after||(position-after)%repeat!==0)return'';
+    if(position===after&&mode!=='direct'){
+        const slot=AD_CONFIG.kakao?.list;
+        return slot?.unit?`<aside class="daycare-list-ad-slot" aria-label="광고"><span>광고</span><ins class="kakao_ad_area" style="display:none" data-ad-unit="${esc(slot.unit)}" data-ad-width="${Number(slot.width)}" data-ad-height="${Number(slot.height)}"></ins></aside>`:'';
+    }
+    if(mode==='kakao')return'';
+    const ads=directAds();
+    return ads.length?directAdHtml(ads[(page-1)%ads.length]):'';
+}
+/** SOFTM-LIST-AD-RESTORE END */
 function mountAdSettings(){const key=AD_CONFIG.operator?.queryKey||'ad-settings';if(new URLSearchParams(location.search).get(key)!=='1'||$('adAdminToggle'))return;const button=document.createElement('button');button.id='adAdminToggle';button.className='ad-admin-toggle';button.type='button';button.textContent='광고 설정';button.onclick=()=>{$('adAdminLayer').hidden=false};document.body.appendChild(button);const layer=document.createElement('div');layer.id='adAdminLayer';layer.className='ad-admin-layer';layer.hidden=true;layer.onclick=e=>{if(e.target===layer)layer.hidden=true};layer.innerHTML=`<section class="ad-admin-card" role="dialog" aria-modal="true" aria-label="광고 운영 설정"><h2>광고 운영 설정</h2><p>이 화면의 저장값은 현재 브라우저의 시험 설정입니다. 전체 이용자 기본값은 <b>nationwide-daycare-ad-config.js</b>에서 관리합니다.</p><label class="ad-setting-row"><span>광고 전체 사용</span><input id="adSettingEnabled" type="checkbox" ${AD_CONFIG.enabled?'checked':''}></label><label class="ad-setting-row"><span>광고 방식</span><select id="adSettingMode"><option value="hybrid">카카오 + 직접광고</option><option value="kakao">카카오만</option><option value="direct">직접광고만</option><option value="off">광고 끄기</option></select></label><label class="ad-setting-row"><span>상단 배너</span><input id="adSettingBanner" type="checkbox" ${AD_CONFIG.placements?.banner?'checked':''}></label><label class="ad-setting-row"><span>목록 직접광고</span><input id="adSettingList" type="checkbox" ${AD_CONFIG.placements?.listNative?'checked':''}></label><div class="ad-admin-actions"><button type="button" onclick="resetAdSettings()">기본값 복원</button><button type="button" onclick="$('adAdminLayer').hidden=true">취소</button><button class="primary" type="button" onclick="saveAdSettings()">저장 후 적용</button></div></section>`;document.body.appendChild(layer);$('adSettingMode').value=AD_CONFIG.mode||'off'}
 function saveAdSettings(){const key=AD_CONFIG.operator?.storageKey||'daycare-map-ad-overrides-v1',value={enabled:$('adSettingEnabled').checked,mode:$('adSettingMode').value,placements:{banner:$('adSettingBanner').checked,listNative:$('adSettingList').checked}};localStorage.setItem(key,JSON.stringify(value));location.reload()}
 function resetAdSettings(){localStorage.removeItem(AD_CONFIG.operator?.storageKey||'daycare-map-ad-overrides-v1');location.reload()}
@@ -202,7 +253,9 @@ function apply(skipMapUpdate=false,selectResults=true){
  if(!skipMapUpdate&&mapReady&&($('province').value||filtered.length<=30))scheduleMapUpdate()
 }
 function row(c,rank){const ev=c.ev,routeRank=routeOrder.indexOf(c.i),confidence=confidenceCategory(c),evaluation=ev?`<span class="chip score">공단 ${scoreText(ev.score)}</span><span class="chip grade">${esc(gradeText(ev.grade))}</span><span class="chip">${ev.year||'-'}년 평가</span>`:(isNew(c)?'<span class="chip new">신설·미평가</span>':'<span class="chip">공식 평가 미확인</span>');return `<article class="row ${selected.has(c.i)?'route-selected':''}" onclick="showOnMap('${c.i}')"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 선택" onclick="event.stopPropagation()" onchange="toggle('${c.i}',this.checked)"><div><h3><span class="rank">${routeRank>=0&&$('sort').value==='route'?routeRank+1:rank}.</span>${esc(c.n)}</h3><div class="meta">${evaluation}<span class="chip confidence-${confidence}">정보신뢰 ${esc(confidenceText(c))}</span><span class="chip">정원 ${c.z}명</span>${Number.isFinite(c._distance)?`<span class="chip">기준지 ${c._distance.toFixed(1)}km</span>`:''}<span class="chip${isNew(c)?' new':''}">지정 ${esc(c.d||'-')}</span></div><div class="details">${esc(c.a)}<br>사회복지사 ${c.s} · 간호 ${c.rn} · 간호조무 ${c.na} · 물리 ${c.pt} · 작업 ${c.ot} · 요양보호 ${c.cw}</div></div><div class="actions"><button class="map" onclick="event.stopPropagation();showOnMap('${c.i}')">지도 표시</button><button class="copy" onclick="event.stopPropagation();copyDestinationName('${c.i}')">목적지명 복사</button><button class="copy" onclick="event.stopPropagation();copyDestinationAddress('${c.i}')">주소 복사</button><a class="kakao" target="_blank" rel="noopener" onclick="event.stopPropagation()" href="${kakaoUrl(c)}">카카오 상세</a><a class="nhis" target="_blank" rel="noopener" onclick="event.stopPropagation()" href="${officialUrl(c)}">공단 상세</a></div></article>`}
-function render(){const start=(page-1)*PAGE,rows=filtered.slice(start,start+PAGE);if(rows.length){const after=Math.max(1,Math.min(rows.length,Number(AD_CONFIG.placements?.listAfter)||6)),parts=rows.map((c,i)=>row(c,start+i+1)),ad=listAdHtml(rows);if(ad)parts.splice(after,0,ad);$('list').innerHTML=parts.join('')}else $('list').innerHTML='<div class="empty">조건에 맞는 센터가 없습니다.</div>';const pages=Math.ceil(filtered.length/PAGE),from=Math.max(1,page-2),to=Math.min(pages,page+2);let h=`<button ${page===1?'disabled':''} onclick="go(${page-1})">이전</button>`;for(let i=from;i<=to;i++)h+=`<button class="${i===page?'active':''}" onclick="go(${i})">${i}</button>`;h+=`<button ${page>=pages?'disabled':''} onclick="go(${page+1})">다음</button>`;$('pager').innerHTML=h;renderSelected();updateSelectAllControl()}
+/** SOFTM-LIST-AD-RENDER START 날짜:20260904 : 정렬·필터·페이지 이동 뒤에도 첫 광고와 이후 문의 위치를 유지 */
+function render(){destroyDaycareListAd();const start=(page-1)*PAGE,rows=filtered.slice(start,start+PAGE);if(rows.length){$('list').innerHTML=rows.map((c,i)=>row(c,start+i+1)+listAdHtml(i)).join('')}else $('list').innerHTML='<div class="empty">조건에 맞는 센터가 없습니다.</div>';const pages=Math.ceil(filtered.length/PAGE),from=Math.max(1,page-2),to=Math.min(pages,page+2);let h=`<button ${page===1?'disabled':''} onclick="go(${page-1})">이전</button>`;for(let i=from;i<=to;i++)h+=`<button class="${i===page?'active':''}" onclick="go(${i})">${i}</button>`;h+=`<button ${page>=pages?'disabled':''} onclick="go(${page+1})">다음</button>`;$('pager').innerHTML=h;renderSelected();updateSelectAllControl();queueDaycareAdFit()}
+/** SOFTM-LIST-AD-RENDER END */
 function go(n){page=n;render();$('list').scrollTop=0}
 async function syncMapMarkersToSelection(){
  if(!mapReady)return;

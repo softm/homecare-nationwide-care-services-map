@@ -1,0 +1,40 @@
+/** SOFTM-PARTNER-OVERLAY START 날짜:20260904 : 두 지도에서 제휴 문의와 목록 광고를 모바일에서도 잘리지 않게 표시 */
+.partner-list-ad{display:block;margin:10px;padding:16px;border:1px solid #bcd9d0;border-radius:12px;background:linear-gradient(145deg,#effaf6,#f4f8ff);text-align:left}
+.partner-list-ad .partner-ad-top{display:flex;align-items:center;gap:8px;margin-bottom:9px;color:#527064;font-size:12px}
+.partner-list-ad .partner-ad-label{padding:3px 7px;border-radius:6px;background:#087650;color:#fff;font-weight:800}
+.partner-list-ad h3{margin:0;color:#17324d;font-size:16px;line-height:1.45}
+.partner-list-ad p{margin:7px 0 0;color:#53647a;font-size:13px;line-height:1.6}
+.partner-list-ad .ad-cta{margin-top:12px;background:#087650;font-size:14px;cursor:pointer}
+.partner-list-ad small{display:block;margin-top:9px;color:#647386;font-size:12px;line-height:1.5}
+.daycare-list-ad-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:124px;margin:10px;padding:8px 0;overflow:hidden;border:1px solid #dce5ee;border-radius:12px;background:#f7f9fc}
+.daycare-list-ad-slot>span{margin-bottom:6px;color:#758397;font-size:12px}
+.daycare-list-ad-slot iframe{display:block;max-width:100%}
+.partner-dialog{box-sizing:border-box;width:min(560px,calc(100% - 24px));max-height:calc(100dvh - 24px);margin:auto;padding:0;border:1px solid #d1dfe4;border-radius:18px;background:#fff;color:#17324d;box-shadow:0 24px 80px #10293840;overflow:auto;overscroll-behavior:contain;font:16px/1.5 system-ui,-apple-system,sans-serif}
+.partner-dialog::backdrop{background:rgba(13,31,49,.64)}
+.partner-dialog *{box-sizing:border-box}
+.partner-dialog header{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 24px 16px;background:#fff;border-bottom:1px solid #e5ecef}
+.partner-dialog header h2{color:#17324d;margin:3px 0 0;font-size:22px;line-height:1.35}
+.partner-dialog header small{color:#087650;font-size:13px;font-weight:800}
+.partner-dialog .partner-close{flex:none;width:40px;height:40px;min-height:40px;padding:0;border:1px solid #d9e3e9;border-radius:50%;background:#fff;color:#17324d;font-size:26px;line-height:1;cursor:pointer}
+.partner-dialog .partner-body{padding:20px 24px 24px}
+.partner-dialog .partner-intro{margin:0 0 18px;color:#53647a;font-size:14px}
+.partner-dialog .partner-fields{display:grid;grid-template-columns:1fr 1fr;gap:15px 14px;margin:0;padding:0;border:0;min-width:0}
+.partner-dialog label{display:block;margin:0;color:#273f53;font-size:14px;font-weight:700}
+.partner-dialog label span{color:#647386;font-size:12px;font-weight:400}
+.partner-dialog .partner-wide{grid-column:1/-1}
+.partner-dialog input:not([type=checkbox]),.partner-dialog textarea{display:block;width:100%;min-width:0;min-height:44px;margin:6px 0 0;padding:10px 12px;border:1px solid #b9cbd5;border-radius:8px;background:#fff;color:#17324d;font-family:inherit;font-size:16px;line-height:1.5}
+.partner-dialog textarea{resize:vertical;min-height:112px;max-height:280px}
+.partner-dialog :focus-visible{outline:3px solid #167a62;outline-offset:3px}
+.partner-dialog .partner-consent{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.6;font-weight:400}
+.partner-dialog input[type=checkbox]{flex:none;width:18px;height:18px;min-height:18px;margin:2px 0 0;accent-color:#087650}
+.partner-dialog .partner-status{margin:14px 0 0;padding:11px 12px;border-radius:8px;background:#f1f6f9;color:#435a6b;font-size:14px;white-space:pre-line}
+.partner-dialog .partner-status:empty{display:none}
+.partner-dialog .partner-status[data-state=error]{background:#fff2ef;color:#9e362b}
+.partner-dialog .partner-status[data-state=success]{background:#eaf7ef;color:#096640}
+.partner-dialog .partner-submit{display:block;width:100%;min-height:46px;margin:18px 0 0;padding:11px 16px;border:0;border-radius:9px;background:#087650;color:#fff;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer}
+.partner-dialog button:disabled{opacity:.6;cursor:wait}
+.partner-dialog .partner-fallback{margin:14px 0 0;color:#647386;font-size:13px;overflow-wrap:anywhere}
+.partner-dialog .partner-fallback a{color:#126a91;text-underline-offset:3px}
+html.partner-inquiry-open{overflow:hidden}
+@media(max-width:480px){.partner-dialog header{padding:16px}.partner-dialog .partner-body{padding:16px}.partner-dialog .partner-fields{grid-template-columns:1fr}.partner-list-ad{margin:9px 0}.daycare-list-ad-slot{margin:9px 0}}
+/** SOFTM-PARTNER-OVERLAY END */

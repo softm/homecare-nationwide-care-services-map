@@ -43,6 +43,9 @@
 .ad-zone{margin-bottom:12px;padding:7px 10px 10px;overflow:hidden}.ad-zone[hidden]{display:none}.ad-zone-label{display:block;margin:0 0 5px;color:#758397;font-size:9px;font-weight:900;letter-spacing:.08em}.ad-banner-host{min-height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden}.ad-banner-host iframe{display:block;max-width:100%}.ad-loading{color:#8491a3;font-size:11px}.list-ad-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:116px;margin:9px 0;padding:8px;border:1px solid #dce5ee;border-radius:12px;background:#f7f9fc;overflow:hidden}.list-ad-slot iframe{display:block;max-width:100%}.house-banner{width:min(100%,728px);min-height:90px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:13px 17px;border:1px solid #cfe1f2;border-radius:12px;background:linear-gradient(135deg,#eff8ff,#f3fbf7)}.house-banner h3{margin:0;color:#17324d;font-size:15px}.house-banner p{margin:5px 0 0;color:#53647a;font-size:11px}.ad-kicker{display:block;margin-bottom:4px;color:#176b9f;font-size:10px;font-weight:900}.ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 13px;border:0;border-radius:9px;background:#17324d;color:#fff;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}
 @media(max-width:640px){.detail-sheet{height:72dvh;max-height:none}.detail-main-tabs{padding:8px 10px}.detail-main-tab{min-height:40px}.detail-view{padding:14px}.basic-live-grid{grid-template-columns:1fr}.basic-live-item.wide{grid-column:auto}.official-field-grid{grid-template-columns:1fr}.official-field.wide{grid-column:auto}.official-card-head{align-items:flex-start}.official-table th,.official-table td{max-width:190px}.official-photo-grid{grid-template-columns:1fr 1fr;gap:7px}.official-photo img{height:108px}.official-photo.expanded img{height:min(340px,43vh)}.official-photo figcaption{padding:7px;font-size:9px}.ad-zone{padding:6px}.ad-banner-host{min-height:100px}.house-banner{min-height:100px;grid-template-columns:1fr;padding:12px 14px}.house-banner .ad-cta{justify-self:start}}
 </style>
+<!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 두 지도에서 같은 제휴 문의 화면을 사용 -->
+<link rel="stylesheet" href="partner-inquiry.css?v=20260904-1">
+<!-- SOFTM-PARTNER-ASSETS END -->
 </head>
 <body>
 <header class="page-head"><div class="head-row"><div><h1 id="pageTitle">전국 주야간보호센터 지도</h1><p>돌봄한눈에서 현재 위치를 기준으로 공개 기관정보·평가·인력을 조회합니다.</p></div><a class="legacy-link" href="index.html">돌봄한눈 홈</a></div></header>
@@ -68,7 +71,11 @@
 <section class="detail-sheet" id="detailSheet" hidden aria-live="polite"><div class="detail-head"><small id="detailRegion"></small><h3 id="detailName"></h3><button class="detail-close" id="detailClose" aria-label="상세 닫기">×</button></div><div class="detail-body" id="detailBody"></div></section>
 <section class="compare-modal" id="compareLayer" hidden><div class="compare-dialog" role="dialog" aria-modal="true" aria-labelledby="compareTitle"><header class="compare-head"><h2 id="compareTitle">선택센터 비교표 <span class="compare-count" id="compareCount">0곳</span></h2><div class="compare-actions"><button type="button" class="excel-btn" id="compareExcel">엑셀 다운로드</button><button type="button" class="compare-close" id="compareClose" aria-label="비교표 닫기">×</button></div></header><div class="compare-scroll"><div id="compareBody"></div></div><p class="compare-foot">컬럼 제목을 누르면 해당 값으로 오름차순·내림차순 정렬됩니다. 평점·등급은 국민건강보험공단 평가 연결 자료이며 미평가 기관은 마지막에 표시됩니다.</p></div></section>
 <div class="toast" id="toast" hidden></div>
-<script src="nationwide-care-ad-config.js?v=20260902-21"></script>
+<!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 목록 광고 복구 설정과 공통 문의 연결을 함께 갱신 -->
+<script src="nationwide-care-ad-config.js?v=20260904-1"></script>
+<script src="partner-inquiry-config.js?v=20260904-1"></script>
+<script src="partner-inquiry.js?v=20260904-1"></script>
+<!-- SOFTM-PARTNER-ASSETS END -->
 <script src="nationwide-care-manifest.js"></script>
 <script src="naver-geocoder.js?v=20260902-1"></script><!-- SOFTM-GEOCODER-SDK 날짜:20260902 : 두 지도에서 같은 브라우저 주소 변환 모듈을 공유하기 위해 추가 -->
 <script src="nhis-static-data.js?v=20260904-1"></script><!-- SOFTM-NHIS-GZIP 날짜:20260904 : 압축 배포 전 로더 캐시가 삭제된 비압축 상세를 요청하지 않도록 버전 갱신 -->
@@ -106,13 +113,35 @@ function setStatus(title,text=''){$('mapStatus').innerHTML=`<b>${esc(title)}</b>
 function careAdConfig(){return window.CARE_AD_CONFIG||{enabled:false,mode:'off',placements:{}}}
 function careAdMode(){const config=careAdConfig();return config.enabled&&config.mode!=='off'?config.mode:'off'}
 function safeAdUrl(value){try{const url=new URL(value,location.href);return ['https:','http:','mailto:'].includes(url.protocol)?url.href:'#'}catch{return'#'}}
-function directAdHtml(item){if(!item)return'';return `<div class="house-banner"><div><span class="ad-kicker">${esc(item.eyebrow||'돌봄 생활 정보')}</span><h3>${esc(item.title)}</h3><p>${esc(item.description||'')}</p></div><a class="ad-cta" href="${esc(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${esc(item.cta||'자세히 보기')}</a></div>`}
+/** SOFTM-PARTNER-CTA START 날짜:20260904 : 제휴 문의는 메일 앱 실행 대신 현재 지도 위에서 접수 */
+function directAdHtml(item,banner=true){
+    if(!item)return'';
+    const action=item.action==='partner-inquiry'
+        ? `<button type="button" class="ad-cta" data-partner-inquiry aria-haspopup="dialog">${esc(item.cta||'제휴 문의')}</button>`
+        : `<a class="ad-cta" href="${esc(safeAdUrl(item.url))}" target="${String(item.url).startsWith('mailto:')?'_self':'_blank'}" rel="sponsored noopener">${esc(item.cta||'자세히 보기')}</a>`;
+    const content=`<span class="ad-kicker">${esc(item.eyebrow||'돌봄 생활 정보')}</span><h3>${esc(item.title)}</h3><p>${esc(item.description||'')}</p>`;
+    if(banner)return `<div class="house-banner"><div class="ad-copy">${content}</div>${action}</div>`;
+    return `<aside class="partner-list-ad" aria-label="광고·제휴"><div class="partner-ad-top"><span class="partner-ad-label">${esc(item.label||'광고')}</span><span>${esc(item.eyebrow||'돌봄 생활 정보')}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.description||'')}</p>${action}<small>${esc(careAdConfig().direct?.disclosure||'광고 콘텐츠입니다.')}</small></aside>`;
+}
+/** SOFTM-PARTNER-CTA END */
 function activeDirectAd(){return (careAdConfig().direct?.items||[]).find(item=>item?.active&&item.title&&item.url)}
 function kakaoIns(slot){return slot?.unit?`<ins class="kakao_ad_area" style="display:none" data-ad-unit="${esc(slot.unit)}" data-ad-width="${Number(slot.width)}" data-ad-height="${Number(slot.height)}"></ins>`:''}
 function queueCareAdFit(){if(!['hybrid','kakao'].includes(careAdMode())||!document.querySelector('ins.kakao_ad_area:not([data-adfit-ready])'))return;clearTimeout(adRefreshTimer);adRefreshTimer=setTimeout(()=>{document.querySelectorAll('ins.kakao_ad_area:not([data-adfit-ready])').forEach(ins=>ins.dataset.adfitReady='1');const script=document.createElement('script');script.async=true;script.src=careAdConfig().kakao?.script||'https://t1.daumcdn.net/kas/static/ba.min.js';script.onload=()=>script.remove();document.head.appendChild(script)},80)}
 function initCareAds(){const config=careAdConfig(),zone=$('careAdBanner'),host=$('careAdBannerHost'),mode=careAdMode();if(!zone||mode==='off'||!config.placements?.banner){if(zone)zone.hidden=true;return}const slot=matchMedia('(max-width:640px)').matches?config.kakao?.mobile:config.kakao?.desktop;if(mode==='direct'||!slot?.unit){const item=activeDirectAd();host.innerHTML=item?directAdHtml(item):'';zone.hidden=!item;return}host.innerHTML=kakaoIns(slot);zone.hidden=false;queueCareAdFit();if(config.fallbackToDirect)setTimeout(()=>{if(!host.querySelector('iframe')){const item=activeDirectAd();if(item)host.innerHTML=directAdHtml(item)}},5200)}
 function configuredListAds(config){const units=Array.isArray(config.kakao?.listUnits)?config.kakao.listUnits:config.kakao?.list?[config.kakao.list]:[];const seen=new Set();return units.filter(slot=>{const unit=String(slot?.unit||'').trim();if(!unit||seen.has(unit))return false;seen.add(unit);return true})}
-function listAdHtml(index){const config=careAdConfig(),after=Math.max(4,Number(config.placements?.listAfter)||6),repeat=Math.max(5,Number(config.placements?.listRepeat)||6),position=index+1,isAd=position===after||(position>after&&(position-after)%repeat===0);if(!config.placements?.listNative||!isAd||careAdMode()==='off')return'';if(careAdMode()==='direct'){const item=activeDirectAd();return item?`<aside class="list-ad-slot" aria-label="광고">${directAdHtml(item)}</aside>`:''}const slotIndex=position===after?0:Math.floor((position-after)/repeat),slot=configuredListAds(config)[slotIndex];if(!slot?.unit)return'';return `<aside class="list-ad-slot" aria-label="광고"><span class="ad-zone-label">광고</span>${kakaoIns(slot)}</aside>`}
+/** SOFTM-LIST-AD-RESTORE START 날짜:20260904 : 기존 첫 광고 단위를 유지하고 나머지 목록 슬롯에서 제휴 문의를 접수 */
+function listAdHtml(index){
+    const config=careAdConfig(),mode=careAdMode(),after=Math.max(4,Number(config.placements?.listAfter)||6),repeat=Math.max(5,Number(config.placements?.listRepeat)||6),position=index+1;
+    if(!config.placements?.listNative||mode==='off'||position<after||(position-after)%repeat!==0)return'';
+    if(position===after&&mode!=='direct'){
+        const slot=configuredListAds(config)[0];
+        return slot?.unit?`<aside class="list-ad-slot" aria-label="광고"><span class="ad-zone-label">광고</span>${kakaoIns(slot)}</aside>`:'';
+    }
+    if(mode==='kakao')return'';
+    const item=activeDirectAd();
+    return item?directAdHtml(item,false):'';
+}
+/** SOFTM-LIST-AD-RESTORE END */
 function destroyRenderedListAds(){const adfit=window.adfit;if(!adfit||typeof adfit.destroy!=='function')return;const units=new Set(Array.from($('list')?.querySelectorAll('ins.kakao_ad_area')||[],ins=>ins.dataset.adUnit).filter(Boolean));for(const unit of units)try{adfit.destroy(unit)}catch{}}
 function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src+(src.includes('?')?'&':'?')+'v='+ASSET_VERSION;s.onload=resolve;s.onerror=()=>reject(new Error(src+' 로드 실패'));document.head.appendChild(s)})}
 async function loadCategoryData(){showLoading(`${CONFIG.label} 공식 데이터를 불러오는 중`,`총 ${CONFIG.count.toLocaleString()}곳`);window.NATIONAL_CARE_DATA=[];try{const results=await Promise.allSettled(CONFIG.files.map(loadScript)),failures=results.filter(r=>r.status==='rejected');DATA=window.NATIONAL_CARE_DATA||[];DATA.forEach(c=>{for(const k of ['z','s','rn','na','pt','ot','cw','es'])if(c[k]!==undefined)c[k]=Number(c[k]);});if(!DATA.length)throw new Error(`${CONFIG.label} 데이터 파일을 불러오지 못했습니다.`);if(failures.length)toast(`일부 데이터 파일 ${failures.length}개를 다시 확인해 주세요.`);return failures.length}finally{hideLoading()}}
