@@ -10,6 +10,7 @@ const fail = message => { throw new Error(message); };
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const exists = relative => fs.existsSync(path.join(root, relative));
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/viewport-regions.test.mjs')], { stdio: 'inherit' }); // SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 정기 검사에서 모든 기관 지역 연결과 화면영역 누락 회귀를 함께 확인
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/brand-identity.test.mjs')], { stdio: 'inherit' }); // SOFTM-BRAND-IDENTITY 날짜:20260904 : 서비스 소개와 홈페이지·유형 안내의 연결이 누락되는 회귀를 함께 확인
 
 function localScripts(htmlFile) {
   const html = read(htmlFile);
@@ -49,6 +50,7 @@ const landingPages = [...new Set(Object.values(categoryLandingPages))];
 /** SOFTM-SEO-LANDING END */
 
 for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html); // SOFTM-DAYCARE-LANDING 날짜:20260904 : 안내와 분리된 기존 전용 지도의 스크립트 검사도 유지
+localScripts('about.html'); // SOFTM-BRAND-IDENTITY 날짜:20260904 : 신규 소개 문서의 로컬 참조·스크립트 오류도 검사
 
 /** SOFTM-INDEX-ENTRY-CHECK START 날짜:20260903 : 인덱스 광고 크기와 모든 요양 카테고리 직행 링크가 함께 유지되도록 자동 검사 */
 const indexSource = read('index.html');
@@ -96,11 +98,12 @@ const sitemapSource = read('sitemap.xml');
 const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
 const expectedSitemapUrls = [
   `${publicOrigin}/`,
+  `${publicOrigin}/about.html`, // SOFTM-BRAND-IDENTITY 날짜:20260904 : 유형 안내 외에 독립 서비스의 소개 문서도 검색 대표 목록에 포함
   ...landingPages.map(page => `${publicOrigin}/${page}`),
   ...getRegionalSeoPages(root).pages.map(page => page.url) // SOFTM-SEO-REGIONAL-CHECK 날짜:20260904 : 지역별 실기관 페이지의 누락과 임의 주소 추가를 함께 차단
 ];
 if (sitemapUrls.length !== expectedSitemapUrls.length || expectedSitemapUrls.some(url => !sitemapUrls.includes(url))) fail('sitemap.xml 공개 페이지 목록이 누락되거나 불필요한 URL을 포함합니다.');
-const indexablePages = [['index.html', `${publicOrigin}/`], ...landingPages.map(page => [page, `${publicOrigin}/${page}`])];
+const indexablePages = [['index.html', `${publicOrigin}/`], ['about.html', `${publicOrigin}/about.html`], ...landingPages.map(page => [page, `${publicOrigin}/${page}`])]; // SOFTM-BRAND-IDENTITY 날짜:20260904 : 소개 문서의 색인 허용·대표 주소·브랜드 메타도 같은 기준으로 검사
 for (const [htmlFile, canonical] of indexablePages) {
   const source = read(htmlFile);
   if (!source.includes('<meta name="robots" content="index,follow')) fail(`${htmlFile}: 검색 허용 robots 메타 누락`);
