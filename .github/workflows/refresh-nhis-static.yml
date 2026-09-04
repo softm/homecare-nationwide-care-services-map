@@ -138,16 +138,21 @@ jobs:
             if [ "$FORCE" = true ]; then args+=(--force); fi
             python scripts/sync_nhis_static.py "${args[@]}"
           done
+      # SOFTM-DATA-UNIFIED START 날짜:20260904 : 공단 수집 직후 검색 자료와 안내 수치를 함께 갱신해 지도에 새 데이터 반영
+      - name: 수집 JSON에서 지도 검색 자료 생성
+        if: steps.plan.outputs.run == 'true'
+        run: python scripts/build_nationwide_care_services.py
+      # SOFTM-DATA-UNIFIED END
       - name: 생성물 검증
         if: steps.plan.outputs.run == 'true'
         run: npm run check
       - name: 변경 커밋 및 반영
         if: steps.plan.outputs.run == 'true'
         run: |
-          if git diff --quiet -- data/nhis source-data; then exit 0; fi
+          if git diff --quiet -- data source-data *-map.html index.html; then exit 0; fi
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/nhis source-data
+          git add data source-data *-map.html index.html # SOFTM-DATA-UNIFIED 날짜:20260904 : 수집 자료와 지도·안내 생성물을 같은 회차에 반영
           git commit -m "$(TZ=Asia/Seoul date +%Y%m%d)_nhis_static_refresh"
           git push
 # SOFTM-NHIS-ACTIONS END
