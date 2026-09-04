@@ -141,7 +141,7 @@ jobs:
       # SOFTM-DATA-UNIFIED START 날짜:20260904 : 공단 수집 직후 검색 자료와 안내 수치를 함께 갱신해 지도에 새 데이터 반영
       - name: 수집 JSON에서 지도 검색 자료 생성
         if: steps.plan.outputs.run == 'true'
-        run: python scripts/build_nationwide_care_services.py
+        run: npm run build # SOFTM-DATA-REGIONS 날짜:20260904 : 수집 후 지도뿐 아니라 지역 목록과 검색 연결도 함께 갱신
       # SOFTM-DATA-UNIFIED END
       - name: 생성물 검증
         if: steps.plan.outputs.run == 'true'
@@ -149,10 +149,10 @@ jobs:
       - name: 변경 커밋 및 반영
         if: steps.plan.outputs.run == 'true'
         run: |
-          if git diff --quiet -- data source-data *-map.html index.html; then exit 0; fi
+          if git diff --quiet -- data source-data regions *-map.html index.html sitemap.xml; then exit 0; fi # SOFTM-DATA-REGIONS 날짜:20260904 : 지역 목록만 바뀐 경우도 누락 없이 반영
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data source-data *-map.html index.html # SOFTM-DATA-UNIFIED 날짜:20260904 : 수집 자료와 지도·안내 생성물을 같은 회차에 반영
+          git add data source-data regions *-map.html index.html sitemap.xml # SOFTM-DATA-REGIONS 날짜:20260904 : 수집 자료·지역 목록·사이트맵을 같은 회차에 반영
           git commit -m "$(TZ=Asia/Seoul date +%Y%m%d)_nhis_static_refresh"
           git push
 # SOFTM-NHIS-ACTIONS END
