@@ -64,6 +64,7 @@
 - 시설별 상세조회 JSON이 아직 없는 기관은 오류 화면 대신 공단 시설별 현황·평가의 주소·정원·인력·평가 요약을 표시하고, JSON 수집 후 같은 화면에서 상세 항목으로 자동 전환한다. // SOFTM-NHIS-FALLBACK 날짜:20260903 : 장기 순환 수집 기간에도 두 지도의 공단 정보를 중단 없이 제공
 - `details` 수집은 시설별 상세조회 OpenAPI와 공단 공개 상세 페이지의 기본정보(11)·인력/근속(14)·CCTV(19)를 결합한다. 화면 고유 항목도 `data/nhis/details`에 정적으로 저장하고 브라우저 실시간 크롤링으로 되돌리지 않는다. // SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 공단 원문 링크와 같은 공개 정보 범위를 Vercel 없이 유지
 - 상세 수집 규격을 바꾸면 `DETAIL_PROFILE`도 변경해 완료된 예전 샤드 체크포인트가 새 필드 수집을 건너뛰지 않게 한다. // SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 장기 전체수집의 규격 전환 누락을 방지
+- 기관별 공단 상세는 `data/nhis/details/NN/{기관기호}.json.gz`로 직접 저장하고 비압축 상세 JSON은 배포하지 않는다. `nhis-static-data.js`, 매니페스트, 검증기의 확장자를 함께 유지한다. // SOFTM-NHIS-GZIP 날짜:20260903 : 전체 상세가 GitHub Pages 용량 한도를 넘지 않도록 압축 배포 규격을 고정
 - 공공데이터 서비스키는 로컬 `.env.local`과 GitHub Actions Secret `DATA_GO_KR_SERVICE_KEY`에만 두며 HTML·정적 JSON·로그에 넣지 않는다.
 
 ## 서버 원칙
