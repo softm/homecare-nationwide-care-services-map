@@ -2,7 +2,7 @@
 
 <!-- SOFTM-LANDING-ADS START 날짜:20260904 : 8개 안내의 공용 광고 위치와 신규 단위 발급 규격을 재사용 가능하게 기록 -->
 
-8개 기관 유형은 `인덱스 → 유형 안내 → 지도` 순서로 이동합니다. 주야간보호도 `daycare-map.html` 안내를 거쳐 기존 `nationwide-daycare-map.html` 지도를 엽니다.
+8개 기관 유형은 `인덱스 → 유형 안내 → 지도` 순서로 이동합니다. 주야간보호도 `daycare-map.html` 안내를 거쳐 다른 유형과 같은 `nationwide-care-services-map.html?type=daycare` 지도를 엽니다. <!-- SOFTM-DAYCARE-UNIFIED 날짜:20260904 : 광고 안내의 이동 설명을 통합 지도 진입과 일치 -->
 
 광고는 각 안내의 **제목·지도 찾기·자료 요약 아래, 이용 순서 위**에 한 개씩 배치합니다. `광고` 표시로 검색 버튼과 구분하며 화면을 덮거나 고정하지 않습니다.
 

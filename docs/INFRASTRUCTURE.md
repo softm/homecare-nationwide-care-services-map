@@ -6,8 +6,8 @@
 
 | 영역 | 실행 위치 | 구성 파일·서비스 | 역할 | 브라우저 호출 여부 | 인증정보 |
 |---|---|---|---|---:|---|
-| 통합 시작 화면 | GitHub Pages 또는 로컬 정적 서버 | `index.html` | 전국 주간·전국 요양 및 요양 8개 카테고리 진입 | 예 | 없음 |
-| 기관 유형 안내 | GitHub Pages 또는 로컬 정적 서버 | `daycare-map.html` 등 8개 안내, `seo-landing.css` | 유형별 소개 → 전용 지도 진입·광고 | 예 | 없음 | <!-- SOFTM-LANDING-ADS 날짜:20260904 : 모든 유형의 2단계 안내와 지도 역할을 구분 -->
+| 통합 시작 화면 | GitHub Pages 또는 로컬 정적 서버 | `index.html` | 8개 유형을 한 번씩 선택 → 유형 안내 → 통합 지도 진입 | 예 | 없음 | <!-- SOFTM-INDEX-UNIFIED 날짜:20260904 : 주야간보호도 같은 시작 흐름으로 연결 -->
+| 기관 유형 안내 | GitHub Pages 또는 로컬 정적 서버 | `daycare-map.html` 등 8개 안내, `seo-landing.css` | 유형별 소개 → 통합 지도의 해당 `type` 진입·광고 | 예 | 없음 | <!-- SOFTM-LANDING-ADS 날짜:20260904 : 모든 유형의 2단계 안내와 지도 역할을 구분 -->
 | 전국 주간 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-daycare-map.html` | 주야간보호 5,751곳 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 전국 요양 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-care-services-map.html` | 8개 기관 유형 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 지도·주소 변환 | 사용자 브라우저 | 네이버 Maps JavaScript SDK, `naver-geocoder.js` | 지도 표시, 주소→좌표, 좌표→주소 | 네이버 SDK 직접 호출 | `ncpKeyId=etfcybk8vf`, Maps Application의 Web 서비스 URL 제한 |
