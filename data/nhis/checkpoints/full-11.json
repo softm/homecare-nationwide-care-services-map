@@ -1,1 +1,1 @@
-{"apiCalls":571,"completed":false,"cycleId":"20260903T042115Z","lastId":"12726000455","mode":"full","processed":55,"schemaVersion":1,"scope":["catalog","details","evaluations"],"shard":{"count":14,"index":11},"updatedAt":"2026-09-03T04:23:02Z"}
+{"apiCalls":31230,"completed":true,"cycleId":"20260903T132209Z","detailProfile":"official-page-tabs-11-14-19-v1","lastId":"35013000110","mode":"full","processed":2240,"schemaVersion":1,"scope":["details"],"shard":{"count":14,"index":11},"updatedAt":"2026-09-03T14:21:54Z"}
