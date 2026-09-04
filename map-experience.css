@@ -164,7 +164,20 @@
 .care-map-page .care-basket-item button { padding:6px 9px; min-width:36px; }
 .care-map-page .care-basket-item .care-drag-handle { cursor:grab; touch-action:none; user-select:none; font-size:24px; padding:4px 8px; }
 .care-map-page .care-basket button:disabled { color:#7b8898; background:#f1f4f7; border-color:#e0e6ed; cursor:default; }
-.care-drop-target { outline:3px solid #175cb5; outline-offset:1px; }
+/** SOFTM-DRAG-FEEDBACK START 날짜:20260904 : 잡은 카드와 놓일 자리를 구분해 실제로 이동하고 있음을 즉시 보여줌 */
+.care-map-page .care-basket .care-basket-item .care-drag-handle { min-width:44px; background:#e9f1fc; border-color:transparent; color:#376caa; font-size:26px; line-height:1; }
+.care-map-page .care-basket .care-basket-item .care-drag-handle:hover { background:#d9e8fc; color:#175cb5; }
+.care-basket-dragging,.care-basket-dragging * { cursor:grabbing!important; user-select:none!important; }
+.care-basket-item.care-drag-placeholder { position:relative; border:2px dashed #4384d0; padding:5px; background:#eaf3ff; }
+.care-drag-placeholder > * { visibility:hidden; }
+.care-drag-placeholder::after { content:attr(data-drop-label); position:absolute; inset:0; display:grid; place-items:center; color:#175cb5; font-size:15px; font-weight:750; }
+.care-drag-preview { position:fixed; z-index:25000; top:0; left:0; display:flex; align-items:center; gap:12px; box-sizing:border-box; padding:10px 14px; border:2px solid #175cb5; border-radius:12px; background:#fff; color:#173654; box-shadow:0 18px 40px #143a6b40,0 4px 10px #143a6b26; pointer-events:none; will-change:transform; }
+.care-drag-preview > span:last-child { min-width:0; }
+.care-drag-preview strong { display:block; font-size:16px; line-height:1.5; overflow-wrap:anywhere; }
+.care-drag-grip { color:#175cb5; font-size:28px; }
+.care-drag-position { display:block; margin-top:3px; color:#175cb5; font-size:13px; font-weight:650; }
+.care-drag-help { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+/** SOFTM-DRAG-FEEDBACK END */
 .care-basket-status { font-size:14px; color:#415a74; overflow-wrap:anywhere; margin:10px 0 0; }
 .care-basket-status:empty { display:none; }
 .care-basket-map .selected { display:none; }

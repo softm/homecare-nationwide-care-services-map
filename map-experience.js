@@ -20,7 +20,7 @@
     }
     let options, basket, bar, media, detailOrigin, view = 'list';
     let rowById = new Map(), restoreGeneration = 0;
-    let basketMap, draggedId = null, touchTarget = null, lastItems = ''; // SOFTM-BASKET-ORDER 날짜:20260904 : 비교함 조작 중 검색 목록 갱신이 드래그 요소를 교체하지 않도록 유지
+    let basketMap, lastItems = '', cancelBasketDrag = () => {}; // SOFTM-DRAG-FEEDBACK 날짜:20260904 : 비교함 갱신 시 진행 중인 드래그의 떠 있는 항목도 함께 정리
     const positions = { list: null, map: null };
     const allRows = () => options?.rows() || [];
     const rows = () => (basket?.ids() || []).map(id => rowById.get(id)).filter(Boolean);
@@ -42,8 +42,10 @@
         bar.querySelector('[data-basket-map]').setAttribute('aria-pressed', String(basketMap?.active() || false));
         bar.querySelector('[data-basket-route]').disabled = !selected.length;
         bar.querySelector('[data-basket-edit]').hidden = !selected.length;
-        const markup = selected.map((row, index) => `<li class="care-basket-item" data-basket-id="${escape(row.i)}"><button type="button" class="care-drag-handle" data-basket-drag="${escape(row.i)}" aria-label="${escape(row.n)} 순서 끌어서 이동">⠿</button><span class="care-basket-name"><b>${index + 1}.</b> ${escape(row.n)}</span><span class="care-basket-item-actions"><button type="button" data-basket-move="${escape(row.i)}" data-offset="-1" ${index === 0 ? 'disabled' : ''} aria-label="${escape(row.n)} 앞으로 이동">↑</button><button type="button" data-basket-move="${escape(row.i)}" data-offset="1" ${index === selected.length - 1 ? 'disabled' : ''} aria-label="${escape(row.n)} 뒤로 이동">↓</button><button type="button" data-care-basket="${escape(row.i)}" aria-label="${escape(row.n)} 비교함에서 빼기">×</button></span></li>`).join('');
-        if (markup !== lastItems) { bar.querySelector('.care-basket-items').innerHTML = markup; lastItems = markup; }
+        /** SOFTM-DRAG-FEEDBACK START 날짜:20260904 : 위아래 버튼을 없애고 손잡이로 순서를 조정하며 키보드 접근은 방향키로 유지 */
+        const markup = selected.map((row, index) => `<li class="care-basket-item" data-basket-id="${escape(row.i)}"><button type="button" class="care-drag-handle" data-basket-drag="${escape(row.i)}" aria-label="${escape(row.n)} 순서 끌어서 이동" aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight" aria-describedby="careBasketDragHelp">⠿</button><span class="care-basket-name"><b>${index + 1}.</b> ${escape(row.n)}</span><span class="care-basket-item-actions"><button type="button" data-care-basket="${escape(row.i)}" aria-label="${escape(row.n)} 비교함에서 빼기">×</button></span></li>`).join('');
+        if (markup !== lastItems) { cancelBasketDrag(); bar.querySelector('.care-basket-items').innerHTML = markup; lastItems = markup; }
+        /** SOFTM-DRAG-FEEDBACK END */
         document.querySelectorAll('#list input[type="checkbox"], #selectAll, #selectAllResults').forEach(node => { node.disabled = basketMap?.active() || false; });
         /** SOFTM-BASKET-ORDER END */
         document.querySelectorAll('.care-basket-button[data-care-basket]').forEach(node => {
@@ -132,6 +134,103 @@
         const statusLabel = document.getElementById('selectedCount')?.previousElementSibling;
         if (statusLabel) statusLabel.textContent = '지도에 표시';
     }
+    /** SOFTM-DRAG-FEEDBACK START 날짜:20260904 : 집어 든 카드·빈 자리·주변 카드 이동으로 놓을 순서를 보여주고 놓기 전 취소는 기존 순서로 복원 */
+    function installBasketDrag(host, onMove) {
+        const list = host.querySelector('.care-basket-items');
+        let drag = null, frame = 0;
+        const items = () => [...list.querySelectorAll('[data-basket-id]')];
+        const reducedMotion = root.matchMedia('(prefers-reduced-motion: reduce)');
+        function animateMove(before) {
+            if (reducedMotion.matches) return;
+            items().forEach(item => {
+                if (item === drag?.source) return;
+                const old = before.get(item), now = item.getBoundingClientRect();
+                if (old && (old.left !== now.left || old.top !== now.top)) item.animate([{ transform: `translate(${old.left - now.left}px,${old.top - now.top}px)` }, { transform: 'none' }], { duration: 170, easing: 'ease-out' });
+            });
+        }
+        function updateTarget() {
+            if (!drag) return;
+            const target = document.elementFromPoint(drag.x, drag.y)?.closest('[data-basket-id]');
+            if (!target || !list.contains(target) || target === drag.source) return;
+            const ordered = items(), from = ordered.indexOf(drag.source), to = ordered.indexOf(target);
+            const targetRect = target.getBoundingClientRect(), sourceRect = drag.source.getBoundingClientRect();
+            const sameRow = Math.abs(targetRect.top - sourceRect.top) < Math.min(targetRect.height, sourceRect.height) / 2;
+            const after = from < to, crossed = sameRow ? drag.x > targetRect.left + targetRect.width / 2 : drag.y > targetRect.top + targetRect.height / 2;
+            if (after !== crossed) return;
+            ordered.forEach(item => item.getAnimations().forEach(animation => animation.cancel()));
+            const before = new Map(ordered.map(item => [item, item.getBoundingClientRect()]));
+            list.insertBefore(drag.source, after ? target.nextSibling : target);
+            const index = items().indexOf(drag.source);
+            drag.source.dataset.dropLabel = `${index + 1}번째에 놓기`;
+            drag.preview.querySelector('.care-drag-position').textContent = `${index + 1}번째로 이동`;
+            animateMove(before);
+        }
+        function paint(autoScroll = true) {
+            if (!drag) return;
+            const left = Math.max(8, Math.min(root.innerWidth - drag.width - 8, drag.x - drag.offsetX));
+            const top = Math.max(8, Math.min(root.innerHeight - drag.height - 8, drag.y - drag.offsetY));
+            drag.preview.style.transform = `translate3d(${left}px,${top}px,0)${reducedMotion.matches ? '' : ' rotate(-1deg) scale(1.02)'}`;
+            if (autoScroll) {
+                const rect = host.getBoundingClientRect(), scrollHost = host.scrollHeight > host.clientHeight + 2 ? host : getComputedStyle(host).position === 'fixed' ? null : root;
+                const topEdge = scrollHost === root ? 48 : Math.max(rect.top, 0) + 48, bottomEdge = scrollHost === root ? root.innerHeight - 48 : Math.min(rect.bottom, root.innerHeight) - 48;
+                if (scrollHost && drag.x >= rect.left && drag.x <= rect.right) {
+                    const step = drag.y < topEdge ? -9 : drag.y > bottomEdge ? 9 : 0;
+                    if (step) scrollHost.scrollBy({ top: step, behavior: 'instant' });
+                }
+            }
+            updateTarget();
+        }
+        function tick() { paint(); if (drag) frame = requestAnimationFrame(tick); }
+        function finish(commit = false) {
+            if (!drag) return;
+            const current = drag, rect = list.getBoundingClientRect(), hostRect = host.getBoundingClientRect();
+            const inside = current.x >= rect.left && current.x <= rect.right && current.y >= Math.max(rect.top, hostRect.top) && current.y <= Math.min(rect.bottom, hostRect.bottom);
+            const next = items().indexOf(current.source), changed = commit && inside && next !== current.originalIndex;
+            drag = null; cancelAnimationFrame(frame);
+            current.preview.remove(); current.source.classList.remove('care-drag-placeholder'); delete current.source.dataset.dropLabel;
+            document.body.classList.remove('care-basket-dragging');
+            items().forEach(item => item.getAnimations().forEach(animation => animation.cancel()));
+            if (host.hasPointerCapture(current.pointerId)) host.releasePointerCapture(current.pointerId);
+            if (changed) {
+                onMove(current.id, next);
+                const placed = list.querySelector(`[data-basket-id="${CSS.escape(current.id)}"]`);
+                if (placed && !reducedMotion.matches) placed.animate([{ backgroundColor: '#d9eaff', boxShadow: '0 0 0 3px #175cb566' }, { backgroundColor: '#f6f9fd', boxShadow: '0 0 0 0 transparent' }], { duration: 650, easing: 'ease-out' });
+            } else {
+                const byId = new Map(items().map(item => [item.dataset.basketId, item]));
+                basket.ids().forEach(id => { const item = byId.get(id); if (item) list.append(item); });
+                current.handle.focus({ preventScroll: true });
+            }
+        }
+        host.addEventListener('pointerdown', event => {
+            const handle = event.target.closest('[data-basket-drag]');
+            if (!handle || event.button !== 0 || drag || basket.ids().length < 2) return;
+            event.preventDefault(); handle.focus({ preventScroll: true });
+            const source = handle.closest('[data-basket-id]'), rect = source.getBoundingClientRect(), id = handle.dataset.basketDrag, index = basket.ids().indexOf(id);
+            const preview = document.createElement('div');
+            preview.className = 'care-drag-preview'; preview.setAttribute('aria-hidden', 'true'); preview.inert = true;
+            preview.style.width = `${rect.width}px`; preview.style.minHeight = `${rect.height}px`;
+            preview.innerHTML = `<span class="care-drag-grip">⠿</span><span><strong>${escape(rowById.get(id)?.n)}</strong><small class="care-drag-position">${index + 1}번째로 이동</small></span>`;
+            document.body.append(preview);
+            drag = { id, source, handle, preview, pointerId: event.pointerId, originalIndex: index, x: event.clientX, y: event.clientY, width: rect.width, height: preview.getBoundingClientRect().height, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top };
+            source.dataset.dropLabel = `${index + 1}번째에 놓기`; source.classList.add('care-drag-placeholder'); document.body.classList.add('care-basket-dragging');
+            host.setPointerCapture(event.pointerId); paint(false); frame = requestAnimationFrame(tick);
+        });
+        host.addEventListener('pointermove', event => { if (!drag || event.pointerId !== drag.pointerId) return; drag.x = event.clientX; drag.y = event.clientY; paint(false); });
+        host.addEventListener('pointerup', event => { if (!drag || event.pointerId !== drag.pointerId) return; drag.x = event.clientX; drag.y = event.clientY; paint(false); finish(true); });
+        host.addEventListener('pointercancel', () => finish());
+        host.addEventListener('lostpointercapture', () => finish());
+        root.addEventListener('blur', () => finish());
+        document.addEventListener('keydown', event => { if (drag && event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); finish(); } }, true);
+        host.addEventListener('keydown', event => {
+            const handle = event.target.closest('[data-basket-drag]'), offset = { ArrowUp: -1, ArrowLeft: -1, ArrowDown: 1, ArrowRight: 1 }[event.key];
+            if (!handle || !offset || drag) return;
+            event.preventDefault(); event.stopPropagation();
+            const index = basket.ids().indexOf(handle.dataset.basketDrag) + offset;
+            if (index >= 0 && index < basket.ids().length) onMove(handle.dataset.basketDrag, index);
+        });
+        return () => finish();
+    }
+    /** SOFTM-DRAG-FEEDBACK END */
     function init(config) {
         if (options) return;
         options = config;
@@ -152,30 +251,25 @@
         bar = document.createElement('section');
         bar.className = 'care-basket';
         bar.setAttribute('aria-label', '관심 기관 비교함');
-        bar.innerHTML = '<div class="care-basket-summary"><strong>비교함 <span class="care-basket-count" aria-live="polite">0곳</span></strong><span class="care-basket-hint">드래그나 화살표로 방문 순서를 바꿀 수 있어요.</span><button type="button" data-basket-edit aria-expanded="false" hidden>순서 조정</button><button type="button" data-basket-clear hidden>비우기</button></div><div class="care-basket-actions"><button type="button" data-basket-map disabled aria-pressed="false">담은 기관만 지도</button><button type="button" data-basket-route disabled>담은 순서로 경로</button><button type="button" data-basket-open disabled>담은 기관 비교</button></div><ol class="care-basket-items" aria-label="방문 순서"></ol><p class="care-basket-status" role="status"></p>'; // SOFTM-BASKET-ORDER 날짜:20260904 : 비교함과 지도·경로의 대상 및 순서를 명확히 연결
+        bar.innerHTML = '<div class="care-basket-summary"><strong>비교함 <span class="care-basket-count" aria-live="polite">0곳</span></strong><span class="care-basket-hint">⠿ 손잡이를 잡고 끌어 방문 순서를 바꾸세요.</span><button type="button" data-basket-edit aria-expanded="false" hidden>순서 조정</button><button type="button" data-basket-clear hidden>비우기</button></div><div class="care-basket-actions"><button type="button" data-basket-map disabled aria-pressed="false">담은 기관만 지도</button><button type="button" data-basket-route disabled>담은 순서로 경로</button><button type="button" data-basket-open disabled>담은 기관 비교</button></div><span class="care-drag-help" id="careBasketDragHelp">손잡이를 끌어 순서를 바꿉니다. 손잡이에 초점을 두고 방향키로도 조정할 수 있습니다.</span><ol class="care-basket-items" aria-label="방문 순서"></ol><p class="care-basket-status" role="status"></p>'; // SOFTM-DRAG-FEEDBACK 날짜:20260904 : 이동 버튼 대신 손잡이로 직접 순서를 바꾸는 조작을 안내
         layout.before(bar);
         /** SOFTM-BASKET-MAP START 날짜:20260904 : 두 지도에 같은 비교함 전용 보기와 검색 복귀 동작을 연결 */
         basketMap = root.CareBasketMap.create({ ...options.basketMap, mode(active) { document.body.classList.toggle('care-basket-map', active); if (!active) bar.querySelector('.care-basket-status').textContent = '검색 결과 지도로 돌아왔습니다. 조회 조건과 비교함 순서는 유지됩니다.'; refresh(); }, status(message) { bar.querySelector('.care-basket-status').textContent = message; options.basketMap.status(message); } });
         if (root.ResizeObserver) new ResizeObserver(() => document.body.style.setProperty('--care-basket-height', `${bar.getBoundingClientRect().height + 28}px`)).observe(bar);
         function changed(message) { refresh(); if (basketMap.active()) void basketMap.show(rows(), { fit: false }); if (message) bar.querySelector('.care-basket-status').textContent = message; }
         function move(id, index) { const row = rowById.get(id); basket.move(id, index); changed(`${row?.n || '기관'}을 ${index + 1}번째로 옮겼습니다. 변경한 순서로 경로를 다시 계산할 수 있습니다.`); bar.querySelector(`[data-basket-drag="${CSS.escape(id)}"]`)?.focus({ preventScroll: true }); }
-        function endDrag() { draggedId = null; touchTarget = null; bar.querySelectorAll('.care-drop-target').forEach(node => node.classList.remove('care-drop-target')); }
-        bar.addEventListener('pointerdown', event => { const handle = event.target.closest('[data-basket-drag]'); if (!handle || event.button !== 0) return; event.preventDefault(); handle.focus({ preventScroll: true }); draggedId = handle.dataset.basketDrag; handle.setPointerCapture(event.pointerId); });
-        bar.addEventListener('pointermove', event => { if (!draggedId) return; const item = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-basket-id]'); touchTarget = item?.dataset.basketId || null; bar.querySelectorAll('.care-drop-target').forEach(node => node.classList.remove('care-drop-target')); item?.classList.add('care-drop-target'); });
-        bar.addEventListener('pointerup', () => { if (draggedId && touchTarget && draggedId !== touchTarget) move(draggedId, basket.ids().indexOf(touchTarget)); endDrag(); });
-        bar.addEventListener('pointercancel', endDrag);
+        cancelBasketDrag = installBasketDrag(bar, move); // SOFTM-DRAG-FEEDBACK 날짜:20260904 : 두 지도에서 동일한 카드 이동·놓기 표시와 취소 동작을 사용
         /** SOFTM-BASKET-MAP END */
         media = root.matchMedia('(max-width: 1000px)');
         media.addEventListener('change', () => { syncView(); options.resizeMap?.(); });
         document.addEventListener('click', event => {
-            const node = event.target.closest('[data-care-basket], [data-basket-open], [data-basket-clear], [data-basket-move], [data-basket-edit], [data-basket-map], [data-basket-route], button[data-care-view]'); // SOFTM-BASKET-MAP 날짜:20260904 : 비교함 조작이 기관 상세 클릭으로 전달되지 않도록 처리
+            const node = event.target.closest('[data-care-basket], [data-basket-open], [data-basket-clear], [data-basket-edit], [data-basket-map], [data-basket-route], button[data-care-view]'); // SOFTM-DRAG-FEEDBACK 날짜:20260904 : 제거한 위아래 버튼 분기를 없애고 드래그 손잡이의 입력을 유지
             if (!node) return;
             event.stopPropagation();
             if (node.hasAttribute('data-care-basket')) { if (rowById.has(node.dataset.careBasket)) basket.toggle(node.dataset.careBasket); changed(); } // SOFTM-BASKET-MAP 날짜:20260904 : 담기·제거 시 이전 방문 경로를 지우고 현재 비교함만 표시
             else if (node.hasAttribute('data-basket-open')) options.compare();
             /** SOFTM-BASKET-ORDER START 날짜:20260904 : 모바일 순서 조정과 지도 복귀도 같은 비교함 상태로 처리 */
             else if (node.hasAttribute('data-basket-clear')) { basket.clear(); changed(); }
-            else if (node.hasAttribute('data-basket-move')) move(node.dataset.basketMove, basket.ids().indexOf(node.dataset.basketMove) + Number(node.dataset.offset));
             else if (node.hasAttribute('data-basket-edit')) { const expanded = bar.classList.toggle('care-basket-editing'); node.setAttribute('aria-expanded', String(expanded)); }
             else if (node.hasAttribute('data-basket-map')) { if (basketMap.active()) basketMap.exit(); else { setView('map', false); void basketMap.show(rows()); } }
             else if (node.hasAttribute('data-basket-route')) routeBasket();
