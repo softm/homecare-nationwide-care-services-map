@@ -56,6 +56,7 @@
 - 검색 대표 Origin은 `https://homecare.designboard.net`이며 canonical·OG·구조화 데이터·`robots.txt`·`sitemap.xml`과 Vercel CORS 허용 Origin을 함께 유지한다. 검색엔진 등록에는 루트의 단일 `sitemap.xml`만 제출한다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 검색 신호와 공개 서비스 호출 출처가 예전 GitHub 주소로 갈라지지 않도록 운영 기준을 고정 -->
 - 공개 사이트 브랜드는 `돌봄한눈`으로 통일하고 유형별 정적 검색 대표 페이지와 `nationwide-care-services-map.html?type=...` 지도 도구를 분리한다. 주야간보호 검색 대표는 `nationwide-daycare-map.html`이며 지도 도구 쿼리 URL을 사이트맵에 다시 넣지 않는다. <!-- SOFTM-SEO-LANDING 날짜:20260903 : 브랜드 신호와 동일 데이터 페이지의 검색 순위가 분산되지 않도록 색인 경계를 고정 -->
 - `nationwide-care-services-map.html`의 robots 메타는 사용자 요청에 따라 `index,follow`로 유지하고 `noindex`를 다시 추가하지 않는다. 기존 canonical·사이트맵 대표 페이지 연결은 유지한다. <!-- SOFTM-SEO-INDEX 날짜:20260904 : 지도 주소의 검색 등록을 코드에서 차단하지 않도록 사용자 변경 지시를 기록 -->
+- 검색 유입 작업은 `docs/SEARCH_OPERATIONS.md`에 따라 배포·등록 요청·실제 브랜드 검색 노출·검색 클릭을 구분해서 확인한다. `scripts/check-search-readiness.mjs` 통과만으로 검색 유입 목표를 완료 처리하지 않는다. <!-- SOFTM-SEARCH-OPERATIONS 날짜:20260904 : 사용자가 요구한 실제 방문 유입을 로컬 설정 성공으로 대체하지 않도록 검증 기준을 고정 -->
 
 ## 데이터 원칙
 

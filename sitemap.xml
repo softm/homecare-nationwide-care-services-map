@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- SOFTM-SEO-LANDING START 날짜:20260903 : 지도 도구의 중복 쿼리 주소 대신 고유 설명을 가진 기관 유형별 대표 페이지만 제출 -->
-  <url><loc>https://homecare.designboard.net/</loc><lastmod>2026-09-03</lastmod><priority>1.0</priority></url>
+  <url><loc>https://homecare.designboard.net/</loc><lastmod>2026-09-04</lastmod><priority>1.0</priority></url> <!-- SOFTM-SEARCH-BRAND 날짜:20260904 : 실제 홈페이지 제목 변경일을 수집기에 전달 -->
   <url><loc>https://homecare.designboard.net/nationwide-daycare-map.html</loc><lastmod>2026-09-03</lastmod><priority>1.0</priority></url>
   <url><loc>https://homecare.designboard.net/nursing-home-map.html</loc><lastmod>2026-09-03</lastmod><priority>0.9</priority></url>
   <url><loc>https://homecare.designboard.net/home-care-map.html</loc><lastmod>2026-09-03</lastmod><priority>0.9</priority></url>
