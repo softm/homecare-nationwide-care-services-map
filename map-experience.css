@@ -152,3 +152,33 @@
 }
 @media(prefers-reduced-motion:reduce) { .care-map-page *, .care-map-page *::before, .care-map-page *::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
 /** SOFTM-MAP-EXPERIENCE END */
+/** SOFTM-BASKET-ORDER START 날짜:20260904 : 기본 조건과 비교함 방문 순서를 작은 화면·큰 글자에서도 직접 조작 */
+.care-map-page .filter-lines { margin-top:16px; }
+.care-basket-summary { flex-wrap:wrap; }
+.care-basket-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.care-basket-actions > button { flex:1 1 150px; word-break:keep-all; overflow-wrap:normal; }
+.care-basket-items { list-style:none; padding:0; margin:12px 0 0; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr)); gap:8px; }
+.care-basket-item { display:flex; align-items:center; gap:6px; border:1px solid #d4e0ee; border-radius:10px; padding:6px; background:#f6f9fd; min-width:0; }
+.care-basket-name { flex:1; min-width:0; overflow-wrap:anywhere; line-height:1.5; }
+.care-basket-item-actions { display:flex; flex-shrink:0; gap:3px; }
+.care-map-page .care-basket-item button { padding:6px 9px; min-width:36px; }
+.care-map-page .care-basket-item .care-drag-handle { cursor:grab; touch-action:none; user-select:none; font-size:24px; padding:4px 8px; }
+.care-map-page .care-basket button:disabled { color:#7b8898; background:#f1f4f7; border-color:#e0e6ed; cursor:default; }
+.care-drop-target { outline:3px solid #175cb5; outline-offset:1px; }
+.care-basket-status { font-size:14px; color:#415a74; overflow-wrap:anywhere; margin:10px 0 0; }
+.care-basket-status:empty { display:none; }
+.care-basket-map .selected { display:none; }
+.care-basket-map .map-note,.care-basket-map .map-scope-badge,.care-basket-map .map-card > .route-note { display:none; }
+@media(min-width:1001px) { .care-basket [data-basket-edit] { display:none; } }
+@media(max-width:1000px) {
+ .care-map-page.has-care-basket { padding-bottom:var(--care-basket-height,210px); }
+ .care-basket.has-items { max-height:65dvh; overflow-y:auto; }
+ .care-basket.has-items.care-basket-editing .care-basket-items { display:grid; grid-template-columns:1fr; }
+ .care-basket.has-items .care-basket-status { max-height:4.8em; overflow:auto; }
+ .care-basket-actions { gap:5px; }
+ .care-basket-actions > button { flex-basis:30%; min-width:0; }
+ .care-map-page .care-basket.has-items .care-basket-actions button { padding:8px 6px; }
+ .care-basket-item { flex-wrap:wrap; }
+ .care-basket-item-actions { margin-left:auto; }
+}
+/** SOFTM-BASKET-ORDER END */
