@@ -38,17 +38,21 @@
 .care-map-page [data-basket-open] { background:#175cb5; color:#fff; border-color:#175cb5; }
 .care-map-page [data-basket-open]:disabled { background:#eef2f6; color:#66798a; border-color:#dce5ee; cursor:default; }
 .care-map-page .results { min-width:0; }
-.care-map-page .row { gap:12px; padding:18px 8px; }
-.care-map-page .row h3 { font-size:18px; line-height:1.5; margin-top:0; }
 .care-map-page .row p,.care-map-page .row .details { font-size:16px; line-height:1.65; }
 .care-map-page .row .chip { font-size:13px; line-height:1.5; }
-.care-map-page .row input[type="checkbox"] { width:24px; height:24px; min-height:24px; cursor:pointer; }
+/** SOFTM-LIST-CONTROLS START 날짜:20260905 : 체크박스를 설명과 같은 줄에 놓고 담기와 지도 표시의 조작 크기를 구분 */
+.care-map-page .row input[type="checkbox"] { width:20px; height:20px; min-width:20px; min-height:20px; margin:0; flex:0 0 20px; accent-color:#175cb5; cursor:pointer; }
+/** SOFTM-LIST-CONTROLS END */
 .care-map-page .row .actions { flex-wrap:wrap; }
 .care-map-page .row .actions button,.care-map-page .row .actions a,.care-map-page .small-btn,.care-map-page .route-actions button { min-height:48px; font-size:14px; }
 .care-map-page .small-btn.primary,.care-map-page .route-actions .primary { background:#f2f6fb; border-color:#c3d2e2; color:#294f76; }
 .care-map-page .icon-btn,.care-map-page .map-share-icon { background:var(--care-blue,#175cb5); border-color:var(--care-blue,#175cb5); box-shadow:0 3px 10px #175cb51a; }
-.care-row-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; }
-.care-map-display { display:inline-flex; align-items:center; gap:7px; font-size:13px; color:#53667b; cursor:pointer; min-height:48px; }
+/** SOFTM-LIST-CONTROLS START 날짜:20260905 : 담기 버튼과 지도 표시를 한 행동 영역으로 묶고 이름 없는 체크가 떨어져 보이지 않도록 정리 */
+.care-row-actions { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.care-map-display { display:inline-flex; align-items:center; gap:7px; padding:8px 6px; border-radius:8px; font-size:14px; font-weight:500; line-height:1.4; color:#53667b; cursor:pointer; min-height:48px; white-space:nowrap; }
+.care-map-display:hover { color:#175cb5; background:#eef5fc; }
+.care-map-display:focus-within { outline:2px solid #175cb5; outline-offset:2px; }
+/** SOFTM-LIST-CONTROLS END */
 .care-map-page .route-note,.care-map-page .map-note,.care-map-page .route-tools p { font-size:14px; line-height:1.6; }
 .care-map-page .route-tools > p,.care-map-page .select-tools { color:#53667b; }
 .care-map-page .detail-view,.care-map-page .detail-line,.care-map-page .official-field,.care-map-page .official-table th,.care-map-page .official-table td,.care-map-page .popup-row,.care-map-page .popup-static-item,.care-map-page .popup-static-message { font-size:16px; line-height:1.65; }
@@ -138,9 +142,19 @@
 .care-map-page #naverMap { height:clamp(400px,calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,90px) - 122px),720px); }
 .care-map-page #list { height:min(760px,calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,90px) - 147px)); max-height:none; min-height:320px; overflow-y:auto; }
 /** SOFTM-TAB-FEEDBACK END */
-.care-map-page .row { display:block; border:0; border-bottom:1px solid #e2e8ef; border-radius:0; box-shadow:none; background:#fff; padding:20px 4px; }
-.care-map-page .row h3 { margin:0 0 8px; font-size:18px; line-height:1.5; }
-.care-map-page .row p { margin:8px 0; }
+/** SOFTM-LIST-CONTROLS START 날짜:20260905 : 두 지도 목록의 번호·기관명·설명·행동이 같은 순서와 간격으로 읽히도록 통일 */
+.care-map-page .row { display:block; border:0; border-bottom:1px solid #e2e8ef; border-radius:0; box-shadow:none; background:#fff; padding:18px 10px; }
+.care-map-page .row:hover { background:#f8fafc; }
+.care-result-heading { display:flex; align-items:flex-start; gap:9px; margin-bottom:10px; }
+.care-map-page .care-result-heading h3 { min-width:0; margin:0; font-size:18px; line-height:1.5; overflow-wrap:anywhere; }
+.care-result-rank { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; min-width:27px; height:27px; padding:0 6px; border-radius:8px; background:#edf2f8; color:#456481; font-size:12px; font-weight:750; font-variant-numeric:tabular-nums; }
+.care-map-page .row p { margin:7px 0; }
+.care-map-page .row .care-result-evaluation { color:#3e526b; font-size:14px; }
+.care-map-page .row .care-result-summary { color:#687b91; font-size:14px; }
+.care-map-page .row .care-row-actions { padding-top:3px; }
+.care-map-page .select-tools label,.care-map-page .select-all-control { display:inline-flex; align-items:center; gap:8px; min-height:40px; margin:0; padding:4px 0; border:0; background:transparent; color:#46617d; font-size:14px; font-weight:650; cursor:pointer; }
+.care-map-page .select-tools input,.care-map-page .select-all-control input { width:18px; height:18px; min-height:18px; margin:0; accent-color:#175cb5; }
+/** SOFTM-LIST-CONTROLS END */
 .care-map-page .row .meta { display:flex; flex-wrap:wrap; gap:4px; }
 .care-map-page .list-head,.care-map-page .result-head { flex-wrap:wrap; gap:10px; }
 .care-map-page .list-head select,.care-map-page .result-head select { max-width:100%; }

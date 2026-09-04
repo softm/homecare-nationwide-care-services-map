@@ -64,7 +64,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 두 지도에서 읽기 크기와 비용·비교 흐름을 동일하게 제공 -->
 <link rel="stylesheet" href="care-theme.css?v=20260904-1">
 <link rel="stylesheet" href="care-cost.css?v=20260904-1">
-<link rel="stylesheet" href="map-experience.css?v=20260905-3"> <!-- SOFTM-TAB-FEEDBACK 날짜:20260905 : 탭 선택 구조와 담은 개수 반응을 함께 적용 -->
+<link rel="stylesheet" href="map-experience.css?v=20260905-4"> <!-- SOFTM-LIST-CONTROLS 날짜:20260905 : 목록의 지도 체크 설명과 행동 배치를 함께 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 </head>
 <body>
@@ -312,9 +312,16 @@ function apply(skipMapUpdate=false,selectResults=true,search=null){
 /** SOFTM-SEARCH-FEEDBACK END */
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 체크는 지도 표시에 유지하고 별도 비교함과 키보드 기관 선택을 제공 */
 /** SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급을 구분하고 자료 설명을 쉽게 제공 */
-/** SOFTM-SEARCH-CARD START 날짜:20260905 : 목록에서는 기관명·주소·평가와 담기를 우선하고 세부 항목은 상세에서 확인 */
-function row(c,rank){const ev=c.ev,evaluation=ev?`${gradeText(ev.grade)} · ${scoreText(ev.score)} · ${ev.year?`${ev.year}년 평가`:'평가연도 미확인'}`:(isNew(c)?'신설·미평가':'기관 평가 미확인');return `<article class="row" role="button" tabindex="0" aria-label="${esc(c.n)} 상세 보기" onkeydown="if(event.target===this&amp;&amp;(event.key==='Enter'||event.key===' ')){event.preventDefault();showOnMap('${c.i}')}" onclick="showOnMap('${c.i}')"><h3><span class="care-search-rank">${rank}.</span> ${esc(c.n)}</h3><div class="meta">${esc(evaluation)}</div><p>${esc(c.a||'주소 확인 필요')}</p><p class="care-row-capacity">정원 ${c.z}명</p><div class="care-row-actions">${CareMapExperience.button(c)}<label class="care-map-display" onclick="event.stopPropagation()"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 지도 표시" onchange="toggle('${c.i}',this.checked)">지도 표시</label></div></article>`}
-/** SOFTM-SEARCH-CARD END */
+/** SOFTM-LIST-CONTROLS START 날짜:20260905 : 통합 지도와 같은 제목·번호·지도 표시 구조로 조작을 예측할 수 있게 정리 */
+function row(c,rank){
+ const ev=c.ev,evaluation=ev?`${gradeText(ev.grade)} · ${scoreText(ev.score)} · ${ev.year?`${ev.year}년 평가`:'평가연도 미확인'}`:(isNew(c)?'신설·미평가':'기관 평가 미확인');
+ return `<article class="row" role="button" tabindex="0" aria-label="${esc(c.n)} 상세 보기" onkeydown="if(event.target===this&amp;&amp;(event.key==='Enter'||event.key===' ')){event.preventDefault();showOnMap('${c.i}')}" onclick="showOnMap('${c.i}')">
+  <div class="care-result-heading"><span class="care-result-rank">${rank}</span><h3>${esc(c.n)}</h3></div>
+  <p class="care-result-evaluation">${esc(evaluation)}</p><p>${esc(c.a||'주소 확인 필요')}</p><p class="care-result-summary">정원 ${c.z}명</p>
+  <div class="care-row-actions">${CareMapExperience.button(c)}<label class="care-map-display" onclick="event.stopPropagation()"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 지도 표시" onchange="toggle('${c.i}',this.checked)"><span>지도에 표시</span></label></div>
+ </article>`;
+}
+/** SOFTM-LIST-CONTROLS END */
 /** SOFTM-MAP-WORDING END */
 /** SOFTM-MAP-EXPERIENCE END */
 /** SOFTM-LIST-AD-RENDER START 날짜:20260904 : 정렬·필터·페이지 이동 뒤에도 첫 광고와 이후 문의 위치를 유지 */
