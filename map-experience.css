@@ -195,3 +195,25 @@
  .care-basket-item-actions { margin-left:auto; }
 }
 /** SOFTM-BASKET-ORDER END */
+
+/** SOFTM-ROUTE-VIEW START 날짜:20260905 : 지도 표시 대상을 선택 상태로 보여주고 경로 전체가 현재 화면 안에 들어오도록 확보 */
+.care-map-choice { display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin-top:12px; padding:10px; background:#f2f6fb; border-radius:12px; }
+.care-map-choice-label { font-size:14px; font-weight:700; color:#415a74; }
+.care-map-options { display:flex; flex:1; flex-wrap:wrap; gap:6px; }
+.care-map-page .care-basket .care-map-options button { flex:1 1 160px; min-width:0; background:transparent; color:#415a74; border-color:transparent; }
+.care-map-page .care-basket .care-map-options button[aria-pressed="true"] { color:#fff; background:#175cb5; border-color:#175cb5; box-shadow:0 2px 6px #175cb522; }
+.care-map-page .care-basket .care-map-options button[aria-pressed="true"]::before { content:'✓ '; }
+.care-map-options span { white-space:nowrap; }
+.care-map-page .care-basket [data-basket-route]:not(:disabled) { background:#175cb5; border-color:#175cb5; color:#fff; }
+.care-map-page .care-basket [data-basket-route][aria-busy="true"] { color:#175cb5; background:#eaf3ff; }
+.care-map-page .map-card { scroll-margin-top:76px; }
+.care-map-feedback { margin:0 0 10px; padding:9px 12px; background:#eaf3ff; border:1px solid #c9def7; border-radius:10px; font-size:14px; color:#174c89; overflow-wrap:anywhere; }
+.care-map-feedback[hidden] { display:none; }
+.care-basket-map #naverMap { height:clamp(260px,calc(100dvh - 210px),670px); }
+@media(max-width:1000px) {
+ .care-map-choice { padding:6px; gap:4px; }
+ .care-map-choice-label { flex-basis:100%; font-size:12px; padding-left:3px; }
+ .care-map-page .care-basket .care-map-options button { flex-basis:40%; padding:8px 5px; line-height:1.4; }
+ .care-basket-map #naverMap { height:clamp(220px,calc(100dvh - var(--care-basket-height,300px) - 215px),540px); }
+}
+/** SOFTM-ROUTE-VIEW END */

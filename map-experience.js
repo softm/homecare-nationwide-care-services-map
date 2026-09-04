@@ -20,7 +20,7 @@
     }
     let options, basket, bar, media, detailOrigin, view = 'list';
     let rowById = new Map(), restoreGeneration = 0;
-    let basketMap, lastItems = '', cancelBasketDrag = () => {}; // SOFTM-DRAG-FEEDBACK 날짜:20260904 : 비교함 갱신 시 진행 중인 드래그의 떠 있는 항목도 함께 정리
+    let basketMap, mapFeedback, routeBusy = false, lastItems = '', cancelBasketDrag = () => {}; // SOFTM-ROUTE-VIEW 날짜:20260905 : 지도 결과와 경로 진행 상태를 두 화면에서 동일하게 표시
     const positions = { list: null, map: null };
     const allRows = () => options?.rows() || [];
     const rows = () => (basket?.ids() || []).map(id => rowById.get(id)).filter(Boolean);
@@ -37,10 +37,20 @@
         bar.querySelector('[data-basket-open]').disabled = !selected.length;
         bar.querySelector('[data-basket-clear]').hidden = !selected.length;
         /** SOFTM-BASKET-ORDER START 날짜:20260904 : 드래그·키보드·터치에서 같은 방문 순서와 지도 전환 동작을 제공 */
-        bar.querySelector('[data-basket-map]').disabled = !selected.length && !basketMap?.active();
-        bar.querySelector('[data-basket-map]').textContent = basketMap?.active() ? '검색 결과 지도' : '담은 기관만 지도';
-        bar.querySelector('[data-basket-map]').setAttribute('aria-pressed', String(basketMap?.active() || false));
-        bar.querySelector('[data-basket-route]').disabled = !selected.length;
+        /** SOFTM-ROUTE-VIEW START 날짜:20260905 : 현재 선택이 바뀌어도 버튼 이름은 유지해 지도에 보이는 기관을 분명하게 구분 */
+        const basketActive = basketMap?.active() || false;
+        bar.querySelectorAll('[data-basket-map]').forEach(node => {
+            const savedOnly = node.dataset.basketMap === 'saved';
+            node.disabled = savedOnly && !selected.length && !basketActive;
+            node.setAttribute('aria-pressed', String(savedOnly === basketActive));
+        });
+        bar.querySelector('[data-basket-map="saved"] span').textContent = `${selected.length}곳`;
+        document.querySelectorAll('[data-basket-route], #routeBtn, [data-basket-route-shortcut]').forEach(node => {
+            node.disabled = !selected.length || routeBusy;
+            node.textContent = routeBusy ? '탐색 중…' : '경로탐색';
+            node.setAttribute('aria-busy', String(routeBusy));
+        });
+        /** SOFTM-ROUTE-VIEW END */
         bar.querySelector('[data-basket-edit]').hidden = !selected.length;
         /** SOFTM-DRAG-FEEDBACK START 날짜:20260904 : 위아래 버튼을 없애고 손잡이로 순서를 조정하며 키보드 접근은 방향키로 유지 */
         const markup = selected.map((row, index) => `<li class="care-basket-item" data-basket-id="${escape(row.i)}"><button type="button" class="care-drag-handle" data-basket-drag="${escape(row.i)}" aria-label="${escape(row.n)} 순서 끌어서 이동" aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight" aria-describedby="careBasketDragHelp">⠿</button><span class="care-basket-name"><b>${index + 1}.</b> ${escape(row.n)}</span><span class="care-basket-item-actions"><button type="button" data-care-basket="${escape(row.i)}" aria-label="${escape(row.n)} 비교함에서 빼기">×</button></span></li>`).join('');
@@ -251,10 +261,29 @@
         bar = document.createElement('section');
         bar.className = 'care-basket';
         bar.setAttribute('aria-label', '관심 기관 비교함');
-        bar.innerHTML = '<div class="care-basket-summary"><strong>비교함 <span class="care-basket-count" aria-live="polite">0곳</span></strong><span class="care-basket-hint">⠿ 손잡이를 잡고 끌어 방문 순서를 바꾸세요.</span><button type="button" data-basket-edit aria-expanded="false" hidden>순서 조정</button><button type="button" data-basket-clear hidden>비우기</button></div><div class="care-basket-actions"><button type="button" data-basket-map disabled aria-pressed="false">담은 기관만 지도</button><button type="button" data-basket-route disabled>담은 순서로 경로</button><button type="button" data-basket-open disabled>담은 기관 비교</button></div><span class="care-drag-help" id="careBasketDragHelp">손잡이를 끌어 순서를 바꿉니다. 손잡이에 초점을 두고 방향키로도 조정할 수 있습니다.</span><ol class="care-basket-items" aria-label="방문 순서"></ol><p class="care-basket-status" role="status"></p>'; // SOFTM-DRAG-FEEDBACK 날짜:20260904 : 이동 버튼 대신 손잡이로 직접 순서를 바꾸는 조작을 안내
+        bar.innerHTML = '<div class="care-basket-summary"><strong>비교함 <span class="care-basket-count" aria-live="polite">0곳</span></strong><span class="care-basket-hint">⠿ 손잡이를 잡고 끌어 방문 순서를 바꾸세요.</span><button type="button" data-basket-edit aria-expanded="false" hidden>순서 조정</button><button type="button" data-basket-clear hidden>비우기</button></div><div class="care-map-choice" role="group" aria-label="지도에 표시할 기관"><span class="care-map-choice-label">지도에 표시</span><div class="care-map-options"><button type="button" data-basket-map="search" aria-pressed="true">검색 결과</button><button type="button" data-basket-map="saved" disabled aria-pressed="false">비교함에 담은 기관 <span>0곳</span></button></div></div><div class="care-basket-actions"><button type="button" data-basket-route disabled>경로탐색</button><button type="button" data-basket-open disabled>담은 기관 비교</button></div><span class="care-drag-help" id="careBasketDragHelp">손잡이를 끌어 순서를 바꿉니다. 손잡이에 초점을 두고 방향키로도 조정할 수 있습니다.</span><ol class="care-basket-items" aria-label="방문 순서"></ol><p class="care-basket-status" role="status"></p>'; // SOFTM-ROUTE-VIEW 날짜:20260905 : 지도 표시 대상 두 가지를 나란히 두고 경로 실행을 별도 행동으로 구분
         layout.before(bar);
         /** SOFTM-BASKET-MAP START 날짜:20260904 : 두 지도에 같은 비교함 전용 보기와 검색 복귀 동작을 연결 */
-        basketMap = root.CareBasketMap.create({ ...options.basketMap, mode(active) { document.body.classList.toggle('care-basket-map', active); if (!active) bar.querySelector('.care-basket-status').textContent = '검색 결과 지도로 돌아왔습니다. 조회 조건과 비교함 순서는 유지됩니다.'; refresh(); }, status(message) { bar.querySelector('.care-basket-status').textContent = message; options.basketMap.status(message); } });
+        /** SOFTM-ROUTE-VIEW START 날짜:20260905 : 경로 결과가 화면 아래에서 숨지 않도록 지도 바로 위에도 표시 */
+        mapFeedback = document.createElement('p');
+        mapFeedback.className = 'care-map-feedback';
+        mapFeedback.hidden = true;
+        document.querySelector('.map-card .map-wrap').before(mapFeedback);
+        basketMap = root.CareBasketMap.create({ ...options.basketMap,
+            mode(active) {
+                document.body.classList.toggle('care-basket-map', active);
+                mapFeedback.hidden = !active;
+                if (!active) bar.querySelector('.care-basket-status').textContent = '검색 결과 지도로 돌아왔습니다. 조회 조건과 비교함 순서는 유지됩니다.';
+                refresh(); options.resizeMap?.();
+            },
+            busy(value) { routeBusy = value; refresh(); },
+            status(message) {
+                bar.querySelector('.care-basket-status').textContent = message;
+                mapFeedback.textContent = message.split(' · 출발:')[0];
+                options.basketMap.status(message);
+            }
+        });
+        /** SOFTM-ROUTE-VIEW END */
         if (root.ResizeObserver) new ResizeObserver(() => document.body.style.setProperty('--care-basket-height', `${bar.getBoundingClientRect().height + 28}px`)).observe(bar);
         function changed(message) { refresh(); if (basketMap.active()) void basketMap.show(rows(), { fit: false }); if (message) bar.querySelector('.care-basket-status').textContent = message; }
         function move(id, index) { const row = rowById.get(id); basket.move(id, index); changed(`${row?.n || '기관'}을 ${index + 1}번째로 옮겼습니다. 변경한 순서로 경로를 다시 계산할 수 있습니다.`); bar.querySelector(`[data-basket-drag="${CSS.escape(id)}"]`)?.focus({ preventScroll: true }); }
@@ -271,7 +300,13 @@
             /** SOFTM-BASKET-ORDER START 날짜:20260904 : 모바일 순서 조정과 지도 복귀도 같은 비교함 상태로 처리 */
             else if (node.hasAttribute('data-basket-clear')) { basket.clear(); changed(); }
             else if (node.hasAttribute('data-basket-edit')) { const expanded = bar.classList.toggle('care-basket-editing'); node.setAttribute('aria-expanded', String(expanded)); }
-            else if (node.hasAttribute('data-basket-map')) { if (basketMap.active()) basketMap.exit(); else { setView('map', false); void basketMap.show(rows()); } }
+            /** SOFTM-ROUTE-VIEW START 날짜:20260905 : 선택된 모드를 다시 눌러도 경로를 지우거나 반대 모드로 전환하지 않음 */
+            else if (node.hasAttribute('data-basket-map')) {
+                if (node.dataset.basketMap === 'search') basketMap.exit();
+                else if (!basketMap.active()) void basketMap.show(rows());
+                revealMap();
+            }
+            /** SOFTM-ROUTE-VIEW END */
             else if (node.hasAttribute('data-basket-route')) routeBasket();
             /** SOFTM-BASKET-ORDER END */
             else setView(node.dataset.careView);
@@ -331,7 +366,20 @@
         document.getElementById('compareLayer').querySelector('[aria-label="비교표 닫기"]')?.focus();
     }
     /** SOFTM-BASKET-MAP START 날짜:20260904 : 지도 자동검색과 비교함 전용 보기를 구분하는 공통 진입점 */
-    function routeBasket() { setView('map', false); return basketMap?.show(rows(), { route: true }); }
+/** SOFTM-ROUTE-VIEW START 날짜:20260905 : 버튼 실행 즉시 지도로 이동하고 중복 경로 요청으로 앞선 응답을 취소하지 않음 */
+    function revealMap() {
+        bar?.classList.remove('care-basket-editing');
+        bar?.querySelector('[data-basket-edit]')?.setAttribute('aria-expanded', 'false');
+        setView('map', false);
+        document.querySelector('.map-card')?.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
+    function routeBasket() {
+        if (routeBusy) return;
+        const pending = basketMap?.show(rows(), { route: true });
+        revealMap();
+        return pending;
+    }
+    /** SOFTM-ROUTE-VIEW END */
     function isBasketMap() { return basketMap?.active() || false; }
     function exitBasketMap() { basketMap?.exit(); }
     function contains(id) { return basketMap?.has(id) || false; }

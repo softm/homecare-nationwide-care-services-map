@@ -56,7 +56,7 @@
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 두 지도에서 읽기 크기와 비용·비교 흐름을 동일하게 제공 -->
 <link rel="stylesheet" href="care-theme.css?v=20260904-1">
 <link rel="stylesheet" href="care-cost.css?v=20260904-1">
-<link rel="stylesheet" href="map-experience.css?v=20260904-3"> <!-- SOFTM-DRAG-FEEDBACK 날짜:20260904 : 움직이는 카드와 드래그 동작을 같은 버전으로 적용 -->
+<link rel="stylesheet" href="map-experience.css?v=20260905-1"> <!-- SOFTM-ROUTE-VIEW 날짜:20260905 : 지도 선택과 경로 전체 표시를 같은 버전으로 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 </head>
 <body>
@@ -81,7 +81,7 @@
    <p class="route-note">지도를 드래그하면 화면 중앙에 기준점이 표시되고 현재 화면의 기관을 자동 조회합니다. 지역 선택값은 지도 이동으로 바뀌지 않습니다.</p>
   </div>
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급·비교 선택을 혼동하지 않도록 표현 -->
-  <aside class="card results"><div class="list-head"><h2>검색한 기관</h2><select id="sort"><option value="priority">우선순위</option><option value="rating">공단 평가점수순</option><option value="distance">기준위치 가까운순</option><option value="name">기관명순</option><option value="new">최근 지정순</option><option value="capacity">정원 큰순</option></select></div><div class="select-tools"><label><input id="selectAll" type="checkbox" checked> 지도 모두 표시</label><button class="small-btn" id="compareBtn">비교함 보기</button><button class="small-btn primary" id="routeBtn">비교함 경로</button></div><div class="result-list" id="list"><div class="empty">현재 위치를 확인하고 있습니다.</div></div><p class="route-note" id="routeNote">체크는 검색 결과 지도 표시에 사용됩니다. 비교함에 담으면 담은 기관만 보거나 순서대로 방문 경로를 찾을 수 있습니다.</p></aside>
+  <aside class="card results"><div class="list-head"><h2>검색한 기관</h2><select id="sort"><option value="priority">우선순위</option><option value="rating">공단 평가점수순</option><option value="distance">기준위치 가까운순</option><option value="name">기관명순</option><option value="new">최근 지정순</option><option value="capacity">정원 큰순</option></select></div><div class="select-tools"><label><input id="selectAll" type="checkbox" checked> 지도 모두 표시</label><button class="small-btn" id="compareBtn">비교함 보기</button><button class="small-btn primary" id="routeBtn">경로탐색</button></div><div class="result-list" id="list"><div class="empty">현재 위치를 확인하고 있습니다.</div></div><p class="route-note" id="routeNote">체크는 검색 결과 지도 표시에 사용됩니다. 비교함에 담으면 담은 기관만 보거나 순서대로 방문 경로를 찾을 수 있습니다.</p></aside> <!-- SOFTM-ROUTE-VIEW 날짜:20260905 : 목록에서도 같은 경로탐색 이름과 진행 상태로 실행 -->
 <!-- SOFTM-MAP-WORDING END -->
  </section>
 </main>
@@ -109,8 +109,8 @@
 <script src="care-cost-rates.js?v=20260904-1"></script>
 <script src="care-cost-engine.js?v=20260904-1"></script>
 <script src="care-cost-ui.js?v=20260904-1"></script>
-<script src="care-basket-map.js?v=20260904-1"></script>
-<script src="map-experience.js?v=20260904-3"></script> <!-- SOFTM-DRAG-FEEDBACK 날짜:20260904 : 움직이는 카드와 드래그 동작을 같은 버전으로 적용 -->
+<script src="care-basket-map.js?v=20260905-1"></script> <!-- SOFTM-ROUTE-VIEW 날짜:20260905 : 지도 선택과 경로 전체 표시를 같은 버전으로 적용 -->
+<script src="map-experience.js?v=20260905-1"></script> <!-- SOFTM-ROUTE-VIEW 날짜:20260905 : 지도 선택과 경로 전체 표시를 같은 버전으로 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
