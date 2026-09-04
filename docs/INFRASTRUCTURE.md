@@ -15,6 +15,7 @@
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | `DATA_GO_KR_SERVICE_KEY` |
 | 길찾기 서버 | Vercel Functions | `services/vercel-api/api/directions.js` | 네이버 Directions 15 자동차 경로 중계 | `POST /api/directions`만 호출 | `NAVER_MAPS_API_KEY_ID`, `NAVER_MAPS_API_SECRET` |
 | 광고 설정 | GitHub Pages 정적 파일 및 광고 사업자 | `index-ad-config.js`, `nationwide-daycare-ad-config.js`, `nationwide-care-ad-config.js` | 화면별 PC·모바일·목록 광고 슬롯 설정 | 예 | 광고 설정 파일의 공개 클라이언트 값만 사용 | <!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 인덱스 승인 단위가 다른 지도 광고와 섞이지 않도록 인프라 경계를 명시 -->
+| 광고·제휴 문의 | 사용자 브라우저→Web3Forms | `partner-inquiry-config.js`, `partner-inquiry.js`, `partner-inquiry.css` | 두 지도 공통 오버레이에서 이메일 문의 접수 | 제출할 때만 `POST https://api.web3forms.com/submit` | 수신 주소로 발급한 공개 Access Key | <!-- SOFTM-PARTNER-INFRA 날짜:20260904 : 제휴 메일 접수에 별도 런타임 서버가 필요하지 않도록 브라우저 호출을 명시 -->
 | 로컬 정적 서버 | 개발자 PC | `npm run serve` → `python3 -m http.server 3000` | HTML을 `file://`이 아닌 HTTP Origin으로 검증 | `http://localhost:3000` | 없음 |
 | 정합성 검사 | 로컬 또는 GitHub Actions | `npm run check` | HTML 의존성, JS·Python 구문, 기관 수·중복·정적 NHIS 스키마 검사 | 아니오 | fixture 검사에는 없음 |
 
@@ -32,6 +33,19 @@
 | 공단 원천 수집 | GitHub Actions→공공데이터 | 기관검색·시설상세 API, 시설현황·평가 파일 | Python 수집기가 재시도·호출 예산·샤드 체크포인트를 적용 | 키를 HTML·JSON·로그에 기록하지 않음 |
 | 공단 화면 보완 수집 | GitHub Actions→공단 공개 상세 페이지 | 기본정보(11)·인력/근속(14)·CCTV(19) 탭 | 공개 표의 항목·셀 구조를 상세 JSON에 병합 | 브라우저 실시간 호출 금지 |
 | 공단 사진 수집 | GitHub Actions→공단 공개 페이지 | `longtermcare.or.kr` 상세·썸네일 | 공개 페이지에서 사진 키와 메타데이터만 정규화 | 페이지 구조 변경 시 파서와 화면을 함께 검사 |
+
+## 광고·제휴 문의 설정
+
+<!-- SOFTM-PARTNER-SETUP START 날짜:20260904 : 광고 슬롯 복구와 실제 메일 수신 활성화 절차를 함께 인수인계 -->
+
+- 기본 hybrid 모드에서 두 지도 모두 6번째 기관 뒤에 기존 전용 카카오 목록 광고를 표시한다. 12번째부터 6개 간격으로 제휴 문의 카드를 표시한다. 전국 주간은 페이지마다 이 순서를 적용한다.
+- `partner-inquiry-config.js`의 `accessKey`에 수신 이메일로 발급한 Web3Forms 공개 Access Key를 설정한다. 현재 수신 안내 주소는 `softm@nate.com`이며, 실제 수신처는 Access Key에 연결된 이메일로 결정된다. 수신처를 바꿀 때 키와 `recipientEmail`을 함께 변경한다.
+- 공개 폼 키 발급 및 클라이언트 사용 근거: [Web3Forms 시작 안내](https://docs.web3forms.com/getting-started), [클라이언트 호출과 공개 키 안내](https://docs.web3forms.com/getting-started/troubleshooting). 서버 Secret은 이 파일에 넣지 않는다.
+- 키가 비어 있으면 접수 준비 안내와 직접 이메일 링크를 제공하고 API를 호출하지 않는다. 키를 등록한 다음 브라우저 제출과 수신 메일함 확인까지 진행해야 실제 수신 연결이 완료된다.
+- 문의 내용은 제출 시에만 Web3Forms로 전송하며 로컬 저장소에 저장하지 않는다. 성공 응답을 확인한 뒤에만 폼을 비우고, 실패·시간 초과 시에는 입력을 유지한다.
+- 새 파일은 저장소 루트에서 정적으로 제공한다. 별도 빌드·설치 단계는 없으며 `npm run check` 후 `npm run serve`로 검증한다.
+
+<!-- SOFTM-PARTNER-SETUP END -->
 
 ## 공단 데이터 파이프라인
 
