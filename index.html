@@ -41,7 +41,7 @@
     .house-banner b{display:block;color:#17324d;font-size:15px}
     .house-banner p{margin-top:5px;font-size:11px}
     .ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 13px;border-radius:9px;background:#17324d;color:#fff;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}
-    /** SOFTM-INDEX-UNIFIED START 날짜:20260904 : 주야간 중복 진입을 없애고 8개 유형을 같은 크기와 정보 순서로 선택하도록 구성 */
+    /** SOFTM-INDEX-UNIFIED START 날짜:20260904 : 주야간 중복 진입을 없애고 9개 유형을 같은 크기와 정보 순서로 선택하도록 구성 */
     .hero,.category-heading{word-break:keep-all;overflow-wrap:anywhere}
     .hero h1{text-wrap:balance}
     .category-section{margin-top:28px}
@@ -84,14 +84,14 @@
       </div>
       <nav class="categories" aria-label="전국 요양·돌봄기관 카테고리">
         <a class="category-link" data-category="facility" href="nursing-home-map.html">
-          <b>요양원(요양시설)</b>
-          <span class="category-description">입소해 생활하며 돌봄을 받는 곳</span>
-          <span class="category-footer"><span data-count>6,441곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
+          <b>요양원·공동생활가정</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+          <span class="category-description">요양원과 노인요양공동생활가정에서 입소 돌봄을 받는 곳</span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+          <span class="category-footer"><span data-count>6,481곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
         </a>
         <a class="category-link" data-category="daycare" href="daycare-map.html">
-          <b>주야간보호센터</b>
+          <b>주·야간보호센터</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-description">낮 또는 밤 동안 센터에서 돌봄을 받는 곳</span>
-          <span class="category-footer"><span data-count>5,751곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
+          <span class="category-footer"><span data-count>5,757곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
         </a>
         <a class="category-link" data-category="home-care" href="home-care-map.html">
           <b>방문요양센터</b>
@@ -113,13 +113,20 @@
           <span class="category-description">일정 기간 머물며 돌봄을 받는 곳</span>
           <span class="category-footer"><span data-count>105곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
+        <!-- SOFTM-CARE-CATEGORIES START 날짜:20260904 : 원본에 있는 복지용구 사업소도 공통 안내를 거쳐 조회 -->
+        <a class="category-link" data-category="welfare-equipment" href="welfare-equipment-map.html"> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+          <b>복지용구사업소</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+          <span class="category-description">휠체어·침대 등 복지용구 판매·대여 사업소</span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+          <span class="category-footer"><span data-count>1,851곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+        </a>
+        <!-- SOFTM-CARE-CATEGORIES END -->
         <a class="category-link" data-category="dementia" href="dementia-care-map.html">
-          <b>치매전담기관</b>
-          <span class="category-description">치매 어르신을 위한 전담 돌봄기관</span>
+          <b>치매전담형 기관</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+          <span class="category-description">요양시설·공동생활가정·주야간보호의 치매전담형 모아보기</span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-footer"><span data-count>416곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
         <a class="category-link" data-category="nursing-hospital" href="nursing-hospital-map.html">
-          <b>요양병원</b>
+          <b>요양병원(의료기관)</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-description">입원 진료를 제공하는 의료기관</span>
           <span class="category-footer"><span data-count>1,301곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
@@ -141,7 +148,7 @@
 <!-- SOFTM-SEO-HOME END -->
   </main>
   <script src="index-ad-config.js?v=20260903-1"></script><!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 전용 광고 단위만 이 화면에서 사용 -->
-  <script src="nationwide-care-manifest.js"></script>
+  <script src="nationwide-care-manifest.js?v=20260904-categories"></script> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
   <script>
     /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 인덱스 전용 광고 단위와 실제 데이터 수를 사용해 화면별 광고 집계를 분리 */
     const manifest=window.NATIONAL_CARE_MANIFEST||{};
