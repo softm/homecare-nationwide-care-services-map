@@ -31,7 +31,7 @@
 - `전국 주간`: `nationwide-daycare-map.html` 기반 전국 주야간보호센터 프로젝트
 - `전국 요양`: `nationwide-care-services-map.html` 기반 전국 노인돌봄·요양기관 통합 프로젝트
 
-두 프로젝트를 혼동하지 않는다. 전국 요양의 `type=daycare` 데이터는 전국 주간과 같은 5,757개 기관기호를 사용한다.
+두 프로젝트를 혼동하지 않는다. 전국 요양의 `type=daycare`와 전국 주간은 `data/care/daycare.json.gz`를 공용으로 사용하며 기관기호 집합이 같아야 한다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 두 지도 자료가 별도 생성되어 달라지지 않도록 통일 -->
 
 ## 작업 시작
 
@@ -70,7 +70,7 @@
 ## 데이터 원칙
 
 - 원본은 `source-data`에 보존한다.
-- 생성된 `nationwide-care-data/*.js`, `nationwide-care-manifest.js`, `nationwide-daycare-evaluations.js`를 직접 임의 수정하지 않는다.
+- `data/care/*.json.gz`·`manifest.json`은 수집 JSON에서 생성한다. 직접 수정하거나 기존 기관 데이터 JS를 다시 만들지 않는다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 지도 입력을 data로 통일 -->
 - 데이터를 재생성하면 `npm run check`로 개수·중복·참조 누락을 확인한다.
 - 전국 주간과 전국 요양 `daycare`의 기관기호 집합 차이는 0이어야 한다.
 - 공단 상세·사진은 `data/nhis`의 정적 JSON을 단일 기준으로 사용하고 두 지도가 `nhis-static-data.js`를 공유한다. // SOFTM-NHIS-POLICY 날짜:20260902 : 실시간 공단 크롤링 서버가 다시 생기지 않도록 정적 배포 구조를 고정
@@ -123,6 +123,12 @@ ZIP을 다시 만들 때 파일명 앞에 `YYYYMMDD_`를 붙인다.
 <!-- SOFTM-CARE-CATEGORIES START 날짜:20260904 : 급여 분류 누락과 두 지도의 기관 집합 불일치를 방지 -->
 - 기본 급여 카테고리는 요양원·공동생활가정, 주·야간보호, 방문요양, 방문간호, 방문목욕, 단기보호, 복지용구다. 치매전담형은 특화 모아보기이고 요양병원은 의료기관으로 구분한다.
 - `scripts/care_categories.py`의 분류를 생성기·수집기가 공유한다. 치매전담형 공동생활가정(S41)과 요양시설 치매전담실(G/M)은 시설, 주야간보호 치매전담실(H/I)은 주야간보호에도 포함한다. 복지용구는 B06/C06이다.
-- `scripts/build_nationwide_care_services.py`는 통합 데이터와 전국 주간 데이터를 함께 재생성하며, 평가 생성기를 이어서 실행한다. 2026-06-10 원본 기준 시설 6,481곳·주야간보호 5,757곳·복지용구 1,851곳이며 두 주야간보호 지도의 기관기호·급여코드·정원·인력이 일치해야 한다.
+- `scripts/build_nationwide_care_services.py`는 `data/nhis`의 목록·평가·상세와 `data/hira`만 읽어 두 지도의 공용 검색 인덱스와 안내 수치를 생성한다. 기관 수는 현재 수집 목록과 대조하고 두 주야간보호 지도의 기관기호·급여코드·정원·인력·평가를 일치시킨다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 과거 엑셀과 별도 주간 평가 생성 경로를 제거 -->
 - 새 급여를 추가하면 홈·유형 안내·지도 메뉴·canonical·사이트맵·검증기를 함께 갱신한다. 복지용구 화면은 입소 정원·돌봄인력 지표를 기본정보·비교표에서 제외한다.
 <!-- SOFTM-CARE-CATEGORIES END -->
+
+<!-- SOFTM-DATA-UNIFIED START 날짜:20260904 : 수집 완료 후에도 지도 목록이 옛 엑셀을 보는 이중 기준 재발 방지 -->
+- 지도 목록·검색·마커·비교는 `care-data.js`로 `data/care/manifest.json`과 선택 유형의 압축 JSON을 읽는다. 상세·사진은 `nhis-static-data.js`의 기존 기관별 경로를 유지한다.
+- `data/care`는 수만 개 상세 파일을 브라우저에서 한꺼번에 읽지 않도록 만든 수집 자료의 검색 인덱스다. 엑셀·CSV 또는 제거한 JS를 지도 생성 입력으로 다시 연결하지 않는다. 심평원 원본 변경은 `scripts/import_hira_hospitals.py`로 `data/hira`를 갱신한다.
+- 목록·상세·평가 수집 후 검색 인덱스를 생성하고 검증한다. Actions는 이 순서를 자동 실행한다. 빈 인력은 완전한 0명으로 표시하지 않으며 공단 공개 페이지에 수집된 주소로 신규 기관의 주소 누락을 보완한다.
+<!-- SOFTM-DATA-UNIFIED END -->

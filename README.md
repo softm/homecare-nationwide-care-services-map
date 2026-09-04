@@ -39,12 +39,11 @@ npm run serve
 ├── index.html
 ├── index-ad-config.js              # 인덱스 PC·모바일 전용 광고 단위
 ├── nationwide-daycare-map.html
-├── nationwide-daycare-data-*.js
-├── nationwide-daycare-evaluations.js
 ├── nationwide-daycare-ad-config.js
 ├── nationwide-care-services-map.html
-├── nationwide-care-manifest.js
-├── nationwide-care-data/
+├── care-data.js                    # 두 지도의 공용 검색 자료 로더
+├── data/care/                      # 수집 JSON에서 생성한 압축 검색 인덱스
+├── data/hira/                      # 심평원 요양병원 JSON
 ├── nationwide-care-ad-config.js
 ├── source-data/                    # 공단·심평원 원본
 ├── data/nhis/                      # GitHub Pages가 제공하는 정적 공단 JSON
@@ -61,16 +60,15 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python scripts/build_nationwide_care_services.py
-python scripts/build_daycare_evaluations.py
 npm run check
 ```
 
-`build_nationwide_care_services.py`는 `source-data`의 공단 XLSX·평가 CSV·심평원 CSV로 `nationwide-care-data`와 매니페스트를 다시 만듭니다.
+`build_nationwide_care_services.py`는 `data/nhis/catalog.json`·`evaluations.json`·기관별 상세와 `data/hira/nursing-hospitals.json`만 읽어 `data/care/*.json.gz`·`manifest.json`을 만듭니다. 두 지도는 `care-data.js`로 같은 검색 자료를 읽으며 상세·사진은 기존 기관별 JSON을 사용합니다. 검색 인덱스는 수만 개 상세 파일을 첫 화면에서 내려받지 않도록 만든 재생성 가능 자료이며 별도 원본이 아닙니다. 심평원 원본 교체 시에만 `python scripts/import_hira_hospitals.py`를 먼저 실행합니다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 수집 JSON을 지도 정보의 단일 입력으로 고정 -->
 
 <!-- SOFTM-CARE-CATEGORIES START 날짜:20260904 : 재생성 시 기본 급여와 치매전담 포함 범위를 보존 -->
 급여 분류는 `scripts/care_categories.py`를 생성기와 수집기가 공유합니다. 요양원·공동생활가정에는 시설 치매전담실과 치매전담형 공동생활가정을, 주·야간보호에는 치매전담실을 포함합니다. 복지용구(B06/C06) 1,851곳도 별도 안내·지도로 제공합니다. 치매전담형은 기본 유형에 포함된 기관의 모아보기이며 요양병원은 의료기관으로 구분합니다.
 
-통합 데이터 생성 명령은 전국 주간의 지역별 데이터도 함께 갱신합니다. 두 지도의 주야간보호 5,757곳과 급여·정원·인력은 일치하며, 평가 재생성 후 연결기관은 3,355곳입니다.
+통합 데이터 생성 명령은 두 지도가 공용으로 읽는 자료와 유형 안내의 기관 수를 함께 갱신합니다. 두 지도의 주야간보호 기관기호·급여·정원·인력·평가는 항상 일치해야 하며 기관 수는 현재 수집 목록과 대조합니다. 기존 기관 데이터 JS와 별도 주간 평가 생성기는 제거했습니다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 과거 원본의 고정 개수와 별도 JS 재생성을 폐기 -->
 <!-- SOFTM-CARE-CATEGORIES END -->
 
 ## 공단 정적 데이터
@@ -141,4 +139,4 @@ Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.m
 npm run check
 ```
 
-검사는 HTML의 로컬 스크립트 누락, JavaScript·Python 구문, 전국 주간 5,757곳, 전국 요양 유형별 매니페스트 개수와 중복 기관기호, 공단 정적 스키마·필수 표본·사진 상한을 확인합니다.
+검사는 로컬 참조·구문, 수집 목록과 검색 인덱스의 기관 집합, 유형별 개수·중복·평가, 두 지도의 동일 입력, gzip 로딩·실패 처리, 공단 정적 스키마·필수 표본·사진 상한을 확인합니다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 과거 JS 대신 실제 수집 자료로 검증 -->
