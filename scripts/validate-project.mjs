@@ -231,6 +231,10 @@ for (const file of ['index.html', 'nationwide-daycare-map.html', 'nationwide-car
 }
 if (exists('nationwide-care-data') || exists('nationwide-care-manifest.js') || exists('nationwide-daycare-evaluations.js') || fs.readdirSync(root).some(file => /^nationwide-daycare-data-.*\.js$/.test(file))) fail('이전 기관 데이터 JS가 다시 생성되었습니다.');
 execFileSync('python3', [path.join(root, 'scripts/test_care_data.py')], { stdio: 'inherit' });
+/** SOFTM-ADVANCED-SEARCH START 날짜:20260904 : 공단 검색 인덱스의 누락·조건 조합·공유 복원을 정기 검사에 포함 */
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/advanced-search.test.mjs')], { stdio: 'inherit' });
+execFileSync('python3', ['-m', 'unittest', 'discover', '-s', path.join(root, 'scripts'), '-p', 'test_nhis_search.py'], { stdio: 'inherit' });
+/** SOFTM-ADVANCED-SEARCH END */
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-data.test.mjs')], { stdio: 'inherit' });
 /** SOFTM-DATA-UNIFIED END */
 
