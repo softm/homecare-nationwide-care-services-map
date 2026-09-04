@@ -1,0 +1,32 @@
+/** SOFTM-ADVANCED-SEARCH START 날짜:20260904 : 상세조건이 휴대폰에서도 잘리지 않고 키보드로 조작되도록 공통 배치 */
+.advanced-search{margin:14px 0 8px;border:1px solid #ccdce9;border-radius:13px;background:#f8fbfe;color:#243e56}
+.advanced-search>summary{padding:14px 16px;font-weight:850;font-size:15px;cursor:pointer;min-height:48px}
+.advanced-count{margin-left:7px;color:#075ca8;font-size:12px}
+.advanced-summary-help{margin-left:12px;font-size:12px;color:#60758a;font-weight:500}
+.advanced-body{padding:0 16px 16px}
+.advanced-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.advanced-toolbar p,.advanced-help,.advanced-logic,.advanced-source,.advanced-status{font-size:12px;line-height:1.6;margin:8px 0;color:#536b81}
+.advanced-toolbar button,.advanced-retry{border:1px solid #a9bdce;border-radius:8px;min-height:40px;background:white;padding:8px 12px;color:#264963;cursor:pointer;flex-shrink:0;font-weight:750}
+.advanced-basic{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.advanced-basic>label{display:grid;gap:7px;font-size:13px;font-weight:750;min-width:0}
+.advanced-basic select,.advanced-basic input{width:100%;min-height:44px;min-width:0;padding:9px 11px;border:1px solid #aec2d4;border-radius:8px;background:white;color:#203e59;font:inherit;box-sizing:border-box}
+.advanced-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.advanced-group{min-width:0;margin:0;padding:10px 12px 12px;border:1px solid #d5e1eb;border-radius:10px;background:#fff}
+.advanced-group legend{padding:0 5px;font-size:13px;font-weight:850;color:#203e59}
+.advanced-option,.advanced-parent{display:flex;align-items:center;gap:9px;min-height:44px;font-size:13px;cursor:pointer;line-height:1.45}
+.advanced-option input,.advanced-parent input{width:19px;height:19px;flex:0 0 19px;margin:0;accent-color:#166abd}
+.advanced-option span{flex:1;overflow-wrap:anywhere}
+.advanced-option small{white-space:nowrap;color:#647a8e;font-size:11px}
+.advanced-parent{font-weight:700;color:#426880;border-bottom:1px solid #e7edf3;margin-bottom:4px}
+.advanced-group .advanced-help{font-size:11px;margin-bottom:0}
+.advanced-source a{color:#1767b4;text-decoration:underline}
+.advanced-status{font-weight:750;color:#155b95;background:#ecf5fc;padding:10px 12px;border-radius:8px}
+.advanced-selected{display:flex;flex-wrap:wrap;gap:6px}
+.advanced-selected:empty{display:none}
+.advanced-selected button{display:inline-flex;align-items:center;gap:10px;max-width:100%;text-align:left;overflow-wrap:anywhere;border:1px solid #b5d0e7;background:#edf6ff;color:#15558b;border-radius:20px;padding:8px 11px;font:inherit;font-size:12px;min-height:36px;cursor:pointer}
+.advanced-selected button span{font-size:19px;font-weight:700}
+.advanced-error{color:#a03424;background:#fff0ea;padding:12px;border-radius:8px;font-size:13px;line-height:1.6}
+.advanced-search :focus-visible,.advanced-selected button:focus-visible{outline:3px solid #176fd1;outline-offset:3px}
+.advanced-search [disabled]{opacity:.5;cursor:not-allowed}
+@media(max-width:640px){.advanced-summary-help{display:block;margin:5px 0 0 15px;font-size:11px}.advanced-body{padding:0 10px 12px}.advanced-toolbar{align-items:flex-start}.advanced-toolbar p{margin-top:0}.advanced-basic{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.advanced-address{grid-column:1/-1}.advanced-groups{grid-template-columns:1fr}.advanced-group{padding:8px 10px 10px}.advanced-group legend{font-size:12px}.advanced-option{font-size:12px}.advanced-option small{font-size:10px}}
+/** SOFTM-ADVANCED-SEARCH END */
