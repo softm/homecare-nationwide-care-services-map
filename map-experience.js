@@ -57,6 +57,40 @@
     const allRows = () => options?.rows() || [];
     const rows = () => (basket?.ids() || []).map(id => rowById.get(id)).filter(Boolean);
     const busy = () => routeState.phase === 'routing' || routeState.phase === 'locating';
+    /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 담기 결과를 숫자와 탭에 연결하고 반복 클릭·동작 줄이기 설정에서도 정확히 안내 */
+    let basketFeedbackTimer, basketAnnouncement, basketFeedbackAnimations = [];
+    function showBasketFeedback(row, added) {
+        clearTimeout(basketFeedbackTimer);
+        basketFeedbackAnimations.forEach(animation => animation.cancel());
+        basketFeedbackAnimations = [];
+        const savedTab = tabs.querySelector('#careSavedTab'), hint = savedTab.querySelector('.care-tab-hint');
+        const targets = [savedTab, dock];
+        const reset = () => {
+            targets.forEach(node => { node.classList.remove('care-just-added'); node.querySelector('.care-count-feedback').hidden = true; });
+            hint.textContent = '비교 · 경로탐색';
+        };
+        reset();
+        basketAnnouncement.textContent = `${row.n}, ${added ? '담기 완료' : '담은 기관에서 제거 완료'}. 담은 기관은 총 ${rows().length}곳입니다.`;
+        if (!added) return;
+        hint.textContent = '✓ 담았어요';
+        const reducedMotion = root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        targets.forEach(node => {
+            node.classList.add('care-just-added');
+            const badge = node.querySelector('[data-saved-count]'), plus = node.querySelector('.care-count-feedback');
+            plus.hidden = false;
+            if (reducedMotion || !badge.animate) return;
+            basketFeedbackAnimations.push(badge.animate([
+                { transform: 'scale(1)' }, { transform: 'translateY(-3px) scale(1.35)', offset: .35 },
+                { transform: 'scale(.95)', offset: .7 }, { transform: 'scale(1)' }
+            ], { duration: 650, easing: 'ease-out' }));
+            basketFeedbackAnimations.push(plus.animate([
+                { opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'translateY(-3px)', offset: .25 },
+                { opacity: 1, transform: 'translateY(-3px)', offset: .8 }, { opacity: 0, transform: 'translateY(-8px)' }
+            ], { duration: 1300, easing: 'ease-out', fill: 'forwards' }));
+        });
+        basketFeedbackTimer = setTimeout(() => { reset(); basketFeedbackAnimations.forEach(animation => animation.cancel()); basketFeedbackAnimations = []; }, 1400);
+    }
+    /** SOFTM-TAB-FEEDBACK END */
     function button(row) {
         const active = basket?.has(row.i) || false;
         return `<button type="button" class="care-basket-button" data-care-basket="${escape(row.i)}" aria-pressed="${active}" aria-label="${escape(row.n)} ${active ? '비교함에서 빼기' : '비교에 담기'}">${active ? '✓ 비교에 담음' : '+ 비교에 담기'}</button>`;
@@ -79,7 +113,7 @@
         const missing = new Set((routeState.missing || []).map(item => item.id));
         const markup = selected.map((row, index) => `<li class="care-basket-item" data-basket-id="${escape(row.i)}"><button type="button" class="care-drag-handle" data-basket-drag="${escape(row.i)}" aria-label="${escape(row.n)} 순서 끌어서 이동" aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight" aria-describedby="careBasketDragHelp">⠿</button><div class="care-basket-name"><button type="button" class="care-saved-title" data-saved-detail="${escape(row.i)}"><b>${index + 1}.</b> ${escape(row.n)}</button><p>${escape(row.a || '주소 확인 필요')}</p><small>${escape(evaluationLabel(row))}${missing.has(String(row.i)) ? ' · 위치 확인 필요' : ''}</small><button type="button" class="care-saved-detail" data-saved-detail="${escape(row.i)}">상세 보기</button></div><button type="button" class="care-saved-remove" data-care-basket="${escape(row.i)}" aria-label="${escape(row.n)} 비교함에서 빼기">×</button></li>`).join('');
         if (markup !== lastItems) { cancelBasketDrag(); bar.querySelector('.care-basket-items').innerHTML = markup; lastItems = markup; }
-        dock.textContent = `담은 기관 ${selected.length}곳 보기 →`;
+        dock.querySelector('[data-saved-count]').textContent = selected.length; // SOFTM-TAB-FEEDBACK 날짜:20260905 : 반복 갱신에서도 숫자 강조 요소를 유지
         dock.hidden = !selected.length || workspace !== 'search';
         document.body.classList.toggle('has-care-dock', !!selected.length && workspace === 'search');
         document.querySelectorAll('.care-basket-button[data-care-basket]').forEach(node => {
@@ -345,8 +379,16 @@
         const layout = document.querySelector('.layout'), results = document.querySelector('.results');
         results.id = 'careSearchResults';
         tabs = document.createElement('nav'); tabs.className = 'care-workspace-tabs'; tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', '기관 찾기와 담은 기관');
-        tabs.innerHTML = '<button type="button" id="careSearchTab" role="tab" data-workspace="search" aria-selected="true" aria-controls="careSearchResults">기관 찾기</button><button type="button" id="careSavedTab" role="tab" data-workspace="saved" aria-selected="false" aria-controls="careSavedPanel" tabindex="-1">담은 기관 <span data-saved-count>0</span></button>';
+        /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 두 작업을 선택 가능한 탭으로 구분하고 담은 숫자의 강조 공간을 확보 */
+        tabs.innerHTML = `<button type="button" id="careSearchTab" role="tab" data-workspace="search" aria-selected="true" aria-controls="careSearchResults"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg><span class="care-tab-copy"><span class="care-tab-title">기관 찾기</span><span class="care-tab-hint" aria-hidden="true">지역 · 조건으로 검색</span></span></button><button type="button" id="careSavedTab" role="tab" data-workspace="saved" aria-selected="false" aria-controls="careSavedPanel" tabindex="-1"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4Z"></path></svg><span class="care-tab-copy"><span class="care-tab-title">담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span></span><span class="care-tab-hint" aria-hidden="true">비교 · 경로탐색</span></span></button>`;
+        /** SOFTM-TAB-FEEDBACK END */
         document.querySelector('main.wrap').prepend(tabs);
+        /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 담기 결과를 음성으로도 알리고 확대된 탭이 아래 영역을 가리지 않도록 실제 높이를 공유 */
+        basketAnnouncement = document.createElement('p'); basketAnnouncement.className = 'care-basket-announcement'; basketAnnouncement.setAttribute('role', 'status'); basketAnnouncement.setAttribute('aria-atomic', 'true'); tabs.after(basketAnnouncement);
+        const measureTabs = () => document.body.style.setProperty('--care-tabs-height', `${tabs.getBoundingClientRect().height}px`);
+        measureTabs();
+        if (root.ResizeObserver) new root.ResizeObserver(measureTabs).observe(tabs);
+        /** SOFTM-TAB-FEEDBACK END */
         results.setAttribute('role', 'tabpanel'); results.setAttribute('aria-labelledby', 'careSearchTab');
         const switcher = document.createElement('div'); switcher.className = 'care-view-switch'; switcher.setAttribute('role', 'group'); switcher.setAttribute('aria-label', '기관 표시 방식');
         switcher.innerHTML = '<button type="button" data-care-view="list" aria-pressed="true">목록</button><button type="button" data-care-view="map" aria-pressed="false">지도</button>';
@@ -359,6 +401,7 @@
         <div class="care-saved-footer"><div class="care-saved-actions"><button type="button" class="care-primary" data-basket-open>비교하기</button><button type="button" data-route-edit>경로탐색</button></div><div class="care-route-actions" hidden><button type="button" class="care-primary" data-route-run>경로탐색</button></div></div>`;
         layout.prepend(bar); layout.prepend(results);
         dock = document.createElement('button'); dock.type = 'button'; dock.className = 'care-saved-dock'; dock.dataset.workspace = 'saved'; document.body.append(dock);
+        dock.innerHTML = '담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span>곳 보기 <span aria-hidden="true">→</span>'; // SOFTM-TAB-FEEDBACK 날짜:20260905 : 상단 탭이 보이지 않을 때도 담긴 개수의 변화를 즉시 전달
         routeOutput = document.createElement('section'); routeOutput.className = 'care-route-output'; routeOutput.setAttribute('aria-label', '경로탐색 결과');
         routeOutput.innerHTML = '<p role="status"></p><div class="care-route-summary"></div><details class="care-route-itinerary" hidden></details>';
         bar.querySelector('.care-saved-footer').before(routeOutput);
@@ -384,7 +427,12 @@
             const node = event.target.closest('[data-care-basket], [data-workspace], [data-basket-open], [data-basket-clear], [data-route-edit], [data-route-back], [data-route-run], [data-origin-locate], [data-origin-choice], [data-saved-detail], [data-saved-fit], button[data-care-view]');
             if (!node || node.disabled) return;
             event.stopPropagation();
-            if (node.hasAttribute('data-care-basket')) { if (rowById.has(node.dataset.careBasket)) basket.toggle(node.dataset.careBasket); changed(); }
+            /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 실제 추가 클릭에만 반응하고 삭제·순서 변경·세션 복원은 담기 효과에서 제외 */
+            if (node.hasAttribute('data-care-basket')) {
+                const row = rowById.get(node.dataset.careBasket);
+                if (row) { const added = !basket.has(row.i); basket.toggle(row.i); changed(); showBasketFeedback(row, added); }
+            }
+            /** SOFTM-TAB-FEEDBACK END */
             else if (node.hasAttribute('data-workspace')) setWorkspace(node.dataset.workspace);
             else if (node.hasAttribute('data-basket-open')) options.compare();
             else if (node.hasAttribute('data-basket-clear')) { basket.clear(); changed(); }

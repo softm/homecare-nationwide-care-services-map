@@ -132,10 +132,12 @@
 .care-map-page [hidden] { display:none!important; }
 .care-map-page .layout { display:grid; grid-template-columns:minmax(340px,400px) minmax(0,1fr); gap:20px; align-items:start; }
 .care-map-page .results,.care-saved-panel { grid-column:1; grid-row:1; min-width:0; position:static; }
-.care-map-page .map-card { grid-column:2; grid-row:1; min-width:0; position:sticky; top:calc(var(--care-nav-height,0px) + 68px); scroll-margin-top:calc(var(--care-nav-height,0px) + 76px); }
+/** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 탭 크기와 글자 확대에 맞춰 지도·목록의 가려지는 높이를 계산 */
+.care-map-page .map-card { grid-column:2; grid-row:1; min-width:0; position:sticky; top:calc(var(--care-nav-height,0px) + var(--care-tabs-height,90px) + 10px); scroll-margin-top:calc(var(--care-nav-height,0px) + var(--care-tabs-height,90px) + 18px); }
 .care-map-page .map-wrap { height:auto; min-height:0; }
-.care-map-page #naverMap { height:clamp(400px,calc(100dvh - var(--care-nav-height,0px) - 180px),720px); }
-.care-map-page #list { height:min(760px,calc(100dvh - var(--care-nav-height,0px) - 205px)); max-height:none; min-height:320px; overflow-y:auto; }
+.care-map-page #naverMap { height:clamp(400px,calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,90px) - 122px),720px); }
+.care-map-page #list { height:min(760px,calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,90px) - 147px)); max-height:none; min-height:320px; overflow-y:auto; }
+/** SOFTM-TAB-FEEDBACK END */
 .care-map-page .row { display:block; border:0; border-bottom:1px solid #e2e8ef; border-radius:0; box-shadow:none; background:#fff; padding:20px 4px; }
 .care-map-page .row h3 { margin:0 0 8px; font-size:18px; line-height:1.5; }
 .care-map-page .row p { margin:8px 0; }
@@ -144,13 +146,32 @@
 .care-map-page .list-head select,.care-map-page .result-head select { max-width:100%; }
 .care-map-page .select-tools,.care-map-page .route-actions { margin-top:12px; padding:8px 10px; background:#f5f7fa; border-radius:8px; }
 .care-map-page .route-tools > p,.care-map-page .selected { display:none; }
-.care-workspace-tabs { display:flex; align-items:stretch; gap:24px; position:sticky; top:var(--care-nav-height,0px); z-index:80; margin:0 0 20px; background:#f7f8f5; border-bottom:1px solid #d6e0e9; }
-.care-workspace-tabs button { min-height:58px; padding:12px 4px; border:0; border-bottom:3px solid transparent; border-radius:0; background:transparent; color:#637184; font-size:18px; font-weight:600; cursor:pointer; }
-.care-workspace-tabs button[aria-selected="true"] { border-bottom-color:#175cb5; color:#153b6a; font-weight:800; }
-.care-workspace-tabs span { display:inline-flex; min-width:25px; justify-content:center; margin-left:5px; padding:0 6px; border-radius:20px; background:#e8eef5; color:#244e7b; font-size:14px; }
-.care-view-switch { display:none; scroll-margin-top:calc(var(--care-nav-height,0px) + 74px); }
-.care-map-page .layout { scroll-margin-top:calc(var(--care-nav-height,0px) + 74px); }
-.care-saved-panel { padding:20px; max-height:calc(100dvh - var(--care-nav-height,0px) - 95px); overflow-y:auto; overscroll-behavior:contain; }
+/** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 글자 링크처럼 보이던 작업 전환을 누를 수 있는 두 칸과 선택 표시로 구분 */
+.care-workspace-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; gap:6px; position:sticky; top:var(--care-nav-height,0px); z-index:80; margin:0 0 20px; padding:6px; border:1px solid #cdd8e5; border-radius:15px; background:#eaf0f6; box-shadow:0 3px 10px #172c4308; }
+.care-workspace-tabs button { display:flex; align-items:center; justify-content:center; gap:12px; position:relative; min-width:0; min-height:76px; padding:12px 18px; border:1px solid #cdd8e5; border-radius:10px; background:#f4f7fa; color:#46617d; font-size:18px; font-weight:700; cursor:pointer; transition:background .18s,border-color .18s,box-shadow .18s; }
+.care-workspace-tabs button::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:3px; border-radius:3px 3px 0 0; background:transparent; }
+.care-workspace-tabs button[aria-selected="true"] { border-color:#8aafd9; background:#fff; color:#153b6a; box-shadow:0 2px 6px #244e7b14; font-weight:800; }
+.care-workspace-tabs button[aria-selected="true"]::after { background:#175cb5; }
+.care-workspace-tabs button:hover { background:#fff; border-color:#719aca; box-shadow:0 2px 8px #244e7b1a; }
+.care-workspace-tabs button:focus-visible { outline:3px solid #175cb5; outline-offset:3px; }
+.care-tab-icon { width:24px; height:24px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.care-tab-copy { min-width:0; display:flex; flex-direction:column; gap:3px; text-align:left; }
+.care-tab-title { display:flex; align-items:center; flex-wrap:wrap; gap:6px; line-height:1.4; }
+.care-tab-hint { color:#63788e; font-size:13px; font-weight:500; line-height:1.4; }
+.care-count-wrap { position:relative; display:inline-flex; vertical-align:middle; }
+.care-workspace-tabs [data-saved-count] { display:inline-flex; align-items:center; justify-content:center; min-width:28px; padding:2px 7px; border-radius:20px; background:#e2eaf4; color:#254e7b; font-size:15px; line-height:1.4; font-variant-numeric:tabular-nums; }
+.care-count-feedback { position:absolute; right:-12px; top:-15px; padding:1px 5px; border-radius:12px; background:#175cb5; color:#fff; font-size:12px; font-weight:800; line-height:1.5; pointer-events:none; }
+.care-workspace-tabs button.care-just-added { background:#e9f3ff; border-color:#4382cb; box-shadow:0 0 0 3px #a8cef84d; }
+.care-workspace-tabs .care-just-added [data-saved-count] { background:#175cb5; color:#fff; }
+.care-workspace-tabs .care-just-added .care-tab-hint { color:#175cb5; font-weight:700; }
+.care-saved-dock [data-saved-count] { display:inline-block; min-width:20px; margin:0 2px; font-weight:850; font-variant-numeric:tabular-nums; }
+.care-saved-dock .care-count-feedback { background:#fff; color:#175cb5; }
+.care-saved-dock.care-just-added { background:#11488d; box-shadow:0 0 0 4px #b2d4ff,0 6px 20px #173d7025; }
+.care-basket-announcement { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.care-view-switch { display:none; scroll-margin-top:calc(var(--care-nav-height,0px) + var(--care-tabs-height,90px) + 16px); }
+.care-map-page .layout { scroll-margin-top:calc(var(--care-nav-height,0px) + var(--care-tabs-height,90px) + 16px); }
+.care-saved-panel { padding:20px; max-height:calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,90px) - 37px); overflow-y:auto; overscroll-behavior:contain; }
+/** SOFTM-TAB-FEEDBACK END */
 .care-saved-heading { display:flex; align-items:flex-start; gap:12px; justify-content:space-between; }
 .care-saved-heading h2,.care-route-editor h2 { margin:0; font-size:22px; line-height:1.4; }
 .care-basket-count { display:inline; margin-left:5px; color:#175cb5; font-size:16px; }
@@ -218,17 +239,24 @@
  .care-map-page .layout { display:block; position:relative; }
  .care-map-page .map-card { position:static; }
  .care-map-page #list { height:auto; min-height:0; overflow:visible; }
- .care-workspace-tabs { gap:24px; margin-bottom:16px; }
- .care-workspace-tabs button { font-size:17px; min-height:54px; }
+ /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 작은 화면에서도 두 작업의 이름·설명·개수를 함께 표시 */
+ .care-workspace-tabs { gap:6px; margin-bottom:16px; }
+ .care-workspace-tabs button { gap:8px; padding:10px 8px; font-size:16px; min-height:72px; }
+ .care-tab-icon { width:20px; height:20px; }
+ .care-tab-hint { font-size:12px; }
+ .care-workspace-tabs [data-saved-count] { min-width:24px; padding:2px 5px; font-size:14px; }
+ /** SOFTM-TAB-FEEDBACK END */
  .care-view-switch { display:flex; padding:4px; gap:4px; background:#eaf0f6; border-radius:10px; margin-bottom:12px; }
  .care-view-switch button { min-height:44px; flex:1; border:0; background:transparent; border-radius:7px; color:#52657b; font-size:16px; font-weight:700; }
  .care-view-switch button[aria-pressed="true"] { color:#1d4b80; background:#fff; }
  .care-map-page[data-care-view="list"] .layout > .map-card,.care-map-page[data-care-view="map"] .layout > .results,.care-map-page[data-care-view="map"] .layout > .care-saved-panel { position:absolute; left:-20000px; top:0; width:100%; visibility:hidden; pointer-events:none; }
  .care-saved-panel { max-height:none; overflow:visible; padding:18px; }
  .care-saved-footer { bottom:0; padding-bottom:calc(10px + env(safe-area-inset-bottom)); }
- .care-map-page #naverMap { height:clamp(300px,calc(100dvh - var(--care-nav-height,0px) - 210px),650px); }
- .care-basket-map #naverMap { height:clamp(280px,calc(100dvh - var(--care-nav-height,0px) - 220px),600px); }
- .care-map-page[data-care-panel="route"] #naverMap { height:clamp(280px,calc(100dvh - var(--care-nav-height,0px) - 340px),560px); }
+ /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 새 탭 높이만큼 지도 영역을 조정해 작은 화면의 결과를 가리지 않음 */
+ .care-map-page #naverMap { height:clamp(300px,calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,86px) - 156px),650px); }
+ .care-basket-map #naverMap { height:clamp(280px,calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,86px) - 166px),600px); }
+ .care-map-page[data-care-panel="route"] #naverMap { height:clamp(280px,calc(100dvh - var(--care-nav-height,0px) - var(--care-tabs-height,86px) - 286px),560px); }
+ /** SOFTM-TAB-FEEDBACK END */
  .map-card .care-route-output { padding:10px 12px; margin:0 0 12px; }
  .map-card .care-route-output[data-phase="success"] > [role="status"] { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
  .map-card .care-route-summary { gap:6px 12px; margin:0; }
