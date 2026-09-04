@@ -45,7 +45,7 @@ function makeDaycareHarness(rows = []) {
         function matchesActiveNonSpatialFilters(row){return row.matches!==false}
         function sortFiltered(){} function render(){} function updateSearchScope(){} function clearRouteLine(){}
         function clearCenterMarkers(){mapMarkers=[]}
-        function createCenterMarker(row,coord,label){const marker={centerId:row.i};mapMarkers.push(marker);return marker}
+        function createCenterMarker(row,coord,label){const marker={centerId:row.i,setMap(){}};mapMarkers.push(marker);return marker} // SOFTM-SHARE-RESTORE 날짜:20260905 : 복원 중 해제된 기관 마커 제거도 실제 조회 함수로 검사
         function drawRouteOrderMarkers(){} function openCenter(){} function closeMapPopup(){}
         function listRank(){return 1} function geocodeCenter(row){return externalGeocode(row)}
         function viewportCandidates(){return{regions:[{city:'테스트시'}],candidates:DATA.filter(matchesActiveNonSpatialFilters)}}
@@ -253,3 +253,29 @@ test('통합 지도 미준비: 미리보기 90곳과 전체 필터 결과 150곳
     assert.equal(harness.elements.get('areaCount').textContent, '150곳');
 });
 /** SOFTM-SEARCH-FEEDBACK END */
+
+/** SOFTM-SHARE-RESTORE START 날짜:20260905 : 공유자가 고른 일부 기관·빈 선택을 초기 검색이 전체 선택으로 덮지 않도록 검증 */
+test('주간 공유 복원: 전체 결과와 위치 미확인은 유지하고 선택한 마커만 표시한다', async () => {
+    const harness = makeDaycareHarness([center('one'), center('two'), center('unknown', null)]);
+    harness.run("selected=new Set(['one','unknown'])");
+    const outcome = await harness.run('searchCurrentMap(false,null,true)');
+    assert.equal(outcome.count, 3);
+    assert.equal(outcome.unresolved, 1);
+    assert.equal(outcome.markerCount, 1);
+    assert.deepEqual(harness.snapshot().markers, ['one']);
+    assert.deepEqual(JSON.parse(harness.run('JSON.stringify([...selected])')), ['one', 'unknown']);
+    assert.match(harness.elements.get('routeNote').textContent, /공유된 지도 표시 선택/);
+    await harness.run('searchCurrentMap(false)');
+    assert.deepEqual(harness.snapshot().markers, ['one', 'two'], '이후 직접 검색은 기존 전체 선택 동작을 유지');
+    assert.equal(harness.run('selected.size'), 3);
+});
+
+test('주간 공유 복원: 모두 해제한 공유 선택은 결과를 숨기지 않고 마커만 비운다', async () => {
+    const harness = makeDaycareHarness([center('one'), center('two')]);
+    const outcome = await harness.run('searchCurrentMap(false,null,true)');
+    assert.equal(outcome.count, 2);
+    assert.equal(outcome.markerCount, 0);
+    assert.equal(harness.run('selected.size'), 0);
+    assert.deepEqual(harness.snapshot().markers, []);
+});
+/** SOFTM-SHARE-RESTORE END */
