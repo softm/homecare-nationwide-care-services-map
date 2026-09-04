@@ -11,7 +11,7 @@
 | 전국 요양 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-care-services-map.html` | 8개 기관 유형 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 지도·주소 변환 | 사용자 브라우저 | 네이버 Maps JavaScript SDK, `naver-geocoder.js` | 지도 표시, 주소→좌표, 좌표→주소 | 네이버 SDK 직접 호출 | `ncpKeyId=etfcybk8vf`, Maps Application의 Web 서비스 URL 제한 |
 | 기관 기본 데이터 | GitHub Pages 정적 파일 | `nationwide-daycare-data-*.js`, `nationwide-care-data/*.js`, 각 매니페스트 | 지도 목록·마커·필터의 기본 자료 | 예, 상대경로 정적 파일 | 없음 |
-| 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 JSON | 브라우저 인증정보 없음 |
+| 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/details/**/*.json.gz`, 기타 `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 파일 | 브라우저 인증정보 없음 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 상세 압축 파일과 그 외 JSON의 배포 형식을 구분 -->
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | `DATA_GO_KR_SERVICE_KEY` |
 | 길찾기 서버 | Vercel Functions | `services/vercel-api/api/directions.js` | 네이버 Directions 15 자동차 경로 중계 | `POST /api/directions`만 호출 | `NAVER_MAPS_API_KEY_ID`, `NAVER_MAPS_API_SECRET` |
 | 광고 설정 | GitHub Pages 정적 파일 및 광고 사업자 | `index-ad-config.js`, `nationwide-daycare-ad-config.js`, `nationwide-care-ad-config.js` | 화면별 PC·모바일·목록 광고 슬롯 설정 | 예 | 광고 설정 파일의 공개 클라이언트 값만 사용 | <!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 인덱스 승인 단위가 다른 지도 광고와 섞이지 않도록 인프라 경계를 명시 -->
@@ -26,7 +26,7 @@
 | 주소→좌표 | 브라우저 | `naver.maps.Service.geocode` | 공용 큐·중복 제거·캐시를 사용하는 클라이언트 SDK 호출 | `/api/geocode`를 다시 만들지 않음 |
 | 좌표→주소 | 브라우저 | `naver.maps.Service.reverseGeocode` | 공용 캐시를 사용하는 클라이언트 SDK 호출 | `/api/reverse-geocode`를 다시 만들지 않음 |
 | 기관 기본 목록 | 브라우저 | 저장소의 생성 JS | HTML이 유형별 정적 데이터와 매니페스트를 로드 | 생성물 직접 수정 금지 |
-| 공단 상세 | 브라우저 | `data/nhis/details/{기관기호 앞 2자리}/{기관기호}.json` | `nhis-static-data.js`가 수집 매니페스트 확인 후 로드 | 실시간 공단 API 프록시 금지 |
+| 공단 상세 | 브라우저 | `data/nhis/details/{기관기호 앞 2자리}/{기관기호}.json.gz` | `nhis-static-data.js`가 필요한 기관 파일만 받아 gzip 해제 후 로드 | 실시간 공단 API 프록시 금지 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 브라우저의 실제 압축 상세 요청 경로를 기록 -->
 | 공단 사진 | 브라우저 | `data/nhis/photos/{기관기호 앞 2자리}/{기관기호}.json` | 사진 탭을 열 때 정적 사진 매니페스트 로드 | 원본 이미지는 공단 공개 URL 사용 가능 |
 | 자동차 길찾기 | 브라우저→Vercel | `https://daycare-directions-proxy.vercel.app/api/directions` | Vercel이 Secret을 붙여 네이버 Directions 15 호출 | 유일하게 유지하는 런타임 서버 API |
 | 공단 원천 수집 | GitHub Actions→공공데이터 | 기관검색·시설상세 API, 시설현황·평가 파일 | Python 수집기가 재시도·호출 예산·샤드 체크포인트를 적용 | 키를 HTML·JSON·로그에 기록하지 않음 |
@@ -39,7 +39,7 @@
 |---:|---|---|---|---|
 | 1 | 공공데이터 시설별 현황·평가 원문 | 최신 파일 확인 및 원본 보존 | `source-data/nhis-longtermcare-*.xlsx`, `source-data/nhis_longtermcare_evaluations_*.csv` | 원본을 덮어쓰거나 수동 가공하지 않음 |
 | 2 | 시설별 현황 XLSX + 기관 검색 API | 기관·급여 조합 병합과 변경 감지 | `data/nhis/catalog.json`, `data/nhis/changes.json` | 기관 기본 목록의 수집 기준 |
-| 3 | 시설별 상세조회 API 최대 9개 operation + 공단 상세 11·14·19 탭 | 기관기호·급여코드별 상세와 화면 고유 기본·근속·CCTV 정규화 | `data/nhis/details/NN/{id}.json` | 성공한 기존 섹션은 병합 보존 |
+| 3 | 시설별 상세조회 API 최대 9개 operation + 공단 상세 11·14·19 탭 | 기관기호·급여코드별 상세와 화면 고유 기본·근속·CCTV 정규화·gzip 압축 | `data/nhis/details/NN/{id}.json.gz` | 성공한 기존 섹션은 병합 보존 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 수집기가 상세를 압축 파일로 직접 저장하는 단계 명시 -->
 | 4 | 평가 CSV | 기관기호별 평가 정규화 | `data/nhis/evaluations.json` | 상세 화면의 평가 자료 |
 | 5 | 공단 공개 사진 페이지 | 기관별 사진 키·URL·메타데이터 정규화 | `data/nhis/photos/NN/{id}.json` | 기본 상한 10장 |
 | 6 | 수집 결과 | 성공 ID, 실패, 샤드 진행상태 기록 | `manifest.json`, `failures/*.json`, `checkpoints/*.json` | 중단된 순환 수집을 이어서 실행 |
