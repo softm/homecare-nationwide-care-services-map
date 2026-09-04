@@ -11,6 +11,7 @@
 | 전국 주간 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-daycare-map.html` | 주야간보호 5,751곳 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 전국 요양 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-care-services-map.html` | 8개 기관 유형 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 지도·주소 변환 | 사용자 브라우저 | 네이버 Maps JavaScript SDK, `naver-geocoder.js` | 지도 표시, 주소→좌표, 좌표→주소 | 네이버 SDK 직접 호출 | `ncpKeyId=etfcybk8vf`, Maps Application의 Web 서비스 URL 제한 |
+| 지도 화면영역 판별 | GitHub Pages 정적 파일·사용자 브라우저 | `region-bounds.js`, `viewport-regions.js` | 화면과 겹치는 시군구를 모두 후보로 조회한 뒤 실제 기관 좌표로 판별 | 로컬 정적 자료, 역주소 표본 조회 없음 | 없음 | <!-- SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 지도 화면의 검색 누락을 막는 경계 자료의 책임과 호출 경로를 명시 -->
 | 기관 기본 데이터 | GitHub Pages 정적 파일 | `nationwide-daycare-data-*.js`, `nationwide-care-data/*.js`, 각 매니페스트 | 지도 목록·마커·필터의 기본 자료 | 예, 상대경로 정적 파일 | 없음 |
 | 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/details/**/*.json.gz`, 기타 `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 파일 | 브라우저 인증정보 없음 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 상세 압축 파일과 그 외 JSON의 배포 형식을 구분 -->
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | `DATA_GO_KR_SERVICE_KEY` |
