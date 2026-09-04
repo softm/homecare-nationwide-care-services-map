@@ -8,6 +8,10 @@ const html = `<title>주야간보호센터 | 돌봄한눈</title><meta name="rob
 const inspect = (changes = {}) => inspectPage({ url, status: 200, headers: new Headers({ 'content-type': 'text/html' }), html, expectedCanonical: url, ...changes });
 
 test('검색 허용 페이지', () => assert.deepEqual(inspect().issues, []));
+/** SOFTM-SEO-DEPLOY-TEST START 날짜:20260904 : HTTP 성공과 같은 canonical만으로 이전 본문 배포를 정상 처리하지 않도록 검증 */
+test('이전 HTML 배포 감지', () => assert(inspect({ expectedHtml: html + '<p>새 지역 기관 목록</p>' }).issues.includes('배포 HTML이 현재 수정본과 다름')));
+test('동일 HTML의 줄바꿈 차이는 허용', () => assert.deepEqual(inspect({ html: html + '\r\n', expectedHtml: html + '\n' }).issues, []));
+/** SOFTM-SEO-DEPLOY-TEST END */
 test('HTML noindex 차단', () => assert(inspect({ html: html.replace('index,follow', 'noindex,follow') }).issues.some(issue => issue.includes('차단'))));
 test('응답 헤더 noindex 차단', () => assert(inspect({ headers: new Headers({ 'content-type': 'text/html', 'x-robots-tag': 'googlebot: noindex' }) }).issues.some(issue => issue.includes('차단'))));
 test('Googlebot 전용 차단', () => assert(inspect({ html: html + '<meta name="googlebot" content="none">' }).issues.some(issue => issue.includes('차단'))));

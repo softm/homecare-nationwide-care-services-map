@@ -10,7 +10,7 @@ export function attributes(tag) {
   return Object.fromEntries([...tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)].map(match => [match[1].toLowerCase(), decode(match[2] ?? match[3])]));
 }
 
-export function inspectPage({ url, status, headers, html, expectedCanonical }) {
+export function inspectPage({ url, status, headers, html, expectedCanonical, expectedHtml }) { // SOFTM-SEO-DEPLOY-CHECK 날짜:20260904 : 검색 허용만 같고 본문은 이전 배포인 상태를 구분
   const issues = [];
   const source = html.replace(/<!--[\s\S]*?-->/g, '');
   const metas = [...source.matchAll(/<meta\b[^>]*>/gi)].map(match => attributes(match[0]));
@@ -20,6 +20,7 @@ export function inspectPage({ url, status, headers, html, expectedCanonical }) {
   const directives = [...robots.map(meta => meta.content || ''), headers.get('x-robots-tag') || ''].join(',').toLowerCase();
   const canonical = links.find(link => link.rel?.toLowerCase() === 'canonical')?.href;
   if (status !== 200) issues.push(`HTTP ${status}`);
+  if (expectedHtml !== undefined && html.replaceAll('\r\n', '\n').trim() !== expectedHtml.replaceAll('\r\n', '\n').trim()) issues.push('배포 HTML이 현재 수정본과 다름'); // SOFTM-SEO-DEPLOY-CHECK 날짜:20260904 : 실제 지역 목록·내부 링크까지 운영에 반영되었는지 확인
   if (!headers.get('content-type')?.includes('text/html')) issues.push('HTML 응답 형식이 아님');
   if (/(?:^|[\s,:])(noindex|none)(?:[\s,;]|$)/.test(directives)) issues.push('검색 등록 차단: noindex 또는 none');
   if (!robots.some(meta => meta.name?.toLowerCase() === 'robots' && /(?:^|,)\s*index\s*(?:,|$)/i.test(meta.content || ''))) issues.push('명시적인 index 메타 누락');
@@ -67,10 +68,23 @@ export async function auditSite(origin = publicOrigin) {
     } catch (error) { results.push({ url: `${publicOrigin}${pathname}`, issues: [error.message] }); }
   }
   const pages = [...urls.map(url => [url, url]), ...['nationwide-care-services-map.html', 'nationwide-daycare-map.html'].map(page => [`${publicOrigin}/${page}`, `${publicOrigin}/daycare-map.html`])]; // SOFTM-DAYCARE-LANDING 날짜:20260904 : 두 지도와 주야간보호 안내의 검색 대표 연결을 같이 검사
-  for (const [url, expectedCanonical] of pages) {
-    try { results.push(inspectPage({ url, expectedCanonical, ...await fetchPath(new URL(url).pathname) })); }
-    catch (error) { results.push({ url, issues: [error.message] }); }
+  /** SOFTM-SEO-AUDIT-QUEUE START 날짜:20260904 : 지역별 목록 전체를 확인하면서 공개 서버의 동시 요청을 네 개로 제한 */
+  const pageResults = new Array(pages.length);
+  let nextPage = 0;
+  async function inspectNextPages() {
+    while (nextPage < pages.length) {
+      const index = nextPage++;
+      const [url, expectedCanonical] = pages[index];
+      const pathname = new URL(url).pathname;
+      const localFile = new URL(decodeURI(pathname).slice(1) || 'index.html', root);
+      const expectedHtml = index < urls.length ? fs.readFileSync(localFile, 'utf8') : undefined;
+      try { pageResults[index] = inspectPage({ url, expectedCanonical, expectedHtml, ...await fetchPath(pathname) }); }
+      catch (error) { pageResults[index] = { url, issues: [error.message] }; }
+    }
   }
+  await Promise.all(Array.from({ length: Math.min(4, pages.length) }, () => inspectNextPages()));
+  results.push(...pageResults);
+  /** SOFTM-SEO-AUDIT-QUEUE END */
   return {
     checkedAt: new Date().toISOString(),
     inspectedOrigin: requestedOrigin.origin,

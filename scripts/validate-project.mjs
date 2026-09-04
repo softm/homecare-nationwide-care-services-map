@@ -3,6 +3,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { getRegionalSeoPages } from './build-regional-seo.mjs'; // SOFTM-SEO-REGIONAL-CHECK 날짜:20260904 : 실제 데이터로 생성한 지역 목록만 검색 대표에 포함하도록 검사
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fail = message => { throw new Error(message); };
@@ -93,7 +94,8 @@ const sitemapSource = read('sitemap.xml');
 const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
 const expectedSitemapUrls = [
   `${publicOrigin}/`,
-  ...landingPages.map(page => `${publicOrigin}/${page}`)
+  ...landingPages.map(page => `${publicOrigin}/${page}`),
+  ...getRegionalSeoPages(root).pages.map(page => page.url) // SOFTM-SEO-REGIONAL-CHECK 날짜:20260904 : 지역별 실기관 페이지의 누락과 임의 주소 추가를 함께 차단
 ];
 if (sitemapUrls.length !== expectedSitemapUrls.length || expectedSitemapUrls.some(url => !sitemapUrls.includes(url))) fail('sitemap.xml 공개 페이지 목록이 누락되거나 불필요한 URL을 포함합니다.');
 const indexablePages = [['index.html', `${publicOrigin}/`], ...landingPages.map(page => [page, `${publicOrigin}/${page}`])];
