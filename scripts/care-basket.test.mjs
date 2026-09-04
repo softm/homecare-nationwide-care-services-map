@@ -79,3 +79,51 @@ test('빈 비교함·주소 누락·도로 실패·최대 경유지를 거짓 �
     assert.equal(h.route, null); assert.match(h.messages.at(-1), /불러오지 못/);
 });
 /** SOFTM-BASKET-TEST END */
+
+/** SOFTM-ROUTE-VIEW START 날짜:20260905 : 기관 좌표만 맞춰 경로가 잘리거나 취소된 요청이 최신 진행 상태를 덮는 문제를 검증 */
+test('경로 전체와 출발지를 포함해 화면 범위를 다시 맞춤', async () => {
+    const h = harness(), fitted = [], path = [[126.8, 37.2], [128, 38], [127, 37.01]];
+    h.adapter.fit = points => fitted.push(points);
+    h.adapter.fetch = async () => ({ ok: true, json: async () => ({ path, summary: { distance: 5000, duration: 600000 } }) });
+    await h.mode.show([row('1')], { route: true });
+    assert.deepEqual(fitted.at(-1), [h.original.start, row('1').point, ...path.map(([lng, lat]) => ({ lat, lng }))]);
+    assert.match(h.messages.at(-1), /경로탐색 완료.*5.0km.*10분/);
+});
+test('서버의 경로 실패 사유를 표시하고 진행 상태를 해제', async () => {
+    const h = harness(), busy = [];
+    h.adapter.busy = value => busy.push(value);
+    h.adapter.fetch = async () => ({ ok: true, json: async () => ({ error: '출발지와 도착지가 동일합니다.', code: 2 }) });
+    await h.mode.show([row('1')], { route: true });
+    assert.equal(h.route, null);
+    assert.match(h.messages.at(-1), /출발지와 도착지가 동일/);
+    assert.ok(busy.includes(true)); assert.equal(busy.at(-1), false);
+});
+test('이전 응답 완료가 새 경로의 진행 상태와 화면 범위를 바꾸지 않음', async () => {
+    const h = harness(), busy = [], fitted = [], responses = [];
+    h.adapter.busy = value => busy.push(value);
+    h.adapter.fit = points => fitted.push(points);
+    h.adapter.fetch = () => new Promise(resolve => responses.push(resolve));
+    const first = h.mode.show([row('1')], { route: true });
+    await new Promise(resolve => setImmediate(resolve));
+    const second = h.mode.show([row('2')], { route: true });
+    await new Promise(resolve => setImmediate(resolve));
+    const result = { ok: true, json: async () => ({ path: [[127, 37], [127, 38]], summary: { distance: 1, duration: 1 } }) };
+    const count = fitted.length;
+    responses[0](result); await first;
+    assert.equal(busy.at(-1), true); assert.equal(fitted.length, count);
+    responses[1](result); await second;
+    assert.equal(busy.at(-1), false); assert.match(h.messages.at(-1), /기관2/);
+});
+test('20초가 지나면 지연을 안내하고 재탐색 가능 상태로 복귀', async t => {
+    let expire;
+    t.mock.method(globalThis, 'setTimeout', (callback, delay) => { assert.equal(delay, 20000); expire = callback; return 0; });
+    const h = harness(), busy = [];
+    h.adapter.busy = value => busy.push(value);
+    h.adapter.fetch = (_, signal) => new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError'))));
+    const pending = h.mode.show([row('1')], { route: true });
+    await new Promise(resolve => setImmediate(resolve));
+    expire(); await pending;
+    assert.match(h.messages.at(-1), /응답이 지연/);
+    assert.equal(busy.at(-1), false); assert.equal(h.route, null);
+});
+/** SOFTM-ROUTE-VIEW END */
