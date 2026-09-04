@@ -9,6 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fail = message => { throw new Error(message); };
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const exists = relative => fs.existsSync(path.join(root, relative));
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/viewport-regions.test.mjs')], { stdio: 'inherit' }); // SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 정기 검사에서 모든 기관 지역 연결과 화면영역 누락 회귀를 함께 확인
 
 function localScripts(htmlFile) {
   const html = read(htmlFile);
