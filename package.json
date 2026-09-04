@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "serve": "python3 -m http.server 3000",
-    "build": "node scripts/build-regional-seo.mjs && node scripts/sync-seo-entrypoints.mjs",
+    "build": "python3 scripts/build_nationwide_care_services.py && node scripts/build-regional-seo.mjs && node scripts/sync-seo-entrypoints.mjs",
     "check": "node --test scripts/check-search-readiness.test.mjs scripts/category-landing-ads.test.mjs scripts/validate-regional-seo.test.mjs && node scripts/build-regional-seo.mjs --check && node scripts/sync-seo-entrypoints.mjs --check && node scripts/validate-project.mjs && node scripts/validate-regional-seo.mjs && python3 scripts/validate_nhis_static.py",
     "check:search": "node scripts/check-search-readiness.mjs"
   },
-  "_seoComment": "SOFTM-SEO-BUILD 날짜:20260904 : 지역 목록·검색 연결·원본 일치를 배포 전 함께 검사"
+  "_seoComment": "SOFTM-DATA-REGIONS 날짜:20260904 : 수집 자료로 지도 인덱스를 먼저 만들고 지역 목록·사이트맵까지 함께 갱신"
 }
