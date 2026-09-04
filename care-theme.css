@@ -1,0 +1,23 @@
+/** SOFTM-CARE-THEME START 날짜:20260904 : 홈·안내·지도·비용 화면에서 글자와 색상을 같은 기준으로 읽을 수 있도록 공통 토큰을 제공 */
+:root {
+  --care-ink: #172c43;
+  --care-muted: #53667b;
+  --care-blue: #175cb5;
+  --care-bg: #f7f8f5;
+  --care-line: #dce3e3;
+  --care-soft: #edf3f9;
+  --care-radius: 16px;
+  --care-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+}
+.care-icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/** SOFTM-CARE-THEME END */

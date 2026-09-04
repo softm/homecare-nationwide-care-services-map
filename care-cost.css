@@ -1,0 +1,57 @@
+/** SOFTM-CARE-COST-DESIGN START 날짜:20260904 : 같은 계산기를 좁은 상세창과 독립 페이지에서 읽고 조작할 수 있게 범위를 한정 */
+.cost-page { margin: 0; background: var(--care-bg, #f7f8f5); color: var(--care-ink, #172c43); font: 16px/1.65 var(--care-font, 'Noto Sans KR', sans-serif); }
+.cost-page * { box-sizing: border-box; }
+.cost-page-header, .cost-page-main, .cost-page-footer { max-width: 1080px; margin: auto; padding: 24px; }
+.cost-page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.cost-page-header a { text-decoration: none; color: #175cb5; padding: 10px 0; }
+.cost-page-brand { font-size: 23px; font-weight: 800; }
+.cost-page-main > h1 { font-size: clamp(28px, 4vw, 42px); line-height: 1.3; margin: 12px 0; letter-spacing: -.035em; }
+.cost-page-lead { color: #536576; max-width: 680px; margin-bottom: 32px; }
+.cost-page-footer { color: #536576; }
+.cost-page-footer a { color: #175cb5; }
+.care-cost { color: #172c43; font: 16px/1.65 var(--care-font, 'Noto Sans KR', sans-serif); text-align: left; min-width: 0; width: 100%; container-type: inline-size; overflow-wrap: anywhere; }
+.care-cost *, .care-cost *::before, .care-cost *::after { box-sizing: border-box; }
+.care-cost p { font-size: 1em; line-height: 1.65; margin: 10px 0; }
+.care-cost h2 { color: #172c43; font-size: 1.45em; line-height: 1.4; margin: 10px 0; }
+.care-cost h3 { color: #172c43; font-size: 1.15em; line-height: 1.5; margin: 0 0 10px; }
+.care-cost small { font-size: .875em; color: #536576; line-height: 1.6; }
+.cost-form { padding: clamp(16px, 3vw, 32px); margin: 0; background: #fff; border: 1px solid #dbe3e7; border-radius: 20px; }
+.cost-form-head { margin-bottom: 24px; }
+.care-cost .cost-eyebrow { font-weight: 750; color: #175cb5; font-size: .875em; }
+.cost-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.care-cost .cost-field { display: flex; flex-direction: column; gap: 8px; font-size: 1em; font-weight: 650; margin: 0 0 18px; min-width: 0; }
+.care-cost .cost-field small { font-weight: 400; }
+.care-cost select, .care-cost input[type=number] { display: block; min-height: 48px; width: 100%; max-width: 100%; border: 1px solid #a9b9c7; border-radius: 10px; background: #fff; color: #172c43; font: inherit; padding: 10px 12px; text-overflow: ellipsis; }
+.care-cost select { padding-right: 26px; }
+.care-cost button, .cost-help-actions a { min-height: 48px; border-radius: 10px; font: inherit; line-height: 1.5; white-space: normal; height: auto; cursor: pointer; padding: 12px 18px; }
+.care-cost button { border: 1px solid #175cb5; background: #fff; color: #175cb5; font-weight: 700; }
+.care-cost .cost-calculate { width: 100%; color: #fff; background: #175cb5; margin-top: 12px; }
+.care-cost :focus-visible { outline: 3px solid #2c72c5; outline-offset: 3px; }
+.cost-number { display: flex; align-items: center; gap: 10px; }
+.cost-number input { min-width: 0; }
+.care-cost .cost-check { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0; font-weight: 500; cursor: pointer; }
+.care-cost input[type=checkbox] { appearance: auto; width: 20px; height: 20px; min-width: 20px; margin: 4px 0 0; accent-color: #175cb5; }
+.cost-extras { border-block: 1px solid #dbe3e7; padding: 12px 0; margin: 10px 0 20px; }
+.care-cost summary { min-height: 48px; padding: 10px 2px; cursor: pointer; font-weight: 700; }
+.cost-extras summary span { display: inline-block; margin-left: 8px; font-size: .875em; color: #536576; font-weight: 400; }
+.cost-extra-row { min-width: 0; margin: 16px 0; padding: 16px; border: 1px solid #dbe3e7; border-radius: 12px; }
+.cost-extra-row legend { font-weight: 700; padding: 0 5px; }
+.cost-extra-row > small { display: block; margin: 4px 0 14px; }
+.care-cost .cost-assumption, .care-cost .cost-source { color: #536576; font-size: .875em; }
+.cost-result { margin-top: 20px; background: #edf4fc; border: 1px solid #c8daef; border-radius: 20px; padding: clamp(16px, 3vw, 32px); }
+.care-cost .cost-total { font-weight: 800; font-size: clamp(24px, 5cqw, 36px); line-height: 1.5; letter-spacing: -.04em; margin: 8px 0; overflow-wrap: normal; }
+.care-cost .cost-conditions { color: #364f68; font-size: .9em; }
+.cost-breakdown { border-top: 1px solid #c8daef; margin: 20px 0 12px; padding-top: 12px; }
+.cost-breakdown > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 8px 0; }
+.cost-breakdown dt { flex: 1; }
+.cost-breakdown dd { margin: 0; font-weight: 700; text-align: right; }
+.cost-breakdown small { display: block; }
+.cost-note { border-left: 3px solid #7c9dbc; padding-left: 12px; }
+.care-cost .cost-error { color: #9a3626; font-weight: 650; }
+.cost-help-actions { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 16px; }
+.care-cost a { color: #175cb5; text-underline-offset: 3px; }
+.cost-formula { margin: 12px 0; }
+@container (max-width: 540px) { .cost-fields { grid-template-columns: minmax(0, 1fr); gap: 0; } .cost-breakdown > div { display: block; } .cost-breakdown dd { text-align: left; } }
+@media (max-width: 600px) { .cost-page-header, .cost-page-main, .cost-page-footer { padding: 18px; } .cost-fields { grid-template-columns: minmax(0, 1fr); gap: 0; } .care-cost .cost-total { font-size: 25px; } }
+@media (prefers-reduced-motion: reduce) { .care-cost * { scroll-behavior: auto; } }
+/** SOFTM-CARE-COST-DESIGN END */

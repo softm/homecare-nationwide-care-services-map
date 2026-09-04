@@ -21,119 +21,215 @@
   <meta name="twitter:description" content="공단·심평원 공개자료로 전국 요양·돌봄기관을 지도에서 찾고 평가·인력·정원을 비교합니다.">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://homecare.designboard.net/#website","name":"돌봄한눈","alternateName":"우리 부모님 요양·돌봄기관 찾기","url":"https://homecare.designboard.net/","description":"국민건강보험공단과 건강보험심사평가원 공개자료로 전국 요양·돌봄기관을 찾고 비교하는 독립 정보 서비스","inLanguage":"ko-KR"}</script> <!-- SOFTM-BRAND-IDENTITY 날짜:20260904 : 소개 페이지가 같은 사이트를 가리키도록 식별자를 연결하고 실제 설명과 일치 -->
   <!-- SOFTM-SEO-BRAND END -->
+  <link rel="stylesheet" href="care-theme.css?v=20260904-1"> <!-- SOFTM-CARE-THEME 날짜:20260904 : 안내와 지도에서도 같은 글자·색상을 이어서 사용 -->
   <style>
-    /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 첫 화면에서 광고와 기관 유형별 지도를 바로 찾을 수 있도록 반응형 진입 구조를 제공 */
-    :root{--ink:#172033;--muted:#657287;--line:#d9e2ec;--day:#087650;--care:#6d35dc}
+    /** SOFTM-HOME-DESIGN START 날짜:20260904 : 돌봄 유형과 비용을 처음 찾는 보호자도 큰 글자와 일관된 선택 영역으로 탐색하도록 구성 */
     *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;padding:48px 24px;background:#f3f6fa;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
-    .wrap{width:min(980px,100%);margin:0 auto}
-    .hero{text-align:center}
-    h1{margin:0 0 9px;font-size:clamp(27px,5vw,44px);letter-spacing:-.04em}
-    p{margin:0;color:var(--muted);line-height:1.65}
-    .ad-zone{width:100%;margin:24px auto 0;padding:7px 10px 10px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+    html{scroll-padding-top:24px}
+    body{margin:0;background:var(--care-bg);color:var(--care-ink);font-family:var(--care-font);font-size:16px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}
+    a{color:inherit;text-underline-offset:4px;touch-action:manipulation}
+    a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--care-blue);outline-offset:4px}
+    .wrap,.home-head-inner{width:min(1120px,calc(100% - 48px));margin-inline:auto}
+    .home-head{background:#fff;border-bottom:1px solid var(--care-line)}
+    .home-head-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:80px}
+    .home-brand{display:inline-flex;align-items:center;gap:10px;min-height:48px;color:var(--care-ink);font-size:24px;font-weight:750;letter-spacing:-.05em;text-decoration:none}
+    .brand-symbol{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:var(--care-blue);color:#fff}
+    .home-nav{display:flex;align-items:center;gap:24px}
+    .home-nav a{display:inline-flex;align-items:center;min-height:48px;font-weight:600;text-decoration:none;color:var(--care-muted)}
+    .home-nav a:hover{color:var(--care-blue)}
+    .hero{display:grid;grid-template-columns:1.45fr 1fr;align-items:center;gap:72px;padding:58px 0 42px}
+    .eyebrow{margin:0 0 12px;color:var(--care-blue);font-size:14px;font-weight:700;letter-spacing:.02em}
+    h1{margin:0;font-size:clamp(32px,4vw,46px);line-height:1.3;letter-spacing:-.055em;font-weight:750}
+    .hero-description{max-width:580px;margin:20px 0 0;color:var(--care-muted);font-size:17px}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+    .primary-link,.secondary-link{display:inline-flex;justify-content:center;align-items:center;gap:20px;min-height:52px;padding:12px 22px;border-radius:12px;text-decoration:none;font-weight:650}
+    .primary-link{background:var(--care-blue);color:#fff}
+    .primary-link:hover{background:#10488f}
+    .secondary-link{border:1px solid #b6c7d6;background:#fff;color:var(--care-blue)}
+    .secondary-link:hover{background:var(--care-soft)}
+    .journey{position:relative;padding:26px 28px;border:1px solid #dbe4dc;border-radius:20px;background:#eef3ec}
+    .journey-label{margin:0;color:#486451;font-size:14px;font-weight:700}
+    .journey h2{margin:7px 0 20px;font-size:22px;letter-spacing:-.035em;line-height:1.45}
+    .journey ol{display:grid;gap:18px;margin:0;padding:0;list-style:none}
+    .journey li{display:grid;grid-template-columns:32px 1fr;align-items:start;gap:12px}
+    .journey-number{display:grid;place-items:center;width:32px;height:32px;border:1px solid #cbdccc;border-radius:50%;background:#fff;color:#45634d;font-size:14px;font-weight:700}
+    .journey strong{display:block;font-weight:650}
+    .journey small{display:block;color:var(--care-muted);font-size:14px}
+    .ad-zone{width:100%;margin:0 auto 32px;padding:8px 12px 12px;border:1px solid var(--care-line);border-radius:14px;background:#fff;overflow:hidden}
     .ad-zone[hidden]{display:none}
-    .ad-label{display:block;margin:0 0 5px;color:#7a8798;font-size:9px;font-weight:900;letter-spacing:.08em;text-align:left}
+    .ad-label{display:block;margin:0 0 5px;color:var(--care-muted);font-size:12px;text-align:left}
     .ad-host{min-height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden}
     .ad-host iframe{display:block;max-width:100%}
-    .ad-loading{color:#8491a3;font-size:11px}
-    .house-banner{width:min(100%,728px);min-height:90px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:13px 17px;border:1px solid #cfe1f2;border-radius:12px;background:linear-gradient(135deg,#eff8ff,#f3fbf7);text-align:left}
-    .house-banner small{display:block;margin-bottom:4px;color:#176b9f;font-size:10px;font-weight:900}
-    .house-banner b{display:block;color:#17324d;font-size:15px}
-    .house-banner p{margin-top:5px;font-size:11px}
-    .ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 13px;border-radius:9px;background:#17324d;color:#fff;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}
-    /** SOFTM-INDEX-UNIFIED START 날짜:20260904 : 주야간 중복 진입을 없애고 9개 유형을 같은 크기와 정보 순서로 선택하도록 구성 */
-    .hero,.category-heading{word-break:keep-all;overflow-wrap:anywhere}
-    .hero h1{text-wrap:balance}
-    .category-section{margin-top:28px}
-    .category-heading{margin-bottom:18px}
-    .category-heading h2{margin:0 0 7px;font-size:24px;letter-spacing:-.04em}
-    .category-heading p{font-size:14px}
-    .categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:1fr;gap:12px}
-    .category-link{min-width:0;display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid var(--line);border-radius:16px;background:#fff;color:var(--ink);text-decoration:none;box-shadow:0 4px 16px rgba(23,50,77,.04);transition:background .18s,border-color .18s;word-break:keep-all;overflow-wrap:anywhere}
-    .category-link:hover{border-color:#91b4da;background:#f3f8fe}
-    .category-link:focus-visible{outline:3px solid #175cb5;outline-offset:3px}
-    .category-link b{font-size:17px;line-height:1.4}
-    .category-description{flex:1;color:var(--muted);font-size:13px;line-height:1.65}
-    .category-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;font-size:12px}
-    .category-footer [data-count]{color:var(--muted);font-variant-numeric:tabular-nums}
-    .category-action{flex-shrink:0;color:#175cb5;font-weight:800}
-    @media(max-width:850px){.categories{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:700px){body{padding:28px 14px}.category-heading h2{font-size:22px}.category-link{padding:17px 14px}.ad-zone{padding:6px}.ad-host{min-height:100px}.house-banner{min-height:100px;grid-template-columns:1fr;padding:12px 14px}.house-banner .ad-cta{justify-self:start}}
-    @media(max-width:360px){.categories{grid-template-columns:1fr}}
-    /** SOFTM-INDEX-UNIFIED END */
-    /** SOFTM-INDEX-CATEGORY-ADS END */
-    /** SOFTM-BRAND-IDENTITY START 날짜:20260904 : 기관 찾기 다음에 서비스 배경을 읽을 수 있게 하며 모바일에서도 안내 링크의 터치 영역을 확보 */
-    .service-identity{margin-top:32px;padding:24px;border:1px solid var(--line);border-radius:16px;background:#fff;word-break:keep-all;overflow-wrap:anywhere}
-    .service-identity h2{margin:0 0 12px;font-size:21px;letter-spacing:-.03em}
-    .service-identity p+p{margin-top:12px}
-    .service-identity a{display:inline-flex;align-items:center;min-height:44px;margin-top:10px;color:#175cb5;font-weight:700;text-underline-offset:4px}
-    .service-identity a:focus-visible{outline:3px solid #175cb5;outline-offset:3px}
-    @media(max-width:700px){.service-identity{padding:20px}.service-identity h2{font-size:19px}}
-    /** SOFTM-BRAND-IDENTITY END */
+    .ad-loading{color:var(--care-muted);font-size:14px}
+    .house-banner{width:min(100%,728px);min-height:90px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:13px 17px;border:1px solid var(--care-line);border-radius:12px;background:#f4f7fa;text-align:left}
+    .house-banner small{display:block;margin-bottom:3px;color:var(--care-blue);font-size:12px;font-weight:650}
+    .house-banner b{display:block;font-size:16px}
+    .house-banner p{margin:4px 0 0;color:var(--care-muted);font-size:14px}
+    .ad-cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:8px 14px;border-radius:9px;background:var(--care-ink);color:#fff;text-decoration:none;white-space:nowrap;font-size:14px;font-weight:650}
+    .care-help{margin:0 0 36px;border:1px solid var(--care-line);border-radius:16px;background:#fff}
+    .care-help summary{padding:20px 24px;cursor:pointer;font-size:17px;font-weight:650;min-height:64px}
+    .care-help summary span{margin-left:8px;color:var(--care-muted);font-size:14px;font-weight:400}
+    .help-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 20px 20px}
+    .help-options a{display:flex;flex-direction:column;gap:5px;padding:18px;border:1px solid var(--care-line);border-radius:12px;text-decoration:none;background:var(--care-bg)}
+    .help-options a:hover{border-color:var(--care-blue)}
+    .help-options strong{font-size:16px;color:var(--care-blue)}
+    .help-options span{font-size:14px;color:var(--care-muted)}
+    .category-section{margin-top:0;scroll-margin-top:24px}
+    .category-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:22px}
+    h2{margin:0;font-size:28px;line-height:1.4;letter-spacing:-.04em;font-weight:700}
+    .category-heading p{margin:8px 0 0;color:var(--care-muted)}
+    .category-heading>span{flex-shrink:0;color:var(--care-muted);font-size:14px}
+    .categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:16px}
+    .category-link{min-width:0;display:flex;flex-direction:column;gap:10px;padding:24px;border:1px solid var(--care-line);border-radius:16px;background:#fff;color:var(--care-ink);text-decoration:none;transition:border-color .18s,box-shadow .18s}
+    .category-link:hover{border-color:#7eabdc;box-shadow:0 6px 20px #173f6b0b}
+    .category-link:target{outline:3px solid var(--care-blue);outline-offset:3px}
+    .category-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:3px;border-radius:14px;background:var(--care-soft);color:var(--care-blue)}
+    .category-link[data-category="daycare"] .category-icon,.category-link[data-category="home-care"] .category-icon,.category-link[data-category="dementia"] .category-icon{background:#edf3ec;color:#47694f}
+    .category-link b{font-size:18px;line-height:1.5;font-weight:700}
+    .category-description{flex:1;color:var(--care-muted);font-size:15px;line-height:1.65}
+    .category-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;padding-top:14px;border-top:1px solid #edf0ed;font-size:14px}
+    .category-footer [data-count]{color:var(--care-muted);font-variant-numeric:tabular-nums}
+    .category-action{flex-shrink:0;color:var(--care-blue);font-weight:650}
+    .cost-guide{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;margin:44px 0;padding:32px;border:1px solid #ccdae8;border-radius:20px;background:#edf3f9}
+    .cost-guide h2{font-size:27px}
+    .cost-guide p{margin:14px 0 0;color:var(--care-muted)}
+    .cost-links{display:grid;gap:10px}
+    .cost-links a{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:56px;padding:14px 18px;border:1px solid #c9d7e5;border-radius:12px;background:#fff;color:var(--care-blue);text-decoration:none;font-weight:650}
+    .cost-links a:hover{border-color:var(--care-blue)}
+    .cost-note{font-size:14px}
+    .service-identity{margin:32px 0 40px;padding:28px;border:1px solid var(--care-line);border-radius:16px;background:#fff}
+    .service-identity h2{font-size:23px}
+    .service-identity p{margin:14px 0 0;color:var(--care-muted)}
+    .service-identity a{display:inline-flex;align-items:center;min-height:48px;margin-top:12px;color:var(--care-blue);font-weight:650}
+    .home-footer{padding:24px 0 32px;border-top:1px solid var(--care-line);color:var(--care-muted);font-size:14px}
+    .home-footer strong{margin-right:16px;color:var(--care-ink);font-size:18px}
+    .skip-link{position:absolute;left:16px;top:12px;z-index:100;padding:12px 16px;transform:translateY(-180%);border-radius:8px;background:var(--care-ink);color:#fff}
+    .skip-link:focus{transform:none}
+    .wrap .seo-home-content{padding:28px;border-color:var(--care-line);border-radius:16px;background:#fff}
+    .wrap .seo-region-grid a{min-height:76px;border-radius:12px}
+    .wrap .seo-region-grid span,.wrap .seo-service-note{font-size:14px}
+    @media(max-width:900px){.hero{gap:32px;grid-template-columns:1.2fr 1fr}.categories{grid-template-columns:repeat(2,minmax(0,1fr))}.cost-guide{gap:24px}.journey{padding:22px}}
+    @media(max-width:640px){.wrap,.home-head-inner{width:calc(100% - 32px)}.home-head-inner{min-height:72px;gap:12px}.home-brand{font-size:22px;gap:8px}.brand-symbol{width:36px;height:36px}.home-nav{gap:14px}.home-nav a{font-size:14px}.home-nav .about-nav{display:none}.hero{grid-template-columns:1fr;gap:24px;padding:32px 0}.hero-description{font-size:16px;margin-top:16px}.hero-actions{margin-top:22px;gap:10px}.primary-link,.secondary-link{padding-inline:16px;gap:12px}.journey{padding:20px}.journey h2{font-size:20px;margin-bottom:16px}.journey ol{gap:14px}.care-help{margin-bottom:28px}.care-help summary{padding:18px;font-size:16px}.care-help summary span{display:block;margin:5px 0 0 18px}.help-options{grid-template-columns:1fr;padding:0 16px 16px}.help-options a{padding:15px}.category-heading{align-items:flex-start;gap:12px}.category-heading h2{font-size:25px}.category-heading p{font-size:15px}.category-heading>span{margin-top:5px}.categories{grid-template-columns:1fr;gap:12px}.category-link{padding:20px;display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:16px;row-gap:7px}.category-icon{grid-row:1/3;margin:0}.category-link b,.category-description{grid-column:2}.category-description{font-size:15px}.category-footer{grid-column:1/-1;margin-top:6px;padding-top:12px}.cost-guide{grid-template-columns:1fr;gap:22px;margin:32px 0;padding:24px 20px}.cost-guide h2{font-size:25px}.cost-guide p{font-size:15px}.service-identity,.wrap .seo-home-content{padding:22px 20px}.service-identity h2{font-size:22px}.ad-zone{padding:6px;margin-bottom:24px}.ad-host{min-height:100px}.house-banner{min-height:100px;grid-template-columns:1fr;padding:12px 14px}.house-banner .ad-cta{justify-self:start}.home-footer strong{display:block;margin-bottom:6px}}
+    @media(prefers-reduced-motion:reduce){.category-link{transition:none}}
+    /** SOFTM-HOME-DESIGN END */
   </style>
 <link rel="stylesheet" href="seo-entrypoints.css?v=20260904-1"> <!-- SOFTM-SEO-ENTRYPOINTS 날짜:20260904 : 지역 탐색 링크를 작은 화면에서도 읽고 선택할 수 있도록 전용 서식을 연결 -->
 </head>
 <body>
-  <main class="wrap">
-    <header class="hero">
-      <h1>돌봄한눈 — 우리 부모님 돌봄기관 찾기</h1> <!-- SOFTM-SEARCH-BRAND 날짜:20260904 : 방문자에게 보이는 대표 제목에도 구조화 데이터와 같은 브랜드를 명시 -->
-      <p>돌봄한눈은 요양·돌봄기관의 공개정보를 찾고 비교하는 독립 정보 서비스입니다.<br>필요한 돌봄 유형을 고르고, 가까운 기관을 지도에서 확인해 보세요.</p> <!-- SOFTM-BRAND-IDENTITY 날짜:20260904 : 첫 화면에서 브랜드의 실제 역할을 설명하면서 유형 선택 동선을 유지 -->
-    </header>
+  <!-- SOFTM-HOME-NAV START 날짜:20260904 : 기관 찾기와 비용 안내로 바로 이동할 수 있게 핵심 탐색을 항상 같은 위치에 제공 -->
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+  <header class="home-head"><div class="home-head-inner">
+    <a class="home-brand" href="index.html"><span class="brand-symbol"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="m5 14 11-9 11 9v13H5Z"/><path d="M16 23s-6-3.8-6-7a3.3 3.3 0 0 1 6-1.8 3.3 3.3 0 0 1 6 1.8c0 3.2-6 7-6 7Z"/></svg></span>돌봄한눈</a>
+    <nav class="home-nav" aria-label="주요 메뉴"><a href="#categories">기관 찾기</a><a href="#cost-guide">비용 안내</a><a class="about-nav" href="about.html">서비스 소개</a></nav>
+  </div></header>
+  <!-- SOFTM-HOME-NAV END -->
+  <main class="wrap" id="main">
+    <!-- SOFTM-HOME-INTRO START 날짜:20260904 : 처음 방문한 보호자가 기관 탐색과 비용 확인의 순서를 이해하도록 안내 -->
+    <section class="hero" aria-labelledby="home-title">
+      <div class="hero-copy">
+        <p class="eyebrow">우리 가족에게 맞는 돌봄 찾기</p>
+        <h1 id="home-title">부모님을 위한 돌봄,<br>돌봄한눈에서 찾아보세요</h1>
+        <p class="hero-description">어떤 돌봄이 필요한지 살펴보고, 가까운 기관을 비교해 보세요. 장기요양등급에 따른 예상 비용도 함께 확인할 수 있어요.</p>
+        <div class="hero-actions"><a class="primary-link" href="#categories">돌봄기관 찾기 <span aria-hidden="true">→</span></a><a class="secondary-link" href="#cost-guide">예상 비용 알아보기</a></div>
+      </div>
+      <aside class="journey" aria-label="처음 방문한 분을 위한 이용 순서">
+        <p class="journey-label">처음 알아보는 돌봄도 차근차근</p>
+        <h2>이렇게 시작해 보세요</h2>
+        <ol><li><span class="journey-number" aria-hidden="true">1</span><div><strong>필요한 돌봄 방식 고르기</strong><small>집에서, 센터에서, 시설에서</small></div></li><li><span class="journey-number" aria-hidden="true">2</span><div><strong>가까운 기관 찾아 비교하기</strong><small>위치 · 공개 평가 · 기관 정보</small></div></li><li><span class="journey-number" aria-hidden="true">3</span><div><strong>비용 확인하고 상담 준비하기</strong><small>예상 부담액 · 기관에 물어볼 내용</small></div></li></ol>
+      </aside>
+    </section>
+    <!-- SOFTM-HOME-INTRO END -->
     <!-- /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 광고 뒤에서 검색용 기관 유형별 대표 페이지와 실제 지도로 이동할 수 있게 구성 */ -->
     <aside class="ad-zone" id="indexAdZone" aria-label="광고" hidden>
       <span class="ad-label">광고</span>
       <div class="ad-host" id="indexAdHost"><span class="ad-loading">광고를 준비하고 있습니다.</span></div>
     </aside>
     <!-- /** SOFTM-INDEX-UNIFIED START 날짜:20260904 : 모든 유형을 한 번씩 안내 페이지로 연결해 중복 선택과 서로 다른 지도 진입을 방지 */ -->
-    <section class="category-section" aria-labelledby="categoryTitle">
-      <div class="category-heading">
-        <h2 id="categoryTitle">어떤 돌봄기관을 찾으세요?</h2>
-        <p>필요한 유형을 선택하면 안내를 확인하고 지도로 이동할 수 있습니다.</p>
+    <!-- SOFTM-HOME-HELP START 날짜:20260904 : 낯선 급여 명칭보다 생활 방식으로 유형을 이해한 뒤 기존 안내 경로를 선택하도록 도움 -->
+    <details class="care-help">
+      <summary>어떤 돌봄이 필요한지 아직 모르겠다면 <span>생활 방식으로 먼저 살펴보세요</span></summary>
+      <div class="help-options">
+        <a href="#category-home-care"><strong>집에서 도움받기 <span aria-hidden="true">→</span></strong><span>방문요양을 살펴보고, 필요한 간호·목욕 서비스도 확인하세요.</span></a>
+        <a href="#category-daycare"><strong>센터에 다녀오기 <span aria-hidden="true">→</span></strong><span>낮 또는 밤 동안 돌봄을 받는 주·야간보호를 살펴보세요.</span></a>
+        <a href="#category-facility"><strong>시설에서 생활하기 <span aria-hidden="true">→</span></strong><span>입소 돌봄을 제공하는 요양원·공동생활가정을 살펴보세요.</span></a>
       </div>
+    </details>
+    <!-- SOFTM-HOME-HELP END -->
+    <section class="category-section" id="categories" aria-labelledby="categoryTitle"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 도움말과 주 탐색에서 같은 9개 카드로 이동 -->
+      <!-- SOFTM-HOME-CATEGORY START 날짜:20260904 : 자료 수보다 이용 목적을 먼저 읽고 유형 안내를 선택하도록 정보 순서를 통일 -->
+      <div class="category-heading"><div><h2 id="categoryTitle">어떤 돌봄기관을 찾으세요?</h2><p>유형별 이용 안내를 확인한 뒤, 지도에서 가까운 기관을 찾아보세요.</p></div><span>9개 유형</span></div>
+      <!-- SOFTM-HOME-CATEGORY END -->
       <nav class="categories" aria-label="전국 요양·돌봄기관 카테고리">
-        <a class="category-link" data-category="facility" href="nursing-home-map.html">
+        <a class="category-link" id="category-facility" data-category="facility" href="nursing-home-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 28V6h18v22M4 28h24M12 28v-7h8v7M11 11h2m6 0h2m-10 5h2m6 0h2"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>요양원·공동생활가정</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-description">요양원과 노인요양공동생활가정에서 입소 돌봄을 받는 곳</span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
-          <span class="category-footer"><span data-count>6,573곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+          <span class="category-footer"><span data-count>423곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
         </a>
-        <a class="category-link" data-category="daycare" href="daycare-map.html">
+        <a class="category-link" id="category-daycare" data-category="daycare" href="daycare-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="m5 19 11-8 11 8v9H5Z"/><path d="M13 28v-7h6v7M23 5V2m5 5 2-2m-8 6a5 5 0 1 0-8-5"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>주·야간보호센터</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-description">낮 또는 밤 동안 센터에서 돌봄을 받는 곳</span>
           <span class="category-footer"><span data-count>5,885곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
         </a>
-        <a class="category-link" data-category="home-care" href="home-care-map.html">
+        <a class="category-link" id="category-home-care" data-category="home-care" href="home-care-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="m4 14 12-9 12 9M7 12v16h18V12"/><path d="M16 24s-6-3.8-6-7a3.3 3.3 0 0 1 6-1.8 3.3 3.3 0 0 1 6 1.8c0 3.2-6 7-6 7Z"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>방문요양센터</b>
           <span class="category-description">집에서 일상생활 돌봄을 받는 서비스</span>
           <span class="category-footer"><span data-count>19,276곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
-        <a class="category-link" data-category="home-nursing" href="home-nursing-map.html">
+        <a class="category-link" id="category-home-nursing" data-category="home-nursing" href="home-nursing-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M11 9V5h10v4M5 10h22v18H5Z"/><path d="M16 15v8m-4-4h8"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>방문간호센터</b>
           <span class="category-description">집으로 찾아오는 간호 서비스</span>
           <span class="category-footer"><span data-count>1,015곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
-        <a class="category-link" data-category="home-bath" href="home-bath-map.html">
+        <a class="category-link" id="category-home-bath" data-category="home-bath" href="home-bath-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 18h24v3a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6ZM8 18V8a4 4 0 0 1 8 0m-4 0h8M9 27v3m14-3v3M14 11v2m4-2v2"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>방문목욕기관</b>
           <span class="category-description">집에서 목욕을 지원받는 서비스</span>
           <span class="category-footer"><span data-count>11,407곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
-        <a class="category-link" data-category="short-stay" href="short-stay-care-map.html">
+        <a class="category-link" id="category-short-stay" data-category="short-stay" href="short-stay-care-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 15v13m22-13v13M5 23h22M5 15h22v8M9 15v-5h14v5"/><circle cx="22" cy="6" r="4"/><path d="M22 4v2l2 1"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>단기보호센터</b>
           <span class="category-description">일정 기간 머물며 돌봄을 받는 곳</span>
           <span class="category-footer"><span data-count>110곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
         <!-- SOFTM-CARE-CATEGORIES START 날짜:20260904 : 원본에 있는 복지용구 사업소도 공통 안내를 거쳐 조회 -->
-        <a class="category-link" data-category="welfare-equipment" href="welfare-equipment-map.html"> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
+        <a class="category-link" id="category-welfare-equipment" data-category="welfare-equipment" href="welfare-equipment-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="17" cy="5" r="3"/><path d="M15 10v9h9l4 8M15 13h7M12 15a8 8 0 1 0 9 12"/></svg></span>
+          <!-- SOFTM-HOME-ICON END --> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <b>복지용구사업소</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-description">휠체어·침대 등 복지용구 판매·대여 사업소</span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-footer"><span data-count>2,183곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
         </a>
         <!-- SOFTM-CARE-CATEGORIES END -->
-        <a class="category-link" data-category="dementia" href="dementia-care-map.html">
+        <a class="category-link" id="category-dementia" data-category="dementia" href="dementia-care-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M12 28v-5a10 10 0 1 1 14-9l3 5h-5v6h-6v3"/><path d="M15 16s-5-3.1-5-5.7A2.8 2.8 0 0 1 15 9a2.8 2.8 0 0 1 5 1.3C20 12.9 15 16 15 16Z"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>치매전담형 기관</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-description">요양시설·공동생활가정·주야간보호의 치매전담형 모아보기</span> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-footer"><span data-count>423곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
         </a>
-        <a class="category-link" data-category="nursing-hospital" href="nursing-hospital-map.html">
+        <a class="category-link" id="category-nursing-hospital" data-category="nursing-hospital" href="nursing-hospital-map.html"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 생활 방식 도움말에서 해당 유형 카드로 이동해 기존 안내 경로를 유지 -->
+          <!-- SOFTM-HOME-ICON START 날짜:20260904 : 유형을 글과 같은 뜻의 선 아이콘으로 구분하고 장식은 읽기 순서에서 제외 -->
+          <span class="category-icon"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 28V6h20v22M3 28h26M13 28v-7h6v7M16 9v8m-4-4h8"/></svg></span>
+          <!-- SOFTM-HOME-ICON END -->
           <b>요양병원(의료기관)</b> <!-- SOFTM-CARE-CATEGORIES 날짜:20260904 : 실제 급여 범위와 기관 수에 맞춰 명칭·안내를 일치 -->
           <span class="category-description">입원 진료를 제공하는 의료기관</span>
           <span class="category-footer"><span data-count>1,301곳</span><span class="category-action">찾기 <span aria-hidden="true">→</span></span></span>
@@ -142,6 +238,12 @@
     </section>
     <!-- /** SOFTM-INDEX-UNIFIED END */ -->
     <!-- /** SOFTM-INDEX-CATEGORY-ADS END */ -->
+    <!-- SOFTM-HOME-COST START 날짜:20260904 : 기관 탐색에서 장기요양등급별 비용을 별도 계산 화면으로 자연스럽게 이어서 확인 -->
+    <section class="cost-guide" id="cost-guide" aria-labelledby="cost-title">
+      <div><p class="eyebrow">상담 전, 비용부터 알아보기</p><h2 id="cost-title">한 달에 얼마나 들까요?</h2><p>장기요양등급과 이용 일정을 선택해 예상 본인부담금을 확인해 보세요. 식비 같은 비급여 항목도 함께 살펴볼 수 있어요.</p><p class="cost-note">기관의 A~E 평가등급과 이용자의 장기요양등급은 서로 다른 기준이에요.</p></div>
+      <nav class="cost-links" aria-label="서비스별 예상 비용"><a href="care-cost.html?service=facility">요양원 예상 비용 <span aria-hidden="true">→</span></a><a href="care-cost.html?service=daycare">주·야간보호 예상 비용 <span aria-hidden="true">→</span></a><a href="care-cost.html?service=home-care">방문요양 예상 비용 <span aria-hidden="true">→</span></a></nav>
+    </section>
+    <!-- SOFTM-HOME-COST END -->
 <!-- SOFTM-SEO-HOME START 날짜:20260904 : 기관 유형 선택 다음에 지역별 실제 목록을 탐색할 수 있는 경로를 제공 -->
     <section class="seo-home-content" aria-labelledby="regional-title">
       <h2 id="regional-title">우리 동네 돌봄기관을 찾으세요</h2>
@@ -163,6 +265,9 @@
     </section>
     <!-- SOFTM-BRAND-IDENTITY END -->
   </main>
+  <!-- SOFTM-HOME-FOOTER START 날짜:20260904 : 페이지 끝에서도 서비스 성격과 소개로 이어지는 경로를 명확히 제공 -->
+  <footer class="home-footer"><div class="wrap"><strong>돌봄한눈</strong>우리 부모님을 위한 돌봄기관 찾기 · 공개자료 기반 독립 정보 서비스</div></footer>
+  <!-- SOFTM-HOME-FOOTER END -->
   <script src="index-ad-config.js?v=20260903-1"></script><!-- SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 전용 광고 단위만 이 화면에서 사용 -->
   <script src="care-data.js?v=20260904-data"></script> <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 지도와 같은 JSON 목록으로 기관 수를 표시 -->
   <script>
