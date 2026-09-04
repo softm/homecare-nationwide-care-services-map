@@ -120,6 +120,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
 <script src="advanced-search.js?v=20260904-2"></script><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 전국 요양과 동일한 상세검색 판정을 사용 -->
+<script src="map-share-state.js?v=20260905-1"></script> <!-- SOFTM-SHARE-COMPACT 날짜:20260905 : 기존 긴 공유 주소도 조회조건 해석과 지도 인증 전에 짧게 변환 -->
 <script src="care-data.js?v=20260904-data"></script> <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 전국 요양과 같은 수집 JSON을 공유 -->
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 공식 수가 계산과 세션 비교함을 같은 공용 모듈로 연결 -->
 <script src="care-cost-rates.js?v=20260904-1"></script>
@@ -273,9 +274,9 @@ function matchesCapacity(c,v){if(!v)return true;if(v==='1-20')return c.z<=20;if(
 function multiFilterSet(type){return type==='grade'?gradeFilters:type==='score'?scoreFilters:confidenceFilters}
 function syncMultiFilterButtons(type){const set=multiFilterSet(type);document.querySelectorAll(`[data-filter="${type}"]`).forEach(b=>{const active=b.dataset.value==='all'?set.size===0:set.has(b.dataset.value);b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false')})}
 function toggleMultiFilter(type,value){const set=multiFilterSet(type);if(value==='all')set.clear();else set.has(value)?set.delete(value):set.add(value);syncMultiFilterButtons(type);page=1;apply()}
-function readSharedState(){const p=new URLSearchParams(location.search);if(p.get('share')!=='1')return null;const number=(name,min,max)=>{const value=Number(p.get(name));return Number.isFinite(value)&&value>=min&&value<=max?value:null};return{q:p.get('q')||'',province:p.get('p')||'',city:p.get('c')||'',capacity:p.get('cap')||'',staff:p.get('staff')||'',confidences:(p.get('conf')||'').split(',').filter(Boolean),sort:p.get('sort')||'priority',grades:(p.get('grades')||'').split(',').filter(Boolean),scores:(p.get('scores')||'').split(',').filter(Boolean),selected:(p.get('sel')||'').split(',').filter(Boolean),lat:number('lat',33,39),lng:number('lng',124,132),zoom:number('z',6,21),mapSearch:p.get('map')==='1'}}
+function readSharedState(){const p=new URLSearchParams(location.search);if(p.get('share')!=='1')return null;const number=(name,min,max)=>{const value=Number(p.get(name));return Number.isFinite(value)&&value>=min&&value<=max?value:null};return{q:p.get('q')||'',province:p.get('p')||'',city:p.get('c')||'',capacity:p.get('cap')||'',staff:p.get('staff')||'',confidences:(p.get('conf')||'').split(',').filter(Boolean),sort:p.get('sort')||'priority',grades:(p.get('grades')||'').split(',').filter(Boolean),scores:(p.get('scores')||'').split(',').filter(Boolean),selected:CareMapShare.decodeSelection(p.get('sel')),lat:number('lat',33,39),lng:number('lng',124,132),zoom:number('z',6,21),mapSearch:p.get('map')==='1'}} // SOFTM-SHARE-COMPACT 날짜:20260905 : 기존 쉼표 목록과 압축된 공유 선택을 모두 복원
 function restoreSharedControls(state){const option=(id,value)=>[...$(id).options].some(o=>o.value===value)?value:'';$('q').value=state.q;$('province').value=option('province',state.province);updateCities();$('city').value=option('city',state.city);$('capacity').value=option('capacity',state.capacity);$('staff').value=option('staff',state.staff);$('sort').value=option('sort',state.sort)||'priority';gradeFilters=new Set(state.grades.filter(v=>['A','B','C','D','E','new','unknown'].includes(v)));scoreFilters=new Set(state.scores.filter(v=>['high','mid','low','lowest','unknown'].includes(v)));confidenceFilters=new Set(state.confidences.filter(v=>['high','medium','low'].includes(v)));const ids=new Set(DATA.map(c=>c.i));selected=new Set(state.selected.filter(id=>ids.has(id)));syncMultiFilterButtons('grade');syncMultiFilterButtons('score');syncMultiFilterButtons('confidence')}
-function buildShareUrl(){const url=new URL(location.href);url.search='';url.hash='';const p=url.searchParams,put=(name,value)=>{if(value!==''&&value!==null&&value!==undefined)p.set(name,String(value))};put('share','1');put('q',$('q').value.trim());put('p',$('province').value);put('c',$('city').value);put('cap',$('capacity').value);put('staff',$('staff').value);put('sort',$('sort').value);if(confidenceFilters.size)put('conf',[...confidenceFilters].sort().join(','));if(gradeFilters.size)put('grades',[...gradeFilters].sort().join(','));if(scoreFilters.size)put('scores',[...scoreFilters].sort().join(','));if(selected.size)put('sel',[...selected].join(','));if(mapReady){const center=naverMap.getCenter();put('lat',center.lat().toFixed(5));put('lng',center.lng().toFixed(5));put('z',naverMap.getZoom())}if(mapSearchIds)put('map','1');advancedSearch?.write(p);return url.toString()} // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 두 지도에서 동일한 상세조건 공유값을 사용
+function buildShareUrl(){const url=new URL(location.href);url.search='';url.hash='';const p=url.searchParams,put=(name,value)=>{if(value!==''&&value!==null&&value!==undefined)p.set(name,String(value))};put('share','1');put('q',$('q').value.trim());put('p',$('province').value);put('c',$('city').value);put('cap',$('capacity').value);put('staff',$('staff').value);put('sort',$('sort').value);if(confidenceFilters.size)put('conf',[...confidenceFilters].sort().join(','));if(gradeFilters.size)put('grades',[...gradeFilters].sort().join(','));if(scoreFilters.size)put('scores',[...scoreFilters].sort().join(','));if(selected.size)put('sel',CareMapShare.encodeSelection(selected));if(mapReady){const center=naverMap.getCenter();put('lat',center.lat().toFixed(5));put('lng',center.lng().toFixed(5));put('z',naverMap.getZoom())}if(mapSearchIds)put('map','1');advancedSearch?.write(p);return url.toString()} // SOFTM-SHARE-COMPACT 날짜:20260905 : 상세조건과 지도 위치·선택 기관을 유지하며 공유 주소 길이를 단축
 async function copyText(value){if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);return}const box=document.createElement('textarea');box.value=value;box.setAttribute('readonly','');box.style.position='fixed';box.style.opacity='0';document.body.appendChild(box);box.select();const copied=document.execCommand('copy');box.remove();if(!copied)throw new Error('복사 실패')}
 async function shareCurrentState(){const url=buildShareUrl(),data={title:'전국 주야간보호센터 조회상태',text:'현재 조회조건과 지도영역을 공유합니다.',url};try{if(navigator.share){await navigator.share(data);showToast('현재 조회상태를 공유했습니다.','success')}else{await copyText(url);showToast('현재 조회상태 링크를 복사했습니다.','success')}}catch(error){if(error?.name!=='AbortError'){try{await copyText(url);showToast('현재 조회상태 링크를 복사했습니다.','success')}catch{showToast('공유 링크를 복사하지 못했습니다.','error')}}}}
 async function copyDestinationName(id){const c=DATA.find(x=>x.i===id);if(!c){showToast('복사할 목적지명을 찾지 못했습니다.','error');return}try{await copyText(c.n);showToast(`목적지명 “${c.n}”을 복사했습니다.`,'success')}catch{showToast('목적지명을 복사하지 못했습니다.','error')}}
@@ -543,7 +544,7 @@ async function showOnMap(id){
 }
 /** SOFTM-MAP-EXPERIENCE END */
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 화면검색 전체를 같은 요청으로 묶어 취소 후 목록 복원과 거짓 0건 완료를 방지 */
-async function searchCurrentMap(notify=true,search=null){
+async function searchCurrentMap(notify=true,search=null,preserveSelection=false){ // SOFTM-SHARE-RESTORE 날짜:20260905 : 공유 복원 때만 원래 지도 표시 선택을 유지
  const query=search||beginDaycareSearch();if(!query.isCurrent())return{cancelled:true};
  if(!mapReady)return finishDaycareSearch(query,daycareSearchOutcome());
  clearTimeout(boundsTimer);boundsTimer=null;skipIdleUntil=Date.now()+800;closeMapPopup();
@@ -558,11 +559,17 @@ async function searchCurrentMap(notify=true,search=null){
  }
  const outcome=await displayCenters(rows,false,false,false,bounds,rows.length,query);
  if(outcome.cancelled||!query.isCurrent())return{cancelled:true};
- mapSearchIds=new Set([...outcome.visibleIds,...outcome.unresolvedIds]);$('mapSearchClear').style.display='block';page=1;apply(true,true,query);
+ /** SOFTM-SHARE-RESTORE START 날짜:20260905 : 화면 크기에 따라 조회 결과가 달라도 공유자가 해제한 기관을 다시 표시하지 않음 */
+ if(preserveSelection){
+  mapMarkers=mapMarkers.filter(marker=>{if(selected.has(marker.centerId))return true;marker.setMap(null);return false});
+  outcome.markerCount=mapMarkers.length;
+ }
+ mapSearchIds=new Set([...outcome.visibleIds,...outcome.unresolvedIds]);$('mapSearchClear').style.display='block';page=1;apply(true,!preserveSelection,query);
+ /** SOFTM-SHARE-RESTORE END */
  const names=regions.length?regions.map(r=>r.city).join(' · '):'현재 화면';
  const result=daycareSearchOutcome({...outcome,count:filtered.length,partial:outcome.partial||regionFallback,scope:'현재 지도'});
  setMapStatus(`현 지도 조회 ${filtered.length.toLocaleString()}곳 · 지도 ${outcome.markerCount.toLocaleString()}곳${outcome.unresolved?` · 위치 미확인 ${outcome.unresolved}곳 포함`:''}`);
- $('routeNote').textContent=`${names} 조건으로 ${filtered.length.toLocaleString()}곳을 조회해 모두 선택했습니다.${outcome.unresolved?` 위치 미확인 ${outcome.unresolved.toLocaleString()}곳은 화면 안에 있는지 확인되지 않았으며 목록에 포함했습니다.`:''} 체크를 해제하면 해당 마커가 사라집니다.`;
+ $('routeNote').textContent=`${names} 조건으로 ${filtered.length.toLocaleString()}곳을 조회했습니다. ${preserveSelection?'공유된 지도 표시 선택을 유지했습니다.':'조회한 기관을 모두 선택했습니다.'}${outcome.unresolved?` 위치 미확인 ${outcome.unresolved.toLocaleString()}곳은 화면 안에 있는지 확인되지 않았으며 목록에 포함했습니다.`:''} 체크를 해제하면 해당 마커가 사라집니다.`; // SOFTM-SHARE-RESTORE 날짜:20260905 : 공유 복원에서는 전체 선택으로 오해하지 않도록 실제 상태를 안내
  if(!query.feedback){
   showMapProgress(`${filtered.length.toLocaleString()}곳 조회 완료 · 지도 ${outcome.markerCount.toLocaleString()}곳`,1,1);hideMapProgress(650);
   if(notify&&filtered.length)showToast(`현재 지도 조건으로 ${filtered.length.toLocaleString()}곳을 조회했습니다.${outcome.unresolved?` 위치 미확인 ${outcome.unresolved.toLocaleString()}곳 포함`:''}`,'success');
@@ -608,7 +615,25 @@ async function findOptimalRoute(){
 }
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 지도 드래그를 시작하면 이전 상세조회 완료를 취소해 사용자의 새 검색 의도를 보존 */
 /** SOFTM-MAP-RESTORE START 날짜:20260904 : 비교함 지도는 자동검색에서 제외하고 직접 이동이 이전 상세 화면으로 되돌아가지 않도록 복귀 기록 해제 */
-function initNaver(){if(!window.naver?.maps)return;naverMap=new naver.maps.Map('naverMap',{center:new naver.maps.LatLng(37.48145,126.84805),zoom:14,zoomControl:true,zoomControlOptions:{position:naver.maps.Position.RIGHT_BOTTOM,style:naver.maps.ZoomControlStyle.SMALL},scrollWheel:true,pinchZoom:true,disableDoubleTapZoom:false,disableTwoFingerTapZoom:false,minZoom:6,maxZoom:21});mapReady=true;hideMapLoad();setMapStatus('전국 좌표 자동연결');naver.maps.Event.addListener(naverMap,'click',()=>{closeMapPopup()});naver.maps.Event.addListener(naverMap,'dragstart',()=>{closeMapPopup(false);CareMapExperience.cancelDetail();if(CareMapExperience.isBasketMap())return;beginDaycareSearch();showMapProgress('지도 이동 중');setMapStatus('지도 이동 중')});naver.maps.Event.addListener(naverMap,'dragend',()=>{if(CareMapExperience.isBasketMap())return;clearTimeout(dragSearchTimer);const center=naverMap.getCenter();setBasePoint({lat:center.lat(),lng:center.lng()},'지도 중심 기준 위치');skipIdleUntil=Date.now()+1200;setMapStatus('지도 중심 기준 지정 · 자동 검색 대기');showMapProgress('화면 중앙 기준 · 자동 검색 준비');dragSearchTimer=setTimeout(()=>searchCurrentMap(),420)});naver.maps.Event.addListener(naverMap,'idle',scheduleBoundsMarkers);if(sharedState){apply(true,false);if(sharedState.lat!==null&&sharedState.lng!==null&&sharedState.zoom!==null){skipIdleUntil=Date.now()+500;naverMap.setCenter(new naver.maps.LatLng(sharedState.lat,sharedState.lng));naverMap.setZoom(sharedState.zoom);setTimeout(async()=>{skipIdleUntil=0;await loadMarkersInCurrentBounds();if(sharedState.mapSearch)searchCurrentMap();showToast('공유된 조회상태를 불러왔습니다.','success')},650)}else{apply(false,false);showToast('공유된 조회조건을 불러왔습니다.','success')}}else{$('province').value='경기도';updateCities();$('city').value='광명시';apply(true);setBasePoint(PRESET_ADDRESSES['경기도 광명시 오리로 1034-1'],'기본 위치');useCurrentLocation(true)}} // SOFTM-BASKET-MAP 날짜:20260904 : 비교함 지도 이동은 기관 자동검색 없이 담은 기관만 유지
+/** SOFTM-SHARE-RESTORE START 날짜:20260905 : 공유 지도는 한 번만 조회하고 사용자 조작이 먼저 발생하면 늦은 초기 복원을 취소 */
+function restoreSharedDaycareMap(state){
+ const query=beginDaycareSearch();
+ skipIdleUntil=Date.now()+1500;
+ naverMap.setCenter(new naver.maps.LatLng(state.lat,state.lng));naverMap.setZoom(state.zoom);
+ setTimeout(async()=>{
+  if(!query.isCurrent())return;
+  skipIdleUntil=Date.now()+800;
+  let outcome;
+  if(state.mapSearch)outcome=await searchCurrentMap(false,query,true);
+  else{
+   outcome=await displayCenters(filtered.filter(c=>selected.has(c.i)),false,false,false,null,MAP_LIMIT,query);
+   outcome=finishDaycareSearch(query,outcome);
+  }
+  if(!outcome.cancelled&&query.isCurrent())showToast('공유된 조회상태를 불러왔습니다.','success');
+ },650);
+}
+/** SOFTM-SHARE-RESTORE END */
+function initNaver(){if(!window.naver?.maps)return;naverMap=new naver.maps.Map('naverMap',{center:new naver.maps.LatLng(37.48145,126.84805),zoom:14,zoomControl:true,zoomControlOptions:{position:naver.maps.Position.RIGHT_BOTTOM,style:naver.maps.ZoomControlStyle.SMALL},scrollWheel:true,pinchZoom:true,disableDoubleTapZoom:false,disableTwoFingerTapZoom:false,minZoom:6,maxZoom:21});mapReady=true;hideMapLoad();setMapStatus('전국 좌표 자동연결');naver.maps.Event.addListener(naverMap,'click',()=>{closeMapPopup()});naver.maps.Event.addListener(naverMap,'dragstart',()=>{closeMapPopup(false);CareMapExperience.cancelDetail();if(CareMapExperience.isBasketMap())return;beginDaycareSearch();showMapProgress('지도 이동 중');setMapStatus('지도 이동 중')});naver.maps.Event.addListener(naverMap,'dragend',()=>{if(CareMapExperience.isBasketMap())return;clearTimeout(dragSearchTimer);const center=naverMap.getCenter();setBasePoint({lat:center.lat(),lng:center.lng()},'지도 중심 기준 위치');skipIdleUntil=Date.now()+1200;setMapStatus('지도 중심 기준 지정 · 자동 검색 대기');showMapProgress('화면 중앙 기준 · 자동 검색 준비');dragSearchTimer=setTimeout(()=>searchCurrentMap(),420)});naver.maps.Event.addListener(naverMap,'idle',scheduleBoundsMarkers);if(sharedState){apply(true,false);if(sharedState.lat!==null&&sharedState.lng!==null&&sharedState.zoom!==null){restoreSharedDaycareMap(sharedState)/* SOFTM-SHARE-RESTORE 날짜:20260905 : 공유 조회를 중복 실행해 선택을 덮지 않음 */}else{apply(false,false);showToast('공유된 조회조건을 불러왔습니다.','success')}}else{$('province').value='경기도';updateCities();$('city').value='광명시';apply(true);setBasePoint(PRESET_ADDRESSES['경기도 광명시 오리로 1034-1'],'기본 위치');useCurrentLocation(true)}} // SOFTM-BASKET-MAP 날짜:20260904 : 비교함 지도 이동은 기관 자동검색 없이 담은 기관만 유지
 /** SOFTM-MAP-RESTORE END */
 /** SOFTM-SEARCH-FEEDBACK END */
 function loadNaver(){const s=document.createElement('script');s.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=etfcybk8vf&submodules=geocoder&callback=initNaver';s.onerror=()=>{showMapLoad('네이버지도를 불러오지 못했습니다. Web 서비스 URL과 지도 API 인증을 확인하세요.');setMapStatus('지도 인증 실패')};document.head.appendChild(s)} // SOFTM-MAPS-KEY 날짜:20260902 : Geocoding 권한이 연결된 신규 Maps API Key ID로 SDK 인증을 통일
