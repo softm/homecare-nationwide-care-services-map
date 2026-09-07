@@ -140,11 +140,59 @@ def build_records(data_root=DATA_ROOT):
     return records, catalog["generatedAt"][:10], hospitals["sourceDate"]
 
 
+def update_facility_head_count(html, count):
+    # /** SOFTM-SEO-FACILITY-COUNT START 날짜:20260907 : 수집 건수가 바뀔 때 검색 제목·설명·구조화 데이터가 본문과 다른 수치로 남지 않도록 함께 갱신 */
+    block_pattern = re.compile(r'(<!-- /\*\* SOFTM-SEO-FACILITY-INTENT START[\s\S]*?<!-- /\*\* SOFTM-SEO-FACILITY-INTENT END \*/ -->)')
+    blocks = list(block_pattern.finditer(html))
+    if len(blocks) != 1:
+        raise ValueError(f'요양원 검색 메타 영역이 {len(blocks)}개입니다.')
+    block_match = blocks[0]
+    block = block_match.group(0)
+    current_counts = [match[1] for match in re.finditer(r'(?<![\d,])([\d,]+)곳', block)]
+    if len(current_counts) != 5:
+        raise ValueError(f'요양원 검색 메타 기관 수가 {len(current_counts)}개입니다.')
+    formatted = f'{count:,}'
+    replacement = re.sub(r'(?<![\d,])[\d,]+곳', f'{formatted}곳', block)
+    if any(value != formatted for value in current_counts):
+        replacement, changed_dates = re.subn(r'(<meta name="dcterms\.modified" content=")[^"]+("\s*/?>)', rf'\g<1>{datetime.now():%Y-%m-%d}\2', replacement)
+        if changed_dates != 1:
+            raise ValueError('요양원 검색 대표 페이지의 수정일 메타가 없습니다.')
+    return html[:block_match.start()] + replacement + html[block_match.end():]
+    # /** SOFTM-SEO-FACILITY-COUNT END */
+
+
+def update_index_counts(index, manifest):
+    # /** SOFTM-HOME-COUNT START 날짜:20260907 : CSS 선택자를 카드로 오인해 다른 유형의 기관 수를 덮지 않도록 실제 링크 카드 안에서만 갱신 */
+    updated = index
+    for category, meta in manifest.items():
+        card_pattern = re.compile(rf'<a\b(?=[^>]*\bdata-category="{re.escape(category)}")[^>]*>[\s\S]*?</a>')
+        cards = list(card_pattern.finditer(updated))
+        if len(cards) != 1:
+            raise ValueError(f'홈 {category} 카드가 {len(cards)}개입니다.')
+        card_match = cards[0]
+        card = card_match.group(0)
+        count_pattern = re.compile(r'(<span\b(?=[^>]*\bdata-count(?:\s|=|>))[^>]*>)([\d,]+)곳(</span>)')
+        counts = list(count_pattern.finditer(card))
+        if len(counts) != 1:
+            raise ValueError(f'홈 {category} 카드의 기관 수가 {len(counts)}개입니다.')
+        count_match = counts[0]
+        replacement = card[:count_match.start(2)] + f'{meta["count"]:,}' + card[count_match.end(2):]
+        updated = updated[:card_match.start()] + replacement + updated[card_match.end():]
+    if updated != index:
+        updated, changed_dates = re.subn(r'(<meta name="dcterms\.modified" content=")[^"]+("\s*/?>)', rf'\g<1>{datetime.now():%Y-%m-%d}\2', updated)
+        if changed_dates != 1:
+            raise ValueError('홈 검색 대표 페이지의 수정일 메타가 없습니다.')
+    return updated
+    # /** SOFTM-HOME-COUNT END */
+
+
 def update_landing_counts(manifest):
     marker = f"<!-- SOFTM-DATA-UNIFIED 날짜:{datetime.now():%Y%m%d} : 안내의 기관 수와 기준일을 수집 자료 기반 지도와 일치 -->"
     for category, meta in manifest.items():
         path = ROOT / CATEGORIES[category][1]
         html = path.read_text(encoding="utf-8")
+        if category == "facility":
+            html = update_facility_head_count(html, meta["count"])  # SOFTM-SEO-FACILITY-COUNT 날짜:20260907 : 대표 검색 메타와 실제 수집 건수를 한 번에 갱신
         first = re.search(r'<ul class="data-summary"[\s\S]*?<strong>([\d,]+)곳</strong>', html)
         if first:
             html = html.replace(first[1] + "곳", f'{meta["count"]:,}곳')
@@ -160,8 +208,7 @@ def update_landing_counts(manifest):
             path.write_text(html, encoding="utf-8")
     index_path = ROOT / "index.html"
     index = index_path.read_text(encoding="utf-8")
-    for category, meta in manifest.items():
-        index = re.sub(r'(data-category="' + re.escape(category) + r'"[\s\S]*?<span data-count>)[\d,]+곳', lambda match: match[1] + f'{meta["count"]:,}곳', index)
+    index = update_index_counts(index, manifest)  # SOFTM-HOME-COUNT 날짜:20260907 : 유형별 실제 카드만 갱신해 홈페이지 수치의 신뢰성을 유지
     if index != index_path.read_text(encoding="utf-8"):
         index_path.write_text(index, encoding="utf-8")
     daycare_path = ROOT / "nationwide-daycare-map.html"

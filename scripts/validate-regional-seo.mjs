@@ -105,6 +105,12 @@ export function inspectRegionalPage({ html, meta, rows, sitemapUrls, rootDir = R
   check(sameNumber(summary('evaluationCount'), evaluated), '보이는 평가 확인 수가 원본과 다릅니다.');
   check(textOf(summary('sourceDate')).replace(/\D/g, '').includes(meta.sourceDate.replace(/\D/g, '')), '시설현황 원본 기준일이 없습니다.');
   const expectedRows = new Map(rows.map(row => [String(row.i), row]));
+  const identityCounts = new Map();
+  for (const row of rows) {
+    if (!row.a) continue;
+    const identity = `${String(row.n).trim()}\u0000${String(row.a).trim()}`;
+    identityCounts.set(identity, (identityCounts.get(identity) || 0) + 1);
+  }
   const cards = bodyNodes.filter(node => hasClass(node, 'institution-card'));
   const seen = new Set();
   for (const card of cards) {
@@ -117,7 +123,16 @@ export function inspectRegionalPage({ html, meta, rows, sitemapUrls, rootDir = R
     const heading = children.find(node => node.tag === 'h3');
     const nameLink = heading && descendants(heading).find(node => node.tag === 'a');
     check(textOf(nameLink) === String(row.n).replace(/\s+/g, ' ').trim(), `${id}: 기관명 내용 또는 HTML 이스케이프가 다릅니다.`);
+    check((nameLink?.attrs.rel || '').split(/\s+/).includes('nofollow'), `${id}: 기관 지도 필터 링크의 크롤 제어가 없습니다.`); // SOFTM-SEO-CRAWL 날짜:20260907 : 기관별 검색 조합이 정적 지역 페이지의 크롤 순서를 밀어내지 않도록 검사
     check(textOf(children.find(node => hasClass(node, 'institution-address'))) === String(row.a || '주소 미확인').replace(/\s+/g, ' ').trim(), `${id}: 주소 내용 또는 HTML 이스케이프가 다릅니다.`);
+    /** SOFTM-SEO-DATA-DUPLICATE START 날짜:20260907 : 같은 명칭·주소의 다른 등록 자료가 기관기호와 지정일 없이 서로 다른 시설처럼 보이지 않도록 검사 */
+    const duplicateRegistration = row.a && identityCounts.get(`${String(row.n).trim()}\u0000${String(row.a).trim()}`) > 1;
+    if (duplicateRegistration) {
+      check(textOf(children.find(node => node.attrs['data-field'] === 'i')) === String(row.i), `${id}: 동일 명칭·주소 등록 자료의 기관기호가 없습니다.`);
+      check(textOf(children.find(node => node.attrs['data-field'] === 'd')) === String(row.d || '미확인'), `${id}: 동일 명칭·주소 등록 자료의 지정일이 없습니다.`);
+      check(textOf(children.find(node => hasClass(node, 'institution-service'))).includes('다른 기관기호 등록 자료와 구분'), `${id}: 동일 명칭·주소 등록 자료의 구분 안내가 없습니다.`);
+    }
+    /** SOFTM-SEO-DATA-DUPLICATE END */
     for (const field of ['g', 'ey']) {
       const value = textOf(children.find(node => node.attrs['data-field'] === field));
       const expected = field === 'g' ? (/^[A-E]$/.test(row.g || '') ? `${row.g}등급` : '미확인') : (Number.isInteger(row.ey) && row.ey >= 2000 && row.ey <= 2100 ? `${row.ey}년` : '미확인');
@@ -160,6 +175,7 @@ export function inspectRegionalPage({ html, meta, rows, sitemapUrls, rootDir = R
       if (url.origin === ORIGIN && url.pathname === '/nationwide-care-services-map.html') {
         check(url.searchParams.get('type') === meta.type && url.searchParams.get('p') === meta.province && (!meta.city || url.searchParams.get('c') === meta.city), `지도 링크의 지역 필터가 다릅니다: ${href}`);
         check(['type', 'p', 'c', 'q'].every(key => url.searchParams.getAll(key).length <= 1), `지도 링크에 중복 필터가 있습니다: ${href}`);
+        check((node.attrs.rel || '').split(/\s+/).includes('nofollow'), `지도 필터 링크의 크롤 제어가 없습니다: ${href}`); // SOFTM-SEO-CRAWL 날짜:20260907 : 지역·기관 쿼리의 불필요한 크롤 확장을 생성 단계에서 차단
       }
     } catch (error) { issues.push(`내부 링크 해석 실패: ${href} (${error.message})`); }
   }

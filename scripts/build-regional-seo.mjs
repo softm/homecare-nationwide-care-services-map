@@ -37,6 +37,7 @@ export const REGIONAL_PROVINCES = [
 const STAFF_LABELS = { s: '사회복지사', rn: '간호사', na: '간호조무사', pt: '물리치료사', ot: '작업치료사', cw: '요양보호사' };
 const GENERATED_MARKER = 'SOFTM-REGIONAL-SEO START';
 const FALLBACK_DATE = '2026-09-04';
+const MAP_TOOL_REL = 'nofollow'; // SOFTM-SEO-CRAWL 날짜:20260907 : 필터 조합 URL보다 정적 지역 페이지를 먼저 크롤하도록 지도 도구 링크를 구분
 const html = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
 const json = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 const countText = (number) => Number(number).toLocaleString('ko-KR');
@@ -144,20 +145,40 @@ function breadcrumbs(page, hub) {
   return items;
 }
 
-function institutionCard(record, page) {
+function institutionIdentity(record) {
+  return record.a ? `${String(record.n).trim()}\u0000${String(record.a).trim()}` : '';
+}
+
+function duplicateInstitutionIdentities(records) {
+  const counts = new Map();
+  for (const record of records) {
+    const identity = institutionIdentity(record);
+    if (identity) counts.set(identity, (counts.get(identity) || 0) + 1);
+  }
+  return new Set([...counts].filter(([, count]) => count > 1).map(([identity]) => identity));
+}
+
+function institutionCard(record, page, duplicateIdentities) {
   const config = REGIONAL_TYPES[page.type];
   const grade = validGrade(record) ? `${record.g}등급` : '미확인';
   const year = Number.isInteger(record.ey) && record.ey >= 2000 && record.ey <= 2100 ? `${record.ey}년` : '미확인';
+  const duplicateRegistration = duplicateIdentities.has(institutionIdentity(record));
   const fields = [
+    // /** SOFTM-SEO-DATA-DUPLICATE START 날짜:20260907 : 같은 명칭·주소로 수집된 서로 다른 등록 자료는 기관기호와 지정일로 구분 */
+    ...(duplicateRegistration ? [
+      `<div><dt>기관기호</dt><dd data-field="i">${html(record.i)}</dd></div>`,
+      `<div><dt>지정일</dt><dd data-field="d">${html(record.d || '미확인')}</dd></div>`,
+    ] : []),
+    // /** SOFTM-SEO-DATA-DUPLICATE END */
     `<div><dt>공단 평가등급</dt><dd data-field="g">${html(grade)}</dd></div>`,
     `<div><dt>평가연도</dt><dd data-field="ey">${html(year)}</dd></div>`,
     ...(config.capacity ? [`<div><dt>정원</dt><dd data-field="z">${positiveCount(record.z)}</dd></div>`] : []),
     ...config.staff.map((key) => `<div><dt>${STAFF_LABELS[key]}</dt><dd data-field="${key}">${record.staffMissing ? '일부 미확인' : positiveCount(record[key])}</dd></div>`), // SOFTM-DATA-REGIONS 날짜:20260904 : 일부 급여의 인력만 수집된 값을 전체 인원으로 오인하지 않도록 표시
   ];
   return `        <li class="institution-card" data-institution-id="${html(record.i)}">
-          <div class="institution-title"><h3><a href="${html(mapLink(page, record.n))}">${html(record.n)}</a></h3><span class="institution-map-note">지도에서 보기 ↗</span></div>
+          <div class="institution-title"><h3><a href="${html(mapLink(page, record.n))}" rel="${MAP_TOOL_REL}">${html(record.n)}</a></h3><span class="institution-map-note">지도에서 보기 ↗</span></div>
           <p class="institution-address">${html(record.a || '주소 미확인')}</p>
-          <p class="institution-service">${html(record.tn || REGIONAL_TYPES[page.type].label)}</p>
+          <p class="institution-service">${html(record.tn || REGIONAL_TYPES[page.type].label)}${duplicateRegistration ? ' · 같은 명칭·주소의 다른 기관기호 등록 자료와 구분' : ''}</p>
           <dl class="institution-facts">${fields.join('')}</dl>
         </li>`;
 }
@@ -176,11 +197,23 @@ function renderPage(page, plan) {
   const hub = plan.byType[page.type].find((entry) => entry.province === page.province);
   const districtPages = plan.pages.filter((entry) => entry.type === page.type && entry.province === page.province && entry.city);
   const region = scopeName(page);
-  const title = `${region} ${config.label} ${countText(page.count)}곳 · ${page.city ? '주소·평가 비교' : '시군구별 찾기'} | 돌봄한눈`;
-  const description = page.city
-    ? `${region} ${config.label} ${countText(page.count)}곳의 기관명·주소와 공단 평가등급·평가연도를 확인하세요. 평가 확인 ${countText(page.evaluationCount)}곳. ${page.sourceDate} 수집목록을 기준으로 지역 지도와 기관 비교로 연결합니다.`
-    : `${page.province} ${config.label} ${countText(page.count)}곳을 ${countText(districtPages.length)}개 시군구별로 찾으세요. 지역별 기관 수와 공단 평가 확인 수, 전체 기관 목록과 지도를 제공합니다. 수집목록 ${page.sourceDate} 기준.`;
+  /** SOFTM-SEO-INTENT START 날짜:20260907 : 요양원 지역 검색의 제목·설명을 실제 비교 정보와 맞추고 다른 급여의 기존 검색 문구를 유지 */
+  const title = page.type === 'facility'
+    ? (page.city
+      ? `${region} 요양원 ${countText(page.count)}곳 찾기·비교 | 공단 평가·정원·인력 | 돌봄한눈`
+      : `${region} 요양원 ${countText(page.count)}곳 찾기 | ${countText(districtPages.length)}개 시군구별 목록·평가정보 | 돌봄한눈`)
+    : `${region} ${config.label} ${countText(page.count)}곳 · ${page.city ? '주소·평가 비교' : '시군구별 찾기'} | 돌봄한눈`;
+  const description = page.type === 'facility'
+    ? (page.city
+      ? `${region} 요양원 ${countText(page.count)}곳의 주소와 공단 평가등급·평가연도·정원·인력을 비교하세요. 평가정보는 ${countText(page.evaluationCount)}곳에서 확인했으며 노인요양공동생활가정도 실제 유형으로 구분합니다.`
+      : `${page.province} ${countText(districtPages.length)}개 시군구별 요양원 기관 수와 평가정보 확인 수를 보고, 지역을 선택해 주소·정원·인력을 확인하세요. 전체 ${countText(page.count)}곳이며 노인요양공동생활가정도 실제 유형으로 구분합니다.`)
+    : (page.city
+      ? `${region} ${config.label} ${countText(page.count)}곳의 기관명·주소와 공단 평가등급·평가연도를 확인하세요. 평가 확인 ${countText(page.evaluationCount)}곳. ${page.sourceDate} 수집목록을 기준으로 지역 지도와 기관 비교로 연결합니다.`
+      : `${page.province} ${config.label} ${countText(page.count)}곳을 ${countText(districtPages.length)}개 시군구별로 찾으세요. 지역별 기관 수와 공단 평가 확인 수, 전체 기관 목록과 지도를 제공합니다. 수집목록 ${page.sourceDate} 기준.`);
+  const headingAction = page.type === 'facility' ? '찾기·비교' : '찾기';
+  /** SOFTM-SEO-INTENT END */
   const crumbs = breadcrumbs(page, hub);
+  const duplicateIdentities = duplicateInstitutionIdentities(records); // SOFTM-SEO-DATA-DUPLICATE 날짜:20260907 : 한 지역 안의 동일 명칭·주소 등록 자료만 식별해 구분 정보를 표시
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -203,7 +236,7 @@ function renderPage(page, plan) {
       <div class="section-heading"><h2 id="institutions-title">${html(region)} ${html(config.label)} 전체 ${countText(page.count)}곳</h2><p>기관명 가나다순입니다. 기관명을 누르면 해당 지역·기관명으로 검색된 지도로 이동합니다.</p></div>
       ${evaluationSummary(records)}
       <ol class="institution-list">
-${records.map((record) => institutionCard(record, page)).join('\n')}
+${records.map((record) => institutionCard(record, page, duplicateIdentities)).join('\n')}
       </ol>
     </section>`
     : `    <section aria-labelledby="districts-title">
@@ -249,7 +282,7 @@ ${districtPages.map((district) => `        <li data-region-city="${html(district
 <main id="main">
   <section class="search-intro" aria-labelledby="page-title"><div class="container">
     <nav class="breadcrumb" aria-label="현재 위치">${crumbs.map((item, index) => `${index ? '<span aria-hidden="true">›</span>' : ''}${index === crumbs.length - 1 ? `<span aria-current="page">${html(item.name)}</span>` : `<a href="${item.href}">${html(item.name)}</a>`}`).join('')}</nav>
-    <div class="intro-grid"><div class="intro-copy"><p class="eyebrow">지역별 장기요양기관 찾기</p><h1 id="page-title">${html(region)}<br>${config.label} 찾기</h1><p class="lead">${html(region)} ${config.label} ${countText(page.count)}곳${page.city ? '의 주소와 공단 평가정보를 확인하고, 가까운 기관을 지도에서 비교하세요.' : `을 ${countText(districtPages.length)}개 시군구로 나누어 살펴보세요. 지역을 선택하면 기관별 주소와 평가정보를 볼 수 있습니다.`}</p></div><div class="search-start"><p class="search-label">${html(region)}에서 가까운 기관을 찾으세요</p><a class="primary-button" href="${html(mapLink(page))}">지도에서 ${config.label} 찾기 <span aria-hidden="true">→</span></a><p class="start-note">${html(region)} ${config.label}로 지역·유형을 설정합니다.</p><a class="regional-list-link" href="#${page.city ? 'institutions-title' : 'districts-title'}">${page.city ? '전체 기관 목록' : '시군구 목록'} 먼저 보기 ↓</a></div></div>
+    <div class="intro-grid"><div class="intro-copy"><p class="eyebrow">지역별 장기요양기관 찾기</p><h1 id="page-title">${html(region)}<br> ${config.label} ${headingAction}</h1><p class="lead">${html(region)} ${config.label} ${countText(page.count)}곳${page.city ? '의 주소와 공단 평가정보를 확인하고, 기관 위치를 지도에서 비교하세요.' : `을 ${countText(districtPages.length)}개 시군구로 나누어 살펴보세요. 지역을 선택하면 기관별 주소와 평가정보를 볼 수 있습니다.`}</p></div><div class="search-start"><p class="search-label">${html(region)} ${config.label} 위치를 지도에서 확인하세요</p><a class="primary-button" href="${html(mapLink(page))}" rel="${MAP_TOOL_REL}">지도에서 ${config.label} 위치 보기 <span aria-hidden="true">→</span></a><p class="start-note">${html(region)}의 ${config.label}만 표시합니다.</p><a class="regional-list-link" href="#${page.city ? 'institutions-title' : 'districts-title'}">${page.city ? '전체 기관 목록' : '시군구 목록'} 먼저 보기 ↓</a></div></div> <!-- SOFTM-SEO-INTENT 날짜:20260907 : 검색 제목과 지도 동작이 실제 지역 필터 범위를 정확히 설명하도록 일치 -->
     <ul class="data-summary" aria-label="지역 자료 범위"><li data-summary="count">${config.label} <strong>${countText(page.count)}곳</strong></li><li data-summary="evaluationCount">공단 평가 확인 <strong>${countText(page.evaluationCount)}곳</strong></li><li data-summary="sourceDate">수집목록 <time datetime="${page.sourceDate}">${page.sourceDate.replaceAll('-', '.')}</time> 기준</li></ul>
   </div></section>
   <div class="container content">
@@ -262,6 +295,7 @@ ${districtContent}
       <p>평가등급과 평가연도는 <a href="https://www.data.go.kr/data/15104801/fileData.do" target="_blank" rel="noopener">국민건강보험공단 장기요양기관 평가결과 (새 창)</a>에서 해당 급여의 기관기호로 연결한 공개 평가입니다. 평가연도는 수집목록 기준일과 다르며 기관마다 평가 시기가 다를 수 있습니다.</p>
       <p>평가 미확인은 이 자료에서 해당 기관의 공개 등급 또는 연도를 확인하지 못했다는 뜻이며 낮은 등급을 뜻하지 않습니다. ${config.capacity ? '정원과 ' : ''}인력은 양수로 확인된 자료값만 표시하고, 0 또는 값이 없는 경우 미확인으로 표시합니다. 일부 급여의 인력 자료가 없으면 일부 미확인으로 표시합니다. 직종별 인력은 현재 근무 인원이나 담당자 배정을 보장하지 않습니다.</p>
       <!-- SOFTM-DATA-REGIONS END -->
+      <p>기관 수는 공단 수집목록의 기관기호 기준입니다. 같은 명칭과 주소라도 기관기호가 다르면 별도 항목으로 표시합니다.</p> <!-- SOFTM-SEO-DATA-COUNT 날짜:20260907 : 재지정 등으로 같은 명칭·주소가 다시 등록된 경우 지역 기관 수의 기준을 오해하지 않도록 안내 -->
       <p>${page.city ? '이 목록은' : '각 지역 페이지는'} 자료에 포함된 기관 전체를 가나다순으로 제공하며 추천 순위가 아닙니다. 변경된 운영현황과 실제 이용 가능 여부는 기관 또는 <a href="https://www.longtermcare.or.kr/npbs/r/a/201/selectLtcoSrch.web" target="_blank" rel="noopener">공단 장기요양기관 찾기 (새 창)</a>에서 확인하세요.</p>
       <p class="service-note">돌봄한눈은 공공기관이 운영하는 서비스가 아닌 공개자료 기반의 검색·비교 정보 서비스입니다. 페이지 내용 갱신 <time datetime="${page.lastmod}">${page.lastmod}</time>.</p>
     </section>

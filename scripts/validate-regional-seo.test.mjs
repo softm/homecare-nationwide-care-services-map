@@ -23,12 +23,12 @@ function fixture(t) {
     { i: '002', n: '새봄 주간보호센터', a: '경기도 광명시 빛로 2', p: '경기도', c: '광명시', g: null, ey: null }
   ];
   const mapLink = row => `../nationwide-care-services-map.html?${new URLSearchParams({ type: 'daycare', p: '경기도', c: '광명시', ...(row ? { q: row.n } : {}) })}`;
-  const cards = rows.map(row => `<li class="institution-card" data-institution-id="${row.i}"><h3><a href="${escape(mapLink(row))}">${escape(row.n)}</a></h3><p class="institution-address">${escape(row.a)}</p><dl><dt>공단 평가등급</dt><dd data-field="g">${row.g ? row.g + '등급' : '미확인'}</dd><dt>평가연도</dt><dd data-field="ey">${row.ey ? row.ey + '년' : '미확인'}</dd></dl></li>`).join('');
+  const cards = rows.map(row => `<li class="institution-card" data-institution-id="${row.i}"><h3><a href="${escape(mapLink(row))}" rel="nofollow">${escape(row.n)}</a></h3><p class="institution-address">${escape(row.a)}</p><dl><dt>공단 평가등급</dt><dd data-field="g">${row.g ? row.g + '등급' : '미확인'}</dd><dt>평가연도</dt><dd data-field="ey">${row.ey ? row.ey + '년' : '미확인'}</dd></dl></li>`).join('');
   const jsonLd = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'CollectionPage', name: '광명시 주간보호센터', url: meta.url },
     { '@type': 'BreadcrumbList', itemListElement: [`${origin}/`, `${origin}/daycare-map.html`, province.url, meta.url].map((item, index) => ({ '@type': 'ListItem', position: index + 1, name: ['홈', '주간보호센터', '경기도', '광명시'][index], item })) }
   ] };
-  const html = `<!doctype html><html lang="ko"><head><title>경기도 광명시 주간보호센터 | 돌봄한눈</title><meta name="description" content="경기도 광명시의 주간보호센터 2곳과 공단 공개 평가정보를 확인합니다."><meta name="robots" content="index,follow"><link rel="canonical" href="${meta.url}"><meta property="og:url" content="${meta.url}"><meta property="og:site_name" content="돌봄한눈"><meta property="og:title" content="광명시 주간보호센터"><meta property="og:description" content="광명시의 기관과 평가정보"><link rel="stylesheet" href="../regional-seo.css?v=1"><script type="application/ld+json">${JSON.stringify(jsonLd)}</script></head><body data-region-type="daycare" data-region-province="경기도" data-region-city="광명시"><h1>경기도 광명시 주간보호센터</h1><ul><li data-summary="count">전체 기관 2곳</li><li data-summary="evaluationCount">평가 확인 1곳</li><li data-summary="sourceDate">시설현황 2026.06.10 기준</li></ul><a href="${escape(mapLink())}">광명시 지도에서 찾기</a><ol class="institution-list">${cards}</ol></body></html>`;
+  const html = `<!doctype html><html lang="ko"><head><title>경기도 광명시 주간보호센터 | 돌봄한눈</title><meta name="description" content="경기도 광명시의 주간보호센터 2곳과 공단 공개 평가정보를 확인합니다."><meta name="robots" content="index,follow"><link rel="canonical" href="${meta.url}"><meta property="og:url" content="${meta.url}"><meta property="og:site_name" content="돌봄한눈"><meta property="og:title" content="광명시 주간보호센터"><meta property="og:description" content="광명시의 기관과 평가정보"><link rel="stylesheet" href="../regional-seo.css?v=1"><script type="application/ld+json">${JSON.stringify(jsonLd)}</script></head><body data-region-type="daycare" data-region-province="경기도" data-region-city="광명시"><h1>경기도 광명시 주간보호센터</h1><ul><li data-summary="count">전체 기관 2곳</li><li data-summary="evaluationCount">평가 확인 1곳</li><li data-summary="sourceDate">시설현황 2026.06.10 기준</li></ul><a href="${escape(mapLink())}" rel="nofollow">광명시 지도에서 찾기</a><ol class="institution-list">${cards}</ol></body></html>`;
   return { html, meta, rows, rootDir, sitemapUrls: [meta.url], pageByIdentity: new Map([['daycare|경기도|', province], ['daycare|경기도|광명시', meta]]) };
 }
 
@@ -75,6 +75,15 @@ test('기관명 검색어의 ampersand 또는 지역 필터가 잘못 연결되�
     assert.ok(inspectRegionalPage({ ...input, html }).issues.some(issue => issue.includes('필터')));
   }
 });
+
+/** SOFTM-SEO-CRAWL-TEST START 날짜:20260907 : 지역 CTA와 기관별 필터 URL에서 크롤 제어가 빠지는 회귀를 차단 */
+test('모든 지도 필터 링크는 정적 지역 페이지 크롤을 우선하도록 nofollow를 유지한다', t => {
+  const input = fixture(t);
+  assert.deepEqual(inspectRegionalPage(input).issues, []);
+  const withoutNofollow = input.html.replaceAll(' rel="nofollow"', '');
+  assert.ok(inspectRegionalPage({ ...input, html: withoutNofollow }).issues.some(issue => issue.includes('크롤 제어')));
+});
+/** SOFTM-SEO-CRAWL-TEST END */
 
 test('없는 CSS·중복 사이트맵·잘못된 breadcrumb와 허위 별점은 통과하지 않는다', t => {
   const input = fixture(t);

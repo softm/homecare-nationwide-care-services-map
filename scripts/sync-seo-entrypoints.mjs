@@ -73,6 +73,11 @@ export function syncSeoEntrypoints({ rootDir = ROOT, check = false } = {}) {
   const entries = mainEntries.map(entry => {
     const url = entry.match(/<loc>([^<]+)<\/loc>/)?.[1];
     const file = new URL(url).pathname.slice(1) || 'index.html';
+    /** SOFTM-SEO-LASTMOD START 날짜:20260907 : 생성 블록 밖의 중요한 수정도 페이지가 선언한 실제 수정일과 사이트맵에서 일치 */
+    const source = updates.get(file) || (fs.existsSync(path.join(rootDir, file)) ? fs.readFileSync(path.join(rootDir, file), 'utf8') : '');
+    const declaredLastmod = source.match(/<meta name="dcterms\.modified" content="(\d{4}-\d{2}-\d{2})">/)?.[1];
+    if (declaredLastmod) return entry.replace(/<lastmod>[^<]+<\/lastmod>/, `<lastmod>${declaredLastmod}</lastmod>`);
+    /** SOFTM-SEO-LASTMOD END */
     if (updates.has(file) && updates.get(file) !== fs.readFileSync(path.join(rootDir, file), 'utf8')) {
       return entry.replace(/<lastmod>[^<]+<\/lastmod>/, `<lastmod>${today()}</lastmod>`);
     }

@@ -76,6 +76,25 @@ for (const category of indexCategories) {
   if (category !== 'daycare' && (!landing.includes('href="daycare-map.html"') || landing.includes('href="nationwide-daycare-map.html"'))) fail(`${landingPage}: 주야간보호 안내 진입 누락`);
   /** SOFTM-DAYCARE-LANDING END */
 }
+/** SOFTM-HOME-COUNT-CHECK START 날짜:20260907 : 홈페이지 기관 수가 CSS 선택자나 다른 유형의 값으로 바뀐 채 배포되지 않도록 생성 매니페스트와 직접 대조 */
+const careManifest = JSON.parse(read('data/care/manifest.json'));
+for (const category of indexCategories) {
+  const cards = [...indexSource.matchAll(new RegExp(`<a\\b(?=[^>]*\\bdata-category="${category}")[^>]*>[\\s\\S]*?<\\/a>`, 'g'))];
+  if (cards.length !== 1) fail(`index.html: ${category} 기관 수 카드가 정확히 한 개여야 합니다.`);
+  const counts = [...cards[0][0].matchAll(/<span\b(?=[^>]*\bdata-count(?:\s|=|>))[^>]*>([\d,]+)곳<\/span>/g)];
+  if (counts.length !== 1 || Number(counts[0][1].replaceAll(',', '')) !== careManifest[category]?.count) fail(`index.html: ${category} 기관 수가 매니페스트와 다릅니다.`);
+}
+/** SOFTM-HOME-COUNT-CHECK END */
+/** SOFTM-SEO-FACILITY-CHECK START 날짜:20260907 : 요양원 대표 페이지가 핵심 검색 과제와 실제 비교·해석 내용을 함께 유지하도록 검증 */
+const facilityLanding = read('nursing-home-map.html');
+if (!facilityLanding.includes(`<title>전국 요양원 ${careManifest.facility.count.toLocaleString('ko-KR')}곳 찾기·비교`) || !facilityLanding.includes('<h1 id="page-title">전국 요양원 찾기·비교</h1>')) fail('nursing-home-map.html: 전국 요양원 찾기 대표 제목 불일치');
+const facilityHead = facilityLanding.match(/<!-- \/\*\* SOFTM-SEO-FACILITY-INTENT START[\s\S]*?<!-- \/\*\* SOFTM-SEO-FACILITY-INTENT END \*\/ -->/)?.[0] || '';
+const facilityHeadCounts = [...facilityHead.matchAll(/(?<![\d,])([\d,]+)곳/g)].map(match => Number(match[1].replaceAll(',', '')));
+if (facilityHeadCounts.length !== 5 || facilityHeadCounts.some(count => count !== careManifest.facility.count)) fail('nursing-home-map.html: 검색 메타 기관 수가 매니페스트와 다릅니다.');
+for (const required of ['요양원 찾기에서 먼저 비교할 네 가지', '요양원 찾기 자주 묻는 질문', '평가정보 미확인은 낮은 등급을 뜻하나요?', '요양원과 요양병원은 무엇이 다른가요?', '기관 수는 공단 수집목록의 기관기호 기준입니다.']) {
+  if (!facilityLanding.includes(required)) fail(`nursing-home-map.html: 검색 의도 안내 누락 ${required}`);
+}
+/** SOFTM-SEO-FACILITY-CHECK END */
 if (!indexSource.includes('index-ad-config.js') || !indexSource.includes('initIndexAds()')) fail('index.html: 인덱스 전용 광고 초기화 누락'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 요양 광고 설정을 잘못 재사용하지 않도록 전용 설정 파일을 검사
 const indexAdConfig = runFiles(['index-ad-config.js']).INDEX_AD_CONFIG; // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 광고 크기와 단위를 독립 검증
 if (indexAdConfig?.kakao?.desktop?.width !== 728 || indexAdConfig?.kakao?.desktop?.height !== 90) fail('인덱스 PC 광고는 728×90 배너여야 합니다.');
@@ -102,6 +121,13 @@ const robotsSource = read('robots.txt');
 const sitemapDirectives = [...robotsSource.matchAll(/^Sitemap:\s*(\S+)/gim)].map(match => match[1]);
 if (sitemapDirectives.length !== 1 || sitemapDirectives[0] !== `${publicOrigin}/sitemap.xml`) fail('robots.txt는 공개 도메인의 단일 sitemap.xml만 안내해야 합니다.');
 const sitemapSource = read('sitemap.xml');
+/** SOFTM-SEO-LASTMOD-CHECK START 날짜:20260907 : 주요 페이지의 선언 수정일과 사이트맵 수정일이 달라져 검색엔진의 갱신 신호가 약해지지 않도록 검사 */
+for (const [htmlFile, publicUrl] of [['index.html', `${publicOrigin}/`], ['nursing-home-map.html', `${publicOrigin}/nursing-home-map.html`]]) {
+  const declared = read(htmlFile).match(/<meta name="dcterms\.modified" content="(\d{4}-\d{2}-\d{2})">/)?.[1];
+  const entry = [...sitemapSource.matchAll(/<url>[\s\S]*?<\/url>/g)].map(match => match[0]).find(value => value.includes(`<loc>${publicUrl}</loc>`));
+  if (!declared || !entry?.includes(`<lastmod>${declared}</lastmod>`)) fail(`${htmlFile}: 선언 수정일과 사이트맵 lastmod가 다릅니다.`);
+}
+/** SOFTM-SEO-LASTMOD-CHECK END */
 const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
 const expectedSitemapUrls = [
   `${publicOrigin}/`,
