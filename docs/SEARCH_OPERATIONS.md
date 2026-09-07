@@ -41,6 +41,18 @@
 - 검색 방문이 늘지 않으면 실제 검색어·랜딩 페이지 성과를 근거로 방문자에게 필요한 내용을 보완한다. 복제 페이지, 숨긴 키워드, 허위 후기, 자동 클릭을 만들지 않는다.
 - 사이트 소유권 확인 파일은 유지한다. 새 유료 광고·분석 서비스·외부 게시물은 별도 승인 없이 시작하지 않는다.
 
+## 네이버 갱신 통지
+
+<!-- SOFTM-INDEXNOW START 날짜:20260907 : 누락된 favicon과 오래된 robots 판정을 실제 배포 후 안전하게 다시 수집시키는 절차를 고정 -->
+
+- 네이버 사이트 진단에서 2026-09-05 기준 14개 페이지가 색인됐고, 접근 불가 1건은 `/favicon.ico`, `meta robots` 제외 1건은 2026-09-04에 수집한 `nationwide-care-services-map.html?type=nursing-hospital`의 이전 상태였다. 현재 지도는 `index,follow`이므로 과거 진단만 보고 다시 `noindex`를 넣지 않는다.
+- 루트의 `favicon.ico`·`favicon.svg`·`apple-touch-icon.png`·`site-icon-512.png`를 함께 유지한다. 특히 `/favicon.ico`는 네이버 검색로봇이 직접 요청하므로 삭제하지 않는다.
+- 새 페이지를 배포하거나 기존 페이지 내용을 실제로 바꾼 뒤에만 IndexNow로 해당 URL을 통지한다. 키 파일이 공개 사이트에서 확인되지 않으면 스크립트가 제출을 중단한다.
+- 실행 예시: `npm run notify:indexnow -- --url / --url /about.html`. 기존 사이트맵 827개를 매번 일괄 제출하거나 같은 URL을 반복 제출하지 않는다.
+- IndexNow 응답 성공은 갱신 신호의 접수일 뿐 색인·브랜드 검색 노출 완료가 아니다. 일반 검색 결과와 노출·클릭 보고서를 계속 별도로 확인한다.
+
+<!-- SOFTM-INDEXNOW END -->
+
 ## 공식 안내
 
 - [Google 사이트 이름](https://developers.google.com/search/docs/appearance/site-names)
