@@ -49,7 +49,7 @@
         };
     }
     let options, basket, bar, media, detailOrigin, view = 'list', workspace = 'search', routePanel = false;
-    let rowById = new Map(), restoreGeneration = 0, routeRevision = 0, readyTimer = null;
+    let rowById = new Map(), restoreGeneration = 0, routeRevision = 0, readyTimer = null, searchMapFocusTimer = null;
     let basketMap, routeOutput, originController, tabs, dock, lastItems = '', cancelBasketDrag = () => {};
     let routeState = { phase: 'idle', missing: [] }, originState = { phase: 'idle', origin: null, candidates: [] };
     const workspacePositions = { search: null, saved: null }, workspaceViews = { search: 'list', saved: 'list' };
@@ -159,6 +159,21 @@
         if (preserveScroll && positions[workspace][view]) restore(positions[workspace][view]);
         else document.querySelector('.care-view-switch')?.scrollIntoView({ behavior: 'instant', block: 'start' });
     }
+    /** SOFTM-SEARCH-MAP-SCROLL START 날짜:20260907 : 명시적 조회가 끝나면 결과 지도와 조회 완료 상태를 바로 확인할 수 있도록 이동 */
+    function focusSearchMap() {
+        if (workspace !== 'search') setWorkspace('search', false);
+        if (media?.matches) setView('map', false);
+        const card = document.querySelector('.map-card');
+        if (!card) return;
+        clearTimeout(searchMapFocusTimer); card.classList.remove('care-search-map-focus');
+        requestAnimationFrame(() => {
+            const reducedMotion = root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            card.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' });
+            card.classList.add('care-search-map-focus');
+            searchMapFocusTimer = setTimeout(() => card.classList.remove('care-search-map-focus'), 1500);
+        });
+    }
+    /** SOFTM-SEARCH-MAP-SCROLL END */
     function showSaved({ fit = true } = {}) {
         clearTimeout(readyTimer);
         if (workspace !== 'saved') return;
@@ -497,7 +512,7 @@
     function isBasketMap() { return workspace === 'saved'; }
     function exitBasketMap() { if (basketMap?.active()) setWorkspace('search', false); }
     function contains(id) { return basket?.has(id) || false; }
-    root.CareMapExperience = Object.freeze({ init, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains });
+    root.CareMapExperience = Object.freeze({ init, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-MAP-EXPERIENCE END */
