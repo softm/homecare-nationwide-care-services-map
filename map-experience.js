@@ -54,6 +54,9 @@
     let routeState = { phase: 'idle', missing: [] }, originState = { phase: 'idle', origin: null, candidates: [] };
     const workspacePositions = { search: null, saved: null }, workspaceViews = { search: 'list', saved: 'list' };
     const positions = { search: { list: null, map: null }, saved: { list: null, map: null } };
+    /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 지도와 목록을 화면 가득 확인한 뒤 원래 위치와 크기로 돌아갈 수 있도록 확대 상태를 별도로 보존 */
+    let workspaceExpanded = false, expandedOrigin = null, expandPointerOrigin = null;
+    /** SOFTM-WORKSPACE-EXPAND END */
     const allRows = () => options?.rows() || [];
     const rows = () => (basket?.ids() || []).map(id => rowById.get(id)).filter(Boolean);
     const busy = () => routeState.phase === 'routing' || routeState.phase === 'locating';
@@ -129,6 +132,34 @@
         const generation = ++restoreGeneration;
         requestAnimationFrame(() => { if (generation !== restoreGeneration) return; const list = document.getElementById('list'); if (list) list.scrollTop = position.list; if (bar) bar.scrollTop = position.saved; root.scrollTo({ top: position.top, behavior: 'instant' }); });
     }
+    /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 작업영역 확대 전의 페이지·목록 위치를 저장하고 버튼이나 Esc로 같은 위치에 복귀 */
+    function setWorkspaceExpanded(next) {
+        next = Boolean(next);
+        if (next === workspaceExpanded) return;
+        const previous = expandedOrigin;
+        if (next) expandedOrigin = expandPointerOrigin || { position: remember(), focus: document.activeElement };
+        else expandedOrigin = null;
+        expandPointerOrigin = null; // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 한 번 누를 때 저장한 확대 전 위치가 다음 조작에 재사용되지 않도록 정리
+        workspaceExpanded = next;
+        document.body.classList.toggle('care-workspace-expanded', next);
+        const toggle = tabs?.querySelector('[data-layout-expand]'), label = toggle?.querySelector('[data-layout-label]');
+        if (toggle) {
+            toggle.setAttribute('aria-pressed', String(next));
+            toggle.setAttribute('aria-label', next ? '지도와 목록 원래 크기로 복구' : '지도와 목록 크게 보기');
+            toggle.title = next ? '원래 화면으로 돌아가기 (Esc)' : '지도와 목록 크게 보기';
+        }
+        if (label) label.textContent = next ? '원래대로' : '크게 보기';
+        syncView();
+        requestAnimationFrame(() => {
+            options.resizeMap?.();
+            if (workspace === 'saved') basketMap?.fit();
+            if (!next && previous) {
+                restore(previous.position);
+                requestAnimationFrame(() => { if (previous.focus?.isConnected) previous.focus.focus({ preventScroll: true }); });
+            }
+        });
+    }
+    /** SOFTM-WORKSPACE-EXPAND END */
     function syncView() {
         document.body.dataset.careView = view;
         document.body.dataset.careWorkspace = workspace;
@@ -393,11 +424,14 @@
         media = root.matchMedia('(max-width: 1000px)');
         const layout = document.querySelector('.layout'), results = document.querySelector('.results');
         results.id = 'careSearchResults';
-        tabs = document.createElement('nav'); tabs.className = 'care-workspace-tabs'; tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', '기관 찾기와 담은 기관');
-        /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 두 작업을 선택 가능한 탭으로 구분하고 담은 숫자의 강조 공간을 확보 */
-        tabs.innerHTML = `<button type="button" id="careSearchTab" role="tab" data-workspace="search" aria-selected="true" aria-controls="careSearchResults"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg><span class="care-tab-copy"><span class="care-tab-title">기관 찾기</span><span class="care-tab-hint" aria-hidden="true">지역 · 조건으로 검색</span></span></button><button type="button" id="careSavedTab" role="tab" data-workspace="saved" aria-selected="false" aria-controls="careSavedPanel" tabindex="-1"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4Z"></path></svg><span class="care-tab-copy"><span class="care-tab-title">담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span></span><span class="care-tab-hint" aria-hidden="true">비교 · 경로탐색</span></span></button>`;
-        /** SOFTM-TAB-FEEDBACK END */
+        tabs = document.createElement('nav'); tabs.className = 'care-workspace-tabs'; tabs.setAttribute('aria-label', '기관 찾기와 화면 크기');
+        /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 작업 탭 옆에서 지도·목록 확대와 원상복구를 한 버튼으로 전환 */
+        tabs.innerHTML = `<div class="care-workspace-tab-list" role="tablist" aria-label="기관 찾기와 담은 기관"><button type="button" id="careSearchTab" role="tab" data-workspace="search" aria-selected="true" aria-controls="careSearchResults"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg><span class="care-tab-copy"><span class="care-tab-title">기관 찾기</span><span class="care-tab-hint" aria-hidden="true">지역 · 조건으로 검색</span></span></button><button type="button" id="careSavedTab" role="tab" data-workspace="saved" aria-selected="false" aria-controls="careSavedPanel" tabindex="-1"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4Z"></path></svg><span class="care-tab-copy"><span class="care-tab-title">담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span></span><span class="care-tab-hint" aria-hidden="true">비교 · 경로탐색</span></span></button></div><button type="button" class="care-layout-toggle" data-layout-expand aria-pressed="false" aria-label="지도와 목록 크게 보기" title="지도와 목록 크게 보기"><svg class="care-layout-toggle-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path><path class="care-layout-restore-path" d="M9 9H5V5M15 9h4V5M9 15H5v4M15 15h4v4"></path></svg><span data-layout-label>크게 보기</span></button>`;
+        /** SOFTM-WORKSPACE-EXPAND END */
         document.querySelector('main.wrap').prepend(tabs);
+        tabs.querySelector('[data-layout-expand]').addEventListener('pointerdown', event => {
+            if (!workspaceExpanded) expandPointerOrigin = { position: remember(), focus: event.currentTarget };
+        }); // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 고정 버튼 포커스로 문서가 먼저 이동하기 전에 실제 보고 있던 위치를 저장
         /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 담기 결과를 음성으로도 알리고 확대된 탭이 아래 영역을 가리지 않도록 실제 높이를 공유 */
         basketAnnouncement = document.createElement('p'); basketAnnouncement.className = 'care-basket-announcement'; basketAnnouncement.setAttribute('role', 'status'); basketAnnouncement.setAttribute('aria-atomic', 'true'); tabs.after(basketAnnouncement);
         const measureTabs = () => document.body.style.setProperty('--care-tabs-height', `${tabs.getBoundingClientRect().height}px`);
@@ -433,10 +467,10 @@
         });
         function move(id, index) { const row = rowById.get(id); basket.move(id, index); changed(`${row?.n || '기관'}을 ${index + 1}번째로 옮겼습니다.${routePanel ? ' 경로를 다시 탐색해 주세요.' : ''}`); bar.querySelector(`[data-basket-drag="${CSS.escape(id)}"]`)?.focus({ preventScroll: true }); }
         cancelBasketDrag = installBasketDrag(bar, move);
-        tabs.addEventListener('keydown', event => { if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return; event.preventDefault(); const next = event.key === 'Home' ? 'search' : event.key === 'End' ? 'saved' : workspace === 'search' ? 'saved' : 'search'; setWorkspace(next); tabs.querySelector(`[data-workspace="${next}"]`).focus({ preventScroll: true }); });
+        tabs.addEventListener('keydown', event => { if (!event.target.closest('[data-workspace]') || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return; event.preventDefault(); const next = event.key === 'Home' ? 'search' : event.key === 'End' ? 'saved' : workspace === 'search' ? 'saved' : 'search'; setWorkspace(next); tabs.querySelector(`[data-workspace="${next}"]`).focus({ preventScroll: true }); }); // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 확대 버튼의 방향키가 작업 탭을 바꾸지 않도록 탭 키보드 범위를 제한
         media.addEventListener('change', () => { syncView(); options.resizeMap?.(); if (workspace === 'saved') requestAnimationFrame(() => basketMap.fit()); });
         document.addEventListener('click', event => {
-            const node = event.target.closest('[data-care-basket], [data-workspace], [data-basket-open], [data-basket-clear], [data-route-edit], [data-route-back], [data-route-run], [data-origin-locate], [data-origin-choice], [data-saved-detail], [data-saved-fit], button[data-care-view]');
+            const node = event.target.closest('[data-care-basket], [data-workspace], [data-layout-expand], [data-basket-open], [data-basket-clear], [data-route-edit], [data-route-back], [data-route-run], [data-origin-locate], [data-origin-choice], [data-saved-detail], [data-saved-fit], button[data-care-view]'); // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 공용 클릭 흐름에서 확대 토글을 처리
             if (!node || node.disabled) return;
             event.stopPropagation();
             /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 실제 추가 클릭에만 반응하고 삭제·순서 변경·세션 복원은 담기 효과에서 제외 */
@@ -446,6 +480,7 @@
             }
             /** SOFTM-TAB-FEEDBACK END */
             else if (node.hasAttribute('data-workspace')) setWorkspace(node.dataset.workspace);
+            else if (node.hasAttribute('data-layout-expand')) setWorkspaceExpanded(!workspaceExpanded); // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 같은 버튼으로 확대와 원상복구를 전환
             else if (node.hasAttribute('data-basket-open')) options.compare();
             else if (node.hasAttribute('data-basket-clear')) { basket.clear(); changed(); }
             else if (node.hasAttribute('data-route-edit')) editRoute();
@@ -457,6 +492,13 @@
             else if (node.hasAttribute('data-saved-fit')) basketMap.fit();
             else setView(node.dataset.careView);
         }, true);
+        /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 상세·사진·문의창의 Esc 처리가 없을 때만 확대 작업영역을 원상복구 */
+        document.addEventListener('keydown', event => {
+            if (event.key !== 'Escape' || event.defaultPrevented || !workspaceExpanded) return;
+            event.preventDefault();
+            setWorkspaceExpanded(false);
+        });
+        /** SOFTM-WORKSPACE-EXPAND END */
         bar.querySelector('.care-origin-form').addEventListener('submit', event => { event.preventDefault(); const input = bar.querySelector('#careOriginAddress'); if (!input.value.trim()) { input.focus(); return; } void originController.search(input.value.trim()); });
         bar.querySelector('#careOriginAddress').addEventListener('input', () => { if (originState.phase !== 'idle') originController.clear(); });
         document.addEventListener('toggle', event => {
