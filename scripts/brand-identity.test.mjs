@@ -27,10 +27,23 @@ test('홈페이지와 소개 문서가 같은 사이트 식별자를 사용', ()
   assert.equal(sites[0]['@id'], siteId);
   assert.equal(sites[0].name, '돌봄한눈');
   assert.equal(sites[0].url, `${publicOrigin}/`);
+  assert.equal(sites[0].publisher?.['@id'], `${publicOrigin}/#organization`); // SOFTM-SEARCH-BRAND 날짜:20260907 : 사이트와 운영 주체 식별자가 분리되지 않도록 검사
+  const organization = structured(home).find(item => item['@type'] === 'Organization');
+  assert.equal(organization?.name, '돌봄한눈');
+  assert.equal(organization?.logo?.url, `${publicOrigin}/site-icon-512.png`);
   const page = structured(about).find(item => ['AboutPage', 'WebPage'].includes(item['@type']));
   assert(page, '서비스 소개의 구조화 데이터 누락');
   assert.equal(page.isPartOf?.['@id'], siteId);
 });
+
+test('홈페이지가 검색결과용 공개 아이콘을 사용한다', () => {
+  assert.match(home, /<link\b[^>]*rel="icon"[^>]*href="\/favicon\.ico"/);
+  assert.match(home, /<link\b[^>]*rel="icon"[^>]*href="\/favicon\.svg"/);
+  assert.match(home, /<meta\b[^>]*property="og:image"[^>]*content="https:\/\/homecare\.designboard\.net\/site-icon-512\.png"/);
+  for (const file of ['favicon.ico', 'favicon.svg', 'apple-touch-icon.png', 'site-icon-512.png']) {
+    assert(fs.existsSync(new URL(`../${file}`, import.meta.url)), `검색 아이콘 누락: ${file}`);
+  }
+}); // SOFTM-SEARCH-ICON 날짜:20260907 : 네이버가 요청한 favicon.ico가 다시 누락되지 않도록 검증
 
 test('소개 페이지는 검색 허용·자기 대표 주소와 실제 출처를 제공', () => {
   const url = `${publicOrigin}/about.html`;
