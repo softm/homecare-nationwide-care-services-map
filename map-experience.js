@@ -259,6 +259,7 @@
     function setWorkspace(next, restoreScroll = true) {
         next = next === 'saved' ? 'saved' : 'search';
         if (next === workspace) return;
+        showRouteError(); // SOFTM-ROUTE-ERROR-ALERT 날짜:20260909 : 다른 작업으로 이동하면 이전 경로 오류 알림을 닫음
         workspacePositions[workspace] = remember(); workspaceViews[workspace] = view;
         options.closeDetail?.(); cancelDetail(); cancelBasketDrag(); originController.cancel(); routeRevision++;
         clearTimeout(readyTimer); workspace = next; routePanel = false; view = workspaceViews[next];
@@ -294,8 +295,24 @@
         bar.querySelector('[data-origin-search]').disabled = originState.phase === 'loading';
         refresh();
     }
+    /** SOFTM-ROUTE-ERROR-ALERT START 날짜:20260909 : 목록 아래 오류를 놓치지 않도록 스크롤과 무관한 닫기 가능한 알림을 유지 */
+    function showRouteError(message = '') {
+        let notice = document.querySelector('.care-route-error-alert');
+        if (!notice && message) {
+            notice = document.createElement('section');
+            notice.className = 'care-route-error-alert';
+            notice.innerHTML = '<div role="alert" aria-atomic="true"><strong>경로를 탐색하지 못했습니다</strong><p></p></div><button type="button" aria-label="경로탐색 오류 알림 닫기">×</button>';
+            notice.querySelector('button').addEventListener('click', () => { notice.hidden = true; });
+            document.body.append(notice);
+        }
+        if (!notice) return;
+        notice.hidden = !message;
+        notice.querySelector('p').textContent = message;
+    }
+    /** SOFTM-ROUTE-ERROR-ALERT END */
     function renderRoute(state) {
         routeState = state;
+        showRouteError(state.phase === 'error' ? state.error || '잠시 후 다시 탐색해 주세요.' : ''); // SOFTM-ROUTE-ERROR-ALERT 날짜:20260909 : 실패를 즉시 알리고 재탐색 시작 시 이전 오류를 제거
         const result = state.result, status = routeOutput.querySelector('[role="status"]');
         const messages = { locating: '기관 위치를 확인하고 있습니다…', routing: '담은 순서대로 도로 경로를 탐색하고 있습니다…', waiting: '지도를 연결하고 있습니다…' };
         status.textContent = state.error || messages[state.phase] || (state.phase === 'success' ? '경로탐색 완료' : rows().length > 16 ? '방문 경로는 16곳까지 탐색할 수 있습니다.' : originState.origin ? '출발지와 방문 순서를 확인한 뒤 경로탐색을 눌러 주세요.' : '출발지를 먼저 선택해 주세요.');
