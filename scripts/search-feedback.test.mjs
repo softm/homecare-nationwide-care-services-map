@@ -185,6 +185,7 @@ function makeCareHarness(rows) {
         function cachedCoord(row){return row.coord}
         function hav(){return 0}function sortRows(){}function markerIcon(){}
         function geocode(row){return externalGeocode(row)}
+        function updateAreaLocation(){} // SOFTM-LOCATION-ROW 날짜:20260909 : 조회 건수 검사는 비동기 주소 표시를 모의 처리
         function showLoading(){}function hideLoading(){}function setStatus(){}function renderList(){updateStats()}
         const feedback={isCurrent:()=>true,progress:recordProgress};
     `, context);

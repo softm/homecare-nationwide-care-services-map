@@ -97,7 +97,7 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
         geocode: async row => row._coord, basePoint: null, showLoading() {}, hideLoading() {},
         $: () => node, areaRows: [], selected: new Set(), sortRows() {}, markers: placed,
         /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 조회 완료 계약을 제공하면서 기존 전체 화면 후보 검증을 유지 */
-        markerIcon() {}, renderList() {}, setStatus() {}, rows, resultCount: 0,
+        markerIcon() {}, renderList() {}, setStatus() {}, updateAreaLocation() {}, rows, resultCount: 0, // SOFTM-LOCATION-ROW 날짜:20260909 : 지도 후보 검사는 별도 위치줄 표시를 모의 처리
         beginCareQuery: () => ({ current: () => true }), publishCareResult: (query, outcome) => outcome
         /** SOFTM-SEARCH-FEEDBACK END */
     });
