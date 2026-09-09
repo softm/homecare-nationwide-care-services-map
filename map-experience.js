@@ -166,7 +166,7 @@
         document.body.dataset.carePanel = routePanel ? 'route' : 'saved';
         document.body.classList.toggle('care-basket-map', workspace === 'saved');
         document.body.style.setProperty('--care-nav-height', `${document.querySelector('.category-nav')?.getBoundingClientRect().height || 0}px`);
-        const compact = media.matches, saved = workspace === 'saved';
+        const compact = media.matches && workspace === 'saved', saved = workspace === 'saved'; // SOFTM-MOBILE-MAP 날짜:20260909 : 검색 화면에서는 지도와 목록을 동시에 조작할 수 있도록 inert 제한을 해제
         const map = document.querySelector('.map-card'), results = document.querySelector('.results');
         results.hidden = saved; results.inert = saved || compact && view !== 'list';
         bar.hidden = !saved; bar.inert = !saved || compact && view !== 'list';
@@ -283,6 +283,73 @@
         if (!['facility', 'daycare', 'home-care'].includes(service)) return '';
         return `<details class="care-map-cost" data-cost-service="${escape(service)}" data-cost-institution="${escape(row.i)}"><summary>월 예상 비용 알아보기</summary><div class="care-map-cost-host"></div></details>`;
     }
+    /** SOFTM-MOBILE-MAP START 날짜:20260909 : 조건 입력보다 현재 결과를 먼저 보여주고 보이는 기관만 사진·마커와 연결 */
+    function installMobileSearch() {
+        const filters = document.querySelector('.filters'), list = document.getElementById('list');
+        if (!document.getElementById('searchBtn')) {
+            const search = document.createElement('button'); search.type = 'button'; search.id = 'searchBtn';
+            search.className = 'search-btn care-mobile-search'; search.textContent = '조회';
+            search.onclick = () => options.mobileSearch?.(); filters.querySelector('.filter-grid').append(search);
+        }
+        const toggle = document.createElement('button');
+        toggle.type = 'button'; toggle.className = 'care-mobile-filter-toggle';
+        toggle.textContent = '검색조건'; toggle.setAttribute('aria-expanded', 'false');
+        filters.id ||= 'careMobileFilters'; toggle.setAttribute('aria-controls', filters.id);
+        filters.querySelector('.filter-grid').append(toggle);
+        const setOpen = open => {
+            document.body.classList.toggle('care-mobile-filters-open', open);
+            toggle.setAttribute('aria-expanded', String(open)); toggle.textContent = open ? '조건 닫기' : '검색조건';
+        };
+        toggle.onclick = () => setOpen(!document.body.classList.contains('care-mobile-filters-open'));
+        document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') setOpen(false); });
+        document.getElementById('searchBtn')?.addEventListener('click', () => setOpen(false));
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+        let active = null, frame = 0;
+        const photoCache = new Map();
+        const photoObserver = new IntersectionObserver(entries => {
+            for (const entry of entries) {
+                if (!entry.isIntersecting || !media.matches) continue;
+                const row = entry.target; photoObserver.unobserve(row);
+                const id = row.dataset.id || row.querySelector('[data-care-basket]')?.dataset.careBasket;
+                if (!id || options.type === 'nursing-hospital') continue;
+                const figure = document.createElement('span'); figure.className = 'care-result-photo';
+                figure.textContent = '공단 사진 확인 중'; row.prepend(figure);
+                if (!photoCache.has(id)) photoCache.set(id, root.NhisStaticData.photos(id));
+                photoCache.get(id).then(data => {
+                    const photo = data.photos?.find(item => item.isRepresentative === true) || data.photos?.[0];
+                    if (!photo) { figure.textContent = '등록사진 없음'; return; }
+                    const url = new URL(photo.thumbnailUrl || photo.url, location.href);
+                    if (!['https:', 'http:'].includes(url.protocol)) throw new Error('사진 주소');
+                    const img = document.createElement('img'); img.alt = photo.title || photo.alt || '공단 등록사진';
+                    img.loading = 'lazy'; img.decoding = 'async'; img.src = url.href;
+                    img.onerror = () => { figure.textContent = '사진 로딩 실패'; };
+                    figure.replaceChildren(img);
+                }).catch(() => { figure.textContent = '사진 정보 없음'; photoCache.delete(id); });
+            }
+        }, { root: list, rootMargin: '120px' });
+        const sync = () => {
+            frame = 0;
+            if (!media.matches || workspace !== 'search') return;
+            const top = list.getBoundingClientRect().top;
+            const rows = [...list.querySelectorAll('.row')];
+            const row = rows.find(node => node.getBoundingClientRect().bottom > top + 55);
+            if (!row) return;
+            const id = row.dataset.id || row.querySelector('[data-care-basket]')?.dataset.careBasket;
+            if (active !== row) {
+                active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
+                active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
+            }
+            options.mobileFocus?.(id);
+        };
+        const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
+        const observe = () => { photoObserver.disconnect(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); };
+        new MutationObserver(observe).observe(list, { childList: true });
+        list.addEventListener('scroll', schedule, { passive: true });
+        new MutationObserver(schedule).observe(document.querySelector('.map-wrap'), { childList: true, subtree: true }); // SOFTM-MOBILE-MAP 날짜:20260909 : 비동기로 생성된 첫 마커에도 현재 목록 선택을 연결
+        media.addEventListener('change', () => { setOpen(false); if (!media.matches) options.mobileFocus?.(null); observe(); });
+        observe();
+    }
+    /** SOFTM-MOBILE-MAP END */
     function prepareFilters() {
         const filters = document.querySelector('.filters'), main = document.querySelector('main.wrap');
         if (!filters || !main) return;
@@ -508,6 +575,7 @@
             details.dataset.costMounted = 'true'; root.CareCostUI.mount(details.querySelector('.care-map-cost-host'), { service: details.dataset.costService, institution: { id: row.i, name: row.n, serviceCodes: String(row.t || '').split(',').filter(Boolean) } });
         }, true);
         root.addEventListener('pageshow', () => { const before = basket.ids().join(','); if (storage) { basket = createBasket(storage, options.type); basket.retain(new Set(rowById.keys())); } if (before !== basket.ids().join(',')) changed(); else refresh(); });
+        installMobileSearch(); // SOFTM-MOBILE-MAP 날짜:20260909 : 첫 화면에서 지도와 목록을 함께 탐색하도록 모바일 조작 연결
         syncView(); renderOrigin(); renderRoute(routeState);
     }
     /** SOFTM-WORKSPACE END */

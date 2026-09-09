@@ -64,10 +64,10 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 두 지도에서 읽기 크기와 비용·비교 흐름을 동일하게 제공 -->
 <link rel="stylesheet" href="care-theme.css?v=20260904-1">
 <link rel="stylesheet" href="care-cost.css?v=20260904-1">
-<link rel="stylesheet" href="map-experience.css?v=20260907-2"> <!-- SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 지도·목록 크게 보기와 원상복구 배치를 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="map-experience.css?v=20260909-1"> <!-- SOFTM-MOBILE-ASSETS 날짜:20260909 : 모바일 지도·목록과 위치 팝업 변경을 이전 캐시 없이 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 </head>
-<body>
+<body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급을 구분하고 자료 설명을 쉽게 제공 -->
 <header><h1>전국 주야간보호센터 찾기·평가 비교</h1><p>가까운 기관을 찾고 공단 공개 평가와 이용정보를 비교해 보세요.</p><p><a style="color:#fff" href="index.html">돌봄한눈 홈</a> · <a style="color:#fff" href="gwangmyeong-daycare-center-map.html">광명·구로 상세 비교지도로 이동</a></p></header>
 <!-- SOFTM-MAP-WORDING END -->
@@ -116,7 +116,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="region-bounds.js?v=20260904-1"></script>
 <script src="viewport-regions.js?v=20260904-1"></script>
 <!-- SOFTM-VIEWPORT-REGIONS END -->
-<script src="care-location.js?v=20260905-1"></script> <!-- SOFTM-LOCATION 날짜:20260905 : 두 지도와 방문 출발지의 모바일 위치 처리를 공유 -->
+<script src="care-location.js?v=20260909-1"></script> <!-- SOFTM-MOBILE-ASSETS 날짜:20260909 : 모바일 지도·목록과 위치 팝업 변경을 이전 캐시 없이 적용 -->
 <script src="naver-geocoder.js?v=20260905-3"></script> <!-- SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도에 법정동 상세주소 보완을 함께 적용 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
@@ -128,7 +128,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="care-cost-engine.js?v=20260904-1"></script>
 <script src="care-cost-ui.js?v=20260904-1"></script>
 <script src="care-basket-map.js?v=20260905-2"></script> <!-- SOFTM-WORKSPACE 날짜:20260905 : 검색·담은 기관·출발지 선택을 같은 버전으로 적용 -->
-<script src="map-experience.js?v=20260907-2"></script> <!-- SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 공용 전체 화면 토글과 복귀 동작을 이전 캐시 없이 적용 -->
+<script src="map-experience.js?v=20260909-1"></script> <!-- SOFTM-MOBILE-ASSETS 날짜:20260909 : 모바일 지도·목록과 위치 팝업 변경을 이전 캐시 없이 적용 -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
@@ -699,7 +699,22 @@ function daycareBasketAdapter(){
  }}
 /** SOFTM-WORKSPACE-ADAPTER END */
 /** SOFTM-BASKET-MAP END */
-async function bootDaycare(){const meta=(await CareData.manifest()).daycare;DATA_SOURCE_DATE=meta.sourceDate;$('dataSourceDate').textContent=meta.sourceDate;$('dataSourceNote').textContent=`국민건강보험공단 수집 목록 ${meta.count.toLocaleString()}곳 · 공단 평가 연결 ${meta.evaluationCount.toLocaleString()}곳 · 목록 기준 ${meta.sourceDate}. 정원·인력은 기관별 수집 상세를 사용하며 좌표는 주소로 변환합니다.`;DATA.push(...await CareData.category('daycare'));DATA.forEach(c=>{c.ev=c.ev||null;c.local=ENRICHED[c.i]||null});initFilters();sharedState=readSharedState();if(sharedState)restoreSharedControls(sharedState);else updateCities();advancedSearch=await CareAdvancedSearch.mount({host:$('advancedSearch'),type:'daycare',rows:DATA,resultTarget:$('list'),onChange:refreshDaycareAdvanced,region:()=>({province:$('province').value,city:$('city').value})});CareMapExperience.init({type:"daycare",rows:()=>DATA,compare:compareSelected,basketMap:daycareBasketAdapter(),detail:showOnMap,closeDetail:closeMapPopup,resizeMap:()=>{if(!mapReady)return;const center=naverMap.getCenter();clearTimeout(boundsTimer);skipIdleUntil=Date.now()+1200;naver.maps.Event.trigger(naverMap,"resize");naverMap.setCenter(center)}});apply(true,false);initAds();loadNaver();} // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공통 기관자료 준비 후 상세조건과 공유 주소를 연결 // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결
+/** SOFTM-MOBILE-MAP START 날짜:20260909 : 스크롤 선택은 상세창 없이 마커만 강조하고 내부 이동 재조회를 차단 */
+let mobileActiveMarker=null,mobileActiveIcon=null;
+function focusMobileRow(id){
+ if(!mapReady||CareMapExperience.isBasketMap()||popupViewState)return;
+ const marker=mapMarkers.find(marker => String(marker.centerId) === String(id));
+ if(mobileActiveMarker===marker&&(!marker||String(marker.getIcon()?.content).includes('care-mobile-active-marker')))return;
+ if(mobileActiveMarker&&mobileActiveIcon){mobileActiveMarker.setIcon(mobileActiveIcon);mobileActiveMarker.setZIndex(1000)}
+ mobileActiveMarker=marker;mobileActiveIcon=null;
+ if(!marker||!marker.getMap())return;
+ mobileActiveIcon=marker.getIcon();
+ marker.setIcon({...mobileActiveIcon,content:'<div class="care-mobile-active-marker">'+mobileActiveIcon.content+'</div>'});marker.setZIndex(4500);
+ clearTimeout(boundsTimer);skipIdleUntil=Date.now()+1400;
+ if(!naverMap.getBounds().hasLatLng(marker.getPosition()))naverMap.panTo(marker.getPosition());
+}
+/** SOFTM-MOBILE-MAP END */
+async function bootDaycare(){const meta=(await CareData.manifest()).daycare;DATA_SOURCE_DATE=meta.sourceDate;$('dataSourceDate').textContent=meta.sourceDate;$('dataSourceNote').textContent=`국민건강보험공단 수집 목록 ${meta.count.toLocaleString()}곳 · 공단 평가 연결 ${meta.evaluationCount.toLocaleString()}곳 · 목록 기준 ${meta.sourceDate}. 정원·인력은 기관별 수집 상세를 사용하며 좌표는 주소로 변환합니다.`;DATA.push(...await CareData.category('daycare'));DATA.forEach(c=>{c.ev=c.ev||null;c.local=ENRICHED[c.i]||null});initFilters();sharedState=readSharedState();if(sharedState)restoreSharedControls(sharedState);else updateCities();advancedSearch=await CareAdvancedSearch.mount({host:$('advancedSearch'),type:'daycare',rows:DATA,resultTarget:$('list'),onChange:refreshDaycareAdvanced,region:()=>({province:$('province').value,city:$('city').value})});CareMapExperience.init({type:"daycare",rows:()=>DATA,compare:compareSelected,basketMap:daycareBasketAdapter(),mobileFocus:focusMobileRow,mobileSearch:()=>{clearMapSearch(false);page=1;apply();},detail:showOnMap,closeDetail:closeMapPopup,resizeMap:()=>{if(!mapReady)return;const center=naverMap.getCenter();clearTimeout(boundsTimer);skipIdleUntil=Date.now()+1200;naver.maps.Event.trigger(naverMap,"resize");naverMap.setCenter(center)}});apply(true,false);initAds();loadNaver();} // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공통 기관자료 준비 후 상세조건과 공유 주소를 연결 // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결 // SOFTM-MOBILE-MAP 날짜:20260909 : 공용 목록 스크롤을 각 지도의 마커 강조와 연결
 /** SOFTM-MAP-EXPERIENCE END */
 bootDaycare().catch(error=>{showMapLoad(error.message);setMapStatus('기관 자료 로드 실패');showToast(error.message,'error')});
 /** SOFTM-DATA-UNIFIED END */

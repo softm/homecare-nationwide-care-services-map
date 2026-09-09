@@ -37,18 +37,20 @@
             return attempt(true);
         });
     }
-    const permissionHelp = 'Chrome: 주소창 왼쪽 사이트 설정 → 권한 → 위치를 허용해 주세요. 휴대폰 설정에서도 위치 기능과 사용 중인 브라우저의 위치 권한을 확인해 주세요.';
-    let notice;
-    function hideNotice() { if (notice) notice.hidden = true; }
+    /** SOFTM-LOCATION-DIALOG START 날짜:20260909 : 위치 실패 안내를 설정 방법과 복구 동작이 있는 모달로 제공 */
+    const permissionHelp = '이미 차단된 권한은 사이트에서 강제로 다시 요청할 수 없습니다. iPhone: 설정 → 개인정보 보호 및 보안 → 위치 서비스 및 Safari 웹사이트 권한을 확인하세요. Chrome: 주소창 왼쪽 사이트 설정 → 권한 → 위치를 허용해 주세요. 휴대폰 설정에서도 위치 기능과 사용 중인 브라우저의 위치 권한을 확인해 주세요.';
+    let notice, noticeFocus; // SOFTM-LOCATION-DIALOG 날짜:20260909 : 권한 안내를 닫으면 원래 조작 위치로 복귀
+    function hideNotice() { if (notice) { notice.close(); notice.hidden = true; noticeFocus?.focus?.({ preventScroll: true }); } } // SOFTM-LOCATION-DIALOG 날짜:20260909 : 차단 안내가 결과 탐색을 계속 가리지 않도록 닫기 지원
     function showNotice(error, retry) {
         if (!root.document) return;
         const target = root.document.querySelector('.map-card .map-wrap');
         if (!target) return;
         if (!notice) {
-            notice = root.document.createElement('section'); notice.className = 'care-location-notice';
+            notice = root.document.createElement('dialog'); notice.className = 'care-location-notice';
             notice.setAttribute('aria-label', '현재 위치 안내');
             notice.innerHTML = '<div role="status"><strong></strong><p></p></div><details><summary>위치 권한 설정 방법</summary><p></p></details><div class="care-location-actions"><button type="button" data-location-retry>현재 위치 다시 시도</button><button type="button" data-location-search>지역·기관명 검색</button><button type="button" data-location-dismiss aria-label="현재 위치 안내 닫기">닫기</button></div>';
-            target.before(notice);
+            root.document.body.append(notice); // SOFTM-LOCATION-DIALOG 날짜:20260909 : 지도 아래에 묻히는 권한 안내를 최상단 팝업으로 제공
+            notice.addEventListener('cancel', event => { event.preventDefault(); hideNotice(); });
             notice.querySelector('details p').textContent = permissionHelp;
             notice.querySelector('[data-location-dismiss]').onclick = hideNotice;
             notice.querySelector('[data-location-search]').onclick = () => {
@@ -57,12 +59,16 @@
             };
         }
         const detail = info(error);
-        notice.hidden = false; notice.dataset.reason = detail.reason;
+        noticeFocus = root.document.activeElement;
+        notice.hidden = false; if (!notice.open) notice.showModal(); // SOFTM-LOCATION-DIALOG 날짜:20260909 : 위치 실패를 놓치지 않도록 설정·재시도를 즉시 표시
+        notice.dataset.reason = detail.reason;
         notice.querySelector('strong').textContent = detail.title;
         notice.querySelector('[role="status"] p').textContent = detail.message;
         notice.querySelector('details').hidden = detail.reason !== 'denied';
+        notice.querySelector('details').open = detail.reason === 'denied'; // SOFTM-LOCATION-DIALOG 날짜:20260909 : 이미 차단한 권한은 브라우저 설정 변경이 필요하므로 안내를 펼침
         notice.querySelector('[data-location-retry]').onclick = retry;
     }
+    /** SOFTM-LOCATION-DIALOG END */
     root.CareLocation = Object.freeze({ request: options => requestPosition(root, options), requestPosition, info, permissionHelp, showNotice, hideNotice });
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-LOCATION END */
