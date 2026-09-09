@@ -9,8 +9,9 @@
         network: '음성 인식 서비스에 연결하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.'
     };
     function createSession(Recognition, update) {
-        let current = null, generation = 0;
+        let current = null, generation = 0, stopTimer = null; // SOFTM-VOICE-TEXT 날짜:20260909 : 최종 결과 응답이 없을 때 대기 상태를 해제
         function cancel() {
+            clearTimeout(stopTimer); stopTimer = null;
             generation++;
             const previous = current; current = null;
             if (previous) { try { previous.abort(); } catch {} }
@@ -32,14 +33,22 @@
                 recognizer.onerror = event => { failed = true; emit({ state: 'error', message: messages[event.error] || '음성을 인식하지 못했습니다. 다시 시도하거나 직접 입력해 주세요.' }); };
                 recognizer.onend = () => {
                     if (generation !== token) return;
-                    current = null;
+                    clearTimeout(stopTimer); stopTimer = null; current = null;
                     if (!failed) emit({ state: 'ready', message: heard ? '검색어를 확인하거나 수정한 뒤 조회해 주세요.' : messages['no-speech'] });
                 };
                 emit({ state: 'starting', message: '마이크 연결 중입니다. 권한 요청이 표시되면 허용해 주세요.' });
                 recognizer.start();
             } catch { current = null; failed = true; emit({ state: 'error', message: '음성검색을 시작하지 못했습니다. 마이크 권한을 확인하거나 직접 입력해 주세요.' }); }
         }
-        return { start, cancel };
+        /** SOFTM-VOICE-TEXT START 날짜:20260909 : 사용자가 말을 마칠 때 마지막 인식 결과를 버리지 않도록 중지와 취소를 분리 */
+        function stop() {
+            if (!current) return;
+            update({ state: 'stopping', message: '말씀하신 내용을 텍스트로 변환하고 있습니다…' });
+            stopTimer = setTimeout(() => { cancel(); update({ state: 'error', message: '음성 변환 응답이 지연됩니다. 표시된 검색어를 사용하거나 다시 말해 주세요.' }); }, 8000);
+            try { current.stop(); } catch { cancel(); update({ state: 'error', message: '인식을 마치지 못했습니다. 다시 말하거나 검색어를 직접 입력해 주세요.' }); }
+        }
+        return { start, stop, cancel };
+        /** SOFTM-VOICE-TEXT END */
     }
     function mount({ input, search }) {
         if (!input || input.closest('.care-voice-input')) return;
@@ -53,29 +62,31 @@
         const Recognition = root.SpeechRecognition || root.webkitSpeechRecognition;
         const session = createSession(Recognition, result => {
             if (!dialog.open) return;
-            if (result.text !== undefined) transcript.value = result.text;
+            if (result.text !== undefined && result.text.trim()) { transcript.value = result.text; input.value = result.text; } // SOFTM-VOICE-TEXT 날짜:20260909 : 인식 텍스트를 확인창과 실제 검색창에 즉시 함께 반영
             status.textContent = result.message;
-            const busy = ['listening', 'starting'].includes(result.state);
+            const busy = ['listening', 'starting', 'stopping'].includes(result.state);
+            record.disabled = result.state === 'stopping'; // SOFTM-VOICE-TEXT 날짜:20260909 : 최종 결과를 기다리는 동안 재시작으로 결과가 취소되지 않도록 보호
             record.dataset.listening = String(busy); record.setAttribute('aria-label', busy ? '음성 인식 중지' : '음성 인식 다시 시작');
             submit.disabled = !transcript.value.trim();
         });
-        function stop() { session.cancel(); record.dataset.listening = 'false'; record.setAttribute('aria-label', '음성 인식 다시 시작'); }
+        function stop() { session.cancel(); record.disabled = !Recognition || !root.isSecureContext; record.dataset.listening = 'false'; record.setAttribute('aria-label', '음성 인식 다시 시작'); }
         function close() { stop(); dialog.close(); }
         trigger.onclick = () => {
-            transcript.value = ''; submit.disabled = true; dialog.showModal(); record.focus();
+            transcript.value = input.value; submit.disabled = !transcript.value.trim(); dialog.showModal(); record.focus(); // SOFTM-VOICE-TEXT 날짜:20260909 : 재시도나 오류에도 기존 검색어를 보존
             record.disabled = !Recognition || !root.isSecureContext;
-            status.textContent = !root.isSecureContext ? '보안 연결(HTTPS)에서 음성검색을 사용할 수 있습니다. 검색어를 직접 입력해 주세요.' : !Recognition ? '이 브라우저는 음성검색을 지원하지 않습니다. 검색어를 직접 입력해 주세요.' : '마이크 버튼을 누른 뒤 말씀해 주세요.';
+            status.textContent = !root.isSecureContext ? '보안 연결(HTTPS)에서 음성검색을 사용할 수 있습니다. 검색어를 직접 입력해 주세요.' : !Recognition ? '이 브라우저는 음성검색을 지원하지 않습니다. 검색어를 직접 입력해 주세요.' : '듣고 있습니다. 지역명이나 기관명을 말해 주세요.';
+            if (!record.disabled) session.start(); // SOFTM-VOICE-TEXT 날짜:20260909 : 검색창 마이크 한 번으로 바로 인식을 시작
         };
         record.onclick = () => {
-            if (record.dataset.listening === 'true') { stop(); status.textContent = '인식을 중지했습니다. 검색어를 확인하거나 다시 말해 주세요.'; }
+            if (record.dataset.listening === 'true') { session.stop(); } // SOFTM-VOICE-TEXT 날짜:20260909 : 중지 시 abort 대신 stop으로 마지막 텍스트를 수신
             else session.start();
         };
-        transcript.oninput = () => { stop(); submit.disabled = !transcript.value.trim(); };
+        transcript.oninput = () => { stop(); input.value = transcript.value; submit.disabled = !transcript.value.trim(); };
         submit.onclick = () => { const text = transcript.value.trim(); if (!text) return; input.value = text; close(); search(); };
         transcript.onkeydown = event => { if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); submit.click(); } };
         dialog.querySelector('.care-voice-close').onclick = close;
         dialog.addEventListener('cancel', event => { event.preventDefault(); event.stopPropagation(); close(); });
-        dialog.addEventListener('keydown', event => { if (event.key === 'Escape') event.stopPropagation(); });
+        dialog.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); } }); // SOFTM-VOICE-TEXT 날짜:20260909 : Esc의 검색 입력 초기화보다 창 닫기를 먼저 처리해 인식 텍스트를 보존
         dialog.addEventListener('close', () => { stop(); trigger.focus({ preventScroll: true }); });
         root.addEventListener('pagehide', stop);
         document.addEventListener('visibilitychange', () => { if (document.hidden && dialog.open) { stop(); status.textContent = '음성 인식이 중지되었습니다. 다시 시작해 주세요.'; } });
