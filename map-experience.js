@@ -352,10 +352,11 @@
         back.textContent = '‹'; back.setAttribute('aria-label', '이전 지도와 목록 화면으로 돌아가기'); document.querySelector('.filter-grid').prepend(back);
         const mapButton = document.createElement('button'); mapButton.type = 'button'; mapButton.className = 'care-sheet-map-button'; mapButton.textContent = '지도보기'; document.body.append(mapButton);
         let drag = null, ignoreClick = false, storedScroll = 0, revision = 0;
-        const active = () => media.matches && workspace === 'search';
+        const landscape = root.matchMedia('(max-width:1000px) and (orientation:landscape)'); // SOFTM-LANDSCAPE 날짜:20260909 : 가로 화면에서는 세로 핸들 대신 좌우 탐색을 사용
+        const active = () => media.matches && !landscape.matches && workspace === 'search';
         const sync = () => {
-            document.body.dataset.careSheet = state.state();
-            back.hidden = state.state() !== 'list'; mapButton.hidden = state.state() !== 'list';
+            document.body.dataset.careSheet = landscape.matches ? 'split' : state.state(); // SOFTM-LANDSCAPE 날짜:20260909 : 세로에서 선택한 목록 단계를 보존한 채 가로에서는 지도와 목록을 함께 표시
+            back.hidden = !active() || state.state() !== 'list'; mapButton.hidden = !active() || state.state() !== 'list';
             handle.setAttribute('aria-expanded', String(state.state() === 'list'));
             if (workspace === 'search') map.inert = active() && state.state() === 'list';
         };
@@ -407,6 +408,7 @@
             if (event.key !== 'Escape' || event.defaultPrevented || !active() || detailOrigin || document.querySelector('dialog[open]') || state.state() !== 'list') return;
             event.preventDefault(); goBack();
         });
+        landscape.addEventListener('change', () => { const top = list.scrollTop; sync(); options.resizeMap?.(); requestAnimationFrame(() => { list.scrollTop = top; }); }); // SOFTM-LANDSCAPE 날짜:20260909 : 회전 시 지도 크기만 갱신하고 목록 위치를 유지
         media.addEventListener('change', sync); sync();
         return { state: state.state, set: (next, remember = true) => transition(() => state.set(next, remember)), sync };
     }
@@ -466,7 +468,7 @@
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
                 active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
             }
-            options.mobileFocus?.(id, scrollRequested && (!media.matches || mobileSheet?.state() !== 'list')); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
+            options.mobileFocus?.(id, scrollRequested && (!media.matches || root.matchMedia('(orientation:landscape)').matches || mobileSheet?.state() !== 'list')); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
         const observe = () => { photoObserver.disconnect(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); };
