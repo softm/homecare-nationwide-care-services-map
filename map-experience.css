@@ -470,3 +470,14 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
  .care-map-page[data-care-workspace="search"][data-care-sheet="list"]:has(#pager) .care-sheet-map-button { bottom:calc(116px + env(safe-area-inset-bottom)); }
 }
 /** SOFTM-MOBILE-SHEET END */
+
+/** SOFTM-LOCATION-ROW START 날짜:20260909 : 알약 배경과 말줄임 대신 위치 표식·주소를 흰색 한 줄로 표시 */
+.care-map-page #areaBadge { display:flex; align-items:center; gap:6px; max-width:100%; margin:0; padding:8px 0; border:0; border-radius:0; background:transparent; color:#171717; font-size:16px; font-weight:400; white-space:nowrap; overflow-x:auto; text-overflow:clip; scrollbar-width:none; }
+.care-map-page #areaBadge::before { content:'⊕ 위치'; flex:none; color:#2878ff; font-weight:700; }
+.care-map-page #areaBadge::-webkit-scrollbar { display:none; }
+@media(max-width:1000px) {
+ .care-map-page[data-care-workspace="search"] .map-head { background:#fff; padding:0 12px; border-bottom:1px solid #ededed; }
+ .care-map-page[data-care-workspace="search"] #mapHeading { display:none !important; }
+ .care-map-page[data-care-workspace="search"] .map-title #areaBadge { font-size:16px; display:flex; overflow-x:auto; text-overflow:clip; max-width:100%; }
+}
+/** SOFTM-LOCATION-ROW END */
