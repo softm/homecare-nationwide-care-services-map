@@ -33,3 +33,14 @@ test('음성 미감지와 미지원 환경에서 직접 입력을 안내한다',
     createSession(null, value => updates.push(value)).start(); assert.match(updates.at(-1).message, /직접 입력/);
 });
 /** SOFTM-VOICE-SEARCH END */
+
+/** SOFTM-VOICE-TEXT START 날짜:20260909 : 말하기 중지 후 뒤늦은 최종 결과도 텍스트로 전달되는지 검사 */
+test('중지는 취소하지 않고 최종 인식 결과를 기다린다', () => {
+ const updates=[];let recognizer;
+ class Recognition { constructor(){recognizer=this;} start(){this.onstart();} stop(){this.stopped=true;} abort(){this.aborted=true;} }
+ const session=createSession(Recognition,value=>updates.push(value));session.start();session.stop();
+ assert.equal(recognizer.stopped,true);assert.notEqual(recognizer.aborted,true);
+ recognizer.onresult({results:[[{transcript:'옥길동 주간보호센터'}]]});recognizer.onend();
+ assert.equal(updates.at(-2).text,'옥길동 주간보호센터');assert.equal(updates.at(-1).state,'ready');
+});
+/** SOFTM-VOICE-TEXT END */
