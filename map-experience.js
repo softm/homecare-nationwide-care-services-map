@@ -468,6 +468,7 @@
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
                 active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
             }
+            if (scrollRequested) options.scrollDetail?.(id); // SOFTM-SCROLL-DETAIL 날짜:20260909 : 사용자가 목록을 스크롤할 때만 열린 상세를 현재 기관으로 갱신
             options.mobileFocus?.(id, scrollRequested && (!media.matches || root.matchMedia('(orientation:landscape)').matches || mobileSheet?.state() !== 'list')); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
