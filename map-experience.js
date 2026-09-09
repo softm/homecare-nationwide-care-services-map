@@ -481,6 +481,18 @@
         document.getElementById('searchBtn')?.addEventListener('click', () => setOpen(false));
         document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
         let active = null, frame = 0, scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 실제 목록 스크롤만 지도 이동을 허용
+        /** SOFTM-LIST-SCROLL-END START 날짜:20260910 : 마지막 기관도 상단 선택 기준선까지 올려 자동 선택할 수 있도록 목록 끝 여유를 계산 */
+        const scrollTail = document.createElement('div');
+        scrollTail.className = 'care-list-scroll-tail'; scrollTail.setAttribute('aria-hidden', 'true');
+        function updateScrollTail() {
+            const rows = [...list.querySelectorAll('.row')], last = rows.at(-1);
+            if (!last || rows.length < 2 || !list.clientHeight) { scrollTail.style.height = '0px'; return; }
+            if (!scrollTail.isConnected) list.append(scrollTail);
+            const lastBottom = last.offsetTop + last.offsetHeight;
+            const trailingHeight = [...list.children].filter(node => node !== scrollTail).reduce((height, node) => Math.max(height, node.offsetTop + node.offsetHeight - lastBottom), 0);
+            scrollTail.style.height = `${Math.max(0, list.clientHeight - last.offsetHeight - 52 - trailingHeight)}px`;
+        }
+        /** SOFTM-LIST-SCROLL-END END */
         const photoCache = new Map();
         const photoObserver = new IntersectionObserver(entries => {
             for (const entry of entries) {
@@ -519,8 +531,9 @@
             options.mobileFocus?.(id, scrollRequested && (!media.matches || root.matchMedia('(orientation:landscape)').matches || mobileSheet?.state() !== 'list')); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
-        const observe = () => { photoObserver.disconnect(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); };
+        const observe = () => { photoObserver.disconnect(); updateScrollTail(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); }; // SOFTM-LIST-SCROLL-END 날짜:20260910 : 목록이 다시 그려질 때 끝 스크롤 여유도 새 높이로 갱신
         new MutationObserver(observe).observe(list, { childList: true });
+        if (root.ResizeObserver) new root.ResizeObserver(() => { updateScrollTail(); schedule(); }).observe(list); // SOFTM-LIST-SCROLL-END 날짜:20260910 : 확대·회전으로 목록 높이가 달라져도 마지막 기관 선택 위치를 유지
         list.addEventListener('scroll', () => { scrollRequested = true; schedule(); }, { passive: true }); // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 사용자 스크롤에서만 선택 기관 위치를 따라감
         new MutationObserver(schedule).observe(document.querySelector('.map-wrap'), { childList: true, subtree: true }); // SOFTM-MOBILE-MAP 날짜:20260909 : 비동기로 생성된 첫 마커에도 현재 목록 선택을 연결
         media.addEventListener('change', () => { setOpen(false); if (!media.matches) options.mobileFocus?.(null); observe(); });
