@@ -91,6 +91,7 @@
             cancel() { generation++; if (state.phase === 'loading') publish({ phase: 'idle', error: '' }); }
         };
     }
+    let routeStartRevision = 0; // SOFTM-ROUTE-DIRECT 날짜:20260910 : 출발지 대기 중 취소된 즉시 탐색을 다시 실행하지 않음
     let options, basket, bar, media, detailOrigin, view = 'list', workspace = 'search', routePanel = false;
     let rowById = new Map(), restoreGeneration = 0, routeRevision = 0, readyTimer = null, searchMapFocusTimer = null;
     let basketMap, routeOutput, originController, tabs, dock, lastItems = '', cancelBasketDrag = () => {};
@@ -262,7 +263,7 @@
         if (next === workspace) return;
         showRouteError(); // SOFTM-ROUTE-ERROR-ALERT 날짜:20260909 : 다른 작업으로 이동하면 이전 경로 오류 알림을 닫음
         workspacePositions[workspace] = remember(); workspaceViews[workspace] = view;
-        options.closeDetail?.(); cancelDetail(); cancelBasketDrag(); originController.cancel(); routeRevision++;
+        options.closeDetail?.(); cancelDetail(); cancelBasketDrag(); originController.cancel(); routeRevision++; routeStartRevision++; // SOFTM-ROUTE-DIRECT 날짜:20260910 : 작업 전환 후 대기 중 경로가 실행되지 않도록 취소
         clearTimeout(readyTimer); workspace = next; routePanel = false; view = workspaceViews[next];
         syncView(); options.resizeMap?.();
         if (next === 'saved') showSaved(); else basketMap.exit();
@@ -312,7 +313,7 @@
     }
     /** SOFTM-CARE-INSIGHTS END */
     function changed(message = '') {
-        routeRevision++; refresh();
+        routeStartRevision++; routeRevision++; refresh(); // SOFTM-ROUTE-DIRECT 날짜:20260910 : 기관 구성이 바뀌면 대기 중 탐색을 취소
         void updateInsights(); // SOFTM-CARE-INSIGHTS 날짜:20260910 : 담기·삭제·순서 변경 후 같은 구성으로 설명을 갱신
         if (workspace === 'saved') void showSaved({ fit: false });
         bar.querySelector('.care-order-status').textContent = message || (routePanel ? '방문 기관이 변경되었습니다. 경로를 다시 탐색해 주세요.' : '');
@@ -353,15 +354,28 @@
         document.querySelector('.care-saved-map-tools strong').textContent = routePanel ? '방문 경로' : `담은 기관 ${rows().length}곳`;
         refresh();
     }
-    function editRoute(open = true) {
+    /** SOFTM-ROUTE-DIRECT START 날짜:20260910 : 경로탐색 한 번으로 출발지 확인과 도로 계산까지 이어서 실행 */
+    function editRoute(open = true, locate = true) {
         if (workspace !== 'saved') setWorkspace('saved');
-        originController.cancel(); routeRevision++; routePanel = open;
-        syncView(); setView('list', false); showSaved({ fit: false }); renderOrigin();
+        originController.cancel(); routeRevision++; routeStartRevision++; routePanel = open;
+        syncView(); setView('list', false);
+        const pending = showSaved({ fit: false });
+        renderOrigin();
         bar.querySelector(open ? '.care-route-editor h2' : '.care-saved-heading h2')?.focus({ preventScroll: true });
-        if (open && !originState.origin) void originController.locate(); // SOFTM-ROUTE-DEFAULT-ORIGIN 날짜:20260909 : 경로 편집 진입 시 출발지가 없으면 현위치 주소를 자동 설정
+        if (open && locate && !originState.origin) void originController.locate();
+        return pending;
     }
     async function routeBasket() {
-        if (!routePanel) { editRoute(); return; }
+        if (!routePanel) {
+            const pending = editRoute(true, false), intent = routeStartRevision;
+            await pending;
+            if (intent !== routeStartRevision || workspace !== 'saved' || !routePanel) return;
+            if (!originState.origin) await originController.locate();
+            if (intent !== routeStartRevision || workspace !== 'saved' || !routePanel || !originState.origin) return;
+            await showSaved({ fit: false });
+            if (intent !== routeStartRevision || workspace !== 'saved' || !routePanel) return;
+        }
+        /** SOFTM-ROUTE-DIRECT END */
         if (busy()) return;
         const revision = ++routeRevision;
         bar.querySelector('.care-order-status').textContent = '';
@@ -775,7 +789,7 @@
             else if (node.hasAttribute('data-layout-expand')) setWorkspaceExpanded(!workspaceExpanded); // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 같은 버튼으로 확대와 원상복구를 전환
             else if (node.hasAttribute('data-basket-open')) options.compare();
             else if (node.hasAttribute('data-basket-clear')) { basket.clear(); changed(); }
-            else if (node.hasAttribute('data-route-edit')) editRoute();
+            else if (node.hasAttribute('data-route-edit')) void routeBasket(); // SOFTM-ROUTE-DIRECT 날짜:20260910 : 편집창 진입에 멈추지 않고 바로 탐색
             else if (node.hasAttribute('data-route-back')) editRoute(false);
             else if (node.hasAttribute('data-route-run')) void routeBasket();
             else if (node.hasAttribute('data-origin-locate')) void originController.locate();
