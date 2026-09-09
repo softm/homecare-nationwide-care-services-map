@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "python3 -m http.server 3000",
     "build": "python3 scripts/build_nationwide_care_services.py && node scripts/build-regional-seo.mjs && node scripts/sync-seo-entrypoints.mjs",
-    "check": "node --test scripts/voice-search.test.mjs scripts/mobile-sheet.test.mjs scripts/mobile-viewport-research.test.mjs scripts/check-search-readiness.test.mjs scripts/category-landing-ads.test.mjs scripts/validate-regional-seo.test.mjs scripts/submit-indexnow.test.mjs && node scripts/build-regional-seo.mjs --check && node scripts/sync-seo-entrypoints.mjs --check && node scripts/validate-project.mjs && node scripts/validate-regional-seo.mjs && python3 scripts/validate_nhis_static.py",
+    "check": "node --test scripts/result-sort.test.mjs scripts/voice-search.test.mjs scripts/mobile-sheet.test.mjs scripts/mobile-viewport-research.test.mjs scripts/check-search-readiness.test.mjs scripts/category-landing-ads.test.mjs scripts/validate-regional-seo.test.mjs scripts/submit-indexnow.test.mjs && node scripts/build-regional-seo.mjs --check && node scripts/sync-seo-entrypoints.mjs --check && node scripts/validate-project.mjs && node scripts/validate-regional-seo.mjs && python3 scripts/validate_nhis_static.py",
     "check:search": "node scripts/check-search-readiness.mjs",
     "notify:indexnow": "node scripts/submit-indexnow.mjs"
   },
@@ -14,5 +14,6 @@
   "_indexNowComment": "SOFTM-INDEXNOW 날짜:20260907 : 실제 변경 URL만 공개 키 확인 후 네이버에 통지하도록 실행 경로를 고정",
   "_mobileViewportComment": "SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 짧은 목록 광고와 확대·축소·수동 재검색의 누락을 기본 검사에 포함",
   "_mobileSheetComment": "SOFTM-MOBILE-SHEET 날짜:20260909 : 모바일 목록 단계와 상세 복귀의 회귀검사를 기본 검증에 포함",
-  "_voiceSearchComment": "SOFTM-VOICE-SEARCH 날짜:20260909 : 인식 취소·권한 오류와 오래된 음성 응답을 기본 검사에 포함"
+  "_voiceSearchComment": "SOFTM-VOICE-SEARCH 날짜:20260909 : 인식 취소·권한 오류와 오래된 음성 응답을 기본 검사에 포함",
+  "_resultSortComment": "SOFTM-RESULT-SORT 날짜:20260909 : 중심점·관련도·좌표 누락 정렬을 기본 검사에 포함"
 }
