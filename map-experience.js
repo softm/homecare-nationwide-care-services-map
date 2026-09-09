@@ -311,6 +311,7 @@
         originController.cancel(); routeRevision++; routePanel = open;
         syncView(); setView('list', false); showSaved({ fit: false }); renderOrigin();
         bar.querySelector(open ? '.care-route-editor h2' : '.care-saved-heading h2')?.focus({ preventScroll: true });
+        if (open && !originState.origin) void originController.locate(); // SOFTM-ROUTE-DEFAULT-ORIGIN 날짜:20260909 : 경로 편집 진입 시 출발지가 없으면 현위치 주소를 자동 설정
     }
     async function routeBasket() {
         if (!routePanel) { editRoute(); return; }
