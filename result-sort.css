@@ -15,3 +15,11 @@
 .care-sort-apply { width:100%; min-height:48px; border:0; border-radius:12px; color:white; background:#2176ef; font-size:18px; cursor:pointer; }
 .care-sort-apply:disabled { opacity:.5; }
 /** SOFTM-RESULT-SORT END */
+
+/** SOFTM-SORT-FIXED-ACTION START 날짜:20260909 : 작은 화면에서도 적용 버튼을 찾기 위해 스크롤하지 않도록 본문과 하단 동작을 분리 */
+.care-sort-dialog { overflow:hidden; padding:20px 0 0; max-height:88dvh; }
+.care-sort-dialog[open] { display:flex; flex-direction:column; }
+.care-sort-dialog h2 { flex:none; margin:8px 48px 16px; }
+.care-sort-body { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:0 20px; }
+.care-sort-footer { flex:none; padding:12px 20px calc(16px + env(safe-area-inset-bottom)); border-top:1px solid #e5e7eb; background:#fff; box-shadow:0 -4px 12px #172c4308; }
+/** SOFTM-SORT-FIXED-ACTION END */
