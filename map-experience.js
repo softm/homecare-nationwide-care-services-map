@@ -456,7 +456,7 @@
         }, { root: list, rootMargin: '120px' });
         const sync = () => {
             frame = 0;
-            if (!media.matches || workspace !== 'search') return;
+            if (workspace !== 'search') return; // SOFTM-DESKTOP-MAP 날짜:20260909 : PC 목록 스크롤도 모바일과 같은 마커 선택을 사용
             const top = list.getBoundingClientRect().top;
             const rows = [...list.querySelectorAll('.row')];
             const row = rows.find(node => node.getBoundingClientRect().bottom > top + 55);
@@ -466,7 +466,7 @@
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
                 active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
             }
-            options.mobileFocus?.(id, scrollRequested && mobileSheet?.state() !== 'list'); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
+            options.mobileFocus?.(id, scrollRequested && (!media.matches || mobileSheet?.state() !== 'list')); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
         const observe = () => { photoObserver.disconnect(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); };
