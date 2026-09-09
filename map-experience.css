@@ -553,3 +553,18 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-route-error-alert p { margin:8px 0 0; font-size:15px; line-height:1.6; overflow-wrap:anywhere; }
 .care-route-error-alert button { flex:none; min-width:44px; min-height:44px; padding:4px; border:0; border-radius:8px; background:transparent; color:inherit; font-size:28px; cursor:pointer; }
 /* SOFTM-ROUTE-ERROR-ALERT END */
+/* SOFTM-FILTER-LAYOUT START 날짜:20260909 : 좁은 사이드바에서 조건 제목과 버튼이 섞여 줄바꿈되지 않도록 그룹별 격자로 정렬 */
+.care-map-page .filters .filter-lines { margin-top:16px; padding-top:0; border-top:0; display:grid; gap:16px; }
+.care-map-page .filters .filter-line { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:0; padding:14px 0 0; border-top:1px solid #e5ebf2; }
+.care-map-page .filters .filter-line strong { grid-column:1/-1; min-width:0; margin:0 0 3px; font-size:13px; line-height:1.5; color:#53647a; }
+.care-map-page .filters .filter-line .seg { min-width:0; min-height:40px; padding:8px 4px; border-radius:8px; font-size:13px; line-height:1.4; font-weight:650; white-space:nowrap; }
+.care-map-page .filters .confidence-line { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.care-map-page.care-mobile-filters-open .filters .filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid .care-voice-input { grid-column:1/-1; grid-row:1; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid #province { grid-column:1; grid-row:2; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid #city { grid-column:2; grid-row:2; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid .search-btn { grid-column:1; grid-row:3; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid .care-mobile-filter-toggle { grid-column:2; grid-row:3; white-space:nowrap; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid select { width:100%; min-width:0; box-sizing:border-box; font-size:14px; padding:8px; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid input,.care-map-page.care-mobile-filters-open .filters .filter-grid button,.care-map-page.care-mobile-filters-open .filters .filter-grid select { min-height:44px; }
+/* SOFTM-FILTER-LAYOUT END */
