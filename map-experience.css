@@ -243,7 +243,7 @@
 .care-saved-empty:not([hidden]) ~ .care-order-help { display:none; }
 .care-order-help { color:#617185; font-size:13px; margin:12px 0; }
 .care-basket-items { display:flex; flex-direction:column; list-style:none; padding:0; margin:0; gap:10px; }
-.care-basket-item { display:flex; align-items:flex-start; gap:8px; min-width:0; padding:12px 6px; border:1px solid #dce5ef; border-radius:12px; background:#fff; }
+.care-basket-item { display:flex; align-items:flex-start; gap:8px; min-width:0; padding:12px 6px; border:1px solid #dce5ef; border-radius:12px; background:#fff; cursor:pointer; } /* SOFTM-SAVED-CARD 날짜:20260910 : 카드 본문에서도 기관 상세를 열 수 있음을 표시 */
 .care-basket-name { flex:1; min-width:0; overflow-wrap:anywhere; }
 .care-basket-name p { margin:6px 0; font-size:14px; color:#52657b; line-height:1.6; }
 .care-basket-name small { display:block; font-size:13px; color:#617185; }
