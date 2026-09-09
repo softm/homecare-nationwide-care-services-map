@@ -152,6 +152,7 @@
         bar.querySelector('[data-basket-clear]').hidden = !selected.length;
         bar.querySelector('.care-saved-empty').hidden = !!selected.length;
         bar.querySelector('.care-saved-actions').hidden = routePanel || !selected.length;
+        if (bar.querySelector('.care-insights')) bar.querySelector('.care-insights').hidden = routePanel || !selected.length; // SOFTM-CARE-INSIGHTS 날짜:20260910 : 빈 비교함과 경로 편집에서는 설명 영역을 감춤
         bar.querySelector('.care-route-actions').hidden = !routePanel;
         bar.querySelector('[data-route-run]').disabled = !selected.length || selected.length > 16 || !originState.origin || originState.phase === 'loading' || busy();
         bar.querySelector('[data-route-run]').textContent = busy() ? '탐색 중…' : '경로탐색';
@@ -282,8 +283,37 @@
         if (previous.focus?.isConnected) previous.focus.focus({ preventScroll: true });
     }
     function cancelDetail() { detailOrigin = null; restoreGeneration++; }
+    /** SOFTM-CARE-INSIGHTS START 날짜:20260910 : 설명을 요청한 경우에만 자료를 읽고 변경된 비교함에 이전 결과가 남지 않게 갱신 */
+    let insightRevision = 0, insightAttempt = 0, insightTask;
+    function loadInsights() {
+        if (!insightTask) insightTask = import(`./care-insights.js${insightAttempt ? `?retry=${insightAttempt}` : ''}`).catch(error => {
+            insightTask = null; insightAttempt++; throw error;
+        });
+        return insightTask;
+    }
+    async function updateInsights() {
+        const panel = bar?.querySelector('.care-insights');
+        const revision = ++insightRevision;
+        if (!panel?.open) return;
+        const host = panel.querySelector('.care-insight-content');
+        host.setAttribute('aria-busy', 'true');
+        host.textContent = '담은 기관의 공개정보를 확인하고 있습니다…';
+        try {
+            const [insights, manifest] = await Promise.all([loadInsights(), root.CareData.manifest()]);
+            if (revision !== insightRevision || !panel.open) return;
+            host.innerHTML = insights.render(rows(), { type: options.type, sourceDate: manifest[options.type]?.sourceDate });
+        } catch {
+            if (revision !== insightRevision || !panel.open) return;
+            host.innerHTML = '<p>기관 설명을 불러오지 못했습니다. 기존 비교표는 계속 이용할 수 있습니다.</p><button type="button" data-insight-retry>다시 시도</button>';
+            host.querySelector('button').addEventListener('click', updateInsights);
+        } finally {
+            if (revision === insightRevision) host.setAttribute('aria-busy', 'false');
+        }
+    }
+    /** SOFTM-CARE-INSIGHTS END */
     function changed(message = '') {
         routeRevision++; refresh();
+        void updateInsights(); // SOFTM-CARE-INSIGHTS 날짜:20260910 : 담기·삭제·순서 변경 후 같은 구성으로 설명을 갱신
         if (workspace === 'saved') void showSaved({ fit: false });
         bar.querySelector('.care-order-status').textContent = message || (routePanel ? '방문 기관이 변경되었습니다. 경로를 다시 탐색해 주세요.' : '');
     }
@@ -674,6 +704,13 @@
         <div class="care-saved-empty"><span aria-hidden="true">♡</span><h3>관심 있는 기관을 먼저 담아 주세요</h3><p>기관 찾기에서 ‘비교에 담기’를 누르면 여기에 모입니다.</p><button type="button" data-workspace="search">기관 찾기</button></div>
         <p class="care-order-help">⠿ 손잡이를 끌어 방문 순서를 바꿀 수 있습니다.</p><span class="care-drag-help" id="careBasketDragHelp">손잡이를 끌거나 방향키로 순서를 바꿉니다. Esc를 누르면 이동을 취소합니다.</span><ol class="care-basket-items" aria-label="담은 기관 방문 순서"></ol><p class="care-order-status" role="status"></p>
         <div class="care-saved-footer"><div class="care-saved-actions"><button type="button" class="care-primary" data-basket-open>비교하기</button><button type="button" data-route-edit>경로탐색</button></div><div class="care-route-actions" hidden><button type="button" class="care-primary" data-route-run>경로탐색</button></div></div>`;
+        /** SOFTM-CARE-INSIGHTS START 날짜:20260910 : 두 지도의 담은 기관에서 설명과 상담 질문으로 바로 진입 */
+        const insightsPanel = document.createElement('details');
+        insightsPanel.className = 'care-insights';
+        insightsPanel.innerHTML = '<summary>기관 차이 알아보기<span>공개정보 요약 · 방문 전 질문</span></summary><div class="care-insight-content" aria-busy="false"></div>';
+        insightsPanel.addEventListener('toggle', updateInsights);
+        bar.querySelector('.care-order-help').before(insightsPanel);
+        /** SOFTM-CARE-INSIGHTS END */
         layout.prepend(bar); layout.prepend(results);
         dock = document.createElement('button'); dock.type = 'button'; dock.className = 'care-saved-dock'; dock.dataset.workspace = 'saved'; document.body.append(dock);
         dock.innerHTML = '담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span>곳 보기 <span aria-hidden="true">→</span>'; // SOFTM-TAB-FEEDBACK 날짜:20260905 : 상단 탭이 보이지 않을 때도 담긴 개수의 변화를 즉시 전달
