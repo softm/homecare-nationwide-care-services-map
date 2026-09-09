@@ -25,8 +25,17 @@ test('오류 페이지를 정상 배포로 판정하지 않음', () => assert(in
 test('작은따옴표 및 속성 순서 지원', () => assert.deepEqual(attributes("<meta content='index,follow' NAME='robots'>"), { content: 'index,follow', name: 'robots' }));
 test('홈페이지 브랜드와 구조화 데이터 확인', () => {
   const home = `${publicOrigin}/`;
-  const valid = html.replace(url, home).replace('<h1>주야간보호센터</h1>', '<h1>돌봄한눈</h1>') + `<script type="application/ld+json">{"@type":"WebSite","name":"돌봄한눈","url":"${home}"}</script>`;
+  const valid = html.replace(url, home).replace('<h1>주야간보호센터</h1>', '<h1>돌봄한눈</h1>') + `<meta name="description" content="돌봄한눈은 전국 요양·돌봄기관 검색·비교 서비스입니다."><script type="application/ld+json">{"@type":"WebSite","name":"돌봄한눈","url":"${home}"}</script>`; // SOFTM-SEARCH-NAVER 날짜:20260910 : 홈페이지 정상 표본도 네이버 브랜드 설명 기준을 충족
   assert.deepEqual(inspect({ url: home, expectedCanonical: home, html: valid }).issues, []);
   assert(inspect({ url: home, expectedCanonical: home, html: valid.replace('"name":"돌봄한눈"', '"name":"다른 이름"') }).issues.some(issue => issue.includes('WebSite')));
 });
+/** SOFTM-SEARCH-NAVER START 날짜:20260910 : 브랜드 누락과 네이버 권장 길이 초과가 다시 배포되지 않게 경계값을 검증 */
+test('홈페이지 설명은 브랜드로 시작하고 80자를 넘지 않음', () => {
+  const home = `${publicOrigin}/`;
+  const valid = html.replace(url, home).replace('<h1>주야간보호센터</h1>', '<h1>돌봄한눈</h1>') + `<meta name="description" content="돌봄한눈${'가'.repeat(76)}"><script type="application/ld+json">{"@type":"WebSite","name":"돌봄한눈","url":"${home}"}</script>`;
+  assert.deepEqual(inspect({ url: home, expectedCanonical: home, html: valid }).issues, []);
+  assert(inspect({ url: home, expectedCanonical: home, html: valid.replace('content="돌봄한눈', 'content="전국돌봄') }).issues.some(issue => issue.includes('사이트명으로 시작')));
+  assert(inspect({ url: home, expectedCanonical: home, html: valid.replace('가'.repeat(76), '가'.repeat(77)) }).issues.some(issue => issue.includes('80자')));
+});
+/** SOFTM-SEARCH-NAVER END */
 /** SOFTM-SEARCH-READINESS-TEST END */

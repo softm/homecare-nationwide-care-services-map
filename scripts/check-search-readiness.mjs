@@ -29,6 +29,11 @@ export function inspectPage({ url, status, headers, html, expectedCanonical, exp
   if (!source.match(/<h1\b[^>]*>[\s\S]*?\S[\s\S]*?<\/h1>/i)) issues.push('대표 제목 h1 누락');
   if (url === `${publicOrigin}/`) {
     if (!source.match(/<h1\b[^>]*>[\s\S]*?돌봄한눈[\s\S]*?<\/h1>/i)) issues.push('홈페이지 대표 제목에 브랜드 누락');
+    /** SOFTM-SEARCH-NAVER START 날짜:20260910 : 네이버 권장 길이를 넘겨 브랜드 설명이 잘리거나 분산되지 않도록 배포 전에 차단 */
+    const description = metas.find(meta => meta.name?.toLowerCase() === 'description')?.content || '';
+    if (!description.startsWith('돌봄한눈')) issues.push('홈페이지 설명이 사이트명으로 시작하지 않음');
+    if ([...description].length > 80) issues.push('홈페이지 설명이 네이버 권장 80자를 초과');
+    /** SOFTM-SEARCH-NAVER END */
     try {
       const structured = [...source.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].flatMap(match => JSON.parse(match[1]));
       if (!structured.some(item => item['@type'] === 'WebSite' && item.name === '돌봄한눈' && item.url === `${publicOrigin}/`)) issues.push('홈페이지 WebSite 이름·주소 불일치');
