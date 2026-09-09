@@ -703,6 +703,7 @@
         root.addEventListener('pageshow', () => { const before = basket.ids().join(','); if (storage) { basket = createBasket(storage, options.type); basket.retain(new Set(rowById.keys())); } if (before !== basket.ids().join(',')) changed(); else refresh(); });
         mobileSheet = installMobileSheet(); // SOFTM-MOBILE-SHEET 날짜:20260909 : 두 지도의 모바일 목록 확대·접기와 복귀 동작을 연결
         installMobileSearch(); // SOFTM-MOBILE-MAP 날짜:20260909 : 첫 화면에서 지도와 목록을 함께 탐색하도록 모바일 조작 연결
+        root.CareVoiceSearch?.mount({ input: document.getElementById("q"), search: () => { if (media.matches && mobileSheet?.state() === "list") mobileSheet.set("split"); document.getElementById("searchBtn").click(); } }); // SOFTM-VOICE-SEARCH 날짜:20260909 : 확인한 음성 검색어를 기존 조회 동작에 연결
         syncView(); renderOrigin(); renderRoute(routeState);
     }
     /** SOFTM-WORKSPACE END */
