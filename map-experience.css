@@ -433,3 +433,14 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
  .care-map-page[data-care-workspace="search"] .map-title .area-badge { flex:1; min-width:0; }
 }
 /** SOFTM-MOBILE-HEADING END */
+/** SOFTM-VIEWPORT-RESEARCH START 날짜:20260909 : 자동 조회와 별개로 언제든 현재 화면을 다시 검색하도록 지도 안에 복구 버튼 제공 */
+.care-map-page .care-region-research { position:absolute; z-index:8; top:10px; left:50%; transform:translateX(-50%); right:auto; bottom:auto; min-height:38px; padding:8px 14px; border:1px solid #b7cde6; border-radius:22px; background:#fff; color:#175cb5; box-shadow:0 2px 8px #153f6926; font-size:13px; font-weight:750; white-space:nowrap; cursor:pointer; }
+.care-map-page[data-care-workspace="saved"] .care-region-research { display:none; }
+/** SOFTM-VIEWPORT-RESEARCH END */
+/** SOFTM-MARKER-SIZE START 날짜:20260909 : 밀집 기관과 지도 지명을 덜 가리도록 기본 핀과 선택 강조 크기를 함께 축소 */
+.care-map-page .map-marker { width:32px; height:32px; border-width:2px; border-radius:11px 11px 11px 3px; box-shadow:0 2px 5px #14283e40; }
+.care-map-page .map-marker span { font-size:10px; }
+.care-map-page .map-marker .marker-rank { width:16px; height:16px; right:-6px; top:-7px; border-width:1px; font-size:8px; font-style:normal; }
+.care-map-page .care-mobile-active-marker { transform:scale(1.08); filter:drop-shadow(0 0 2px #175cb5); }
+.care-map-page .care-mobile-active-marker .map-marker,.care-map-page .care-mobile-active-marker .marker-pin { outline:2px solid #fff; }
+/** SOFTM-MARKER-SIZE END */

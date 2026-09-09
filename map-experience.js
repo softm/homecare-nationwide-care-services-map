@@ -2,6 +2,49 @@
 (function (root) {
     'use strict';
     const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    /** SOFTM-VIEWPORT-RESEARCH START 날짜:20260909 : 사용자 확대·축소만 재조회하고 내부 지도 이동과 별도 수동 재검색을 구분 */
+    function ensureListAdFallback(host, fallback) {
+        host.querySelectorAll('.list-ad-slot,.daycare-list-ad-slot').forEach(slot => {
+            root.setTimeout(() => {
+                if (!slot.isConnected || slot.querySelector('iframe')) return;
+                const html = fallback(); if (html) slot.innerHTML = html;
+            }, 5200);
+        });
+    }
+    function createZoomResearch({ enabled, prepare, search }, clock = root) {
+        let userUntil = 0, pending = false, timer;
+        const clear = () => { clock.clearTimeout(timer); timer = null; };
+        const run = () => { clear(); pending = false; userUntil = 0; if (!enabled()) return; prepare(); return search(); };
+        const schedule = () => { clear(); timer = clock.setTimeout(run, 650); };
+        return {
+            gesture() { userUntil = Date.now() + 2000; },
+            zoom() { if (!enabled() || Date.now() > userUntil) return; prepare(); pending = true; schedule(); },
+            idle() { if (pending) schedule(); },
+            drag() { clear(); pending = false; },
+            research: run,
+            pending: () => pending,
+            cancel() { clear(); pending = false; userUntil = 0; }
+        };
+    }
+    function bindViewportResearch(config) {
+        const host = document.querySelector('.map-wrap');
+        const controller = createZoomResearch(config);
+        const zoomControl = target => target.closest?.('#zoomInBtn,#zoomOutBtn,[title*="확대"],[title*="축소"],[aria-label*="확대"],[aria-label*="축소"],a:has(img[alt*="지도 확대"]),a:has(img[alt*="지도 축소"])');
+        host.addEventListener('wheel', () => controller.gesture(), { passive: true, capture: true });
+        host.addEventListener('touchstart', event => { if (event.touches.length > 1) controller.gesture(); }, { passive: true, capture: true });
+        host.addEventListener('dblclick', () => controller.gesture(), { capture: true });
+        for (const name of ['pointerdown', 'keydown', 'click']) host.addEventListener(name, event => { if (zoomControl(event.target)) controller.gesture(); }, { capture: true });
+        config.events.addListener(config.map, 'zoom_changed', () => controller.zoom());
+        config.events.addListener(config.map, 'idle', () => controller.idle());
+        config.events.addListener(config.map, 'dragstart', () => controller.drag());
+        let button = host.querySelector('.map-search');
+        if (!button) { button = document.createElement('button'); button.type = 'button'; host.append(button); }
+        button.classList.add('care-region-research'); button.textContent = '↻ 이 지역 재검색';
+        button.setAttribute('aria-label', '현재 지도 영역에서 이 지역 재검색');
+        button.onclick = () => controller.research();
+        return controller;
+    }
+    /** SOFTM-VIEWPORT-RESEARCH END */
     function createBasket(storage, type) {
         const key = `careCompare:v1:${type}`;
         let ids = [];
@@ -304,7 +347,7 @@
         document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') setOpen(false); });
         document.getElementById('searchBtn')?.addEventListener('click', () => setOpen(false));
         document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
-        let active = null, frame = 0;
+        let active = null, frame = 0, scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 실제 목록 스크롤만 지도 이동을 허용
         const photoCache = new Map();
         const photoObserver = new IntersectionObserver(entries => {
             for (const entry of entries) {
@@ -339,12 +382,12 @@
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
                 active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
             }
-            options.mobileFocus?.(id);
+            options.mobileFocus?.(id, scrollRequested); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
         const observe = () => { photoObserver.disconnect(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); };
         new MutationObserver(observe).observe(list, { childList: true });
-        list.addEventListener('scroll', schedule, { passive: true });
+        list.addEventListener('scroll', () => { scrollRequested = true; schedule(); }, { passive: true }); // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 사용자 스크롤에서만 선택 기관 위치를 따라감
         new MutationObserver(schedule).observe(document.querySelector('.map-wrap'), { childList: true, subtree: true }); // SOFTM-MOBILE-MAP 날짜:20260909 : 비동기로 생성된 첫 마커에도 현재 목록 선택을 연결
         media.addEventListener('change', () => { setOpen(false); if (!media.matches) options.mobileFocus?.(null); observe(); });
         observe();
@@ -622,7 +665,7 @@
     function isBasketMap() { return workspace === 'saved'; }
     function exitBasketMap() { if (basketMap?.active()) setWorkspace('search', false); }
     function contains(id) { return basket?.has(id) || false; }
-    root.CareMapExperience = Object.freeze({ init, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
+    root.CareMapExperience = Object.freeze({ init, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-MAP-EXPERIENCE END */
