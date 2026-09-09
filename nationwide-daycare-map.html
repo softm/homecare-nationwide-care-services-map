@@ -343,6 +343,14 @@ async function syncMapMarkersToSelection(){
  const clipBounds=mapSearchIds?naverMap.getBounds():null,limit=mapSearchIds&&naverMap.getZoom()>=11?rows.length:Math.min(rows.length,MAP_LIMIT);
  const outcome=await displayCenters(rows,false,false,false,clipBounds,limit,search);
  if(outcome.cancelled||!search.isCurrent())return;
+ /** SOFTM-MARKER-SELECTION-FIT START 날짜:20260910 : 체크 반영으로 다시 만든 마커 전체가 보이도록 지도 중심과 배율을 함께 조정 */
+ const positions=mapMarkers.map(marker=>marker.getPosition());
+ if(positions.length){
+  clearTimeout(mapTimer);clearTimeout(boundsTimer);skipIdleUntil=Date.now()+1800;
+  if(positions.length===1){naverMap.setCenter(positions[0]);if(naverMap.getZoom()!==16)naverMap.setZoom(16)}
+  else{const bounds=new naver.maps.LatLngBounds();positions.forEach(position=>bounds.extend(position));naverMap.fitBounds(bounds,{top:70,right:45,bottom:45,left:45});if(naverMap.getZoom()>16)naverMap.setZoom(16)}
+ }
+ /** SOFTM-MARKER-SELECTION-FIT END */
  setMapStatus(`${mapMarkers.length}곳 마커 · 체크 상태 반영`);
  return finishDaycareSearch(search,daycareSearchOutcome({...outcome,count:filtered.length}));
 }
