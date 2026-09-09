@@ -214,6 +214,7 @@
         results.hidden = saved; results.inert = saved || compact && view !== 'list';
         bar.hidden = !saved; bar.inert = !saved || compact && view !== 'list';
         map.inert = compact && view !== 'map';
+        if (!saved) mobileSheet?.sync(); // SOFTM-MOBILE-SHEET 날짜:20260909 : 담은 기관에서 돌아와도 전체 목록의 지도 접근 상태를 유지
         document.querySelectorAll('main.wrap > .filters, main.wrap > .stats, main.wrap > .care-data-note').forEach(node => { node.hidden = saved; });
         tabs.querySelectorAll('[data-workspace]').forEach(node => { const active = node.dataset.workspace === workspace; node.setAttribute('aria-selected', String(active)); node.tabIndex = active ? 0 : -1; });
         document.querySelectorAll('button[data-care-view]').forEach(node => node.setAttribute('aria-pressed', String(node.dataset.careView === view)));
@@ -268,13 +269,14 @@
     }
     function beginDetail(showMap = true) {
         restoreGeneration++;
-        if (!detailOrigin) detailOrigin = { workspace, view, position: remember(), focus: document.activeElement };
+        if (!detailOrigin) detailOrigin = { workspace, view, position: remember(), focus: document.activeElement, sheet: mobileSheet?.state() };
+        if (showMap && media?.matches && workspace === 'search' && mobileSheet?.state() === 'list') mobileSheet.set('split', false); // SOFTM-MOBILE-SHEET 날짜:20260909 : 전체 목록에서 상세를 열 때 지도를 함께 보여주고 이전 단계를 기억
         if (showMap && media?.matches) setView('map', false);
     }
     function finishDetail() {
         const previous = detailOrigin; detailOrigin = null;
         if (!previous || previous.workspace !== workspace) return;
-        if (media?.matches) { view = previous.view; syncView(); options.resizeMap?.(); }
+        if (media?.matches) { view = previous.view; if (previous.sheet) mobileSheet?.set(previous.sheet, false); syncView(); options.resizeMap?.(); } // SOFTM-MOBILE-SHEET 날짜:20260909 : 상세를 닫으면 목록 확대 단계까지 복원
         restore(previous.position);
         if (previous.focus?.isConnected) previous.focus.focus({ preventScroll: true });
     }
@@ -327,6 +329,87 @@
         return `<details class="care-map-cost" data-cost-service="${escape(service)}" data-cost-institution="${escape(row.i)}"><summary>월 예상 비용 알아보기</summary><div class="care-map-cost-host"></div></details>`;
     }
     /** SOFTM-MOBILE-MAP START 날짜:20260909 : 조건 입력보다 현재 결과를 먼저 보여주고 보이는 기관만 사진·마커와 연결 */
+    /** SOFTM-MOBILE-SHEET START 날짜:20260909 : 지도·목록 DOM을 유지한 채 핸들로 세 단계 전환하고 이전 상태로 복귀 */
+    let mobileSheet;
+    function createSheetState() {
+        const states = ['map', 'split', 'list'];
+        let state = 'split', previous = 'split';
+        return {
+            state: () => state,
+            set(next, remember = true) { if (states.includes(next) && next !== state) { if (remember) previous = state; state = next; } return state; },
+            drag(delta) { if (Math.abs(delta) < 45) return state; return this.set(states[Math.max(0, Math.min(2, states.indexOf(state) + (delta < 0 ? 1 : -1)))]); },
+            back() { const next = previous; previous = state; state = next; return state; }
+        };
+    }
+    function installMobileSheet() {
+        const state = createSheetState(), layout = document.querySelector('.layout'), results = document.querySelector('.results');
+        const map = document.querySelector('.map-card'), list = document.getElementById('list');
+        const handle = document.createElement('button'); handle.type = 'button'; handle.className = 'care-sheet-handle';
+        handle.innerHTML = '<span aria-hidden="true"></span><small aria-hidden="true">목록 보기</small>';
+        handle.setAttribute('aria-label', '목록 높이 조절: 위로 올려 펼치기, 아래로 내려 지도 크게 보기'); results.prepend(handle);
+        const back = document.createElement('button'); back.type = 'button'; back.className = 'care-sheet-back';
+        back.textContent = '‹'; back.setAttribute('aria-label', '이전 지도와 목록 화면으로 돌아가기'); document.querySelector('.filter-grid').prepend(back);
+        const mapButton = document.createElement('button'); mapButton.type = 'button'; mapButton.className = 'care-sheet-map-button'; mapButton.textContent = '지도보기'; document.body.append(mapButton);
+        let drag = null, ignoreClick = false, storedScroll = 0, revision = 0;
+        const active = () => media.matches && workspace === 'search';
+        const sync = () => {
+            document.body.dataset.careSheet = state.state();
+            back.hidden = state.state() !== 'list'; mapButton.hidden = state.state() !== 'list';
+            handle.setAttribute('aria-expanded', String(state.state() === 'list'));
+            if (workspace === 'search') map.inert = active() && state.state() === 'list';
+        };
+        const transition = (action, restoreTop) => {
+            if (!active()) return;
+            const before = state.state(), top = restoreTop ?? (before === 'map' ? storedScroll : list.scrollTop);
+            storedScroll = top;
+            layout.style.setProperty('--care-sheet-hidden-map-height', `${map.clientHeight}px`);
+            action(); sync(); const current = ++revision;
+            if (state.state() !== 'list') options.resizeMap?.();
+            requestAnimationFrame(() => {
+                if (current !== revision) return;
+                if (state.state() !== 'map') list.scrollTop = top;
+            });
+        };
+        const goBack = () => transition(() => state.back());
+        back.onclick = goBack; mapButton.onclick = goBack;
+        handle.onclick = () => {
+            if (ignoreClick) { ignoreClick = false; return; }
+            transition(() => state.set(state.state() === 'list' ? 'split' : 'list'));
+        };
+        handle.addEventListener('keydown', event => {
+            if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault(); transition(() => event.key === 'Home' ? state.set('list') : event.key === 'End' ? state.set('map') : state.drag(event.key === 'ArrowUp' ? -100 : 100));
+        });
+        handle.addEventListener('pointerdown', event => {
+            if (!active() || event.button !== 0) return;
+            ignoreClick = false;
+            drag = { id: event.pointerId, y: event.clientY, delta: 0, scrollTop: state.state() === 'map' ? storedScroll : list.scrollTop, mapHeight: state.state() === 'list' ? 0 : map.clientHeight };
+            handle.setPointerCapture(event.pointerId);
+        });
+        handle.addEventListener('pointermove', event => {
+            if (!drag || drag.id !== event.pointerId) return;
+            drag.delta = event.clientY - drag.y;
+            if (Math.abs(drag.delta) < 5) return;
+            document.body.classList.add('care-sheet-dragging');
+            layout.style.setProperty('--care-sheet-drag-height', `${Math.max(0, Math.min(layout.clientHeight - 38, drag.mapHeight + drag.delta))}px`);
+        });
+        const finishDrag = (event, cancelled = false) => {
+            if (!drag || drag.id !== event.pointerId) return;
+            const current = drag; drag = null; ignoreClick = Math.abs(current.delta) >= 5;
+            document.body.classList.remove('care-sheet-dragging'); layout.style.removeProperty('--care-sheet-drag-height');
+            if (!cancelled) transition(() => state.drag(current.delta), current.scrollTop);
+        };
+        handle.addEventListener('pointerup', event => finishDrag(event));
+        handle.addEventListener('pointercancel', event => finishDrag(event, true));
+        handle.addEventListener('lostpointercapture', event => finishDrag(event, true));
+        document.addEventListener('keydown', event => {
+            if (event.key !== 'Escape' || event.defaultPrevented || !active() || detailOrigin || document.querySelector('dialog[open]') || state.state() !== 'list') return;
+            event.preventDefault(); goBack();
+        });
+        media.addEventListener('change', sync); sync();
+        return { state: state.state, set: (next, remember = true) => transition(() => state.set(next, remember)), sync };
+    }
+    /** SOFTM-MOBILE-SHEET END */
     function installMobileSearch() {
         const filters = document.querySelector('.filters'), list = document.getElementById('list');
         if (!document.getElementById('searchBtn')) {
@@ -382,7 +465,7 @@
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
                 active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
             }
-            options.mobileFocus?.(id, scrollRequested); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
+            options.mobileFocus?.(id, scrollRequested && mobileSheet?.state() !== 'list'); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
         const observe = () => { photoObserver.disconnect(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); };
@@ -618,6 +701,7 @@
             details.dataset.costMounted = 'true'; root.CareCostUI.mount(details.querySelector('.care-map-cost-host'), { service: details.dataset.costService, institution: { id: row.i, name: row.n, serviceCodes: String(row.t || '').split(',').filter(Boolean) } });
         }, true);
         root.addEventListener('pageshow', () => { const before = basket.ids().join(','); if (storage) { basket = createBasket(storage, options.type); basket.retain(new Set(rowById.keys())); } if (before !== basket.ids().join(',')) changed(); else refresh(); });
+        mobileSheet = installMobileSheet(); // SOFTM-MOBILE-SHEET 날짜:20260909 : 두 지도의 모바일 목록 확대·접기와 복귀 동작을 연결
         installMobileSearch(); // SOFTM-MOBILE-MAP 날짜:20260909 : 첫 화면에서 지도와 목록을 함께 탐색하도록 모바일 조작 연결
         syncView(); renderOrigin(); renderRoute(routeState);
     }
@@ -665,7 +749,7 @@
     function isBasketMap() { return workspace === 'saved'; }
     function exitBasketMap() { if (basketMap?.active()) setWorkspace('search', false); }
     function contains(id) { return basket?.has(id) || false; }
-    root.CareMapExperience = Object.freeze({ init, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
+    root.CareMapExperience = Object.freeze({ init, createSheetState, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-MAP-EXPERIENCE END */
