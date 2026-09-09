@@ -629,6 +629,18 @@
     }
     /** SOFTM-DRAG-FEEDBACK END */
     /** SOFTM-WORKSPACE START 날짜:20260905 : 같은 지도 DOM을 유지하면서 기관 찾기와 담은 기관의 입력·목록만 전환 */
+    /** SOFTM-WORKSPACE-BACK START 날짜:20260910 : 화면을 벗어나기 전에 상세·경로·목록 단계부터 복원하는 명시적 뒤로가기 */
+    function goBack() {
+        if (detailOrigin) { options.closeDetail?.(); return; }
+        if (routePanel) { editRoute(false); return; }
+        if (workspace === 'saved') { setWorkspace('search'); return; }
+        if (document.body.classList.contains('care-mobile-filters-open')) { document.querySelector('.care-mobile-filter-toggle')?.click(); return; }
+        if (media.matches && mobileSheet?.state() === 'list') { mobileSheet.set('split'); return; }
+        if (workspaceExpanded) { setWorkspaceExpanded(false); return; }
+        if (root.history.length > 1) root.history.back();
+        else root.location.assign('index.html');
+    }
+    /** SOFTM-WORKSPACE-BACK END */
     function init(config) {
         if (options) return;
         options = config; rowById = new Map(allRows().map(row => [String(row.i), row]));
@@ -665,6 +677,13 @@
         layout.prepend(bar); layout.prepend(results);
         dock = document.createElement('button'); dock.type = 'button'; dock.className = 'care-saved-dock'; dock.dataset.workspace = 'saved'; document.body.append(dock);
         dock.innerHTML = '담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span>곳 보기 <span aria-hidden="true">→</span>'; // SOFTM-TAB-FEEDBACK 날짜:20260905 : 상단 탭이 보이지 않을 때도 담긴 개수의 변화를 즉시 전달
+        /** SOFTM-WORKSPACE-BACK START 날짜:20260910 : 지도와 목록을 탐색하는 중에도 복귀 조작을 항상 노출 */
+        const back = document.createElement('button');
+        back.type = 'button'; back.className = 'care-workspace-back';
+        back.setAttribute('aria-label', '이전 화면으로 돌아가기'); back.title = '이전 화면으로 돌아가기';
+        back.innerHTML = '<span aria-hidden="true">←</span><span>이전</span>';
+        back.addEventListener('click', goBack); tabs.prepend(back);
+        /** SOFTM-WORKSPACE-BACK END */
         routeOutput = document.createElement('section'); routeOutput.className = 'care-route-output'; routeOutput.setAttribute('aria-label', '경로탐색 결과');
         routeOutput.innerHTML = '<p role="status"></p><div class="care-route-summary"></div><details class="care-route-itinerary" hidden></details>';
         bar.querySelector('.care-saved-footer').before(routeOutput);

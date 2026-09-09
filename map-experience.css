@@ -568,3 +568,10 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid select { width:100%; min-width:0; box-sizing:border-box; font-size:14px; padding:8px; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid input,.care-map-page.care-mobile-filters-open .filters .filter-grid button,.care-map-page.care-mobile-filters-open .filters .filter-grid select { min-height:44px; }
 /* SOFTM-FILTER-LAYOUT END */
+
+/* SOFTM-WORKSPACE-BACK START 날짜:20260910 : 작업 탭 옆 복귀 버튼을 PC·모바일에서 동일하게 접근 가능하게 유지 */
+.care-map-page .care-workspace-tabs { grid-template-columns:52px minmax(0,1fr) auto; }
+.care-map-page .care-workspace-tabs .care-workspace-back { display:flex; flex-direction:column; justify-content:center; gap:0; padding:2px; min-height:44px; font-size:12px; background:#fff; color:#214b78; border:1px solid #c6d6e6; border-radius:10px; }
+.care-workspace-back > span:first-child { font-size:23px; line-height:1; }
+@media(min-width:1001px) { .care-map-page .care-workspace-tabs { grid-template-columns:52px minmax(0,1fr); } }
+/* SOFTM-WORKSPACE-BACK END */
