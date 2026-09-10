@@ -33,7 +33,37 @@ function setBusy(value) {
     busy = value; $('analysisRun').disabled = value || originController?.state().phase === 'loading'; $('analysisCancel').hidden = !value; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 위치 확인 중 빈 주소로 분석을 시작하지 않음
     $('analysisResults').setAttribute('aria-busy', String(value));
     if (!value) $('analysisProgress').hidden = true;
+    if (!value) scheduleAnalysisMore(); // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 분석이 끝난 뒤 화면에 드러난 목록 끝부터 추가 표시
 }
+/** SOFTM-ANALYSIS-AUTOLOAD START 날짜:20260911 : 목록 끝 접근 때만 다음 기관 사진을 붙이고 확대창·취소·중복 호출을 차단 */
+let autoMoreObserver, autoMoreFrame = 0;
+function scheduleAnalysisMore() {
+    if (autoMoreFrame) return;
+    autoMoreFrame = requestAnimationFrame(() => {
+        autoMoreFrame = 0;
+        const end = $('analysisMore');
+        if (busy || !current || $('analysisResults').hidden || document.hidden || document.querySelector('dialog[open]') || !end || end.hidden) return;
+        const rect = end.getBoundingClientRect();
+        if (rect.top > innerHeight + 240 || rect.bottom < 0) return;
+        showMoreCards();
+    });
+}
+function observeAnalysisEnd() {
+    autoMoreObserver?.disconnect();
+    if ('IntersectionObserver' in window) {
+        autoMoreObserver = new IntersectionObserver(entries => {
+            if (entries.some(entry => entry.isIntersecting)) scheduleAnalysisMore();
+        }, { rootMargin: '0px 0px 240px 0px' });
+        autoMoreObserver.observe($('analysisMore'));
+    }
+}
+function showMoreCards() {
+    if (!current || busy || $('analysisMore')?.hidden) return;
+    limit += 12; renderCards({ append: true });
+}
+document.addEventListener('visibilitychange', scheduleAnalysisMore);
+document.addEventListener('close', scheduleAnalysisMore, true);
+/** SOFTM-ANALYSIS-AUTOLOAD END */
 function invalidate(message = '입력이 바뀌었습니다. 한 번에 분석을 눌러 새 조건으로 확인해 주세요.') {
     generation++; setBusy(false); $('analysisAddressChoices').hidden = true;
     if (current || ! $('analysisResults').hidden) { current = null; $('analysisResults').hidden = true; }
@@ -168,15 +198,15 @@ function render() {
         <section class="analysis-section"><h2>어디부터 알아볼까요?</h2><p>거리순으로 표시합니다. 사진 등록이나 확인된 항목 수는 기관의 품질 순위가 아닙니다.</p><div class="analysis-picks"><button type="button" data-analysis-view="nearby" aria-pressed="true">가까운 후보 ${size}곳</button>${input.selected.size ? `<button type="button" data-analysis-view="confirmed" aria-pressed="false">희망조건 모두 확인 ${chosen.allConfirmed.length}곳</button>` : ''}<a class="analysis-action" href="${esc(basketLink)}" rel="nofollow">담은 기관 비교하러 가기</a></div><div id="analysisCards" class="analysis-cards"></div><button class="analysis-more" id="analysisMore" type="button" hidden>12곳 더 보기</button></section>
         ${report.unknownLocation.length ? `<section class="analysis-section analysis-warning"><h2>위치 확인이 더 필요한 ${report.unknownLocation.length}곳</h2><p>선택한 반경에 걸친 행정지역의 후보입니다. 반경 안인지 아직 알 수 없어 주변 기관 건수에 포함하지 않았습니다.</p><button type="button" data-analysis-retry>미확인 위치 다시 확인</button><details><summary>기관 목록과 주소 보기</summary><ul>${report.unknownLocation.map(row => `<li><a href="${esc(mapUrl(input.type, row))}" rel="nofollow">${esc(row.n)}</a> · ${esc(row.a || '주소 미확인')}</li>`).join('')}</ul></details></section>` : ''}
         <section class="analysis-source">${input.type !== 'nursing-hospital' && size ? gradeTable(report.nearby) : ''}<p>근거: ${input.type === 'nursing-hospital' ? '심평원 개설현황' : '국민건강보험공단 공개 수집 자료'} · 검색 자료 기준일 ${esc(report.sourceDate || '미확인')}${report.featureDate ? ` · 특화서비스 기준일 ${esc(report.featureDate)}` : ''}. 개별 항목의 변경일과 평가연도는 다를 수 있습니다.</p><p>직선거리는 실제 이동시간이나 방문·송영 가능 범위를 뜻하지 않습니다. 공개 정원은 빈자리가 아니며, 등록사진은 현재 시설 상태나 촬영일을 보장하지 않습니다.</p></section>`;
-    renderCards();
+    renderCards(); observeAnalysisEnd(); // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 새 분석 결과의 끝을 관찰하고 이전 결과의 관찰을 해제
 }
-function renderCards() {
+function renderCards({ append = false } = {}) { // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 추가 묶음은 기존 카드·사진·펼침 상태를 보존
     const { report, chosen, input, summaries } = current;
     const confirmed = new Set(chosen.allConfirmed.map(entry => String(entry.row.i)));
     const entries = view === 'confirmed' ? report.nearby.filter(entry => confirmed.has(String(entry.row.i))) : report.nearby;
-    const host = $('analysisCards'); host.replaceChildren();
+    const host = $('analysisCards'), start = append ? host.children.length : 0; if (!append) host.replaceChildren(); // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 스크롤 끝에서 기존 카드를 재생성하지 않음
     if (!entries.length) host.innerHTML = '<p class="analysis-empty">이 항목에 해당하는 후보가 없습니다. 가까운 후보에서 공개 근거와 확인할 질문을 살펴보세요.</p>';
-    for (const entry of entries.slice(0, limit)) {
+    for (const entry of entries.slice(start, limit)) { // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 아직 표시하지 않은 기관 사진만 추가
         const { row, distance, conditions } = entry;
         const card = document.createElement('article'); card.className = 'analysis-card';
         const photo = summaries?.[row.i];
@@ -191,6 +221,7 @@ function renderCards() {
     }
     $('analysisMore').hidden = entries.length <= limit;
     syncBasket();
+    scheduleAnalysisMore(); // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 추가 표시 후에도 끝이 보일 때만 다음 묶음을 확인
 }
 function syncBasket() {
     if (!current) return;
@@ -231,7 +262,7 @@ $('analysisResults').addEventListener('click', event => {
     const button = event.target.closest('button'); if (!button) return;
     if (button.hasAttribute('data-analysis-retry')) { const { input, address } = current; invalidate('확인되지 않은 자료를 다시 확인합니다.'); void run(input, address, generation); }
     else if (button.dataset.analysisView) { view = button.dataset.analysisView; limit = 12; document.querySelectorAll('[data-analysis-view]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.analysisView === view))); renderCards(); }
-    else if (button.id === 'analysisMore') { limit += 12; renderCards(); }
+    else if (button.id === 'analysisMore') showMoreCards(); // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 자동 로드 미지원 환경의 수동 더보기도 같은 추가 방식으로 처리
     else if (button.dataset.analysisSave) { current.basket.toggle(button.dataset.analysisSave); syncBasket(); $('analysisStatus').textContent = `비교함에 ${current.basket.ids().length}곳을 담았습니다.`; }
     else if (button.dataset.analysisPhotos) { const row = current.report.nearby.find(entry => String(entry.row.i) === button.dataset.analysisPhotos)?.row; if (row) openComparison({ rows: [row], type: current.input.type, opener: button, title: `${row.n} 등록사진` }); }
 });
