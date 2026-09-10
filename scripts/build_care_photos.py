@@ -3,6 +3,7 @@
 import argparse
 import gzip
 import hashlib
+import io
 import json
 from pathlib import Path
 
@@ -11,6 +12,15 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def encode(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+
+
+# /** SOFTM-PHOTO-GZIP START 날짜:20260911 : 실행 운영체제에 따라 gzip 헤더가 달라져 검사와 배포 파일이 반복 변경되지 않도록 중립 헤더로 압축 */
+def deterministic_gzip(content):
+    output = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=output, mtime=0) as archive:
+        archive.write(content)
+    return output.getvalue()
+# /** SOFTM-PHOTO-GZIP END */
 
 
 def summaries(root):
@@ -35,7 +45,7 @@ def summaries(root):
                 result[identity] = cached[identity]
         content = encode(result)
         filename = f"{kind}.json.gz"
-        outputs[filename] = gzip.compress(content, mtime=0)
+        outputs[filename] = deterministic_gzip(content)
         manifest[kind] = {"file": filename, "revision": hashlib.sha256(content).hexdigest()[:16],
                           "count": len(result), "withPhotos": sum(bool(x["count"]) for x in result.values()), "source": config["source"]}
     outputs["manifest.json"] = encode(manifest) + b"\n"
