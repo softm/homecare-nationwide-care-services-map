@@ -47,6 +47,17 @@ export function selectedCriteriaFor(type, preferences) {
     const selected = new Set(preferences || []);
     return criteriaFor(type).filter(item => selected.has(item.id));
 }
+export function compactScopeLabel(scope) {
+    const label = String(scope || '').trim();
+    if (!label) return '전국';
+    if (label.includes('지도')) return '현재 지도 영역';
+    const regions = label.split(/\s*·\s*/).filter(Boolean);
+    return regions.length > 2 ? `${regions[0]} 외 ${regions.length - 1}개 지역` : label;
+}
+export function compactSelectedCriteria(criteria, limit = 1) {
+    const items = (criteria || []).slice(0, Math.max(0, limit));
+    return { items, remaining: Math.max(0, (criteria || []).length - items.length) };
+}
 function renderCompactHighlights(conditions) {
     const highlights = compactHighlights(conditions);
     if (!highlights.items.length) return '';
@@ -57,15 +68,15 @@ export function mount(config) {
     let storage; try { storage = window.sessionStorage; } catch {}
     let saved = readPreferences(storage), manifest = null, featureIndex = null, featureError = false;
     let featureTask, featureRevision = 0, renderFrame = 0, reportCache = null, reportRows = null, reportSignature = '', dialogGeneration = 0, step = 1, draft, regionRows = [], regionType = '', regionLoading = false, submitting = false;
-    /** SOFTM-MATCH-PANEL START 날짜:20260910 : 조건 설정과 선택 결과를 같은 패널에 묶어 하나의 기능으로 인식되도록 구성 */
+    /** SOFTM-MATCH-PANEL START 날짜:20260911 : 조건 패널을 짧게 유지하면서 누르는 위치가 분명하도록 구성 */
     const panel = document.createElement('section'); panel.className = 'care-match-panel'; panel.setAttribute('aria-label', '내 조건에 맞는 기관 찾기');
-    const start = document.createElement('button'); start.type = 'button'; start.className = 'care-match-start'; start.innerHTML = '<span>내 조건에 맞는 기관 찾기</span><small>서비스·지역·중요 조건 설정</small>';
+    const start = document.createElement('button'); start.type = 'button'; start.className = 'care-match-start'; start.setAttribute('aria-haspopup', 'dialog'); start.setAttribute('aria-controls', 'careMatchDialog'); start.innerHTML = '<span class="care-match-start-title">내 조건에 맞는 기관 찾기</span><span class="care-match-start-action">조건 설정하기 <i aria-hidden="true">→</i></span>';
     const results = document.querySelector('.results'), list = document.getElementById('list');
     results.querySelector('.list-head,.result-head').after(panel); panel.append(start);
     /** SOFTM-MATCH-PANEL END */
     let summaryMarkup = ''; const reasonMarkup = new WeakMap();
     const summary = document.createElement('section'); summary.className = 'care-match-summary'; summary.setAttribute('aria-label', '내 조건으로 살펴본 결과');
-    const dialog = document.createElement('dialog'); dialog.className = 'care-match-dialog'; dialog.setAttribute('aria-labelledby', 'careMatchTitle');
+    const dialog = document.createElement('dialog'); dialog.id = 'careMatchDialog'; dialog.className = 'care-match-dialog'; dialog.setAttribute('aria-labelledby', 'careMatchTitle');
     dialog.innerHTML = '<header><div><p class="care-match-step"></p><h2 id="careMatchTitle">내 조건에 맞는 기관 찾기</h2></div><button type="button" data-match-close aria-label="질문 닫기">×</button></header><div class="care-match-dialog-body"></div><p class="care-match-status" role="status"></p><footer><button type="button" data-match-back>이전</button><button type="button" data-match-next>다음</button></footer>';
     document.body.append(dialog);
     const body = dialog.querySelector('.care-match-dialog-body'), status = dialog.querySelector('.care-match-status');
@@ -88,7 +99,7 @@ export function mount(config) {
         renderFrame = 0;
         const snapshot = config.snapshot();
         if (!saved.active) {
-            panel.classList.remove('active'); start.innerHTML = '<span>내 조건에 맞는 기관 찾기</span><small>서비스·지역·중요 조건 설정</small>'; summary.remove();
+            panel.classList.remove('active'); start.innerHTML = '<span class="care-match-start-title">내 조건에 맞는 기관 찾기</span><span class="care-match-start-action">조건 설정하기 <i aria-hidden="true">→</i></span>'; summary.remove();
             list.querySelectorAll('.care-match-reasons').forEach(node => node.remove()); return;
         }
         const relevant = relevantPreferences(saved, config.type), ctx = context();
@@ -99,15 +110,19 @@ export function mount(config) {
         }
         const report = reportCache, selectedCriteria = selectedCriteriaFor(config.type, ctx.preferences);
         const filters = filterLabels(snapshot.filters, config.type), scope = snapshot.scope || [snapshot.province, snapshot.city].filter(Boolean).join(' ') || '전국';
-        /** SOFTM-MATCH-PANEL START 날짜:20260910 : 선택값을 설정 버튼 바로 아래 칩으로 보여주고 상세 집계는 접어서 목록 흐름을 유지 */
+        /** SOFTM-MATCH-PANEL START 날짜:20260911 : 지도 영역과 선택 조건을 축약하고 전체 내용은 접어 기관 목록을 바로 보게 함 */
         panel.classList.add('active');
-        start.innerHTML = `<span>내 조건에 맞는 기관 찾기</span><small>${selectedCriteria.length ? `${selectedCriteria.length}개 선택 · 수정` : '중요 조건 선택 안 함 · 수정'}</small>`;
-        const selectedMarkup = selectedCriteria.length ? selectedCriteria.map(item => `<span class="care-match-selected-chip">${escape(item.label)}</span>`).join('') : '<span class="care-match-selected-empty">중요 조건 선택 안 함</span>';
-        const resultMarkup = snapshot.pending || snapshot.error ? (snapshot.error ? '<p role="status">검색을 완료하지 못했습니다. 다시 조회하면 조건별 집계를 확인할 수 있습니다.</p>' : '<p role="status">검색 결과 확인 중입니다.</p>') : `<p class="care-match-result-count">전체 후보 <b>${report.total.toLocaleString()}곳</b></p><details><summary>선택 조건 확인 현황</summary>${report.counts.length ? `<ul>${report.counts.map(item => `<li><b>${escape(item.label)}</b><span>확인 ${item.confirmed}곳 · 조건과 다름 ${item.different}곳 · 미확인 ${item.unknown}곳</span></li>`).join('')}</ul>` : '<p>선택한 중요 조건이 없습니다.</p>'}</details>`;
-        const markup = `<div class="care-match-selection"><b>${escape(manifest?.[config.type]?.label || '')} · ${escape(scope)}</b><div class="care-match-selected-list" aria-label="선택한 중요 조건">${selectedMarkup}</div></div>${resultMarkup}<p class="care-match-guidance">선택 조건은 후보를 제외하거나 순위를 바꾸지 않고 공개정보 확인에 사용됩니다.</p>${filters.length ? `<details><summary>적용 중인 기존 검색조건 ${filters.length}개</summary><ul>${filters.map(label => `<li>${escape(label)}</li>`).join('')}</ul></details>` : ''}${relevant.omitted.length ? '<p class="care-match-note">이 카테고리에서 지원하지 않는 중요 조건은 적용하지 않았습니다. 원래 카테고리로 돌아가면 다시 표시됩니다.</p>' : ''}${featureError ? '<p>특화서비스 자료를 불러오지 못했습니다. 검색 결과는 계속 이용할 수 있습니다.</p><button type="button" data-match-retry>설명 자료 다시 불러오기</button>' : ''}${snapshot.filters.capacity ? '<button type="button" data-match-clear="capacity">기존 정원 조건 해제</button>' : ''}${snapshot.filters.staff ? '<button type="button" data-match-clear="staff">기존 인력 조건 해제</button>' : ''}`;
+        start.innerHTML = `<span class="care-match-start-title">내 조건에 맞는 기관 찾기</span><span class="care-match-start-action">${selectedCriteria.length ? '조건 수정하기' : '조건 선택하기'} <i aria-hidden="true">→</i></span>`;
+        const preview = compactSelectedCriteria(selectedCriteria);
+        const selectedMarkup = preview.items.length ? `${preview.items.map(item => `<span class="care-match-selected-chip" title="${escape(item.label)}">${escape(item.label)}</span>`).join('')}${preview.remaining ? `<span class="care-match-selected-more">외 ${preview.remaining}개</span>` : ''}` : '<span class="care-match-selected-empty">중요 조건 미선택</span>';
+        const resultCountMarkup = snapshot.pending || snapshot.error ? '' : `<span class="care-match-result-count">후보 <b>${report.total.toLocaleString()}곳</b></span>`;
+        const statusMarkup = snapshot.pending || snapshot.error ? (snapshot.error ? '<p class="care-match-compact-status" role="status">검색을 완료하지 못했습니다.</p>' : '<p class="care-match-compact-status" role="status">검색 결과 확인 중입니다.</p>') : '';
+        const breakdownNeeded = selectedCriteria.length || filters.length || relevant.omitted.length || featureError || snapshot.filters.capacity || snapshot.filters.staff;
+        const breakdownMarkup = breakdownNeeded ? `<details class="care-match-breakdown"><summary>조건·확인 결과</summary><div class="care-match-breakdown-content">${selectedCriteria.length ? `<section><b>선택한 중요 조건</b><ul>${selectedCriteria.map(item => `<li>${escape(item.label)}</li>`).join('')}</ul></section>` : ''}${!snapshot.pending && !snapshot.error && report.counts.length ? `<section><b>조건별 확인 현황</b><ul>${report.counts.map(item => `<li><b>${escape(item.label)}</b><span>확인 ${item.confirmed}곳 · 조건과 다름 ${item.different}곳 · 미확인 ${item.unknown}곳</span></li>`).join('')}</ul></section>` : ''}${selectedCriteria.length ? '<p class="care-match-guidance">선택 조건은 후보를 제외하거나 순위를 바꾸지 않고 공개정보 확인에 사용됩니다.</p>' : ''}${filters.length ? `<section><b>적용 중인 기존 검색조건</b><ul>${filters.map(label => `<li>${escape(label)}</li>`).join('')}</ul></section>` : ''}${relevant.omitted.length ? '<p class="care-match-note">이 카테고리에서 지원하지 않는 중요 조건은 적용하지 않았습니다. 원래 카테고리로 돌아가면 다시 표시됩니다.</p>' : ''}${featureError ? '<p>특화서비스 자료를 불러오지 못했습니다.</p><button type="button" data-match-retry>설명 자료 다시 불러오기</button>' : ''}${snapshot.filters.capacity ? '<button type="button" data-match-clear="capacity">기존 정원 조건 해제</button>' : ''}${snapshot.filters.staff ? '<button type="button" data-match-clear="staff">기존 인력 조건 해제</button>' : ''}</div></details>` : '';
+        const markup = `<div class="care-match-overview"><b>${escape(manifest?.[config.type]?.label || '')} · ${escape(compactScopeLabel(scope))}</b>${resultCountMarkup}</div>${statusMarkup}<div class="care-match-summary-row"><div class="care-match-selected-list" aria-label="선택한 중요 조건">${selectedMarkup}</div>${breakdownMarkup}</div>`;
         /** SOFTM-MATCH-PANEL END */
         if (summaryMarkup !== markup) { const expanded = [...summary.querySelectorAll('details')].map(node => node.open); summary.innerHTML = markup; summary.querySelectorAll('details').forEach((node, index) => { node.open = !!expanded[index]; }); summaryMarkup = markup; }
-        if (summary.parentElement !== panel) panel.append(summary); // SOFTM-MATCH-PANEL 날짜:20260910 : 선택 결과가 설정 버튼과 떨어져 목록 카드처럼 보이지 않도록 같은 패널에 유지
+        if (summary.parentElement !== panel) panel.append(summary); // SOFTM-MATCH-PANEL 날짜:20260911 : 축약한 선택 결과를 설정 버튼과 같은 패널에 유지
         const byId = new Map(report.cards.map(card => [card.id, card]));
         list.querySelectorAll('.row').forEach(row => {
             const id = row.dataset.id || row.querySelector('[data-care-basket]')?.dataset.careBasket;

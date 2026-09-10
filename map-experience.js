@@ -819,7 +819,7 @@
         options = config; rowById = new Map(allRows().map(row => [String(row.i), row]));
         /** SOFTM-CARE-MATCH START 날짜:20260910 : 공용 질문 흐름이 준비되지 않아도 기존 지도는 계속 사용할 수 있게 독립 초기화 */
         if (options.match) {
-            const connect = (attempt = 0) => import(`./care-match.js?v=20260910-match-panel1&attempt=${attempt}`).then(module => { // SOFTM-MATCH-PANEL 날짜:20260910 : 조건 설정과 선택값을 묶은 패널을 이전 캐시 없이 적용
+            const connect = (attempt = 0) => import(`./care-match.js?v=20260911-match-action1&attempt=${attempt}`).then(module => { // SOFTM-MATCH-PANEL-ACTION 날짜:20260911 : 축약한 조건 패널과 명확한 설정 버튼을 이전 캐시 없이 적용
                 matchController = module.mount({ ...options.match, type: options.type, allRows, onChange: updateInsights });
             }).catch(() => {
                 if (document.querySelector('.care-match-load-retry')) return;

@@ -26,17 +26,32 @@
 .care-match-choices label:has(input:checked) { background:#edf5ff; border-color:#3478c4; }
 .care-match-choices input { width:18px; height:18px; flex:none; }
 .care-match-confirm { background:#f5f8fc; border:1px solid #dbe6f1; border-radius:12px; padding:16px; margin-top:20px; }
-/** SOFTM-MATCH-PANEL START 날짜:20260910 : 조건 설정 버튼과 선택값을 하나의 카드로 연결해 별개 기능처럼 보이는 문제를 방지 */
+/** SOFTM-MATCH-PANEL START 날짜:20260911 : 명확한 조건 설정 버튼과 축약된 요약으로 목록 가시 영역을 유지 */
 .care-map-page .care-match-panel { margin:4px 12px 10px; overflow:hidden; border:1px solid #a7c7e8; border-radius:12px; background:#f1f7ff; color:#244c76; }
-.care-map-page .care-match-panel > .care-match-start { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin:0; border:0; border-radius:0; text-align:left; }
-.care-map-page .care-match-panel > .care-match-start small { color:#55728f; font-size:11px; font-weight:650; white-space:nowrap; }
-.care-map-page .care-match-panel.active > .care-match-start { border-bottom:1px solid #c5d9ef; background:#e8f2ff; }
-.care-match-summary { padding:12px; margin:0; border:0; border-radius:0; background:transparent; color:#244c76; overflow-wrap:anywhere; font-size:13px; line-height:1.6; }
-.care-match-selection > b { display:block; margin-bottom:7px; font-size:12px; }
-.care-match-selected-list { display:flex; flex-wrap:wrap; gap:5px; }
-.care-match-selected-chip,.care-match-selected-empty { display:inline-flex; align-items:center; min-height:25px; padding:3px 8px; border-radius:999px; background:#fff; color:#245b90; font-size:11px; font-weight:750; }
+.care-map-page .care-match-panel > .care-match-start { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin:0; border:0; border-radius:0; background:#e8f2ff; text-align:left; transition:background .16s ease; }
+.care-map-page .care-match-panel > .care-match-start:hover { background:#dcecff; }
+.care-match-start-title { min-width:0; color:#174e89; }
+.care-match-start-action { display:inline-flex; align-items:center; gap:4px; flex:none; min-height:32px; padding:5px 10px; border-radius:999px; background:#1769c2; color:#fff; font-size:11px; font-weight:800; white-space:nowrap; box-shadow:0 2px 5px #164e8f33; }
+.care-match-start-action i { font-size:15px; font-style:normal; line-height:1; transition:transform .16s ease; }
+.care-match-start:hover .care-match-start-action i { transform:translateX(2px); }
+.care-map-page .care-match-panel.active > .care-match-start { border-bottom:1px solid #c5d9ef; }
+.care-match-summary { padding:9px 12px 10px; margin:0; border:0; border-radius:0; background:transparent; color:#244c76; overflow-wrap:anywhere; font-size:12px; line-height:1.45; }
+.care-match-overview { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.care-match-overview > b { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+.care-match-summary-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; margin-top:6px; }
+.care-match-selected-list { display:flex; align-items:center; gap:5px; min-width:0; flex:1; overflow:hidden; }
+.care-match-selected-chip,.care-match-selected-empty { display:inline-block; min-width:0; max-width:100%; padding:3px 8px; overflow:hidden; border-radius:999px; background:#fff; color:#245b90; font-size:11px; font-weight:750; text-overflow:ellipsis; white-space:nowrap; }
 .care-match-selected-empty { color:#687b8e; }
-.care-match-result-count { display:inline-block; margin:9px 8px 0 0!important; }
+.care-match-selected-more { flex:none; color:#55728f; font-size:11px; font-weight:750; white-space:nowrap; }
+.care-match-result-count { flex:none; margin:0!important; color:#55728f; font-size:11px; white-space:nowrap; }
+.care-match-compact-status { margin:5px 0 0!important; color:#60758b; font-size:11px; }
+.care-match-breakdown { flex:none; margin-left:auto; }
+.care-match-summary .care-match-breakdown > summary { padding:2px 0; color:#245b90; font-size:11px; font-weight:750; white-space:nowrap; }
+.care-match-breakdown[open] { flex-basis:100%; margin-left:0; border-top:1px solid #cfdeed; }
+.care-match-breakdown[open] > summary { padding-top:8px; }
+.care-match-breakdown-content { padding:2px 0 0; }
+.care-match-breakdown-content section { margin-top:8px; }
+.care-match-breakdown-content section > b { font-size:11px; }
 .care-match-guidance { color:#60758b; font-size:11px; }
 /** SOFTM-MATCH-PANEL END */
 .care-match-summary p { margin:8px 0; }
