@@ -607,3 +607,30 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-basket-item.care-scroll-active { background:#edf5ff; border-color:#8bb7eb; box-shadow:inset 4px 0 #2777df; }
 .care-saved-scroll-tail { flex:none; list-style:none; pointer-events:none; }
 /** SOFTM-SAVED-SCROLL END */
+
+/* SOFTM-BRIEF-READABILITY START 날짜:20260910 : 좁은 비교 패널에서도 항목명·값·질문을 구분하고 충분한 행간을 확보 */
+.care-insights { background:#f6f8fb; border-color:#d6e1ee; }
+.care-insights > summary { font-size:18px; line-height:1.5; padding:18px 16px; }
+.care-insights > summary span { font-size:13px; line-height:1.6; }
+.care-insight-content { padding:0 12px 16px; font-size:15px; line-height:1.75; word-break:normal; overflow-wrap:anywhere; }
+.care-insight-intro { padding:16px; border-radius:12px; background:#eaf2ff; color:#254562; }
+.care-insight-content .care-insight-intro h3 { font-size:16px; margin:0 0 12px; color:#173f70; }
+.care-insight-intro ul { margin:0; padding-left:18px; }
+.care-insight-content .care-insight-intro li + li { margin-top:12px; }
+.care-insight-card { margin-top:16px; padding:16px; border-radius:12px; }
+.care-insight-card h4 { display:flex; align-items:flex-start; gap:10px; font-size:17px; line-height:1.6; }
+.care-insight-number { flex:none; display:grid; place-items:center; width:28px; height:28px; background:#eaf2ff; color:#245a93; border-radius:8px; font-size:14px; }
+.care-insight-facts { margin:16px 0 0; }
+.care-insight-facts > div { display:grid; grid-template-columns:72px minmax(0,1fr); gap:10px; padding:12px 0; border-top:1px solid #edf0f4; }
+.care-insight-facts dt { font-size:13px; font-weight:650; color:#5c6e81; }
+.care-insight-facts dd { margin:0; color:#20364d; min-width:0; }
+.care-insight-facts .care-insight-fact-note { display:block; padding:12px; background:#f7f9fc; border-radius:8px; font-size:13px; }
+.care-insight-fact-note dt { margin-bottom:4px; }
+.care-insight-card details { margin-top:8px; padding-top:4px; }
+.care-insight-card summary { font-size:14px; line-height:1.6; }
+.care-insight-questions { padding-left:24px; margin:8px 0 16px; }
+.care-insight-questions li { padding-left:4px; }
+.care-insight-questions li::marker { color:#2462a4; font-weight:750; }
+.care-insight-card .care-saved-detail { width:100%; border:1px solid #c9d9eb; border-radius:8px; background:#f4f8ff; text-align:center; padding:10px; }
+.care-insight-source { padding:14px 4px 0; border-top:1px solid #dce4ee; margin-top:20px; line-height:1.8; color:#596b7d; }
+/* SOFTM-BRIEF-READABILITY END */

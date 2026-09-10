@@ -305,7 +305,7 @@
     /** SOFTM-CARE-INSIGHTS START 날짜:20260910 : 설명을 요청한 경우에만 자료를 읽고 변경된 비교함에 이전 결과가 남지 않게 갱신 */
     let insightRevision = 0, insightAttempt = 0, insightTask;
     function loadInsights() {
-        if (!insightTask) insightTask = import(`./care-insights.js${insightAttempt ? `?retry=${insightAttempt}` : ''}`).catch(error => {
+        if (!insightTask) insightTask = import(`./care-insights.js?v=20260910-2${insightAttempt ? `&retry=${insightAttempt}` : ''}`).catch(error => {
             insightTask = null; insightAttempt++; throw error;
         });
         return insightTask;

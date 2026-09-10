@@ -30,10 +30,34 @@
   for(const row of rows){const value=distance(point,config.coord(row));row._distance=Number.isFinite(value)?value:undefined;}
   rows.sort((a,b)=>compare(a,b,{mode:config.select.value,query:document.getElementById('q').value,point,coord:config.coord}));return true;
  }
+ /** SOFTM-SORT-PERSIST START 날짜:20260910 : 카테고리별 페이지 이동에도 적용한 정렬과 거리 중심점을 같은 탭에서 이어서 사용 */
+ function createPreference(storage){
+  const key='careResultSort:v1';
+  return {
+   read(modes,explicit,fallback='rating'){
+    let saved;try{saved=JSON.parse(storage?.getItem(key)||'null');}catch{}
+    if(modes.includes(explicit))return {mode:explicit,origin:'map',point:null};
+    if(!saved||!modes.includes(saved.mode))return {mode:fallback,origin:'map',point:null};
+    const p=saved.point,valid=p&&Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&Math.abs(p.lat)<=90&&Math.abs(p.lng)<=180;
+    return {mode:saved.mode,origin:saved.origin==='current'&&valid?'current':'map',point:saved.origin==='current'&&valid?{lat:p.lat,lng:p.lng}:null};
+   },
+   write(value){try{storage?.setItem(key,JSON.stringify(value));}catch{}}
+  };
+ }
+ /** SOFTM-SORT-PERSIST END */
  function mount(options){
   config=options;const select=options.select;
   const accuracy=document.createElement('option');accuracy.value='accuracy';accuracy.textContent='정확도순';select.prepend(accuracy);
   if(select.value==='priority')select.value='accuracy';
+  /** SOFTM-SORT-PERSIST START 날짜:20260910 : 공유 정렬값을 우선하고 없으면 마지막으로 적용한 조건을 첫 목록 렌더 전에 복원 */
+  let storage;try{storage=root.sessionStorage;}catch{}
+  const preference=createPreference(storage),modesAvailable=[...select.options].map(option=>option.value);
+  const explicit=new URLSearchParams(root.location.search).get('sort');
+  const restored=preference.read(modesAvailable,explicit,select.value);
+  select.value=restored.mode;origin=restored.origin;currentPoint=restored.point;
+  const savePreference=()=>preference.write({mode:select.value,origin,point:origin==='current'?currentPoint:null});
+  if(modesAvailable.includes(explicit))savePreference();
+  /** SOFTM-SORT-PERSIST END */
   const distanceOption=select.querySelector('[value="distance"]');if(distanceOption)distanceOption.textContent='거리순';
   select.hidden=true;
   const trigger=document.createElement('button');trigger.type='button';trigger.className='care-sort-trigger';select.after(trigger);
@@ -54,7 +78,7 @@
     const point=nextOrigin==='current'?await root.CareLocation.request({isCurrent:()=>generation===token&&dialog.open}):options.center();
     if(generation!==token||!dialog.open)return;
     if(!point)throw new Error('지도가 준비된 뒤 다시 적용해 주세요.');
-    currentPoint=nextOrigin==='current'?point:null;origin=nextOrigin;select.value=mode;options.apply();document.getElementById('list').scrollTop=0;refresh();close();
+    currentPoint=nextOrigin==='current'?point:null;origin=nextOrigin;select.value=mode;options.apply();document.getElementById('list').scrollTop=0;savePreference();refresh();close(); // SOFTM-SORT-PERSIST 날짜:20260910 : 적용 성공 후에만 저장해 취소·위치 실패가 다음 카테고리 조건을 바꾸지 않도록 유지
    }catch(error){if(generation===token&&dialog.open){status.textContent=error.reason?root.CareLocation.info(error).message+' '+(error.reason==='denied'?root.CareLocation.permissionHelp:''):error.message;apply.disabled=false;}}
   };
   dialog.querySelector('.care-sort-close').onclick=close;
@@ -63,6 +87,6 @@
   dialog.addEventListener('close',()=>{generation++;apply.disabled=false;trigger.focus({preventScroll:true});});
   select.addEventListener('change',refresh);refresh();
  }
- root.CareResultSort=Object.freeze({mount,sort,compare,relevance,distance});
+ root.CareResultSort=Object.freeze({mount,sort,compare,relevance,distance,createPreference}); // SOFTM-SORT-PERSIST 날짜:20260910 : 저장소 거부와 잘못된 저장값의 복원 규칙을 검증 가능하게 공유
 })(typeof window==='undefined'?globalThis:window);
 /** SOFTM-RESULT-SORT END */

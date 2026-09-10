@@ -70,10 +70,18 @@ export function analyze(rows, { type = 'daycare', sourceDate = '' } = {}) {
     return { summary, cards, sourceDate, source: hospital ? '심평원 개설현황' : '공단 수집 자료' };
 }
 
+/** SOFTM-BRIEF-READABILITY START 날짜:20260910 : 항목명과 값을 구분해 긴 기관 정보를 빠르게 비교하도록 구성 */
+function renderFact(text) {
+    const separator = text.indexOf(': ');
+    return separator < 0 ? `<div class="care-insight-fact-note"><dt>참고</dt><dd>${escape(text)}</dd></div>` : `<div><dt>${escape(text.slice(0, separator))}</dt><dd>${escape(text.slice(separator + 2))}</dd></div>`;
+}
+/** SOFTM-BRIEF-READABILITY END */
 export function render(rows, config) {
     const report = analyze(rows, config);
+    /** SOFTM-BRIEF-READABILITY START 날짜:20260910 : 요약·기관별 정보·상담 질문을 별도 영역으로 나누어 읽는 순서를 명확히 함 */
     return `<div class="care-insight-intro"><h3>선택 전에 살펴볼 차이</h3><ul>${report.summary.map(text => `<li>${escape(text)}</li>`).join('')}</ul></div>
-    <div class="care-insight-cards">${report.cards.map((card, index) => `<article class="care-insight-card"><h4>${index + 1}. ${escape(card.name)}</h4><ul>${card.facts.map(text => `<li>${escape(text)}</li>`).join('')}</ul><details><summary>방문·전화 상담 질문 ${card.questions.length}개</summary><ul>${card.questions.map(text => `<li>${escape(text)}</li>`).join('')}</ul></details><button type="button" class="care-saved-detail" data-saved-detail="${escape(card.id)}">기관 상세 보기</button></article>`).join('')}</div>
+    <div class="care-insight-cards">${report.cards.map((card, index) => `<article class="care-insight-card"><h4><span class="care-insight-number">${index + 1}</span><span>${escape(card.name)}</span></h4><dl class="care-insight-facts">${card.facts.map(renderFact).join('')}</dl><details><summary>방문·전화 상담 질문 ${card.questions.length}개</summary><ol class="care-insight-questions">${card.questions.map(text => `<li>${escape(text)}</li>`).join('')}</ol></details><button type="button" class="care-saved-detail" data-saved-detail="${escape(card.id)}">기관 상세 보기</button></article>`).join('')}</div>
     <p class="care-insight-source">근거: ${escape(report.source)} · 검색 자료 기준일 ${escape(report.sourceDate || '미확인')}. 개별 항목의 변경일과 평가연도는 다를 수 있습니다. 공개 인력은 실제 근무조나 서비스 품질을 뜻하지 않습니다. 거리·비용·실시간 이용 가능 여부는 이 요약에서 추정하지 않습니다.</p>`;
+    /** SOFTM-BRIEF-READABILITY END */
 }
 /** SOFTM-CARE-INSIGHTS END */
