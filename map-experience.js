@@ -572,6 +572,56 @@
         observe();
     }
     /** SOFTM-MOBILE-MAP END */
+    /** SOFTM-SAVED-SCROLL START 날짜:20260910 : 담은 기관의 스크롤 위치를 카드·마커·열린 상세에 같은 기준으로 반영 */
+    function installSavedScroll() {
+        const list = bar.querySelector('.care-basket-items');
+        const tail = document.createElement('li');
+        tail.className = 'care-saved-scroll-tail'; tail.setAttribute('aria-hidden', 'true');
+        let active = null, frame = 0, follow = false;
+        function sync() {
+            frame = 0;
+            const requested = follow; follow = false;
+            if (workspace !== 'saved' || document.body.classList.contains('care-basket-dragging')) return;
+            const rect = bar.getBoundingClientRect();
+            if (rect.right <= 0 || rect.left >= root.innerWidth || getComputedStyle(bar).visibility === 'hidden') return;
+            const cards = [...list.querySelectorAll('[data-basket-id]')];
+            if (!cards.length) { active = null; tail.remove(); return; }
+            const ownScroll = /auto|scroll/.test(getComputedStyle(bar).overflowY);
+            const top = Math.max(0, rect.top, tabs.getBoundingClientRect().bottom);
+            const bottom = Math.min(root.innerHeight, rect.bottom);
+            const footerHeight = bar.querySelector('.care-saved-footer').getBoundingClientRect().height;
+            if (ownScroll) {
+                if (!tail.isConnected) list.append(tail);
+                const height = Math.max(0, bottom - top - footerHeight - cards.at(-1).getBoundingClientRect().height - 55);
+                tail.style.height = `${cards.length > 1 ? height : 0}px`;
+            } else tail.remove();
+            if (bottom <= top) return;
+            const visible = cards.filter(card => { const r = card.getBoundingClientRect(); return r.bottom > top && r.top < bottom - footerHeight; });
+            const atEnd = ownScroll
+                ? bar.scrollHeight > bar.clientHeight && bar.scrollTop + bar.clientHeight >= bar.scrollHeight - 2
+                : document.documentElement.scrollHeight > root.innerHeight && root.scrollY + root.innerHeight >= document.documentElement.scrollHeight - 2;
+            const card = atEnd ? visible.at(-1) : visible.find(node => node.getBoundingClientRect().bottom > top + 55) || visible.at(-1);
+            if (!card) return;
+            if (active !== card) {
+                active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
+                active = card; card.classList.add('care-scroll-active'); card.setAttribute('aria-current', 'true');
+            }
+            const id = card.dataset.basketId;
+            if (requested) options.scrollDetail?.(id);
+            options.mobileFocus?.(id, requested, true);
+        }
+        const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
+        const onScroll = () => { if (workspace === 'saved') { follow = true; schedule(); } };
+        bar.addEventListener('scroll', onScroll, { passive: true });
+        root.addEventListener('scroll', onScroll, { passive: true });
+        root.addEventListener('resize', schedule);
+        new MutationObserver(schedule).observe(list, { childList: true });
+        new MutationObserver(schedule).observe(document.querySelector('.map-wrap'), { childList: true, subtree: true });
+        new MutationObserver(schedule).observe(document.body, { attributes: true, attributeFilter: ['data-care-workspace', 'data-care-view', 'data-care-panel', 'class'] });
+        if (root.ResizeObserver) new root.ResizeObserver(schedule).observe(bar);
+        schedule();
+    }
+    /** SOFTM-SAVED-SCROLL END */
     function prepareFilters() {
         const filters = document.querySelector('.filters'), main = document.querySelector('main.wrap');
         if (!filters || !main) return;
@@ -833,6 +883,7 @@
         }, true);
         root.addEventListener('pageshow', () => { const before = basket.ids().join(','); if (storage) { basket = createBasket(storage, options.type); basket.retain(new Set(rowById.keys())); } if (before !== basket.ids().join(',')) changed(); else refresh(); });
         mobileSheet = installMobileSheet(); // SOFTM-MOBILE-SHEET 날짜:20260909 : 두 지도의 모바일 목록 확대·접기와 복귀 동작을 연결
+        installSavedScroll(); // SOFTM-SAVED-SCROLL 날짜:20260910 : 담은 기관·방문 경로의 목록 선택을 같은 마커 처리에 연결
         installMobileSearch(); // SOFTM-MOBILE-MAP 날짜:20260909 : 첫 화면에서 지도와 목록을 함께 탐색하도록 모바일 조작 연결
         root.CareVoiceSearch?.mount({ input: document.getElementById("q"), search: () => { if (media.matches && mobileSheet?.state() === "list") mobileSheet.set("split"); document.getElementById("searchBtn").click(); } }); // SOFTM-VOICE-SEARCH 날짜:20260909 : 확인한 음성 검색어를 기존 조회 동작에 연결
         syncView(); renderOrigin(); renderRoute(routeState);

@@ -722,7 +722,7 @@ function daycareBasketAdapter(){
 /** SOFTM-MOBILE-MAP START 날짜:20260909 : 스크롤 선택은 상세창 없이 마커만 강조하고 내부 이동 재조회를 차단 */
 let mobileActiveMarker=null,mobileActiveIcon=null;
 function focusMobileRow(id,follow=false,allowDetail=false){
- if(!mapReady||CareMapExperience.isBasketMap()||(popupViewState&&!allowDetail))return; // SOFTM-SCROLL-DETAIL 날짜:20260909 : 상세 전환과 마커 강조를 함께 반영
+ if(!mapReady||(popupViewState&&!allowDetail))return; // SOFTM-SAVED-SCROLL 날짜:20260910 : 담은 기관에서도 현재 목록 마커를 강조
  const marker=mapMarkers.find(marker => String(marker.centerId) === String(id));
  if(mobileActiveMarker===marker&&(!marker||String(marker.getIcon()?.content).includes('care-mobile-active-marker')))return;
  if(mobileActiveMarker&&mobileActiveIcon){mobileActiveMarker.setIcon(mobileActiveIcon);mobileActiveMarker.setZIndex(1000)}
@@ -736,7 +736,7 @@ function focusMobileRow(id,follow=false,allowDetail=false){
 /** SOFTM-SCROLL-DETAIL START 날짜:20260909 : 팝업이 열려 있을 때만 기관을 바꾸고 최초 지도 복귀 위치를 보존 */
 function updateDetailFromScroll(id){
  const current=document.querySelector('[data-daycare-detail]');
- if(!current||current.dataset.daycareDetail===id||CareMapExperience.isBasketMap())return;
+ if(!current||current.dataset.daycareDetail===id)return; // SOFTM-SAVED-SCROLL 날짜:20260910 : 담은 목록도 열린 상세만 현재 기관으로 교체
  const c=DATA.find(row=>row.i===id);if(!c)return;
  const marker=mapMarkers.find(item=>String(item.centerId)===String(id));
  openCenter(c,marker,popupViewState,true);focusMobileRow(id,true,true);

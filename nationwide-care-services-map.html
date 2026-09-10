@@ -605,7 +605,7 @@ function careBasketAdapter(){
 /** SOFTM-MOBILE-MAP START 날짜:20260909 : 스크롤 선택은 상세창 없이 마커만 강조하고 내부 이동 재조회를 차단 */
 let mobileActiveMarker=null,mobileActiveIcon=null;
 function focusMobileRow(id,follow=false,allowDetail=false){
- if(!mapReady||CareMapExperience.isBasketMap()||(activeDetail&&!allowDetail))return; // SOFTM-SCROLL-DETAIL 날짜:20260909 : 열린 상세를 전환하는 스크롤에서도 마커 강조 허용
+ if(!mapReady||(activeDetail&&!allowDetail))return; // SOFTM-SAVED-SCROLL 날짜:20260910 : 담은 기관에서도 현재 목록 마커를 강조
  const marker=markers.get(id);
  if(mobileActiveMarker===marker&&(!marker||String(marker.getIcon()?.content).includes('care-mobile-active-marker')))return;
  if(mobileActiveMarker&&mobileActiveIcon){mobileActiveMarker.setIcon(mobileActiveIcon);mobileActiveMarker.setZIndex(1000)}
@@ -618,7 +618,7 @@ function focusMobileRow(id,follow=false,allowDetail=false){
 /** SOFTM-MOBILE-MAP END */
 /** SOFTM-SCROLL-DETAIL START 날짜:20260909 : 열린 팝업을 깜박임·복귀 위치 초기화 없이 현재 목록 기관으로 교체 */
 function updateDetailFromScroll(id){
- if(!activeDetail||activeDetail.i===id||CareMapExperience.isBasketMap())return;
+ if(!activeDetail||activeDetail.i===id)return; // SOFTM-SAVED-SCROLL 날짜:20260910 : 담은 목록도 열린 상세만 현재 기관으로 교체
  const c=DATA.find(row=>row.i===id);if(!c)return;
  clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);restoreBlinkedMarker();
  openDetail(c);$('detailBody').scrollTop=0;

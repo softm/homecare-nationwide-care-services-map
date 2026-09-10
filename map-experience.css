@@ -602,3 +602,8 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
  .care-map-page .care-workspace-tabs::before { content:""; position:fixed; top:0; left:0; width:68px; height:52px; box-sizing:border-box; background:#fff; border-bottom:1px solid #d6e1ee; z-index:180; } /* SOFTM-BACK-BACKGROUND 날짜:20260910 : 메뉴 옆 빈 영역에 아래쪽 문구가 비치지 않도록 불투명 배경을 채움 */
 }
 /* SOFTM-BACK-TOP-MENU END */
+
+/** SOFTM-SAVED-SCROLL START 날짜:20260910 : 담은 기관에서도 스크롤 선택과 마지막 카드 접근을 명확하게 표시 */
+.care-basket-item.care-scroll-active { background:#edf5ff; border-color:#8bb7eb; box-shadow:inset 4px 0 #2777df; }
+.care-saved-scroll-tail { flex:none; list-style:none; pointer-events:none; }
+/** SOFTM-SAVED-SCROLL END */
