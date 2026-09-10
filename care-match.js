@@ -12,6 +12,11 @@ export function readPreferences(storage) {
         return { active: saved?.active === true, type: typeof saved?.type === 'string' ? saved.type : '', preferences: Array.isArray(saved?.preferences) ? [...new Set(saved.preferences.filter(value => typeof value === 'string'))].slice(0, 20) : [] };
     } catch { return { active: false, type: '', preferences: [] }; }
 }
+export function clearPreferences(storage) {
+    const cleared = { active: false, type: '', preferences: [] };
+    try { storage?.removeItem(key); } catch {}
+    return cleared;
+}
 export function relevantPreferences(saved, type) {
     const allowed = new Set(criteriaFor(type).map(item => item.id));
     return { preferences: saved.preferences.filter(id => allowed.has(id)), omitted: saved.preferences.filter(id => !allowed.has(id)) };
@@ -119,7 +124,10 @@ export function mount(config) {
         const statusMarkup = snapshot.pending || snapshot.error ? (snapshot.error ? '<p class="care-match-compact-status" role="status">검색을 완료하지 못했습니다.</p>' : '<p class="care-match-compact-status" role="status">검색 결과 확인 중입니다.</p>') : '';
         const breakdownNeeded = selectedCriteria.length || filters.length || relevant.omitted.length || featureError || snapshot.filters.capacity || snapshot.filters.staff;
         const breakdownMarkup = breakdownNeeded ? `<details class="care-match-breakdown"><summary>조건·확인 결과</summary><div class="care-match-breakdown-content">${selectedCriteria.length ? `<section><b>선택한 중요 조건</b><ul>${selectedCriteria.map(item => `<li>${escape(item.label)}</li>`).join('')}</ul></section>` : ''}${!snapshot.pending && !snapshot.error && report.counts.length ? `<section><b>조건별 확인 현황</b><ul>${report.counts.map(item => `<li><b>${escape(item.label)}</b><span>확인 ${item.confirmed}곳 · 조건과 다름 ${item.different}곳 · 미확인 ${item.unknown}곳</span></li>`).join('')}</ul></section>` : ''}${selectedCriteria.length ? '<p class="care-match-guidance">선택 조건은 후보를 제외하거나 순위를 바꾸지 않고 공개정보 확인에 사용됩니다.</p>' : ''}${filters.length ? `<section><b>적용 중인 기존 검색조건</b><ul>${filters.map(label => `<li>${escape(label)}</li>`).join('')}</ul></section>` : ''}${relevant.omitted.length ? '<p class="care-match-note">이 카테고리에서 지원하지 않는 중요 조건은 적용하지 않았습니다. 원래 카테고리로 돌아가면 다시 표시됩니다.</p>' : ''}${featureError ? '<p>특화서비스 자료를 불러오지 못했습니다.</p><button type="button" data-match-retry>설명 자료 다시 불러오기</button>' : ''}${snapshot.filters.capacity ? '<button type="button" data-match-clear="capacity">기존 정원 조건 해제</button>' : ''}${snapshot.filters.staff ? '<button type="button" data-match-clear="staff">기존 인력 조건 해제</button>' : ''}</div></details>` : '';
-        const markup = `<div class="care-match-overview"><b>${escape(manifest?.[config.type]?.label || '')} · ${escape(compactScopeLabel(scope))}</b>${resultCountMarkup}</div>${statusMarkup}<div class="care-match-summary-row"><div class="care-match-selected-list" aria-label="선택한 중요 조건">${selectedMarkup}</div>${breakdownMarkup}</div>`;
+        /** SOFTM-MATCH-CLEAR START 날짜:20260911 : 맞춤 조건만 즉시 지우면서 현재 검색 지역과 목록은 보존 */
+        const clearMarkup = '<button type="button" class="care-match-reset" data-match-reset aria-label="맞춤 조건 지우기. 현재 검색 결과와 지역은 유지됩니다.">조건 지우기</button>';
+        const markup = `<div class="care-match-overview"><b>${escape(manifest?.[config.type]?.label || '')} · ${escape(compactScopeLabel(scope))}</b><span class="care-match-overview-actions">${resultCountMarkup}${clearMarkup}</span></div>${statusMarkup}<div class="care-match-summary-row"><div class="care-match-selected-list" aria-label="선택한 중요 조건">${selectedMarkup}</div>${breakdownMarkup}</div>`;
+        /** SOFTM-MATCH-CLEAR END */
         /** SOFTM-MATCH-PANEL END */
         if (summaryMarkup !== markup) { const expanded = [...summary.querySelectorAll('details')].map(node => node.open); summary.innerHTML = markup; summary.querySelectorAll('details').forEach((node, index) => { node.open = !!expanded[index]; }); summaryMarkup = markup; }
         if (summary.parentElement !== panel) panel.append(summary); // SOFTM-MATCH-PANEL 날짜:20260911 : 축약한 선택 결과를 설정 버튼과 같은 패널에 유지
@@ -138,7 +146,15 @@ export function mount(config) {
         });
     }
     function refresh() { if (!renderFrame) renderFrame = requestAnimationFrame(renderResults); }
+    /** SOFTM-MATCH-CLEAR START 날짜:20260911 : 별도 검색필터를 건드리지 않고 이 기능이 저장한 선택만 해제 */
+    function resetPreferences() {
+        featureRevision++; featureTask = null; featureError = false;
+        saved = clearPreferences(storage); reportCache = null; reportRows = null; reportSignature = '';
+        invalidate(); requestAnimationFrame(() => start.focus({ preventScroll: true }));
+    }
+    /** SOFTM-MATCH-CLEAR END */
     summary.addEventListener('click', event => {
+        if (event.target.closest('[data-match-reset]')) { resetPreferences(); return; }
         if (event.target.closest('[data-match-clear]')) config.clearLegacy?.(event.target.closest('[data-match-clear]').dataset.matchClear);
         if (event.target.closest('[data-match-edit]')) void open();
         if (event.target.closest('[data-match-retry]')) { featureError = false; void evidence(); refresh(); }

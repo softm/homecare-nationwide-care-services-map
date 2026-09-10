@@ -38,6 +38,11 @@
 .care-match-summary { padding:9px 12px 10px; margin:0; border:0; border-radius:0; background:transparent; color:#244c76; overflow-wrap:anywhere; font-size:12px; line-height:1.45; }
 .care-match-overview { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .care-match-overview > b { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+/** SOFTM-MATCH-CLEAR START 날짜:20260911 : 조건 지우기를 요약 줄에 배치해 목록 영역을 더 밀어내지 않음 */
+.care-match-overview-actions { display:flex; align-items:center; gap:7px; flex:none; }
+.care-match-summary .care-match-reset { min-height:28px; margin:0; padding:3px 8px; border-color:#b9cadb; border-radius:999px; background:#fff; color:#516b84; font-size:11px; font-weight:750; white-space:nowrap; }
+.care-match-summary .care-match-reset:hover { border-color:#7d9fbe; background:#f8fbff; color:#244f79; }
+/** SOFTM-MATCH-CLEAR END */
 .care-match-summary-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; margin-top:6px; }
 .care-match-selected-list { display:flex; align-items:center; gap:5px; min-width:0; flex:1; overflow:hidden; }
 .care-match-selected-chip,.care-match-selected-empty { display:inline-block; min-width:0; max-width:100%; padding:3px 8px; overflow:hidden; border-radius:999px; background:#fff; color:#245b90; font-size:11px; font-weight:750; text-overflow:ellipsis; white-space:nowrap; }
