@@ -16,7 +16,9 @@ function mount() {
     link.addEventListener('pointerdown', updateLink);
     document.addEventListener('change', updateLink);
     document.addEventListener('input', updateLink);
-    document.querySelector('.layout').before(link);
+    const heading = document.querySelector('.results .list-head,.results .result-head');
+    if (heading) heading.after(link);
+    else document.querySelector('.results').prepend(link);
     const button = document.createElement('button'); button.type = 'button'; button.textContent = '사진 비교';
     button.dataset.photoCompare = '';
     button.addEventListener('click', () => openComparison({ rows: window.CareMapExperience.rows(), type, opener: button }));
