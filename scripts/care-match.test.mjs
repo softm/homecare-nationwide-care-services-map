@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../advanced-search.js';
 import { criteriaFor, assess, analyzeMatch, renderConditions, renderMatchComparison } from '../care-insights.js';
-import { readPreferences, relevantPreferences, effectiveFilters, destinationUrl } from '../care-match.js';
+import { readPreferences, relevantPreferences, effectiveFilters, destinationUrl, compactHighlights } from '../care-match.js';
 const context = { type: 'daycare', sourceDate: '2026-09-08', featureDate: '2026-09-04', preferences: ['evaluation-ab', 'nurse', 'rehab', 'feature:cognitive'] };
 const criterion = id => criteriaFor('daycare').find(item => item.id === id);
 const a = { i:'1',n:'가센터',g:'A',ey:2023,t:'B03',rn:1,pt:0,ot:0 };
@@ -42,6 +42,20 @@ test('기관별 처음 3개와 펼침, 상담 질문·공통점·차이를 표�
  const html=renderConditions(conditions);assert.match(html,/나머지 조건 1개/);
  assert.match(renderMatchComparison([{...a,n:'<img src=x>'}],context),/&lt;img/);
  assert.match(renderMatchComparison([a,b],context),/이 조건으로 상담할 질문/);
+});
+test('검색 목록에는 확인된 특화서비스만 최대 2개와 나머지 수를 표시한다',()=>{
+ const conditions=[
+  {id:'evaluation-ab',status:'different',label:'공단 평가 A·B등급'},
+  {id:'nurse',status:'confirmed',label:'간호사 등록'},
+  {id:'feature:dementia',status:'unknown',label:'치매전담 장기요양기관'},
+  {id:'feature:cognitive',status:'confirmed',label:'인지활동형 프로그램 제공기관'},
+  {id:'feature:respite',status:'confirmed',label:'가족휴가제 제공기관'},
+  {id:'feature:integrated',status:'confirmed',label:'통합재가서비스 제공기관'}
+ ];
+ const compact=compactHighlights(conditions);
+ assert.deepEqual(compact.items.map(item=>item.id),['feature:cognitive','feature:respite']);
+ assert.equal(compact.remaining,1);
+ assert.deepEqual(compactHighlights(conditions.filter(item=>item.status!=='confirmed')),{items:[],remaining:0});
 });
 test('손상된 세션은 초기화하고 유형에서 지원하지 않는 조건은 알림용으로 분리한다',()=>{
  assert.equal(readPreferences({getItem:()=>'{broken'}).active,false);
