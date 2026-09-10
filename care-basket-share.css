@@ -1,0 +1,18 @@
+/** SOFTM-BASKET-SHARE START 날짜:20260911 : 작은 화면에서도 공유 링크·기관 목록·확정 조작을 읽고 사용할 수 있게 제한 */
+.care-basket-share-dialog { box-sizing:border-box; width:min(520px,calc(100% - 28px)); max-height:85dvh; overflow:auto; border:1px solid #dce5ef; border-radius:18px; padding:24px; color:#172b45; background:#fff; box-shadow:0 18px 60px #152f5540; }
+.care-basket-share-dialog::backdrop { background:#14253b88; }
+.care-basket-share-dialog h2 { margin:0 30px 12px 0; font-size:21px; }
+.care-share-close { position:absolute; right:12px; top:10px; border:0; background:none; font-size:26px; min-width:40px; min-height:40px; cursor:pointer; }
+.care-share-description,.care-share-status { font-size:14px; line-height:1.6; }
+.care-share-content input { box-sizing:border-box; width:100%; margin-top:8px; padding:12px; border:1px solid #afc1d7; border-radius:8px; font-size:16px; }
+.care-share-content ol { max-height:30dvh; overflow:auto; padding-left:24px; line-height:1.7; overflow-wrap:anywhere; }
+.care-share-content li { margin-bottom:8px; }
+.care-share-actions { display:flex; flex-wrap:wrap; gap:8px; position:sticky; bottom:-24px; background:#fff; padding:12px 0; }
+.care-share-actions button { flex:1; min-height:44px; border:1px solid #bbcde3; border-radius:9px; background:#edf4ff; color:#124fa2; font:inherit; font-weight:700; padding:10px; cursor:pointer; }
+.care-share-actions button:focus-visible,.care-share-close:focus-visible { outline:3px solid #276bca; outline-offset:2px; }
+.care-map-page .care-basket .care-saved-heading { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:10px; }
+.care-map-page .care-basket .care-saved-heading > .care-text-button { white-space:nowrap; min-height:44px; }
+.care-map-page .care-basket .care-basket-share-button { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; padding:8px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#1d4ed8; cursor:pointer; }
+.care-basket-share-button svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; }
+.care-basket-share-button:focus-visible { outline:3px solid #276bca; outline-offset:2px; }
+/** SOFTM-BASKET-SHARE END */

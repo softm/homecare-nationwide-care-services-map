@@ -88,6 +88,7 @@
             ids: () => [...ids],
             toggle(id) { id = String(id); ids = ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id]; save(); },
             clear() { ids = []; save(); },
+            replace(values) { ids = [...new Set(values.map(String))]; save(); }, // SOFTM-BASKET-SHARE 날짜:20260911 : 확인한 공유 목록을 방문 순서대로 한 번에 저장
             /** SOFTM-BASKET-ORDER START 날짜:20260904 : 사용자가 정한 방문 순서를 세션에 보존하고 없는 기관이나 범위를 벗어난 이동을 차단 */
             move(id, index) { id = String(id); const from = ids.indexOf(id); if (from < 0 || !Number.isInteger(index) || index < 0 || index >= ids.length) return; ids.splice(from, 1); ids.splice(index, 0, id); save(); },
             /** SOFTM-BASKET-ORDER END */
@@ -948,6 +949,11 @@
         installMobileSearch(); // SOFTM-MOBILE-MAP 날짜:20260909 : 첫 화면에서 지도와 목록을 함께 탐색하도록 모바일 조작 연결
         root.CareVoiceSearch?.mount({ input: document.getElementById("q"), search: () => { if (media.matches && mobileSheet?.state() === "list") mobileSheet.set("split"); document.getElementById("searchBtn").click(); } }); // SOFTM-VOICE-SEARCH 날짜:20260909 : 확인한 음성 검색어를 기존 조회 동작에 연결
         syncView(); renderOrigin(); renderRoute(routeState);
+        /** SOFTM-BASKET-SHARE START 날짜:20260911 : 두 지도의 담은 목록 공유와 명시적 교체를 같은 상태 갱신에 연결 */
+        root.CareBasketShare.mount({ host: bar, type: options.type, ids: () => basket.ids(), rows: allRows,
+            replace: (ids, message) => { basket.replace(ids); changed(message); void showSaved(); },
+            open: () => setWorkspace('saved') });
+        /** SOFTM-BASKET-SHARE END */
     }
     /** SOFTM-WORKSPACE END */
     function showDaycareComparison() {
