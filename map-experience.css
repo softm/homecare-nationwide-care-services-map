@@ -501,7 +501,7 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 @media(min-width:1001px) {
  .care-map-page { overflow:hidden; --care-desktop-sidebar:400px; }
  .care-map-page .page-head,.care-map-page .stats,.care-map-page .source-note,.care-map-page .ad-zone,.care-map-page .care-view-switch { display:none; }
- .care-map-page .category-nav { position:fixed; inset:0 0 auto; height:52px; z-index:180; }
+ .care-map-page .category-nav { position:fixed; inset:0 0 auto 68px; height:52px; z-index:180; } /* SOFTM-WORKSPACE-BACK-VISIBLE 날짜:20260911 : 뒤쪽 PC 규칙이 이전 버튼의 왼쪽 공간을 덮지 않도록 유지 */
  .care-map-page .category-inner { justify-content:flex-start; padding:4px 12px; }
  .care-map-page .category-nav a { padding:8px 12px; font-size:14px; }
  .care-map-page .wrap { max-width:none; margin:0; padding:0; }
