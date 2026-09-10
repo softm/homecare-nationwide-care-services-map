@@ -1,14 +1,28 @@
 /** SOFTM-SEARCH-TOOLS START 날짜:20260911 : 큰 배너 세 줄을 같은 높이의 도구 한 줄로 압축해 기관 목록 우선 표시 */
 .care-map-page .care-search-tools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:10px 12px; border-bottom:1px solid #e1e8ef; flex:none; }
 .care-map-page .care-search-tools .care-match-panel { display:contents; }
+/** SOFTM-TOOL-IDENTITY START 날짜:20260911 : 기능별 아이콘·색·설명을 부여하되 한 줄 탐색과 충분한 터치 영역 유지 */
 .care-map-page .care-search-tools .care-match-start,
 .care-map-page .care-search-tools .care-photo-map-entry,
-.care-map-page .care-search-tools .care-analysis-entry { display:flex; align-items:center; justify-content:center; box-sizing:border-box; width:100%; min-width:0; min-height:44px; margin:0; padding:8px 4px!important; border:1px solid #ccdaea!important; border-radius:8px; background:#f5f8fc!important; color:#254f7b!important; box-shadow:none; font-size:13px; font-weight:700; text-align:center; text-decoration:none; gap:0; }
-.care-map-page .care-search-tools .care-match-start { order:0; }
-.care-map-page .care-search-tools .care-photo-map-entry { order:1; }
-.care-map-page .care-search-tools .care-analysis-entry { order:2; }
+.care-map-page .care-search-tools .care-analysis-entry { display:flex; flex-direction:column; align-items:center; justify-content:center; box-sizing:border-box; width:100%; min-width:0; min-height:96px; margin:0; padding:10px 4px!important; border:1px solid var(--tool-border)!important; border-radius:12px; background:var(--tool-bg)!important; color:var(--tool-color)!important; box-shadow:0 3px 8px #17324d12; font-size:13px; font-weight:750; line-height:1.3; text-align:center; text-decoration:none; gap:4px; transition:box-shadow .15s,transform .15s; }
+.care-map-page .care-search-tools .care-match-start { order:0; --tool-border:#1769bf; --tool-bg:linear-gradient(135deg,#247cda,#164d96); --tool-color:#fff; }
+.care-map-page .care-search-tools .care-photo-map-entry { order:1; --tool-border:#d3c7ed; --tool-bg:linear-gradient(145deg,#faf7ff,#ede5fa); --tool-color:#624090; }
+.care-map-page .care-search-tools .care-analysis-entry { order:2; --tool-border:#b6ded6; --tool-bg:linear-gradient(145deg,#f1fcf9,#ddf2ec); --tool-color:#176958; }
 .care-search-tools .care-match-start-action,.care-search-tools .care-photo-entry-icon,.care-search-tools .care-photo-entry-arrow,.care-search-tools .care-photo-entry-copy > span { display:none; }
-.care-search-tools .care-photo-entry-copy strong { font-size:13px; color:inherit; }
+.care-search-tools .care-photo-entry-copy { flex:none; }
+.care-search-tools .care-photo-entry-copy strong,.care-search-tools .care-match-start-title { font-size:13px; color:inherit; }
+.care-search-tools .care-match-start::before,.care-search-tools .care-photo-map-entry::before,.care-search-tools .care-analysis-entry::before { content:''; width:26px; height:26px; flex:none; background:currentColor; mask:var(--tool-icon) center/contain no-repeat; }
+.care-search-tools .care-match-start { --tool-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M4 6h16M4 12h16M4 18h16'/%3E%3Cpath d='M8 3v6M16 9v6M10 15v6' stroke-width='3.5'/%3E%3C/svg%3E"); }
+.care-search-tools .care-photo-map-entry { --tool-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='3'/%3E%3Ccircle cx='8' cy='9' r='1.5'/%3E%3Cpath d='m4 17 5-5 4 4 3-3 5 5'/%3E%3C/svg%3E"); }
+.care-search-tools .care-analysis-entry { --tool-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 11 9-8 9 8M5 10v11h14V10M9 17v-3M12 17v-6M15 17v-4'/%3E%3C/svg%3E"); }
+.care-search-tools .care-match-start::after { content:'내게 맞는 기관'; }
+.care-search-tools .care-photo-map-entry::after { content:'공단 등록 사진'; }
+.care-search-tools .care-analysis-entry::after { content:'우리 동네 비교'; }
+.care-search-tools .care-match-start::after,.care-search-tools .care-photo-map-entry::after,.care-search-tools .care-analysis-entry::after { font-size:10px; font-weight:500; opacity:.9; }
+.care-map-page .care-search-tools :is(.care-match-start,.care-photo-map-entry,.care-analysis-entry):hover { transform:translateY(-2px); box-shadow:0 5px 12px #17324d25; }
+.care-map-page .care-search-tools :is(.care-match-start,.care-photo-map-entry,.care-analysis-entry):focus-visible { outline:3px solid #ecad38; outline-offset:2px; }
+@media(prefers-reduced-motion:reduce) { .care-map-page .care-search-tools :is(.care-match-start,.care-photo-map-entry,.care-analysis-entry) { transition:none; transform:none; } }
+/** SOFTM-TOOL-IDENTITY END */
 .care-search-tools .care-match-summary,.care-search-tools .care-photo-map-status { grid-column:1/-1; order:3; margin:0; }
 .care-search-tools .care-photo-map-status:empty { display:none; }
 .care-map-page .results .list-head,.care-map-page .results .result-head { min-height:48px; padding:6px 12px; gap:6px; }
