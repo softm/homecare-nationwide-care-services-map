@@ -20,6 +20,17 @@ test('stop milestones preserve order and final destination',()=>{
  assert.ok(Math.abs(stops[0].fraction-.25)<.00001);
  assert.equal(stops[0].fraction,stops[1].fraction);assert.equal(stops[2].fraction,1);
 });
+/** SOFTM-ROUTE-ORDER START 날짜:20260911 : 같은 도로를 다시 지나는 경로에서 좌표 근접값보다 서버 방문 인덱스를 우선하는지 검증 */
+test('route point indices disambiguate repeated road segments',()=>{
+ const path=[[126,37],[126.01,37],[126.02,37],[126.01,37],[126.01,37.01]];
+ const stops=globalThis.CareRouteSimulation.milestones(path,[
+  {id:'a',point:{lng:126.01,lat:37},pathIndex:3},
+  {id:'b',point:{lng:126.01,lat:37.01},pathIndex:4}
+ ]);
+ assert.deepEqual(globalThis.CareRouteSimulation.trajectory(path)(stops[0].fraction),path[3]);
+ assert.equal(stops[1].fraction,1);
+});
+/** SOFTM-ROUTE-ORDER END */
 test('only one institution marker is highlighted and reset restores icons',()=>{
  const marker=()=>({icon:{content:'기관'},z:4,getIcon(){return this.icon},setIcon(i){this.icon=i},getZIndex(){return this.z},setZIndex(z){this.z=z}});
  const a=marker(),b=marker(),select=globalThis.CareRouteSimulation.highlighter(id=>({a,b})[id]);

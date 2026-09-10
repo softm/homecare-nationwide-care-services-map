@@ -8,7 +8,7 @@ import '../care-basket-map.js';
 const { createBasket, createOrigin } = globalThis.CareMapExperience;
 const origin = { label: '선택한 출발지', point: { lat: 37, lng: 127 } };
 const row = (i, point = { lat: 37 + Number(i) / 100, lng: 127 }) => ({ i, n: `기관${i}`, point });
-const response = (path = [[127, 37], [127, 37.1]]) => ({ ok: true, json: async () => ({ path, summary: { distance: 1000, duration: 120000 } }) });
+const response = (path = [[127, 37], [127, 37.1]], summary = {}) => ({ ok: true, json: async () => ({ path, summary: { distance: 1000, duration: 120000, ...summary } }) }); // SOFTM-ROUTE-ORDER 날짜:20260911 : 실제 Directions 경유지 인덱스가 있는 응답도 같은 테스트 장치로 검증
 const flush = () => new Promise(resolve => setImmediate(resolve));
 function harness() {
     const original = { markers: ['search'], selected: new Set(['search']), conditions: ['A', 'high'], center: [37, 127], start: { lat: 38, lng: 128 } };
@@ -39,6 +39,23 @@ test('담은 기관 표시·상세용 번호가 검색 체크와 무관하고 �
     assert.equal(h.mode.state().phase, 'success'); assert.equal(h.mode.state().result.origin.label, origin.label);
     h.mode.exit(); assert.equal(h.saved, h.original); assert.deepEqual(h.markers, ['search']); assert.deepEqual(h.saved.conditions, ['A', 'high']); assert.equal(h.route, null);
 });
+/** SOFTM-ROUTE-ORDER START 날짜:20260911 : 담은 순서와 Directions 응답의 경유지 인덱스를 같은 기관 순번으로 전달하는지 검증 */
+test('응답 경유지 인덱스를 담은 기관 순서대로 모의주행에 전달', async () => {
+    const h = harness(), list = [row('3'), row('1'), row('2')];
+    const path = [[127, 37], [127, 37.03], [127.01, 37.02], [127, 37.01], [127, 37.02]];
+    h.adapter.fetch = async (body, signal) => { h.requests.push({ body, signal }); return response(path, {
+        waypoints: [
+            { location: [127, 37.03], pointIndex: 1 },
+            { location: [127, 37.01], pointIndex: 3 }
+        ],
+        goal: { location: [127, 37.02], pointIndex: 4 }
+    }); };
+    await h.mode.show(list, { route: true, origin });
+    assert.deepEqual(h.mode.state().result.stops.map(stop => [stop.id, stop.pathIndex]), [['3', 1], ['1', 3], ['2', 4]]);
+    assert.deepEqual(h.requests[0].body.waypoints, [row('3').point, row('1').point]);
+    assert.deepEqual(h.requests[0].body.goal, row('2').point);
+});
+/** SOFTM-ROUTE-ORDER END */
 test('출발지 미선택·국외 좌표는 과거 지도 기준 위치로 대체하지 않음', async () => {
     const h = harness();
     for (const value of [null, { point: origin.point, label: '' }, { point: { lat: 0, lng: 0 }, label: '국외' }]) {
