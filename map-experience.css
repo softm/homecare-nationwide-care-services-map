@@ -671,3 +671,19 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-insight-card .care-saved-detail { width:100%; border:1px solid #c9d9eb; border-radius:8px; background:#f4f8ff; text-align:center; padding:10px; }
 .care-insight-source { padding:14px 4px 0; border-top:1px solid #dce4ee; margin-top:20px; line-height:1.8; color:#596b7d; }
 /* SOFTM-BRIEF-READABILITY END */
+
+/** SOFTM-ORIGIN-COMPACT START 날짜:20260911 : 출발지 입력의 세로 분리를 줄이면서 주소·검색·터치 영역을 유지 */
+.care-map-page .care-origin{padding:10px 12px;margin:12px 0;border-radius:10px}
+.care-map-page .care-origin-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.care-map-page .care-origin-head strong{font-size:15px;line-height:1.4}
+.care-map-page .care-origin-head button{min-height:36px;padding:6px 10px;font-size:13px;white-space:nowrap}
+.care-map-page .care-origin-form{margin:0}
+.care-map-page .care-origin .care-origin-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.care-map-page .care-origin-form>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:stretch}
+.care-map-page .care-origin-form input{width:100%;min-height:44px;padding:9px 10px;font-size:16px;box-sizing:border-box}
+.care-map-page .care-origin-form button{width:auto;min-height:44px;padding:8px 10px;font-size:13px;white-space:nowrap}
+.care-map-page .care-origin-selection{margin:8px 0 0;padding:7px 9px;font-size:12px;line-height:1.5;border-radius:6px}
+.care-map-page .care-origin-status{margin:8px 0 0;font-size:13px;line-height:1.5}
+.care-map-page .care-origin-candidates{margin:8px 0 0}
+@media(pointer:coarse){.care-map-page .care-origin-head button{min-height:44px}}
+/** SOFTM-ORIGIN-COMPACT END */
