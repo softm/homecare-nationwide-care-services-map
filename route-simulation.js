@@ -19,7 +19,7 @@
  }
  function mount(host,getMap){
   const panel=document.createElement('section');panel.className='care-simulation';panel.hidden=true;panel.setAttribute('aria-label','모의주행');
-  panel.innerHTML='<div class="care-simulation-heading"><strong>모의주행</strong><span>경로 미리보기</span><output>0%</output></div><div class="care-simulation-controls"><button type="button" data-play>시작</button><button type="button" data-restart>처음부터</button><label>속도 <select aria-label="모의주행 속도"><option value="30">30배</option><option value="60" selected>60배</option><option value="120">120배</option></select></label><button type="button" data-stop>종료</button></div><progress max="1" value="0" aria-label="모의주행 진행률"></progress>';
+  panel.innerHTML='<div class="care-simulation-heading"><strong>모의주행</strong><span>경로 미리보기</span><output>0%</output></div><div class="care-simulation-controls"><button type="button" data-play>시작</button><button type="button" data-restart>처음부터</button><label>속도 <select aria-label="모의주행 속도"><option value="30">30배</option><option value="60" selected>60배</option><option value="120">120배</option><option value="300">300배</option><option value="600">600배</option><option value="1200">1,200배</option></select></label><button type="button" data-stop>종료</button></div><progress max="1" value="0" aria-label="모의주행 진행률"></progress>'; // SOFTM-SIMULATION-SPEED 날짜:20260910 : 긴 경로를 빠르게 확인하도록 최대 1200배 재생 제공
   host.append(panel);
   const play=panel.querySelector('[data-play]'),output=panel.querySelector('output'),progress=panel.querySelector('progress'),speed=panel.querySelector('select');
   let route=null,pointAt,marker=null,frame=null,elapsed=0,last=0,cameraAt=0,playing=false,view=null;
