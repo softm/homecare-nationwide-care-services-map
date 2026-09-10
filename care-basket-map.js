@@ -64,8 +64,8 @@
                 adapter.draw(data.path);
                 fitted = [origin.point, ...points, ...data.path.map(([lng, lat]) => ({ lat, lng }))];
                 adapter.fit(fitted);
-                // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 검증된 도로 좌표만 모의주행에 전달
-                publish('success', { result: { distance, duration, path: data.path, origin, stops: rows.map(row => ({ id: String(row.i), name: row.n })) } });
+                // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 검증된 도로 좌표와 방문 기관 좌표를 모의주행에 전달
+                publish('success', { result: { distance, duration, path: data.path, origin, stops: rows.map((row, index) => ({ id: String(row.i), name: row.n, point: points[index] })) } });
             } catch (error) {
                 if (current() && (error.name !== 'AbortError' || timedOut)) publish('error', { error: timedOut ? '경로 응답이 지연되고 있습니다. 다시 탐색해 주세요.' : routeErrorMessage(error) }); // SOFTM-ROUTE-ERROR 날짜:20260905 : 통신·응답 형식·처리 오류를 같은 문구로 숨기지 않음
             } finally { if (current()) { clearTimeout(timer); controller = null; } }

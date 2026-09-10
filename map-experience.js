@@ -881,7 +881,7 @@
         routeOutput.innerHTML = '<p role="status"></p><div class="care-route-summary"></div><details class="care-route-itinerary" hidden></details>';
         bar.querySelector('.care-saved-footer').before(routeOutput);
         const mapTools = document.createElement('div'); mapTools.className = 'care-saved-map-tools'; mapTools.innerHTML = '<strong>담은 기관</strong><button type="button" data-saved-fit>전체 위치</button><button type="button" data-care-view="list">목록 보기</button>'; document.querySelector('.map-card .map-wrap').before(mapTools);
-        routeSimulation = root.CareRouteSimulation.mount(document.querySelector('.map-card .map-wrap'), options.basketMap.simulationMap); // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 두 지도의 경로 재생 조작을 공용 지도 영역에 연결
+        routeSimulation = root.CareRouteSimulation.mount(document.querySelector('.map-card .map-wrap'), options.basketMap.simulationMap, options.basketMap.simulationMarker); // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 두 지도의 경로 재생 조작을 공용 지도 영역에 연결
         basketMap = root.CareBasketMap.create({ ...options.basketMap, state: renderRoute });
         originController = createOrigin({
             search: query => root.NaverGeocoder.searchAddresses(query),
