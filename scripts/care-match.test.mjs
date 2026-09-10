@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../advanced-search.js';
 import { criteriaFor, assess, analyzeMatch, renderConditions, renderMatchComparison } from '../care-insights.js';
-import { readPreferences, relevantPreferences, effectiveFilters, destinationUrl, compactHighlights, selectedCriteriaFor, compactScopeLabel, compactSelectedCriteria } from '../care-match.js';
+import { readPreferences, clearPreferences, relevantPreferences, effectiveFilters, destinationUrl, compactHighlights, selectedCriteriaFor, compactScopeLabel, compactSelectedCriteria } from '../care-match.js';
 const context = { type: 'daycare', sourceDate: '2026-09-08', featureDate: '2026-09-04', preferences: ['evaluation-ab', 'nurse', 'rehab', 'feature:cognitive'] };
 const criterion = id => criteriaFor('daycare').find(item => item.id === id);
 const a = { i:'1',n:'가센터',g:'A',ey:2023,t:'B03',rn:1,pt:0,ot:0 };
@@ -72,6 +72,12 @@ test('손상된 세션은 초기화하고 유형에서 지원하지 않는 조�
  const saved=readPreferences({getItem:()=>JSON.stringify({active:true,preferences:['nurse','nurse','feature:cognitive']})});
  assert.deepEqual(relevantPreferences(saved,'welfare-equipment'),{preferences:[],omitted:['nurse','feature:cognitive']});
  assert.deepEqual(saved.preferences,['nurse','feature:cognitive']);
+});
+test('조건 지우기는 맞춤 조건 세션만 제거한다',()=>{
+ const removed=[];const storage={removeItem:value=>removed.push(value)};
+ assert.deepEqual(clearPreferences(storage),{active:false,type:'',preferences:[]});
+ assert.deepEqual(removed,['careMatch:v1']);
+ assert.doesNotThrow(()=>clearPreferences({removeItem(){throw new Error('blocked')}}));
 });
 test('서비스·지역 전환은 기존 검색어·평가·특화 조건을 전달하고 정렬 중심점을 URL로 덮지 않는다',()=>{
  const filters={q:'행복',grades:['A'],scores:['high'],confidences:['high'],capacity:'21-40',staff:'nurse',advanced:{owner:'3',features:['integrated-daycare']}};
