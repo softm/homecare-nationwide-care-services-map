@@ -192,3 +192,32 @@ test('수집된 법정동 표기를 사용하고 상세 누락·전체 검색 �
     }
 });
 /** SOFTM-INSTITUTION-ADDRESS-TEST END */
+
+/** SOFTM-POPUP-BASKET-TEST START 날짜:20260911 : 두 상세의 비교 버튼이 첫 화면 공통 행동에서 빠지거나 본문 아래로 되돌아가지 않도록 검사 */
+function functionSource(source, name, nextName) {
+    const start = source.indexOf(`function ${name}(`), end = source.indexOf(`function ${nextName}(`, start + 1);
+    assert.notEqual(start, -1, `${name} 함수를 찾을 수 없습니다.`);
+    assert.notEqual(end, -1, `${nextName} 함수를 찾을 수 없습니다.`);
+    return source.slice(start, end);
+}
+test('통합 지도 상세는 제목 아래 공통 행동 영역에서 비교함 버튼을 한 번 연결', () => {
+    const source = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
+    const detailMarkup = source.match(/<section class="detail-sheet"[\s\S]*?<\/section>/)?.[0] || '';
+    const openDetail = functionSource(source, 'openDetail', 'closeDetail');
+    assert.match(detailMarkup, /detail-head[\s\S]*care-popup-basket-action[\s\S]*detail-body/);
+    assert.equal((openDetail.match(/CareMapExperience\.button\(c\)/g) || []).length, 1);
+    assert.match(openDetail, /detailBasketAction'\)\.innerHTML=CareMapExperience\.button\(c\)/);
+    assert.doesNotMatch(openDetail, /care-row-actions[^\n]*CareMapExperience\.button\(c\)/);
+});
+test('전국 주간 상세는 PC 정보창과 모바일 시트가 공유하는 제목 아래에서 비교함 버튼을 한 번 연결', () => {
+    const source = readFileSync(new URL('../nationwide-daycare-map.html', import.meta.url), 'utf8');
+    const popup = functionSource(source, 'popup', 'setMapStatus');
+    const openCenter = functionSource(source, 'openCenter', 'displayCenters');
+    assert.match(popup, /popup-head[\s\S]*care-popup-basket-action[\s\S]*popup-body/);
+    assert.equal((popup.match(/CareMapExperience\.button\(c\)/g) || []).length, 1);
+    assert.doesNotMatch(popup, /care-row-actions[^\n]*CareMapExperience\.button\(c\)/);
+    assert.equal((openCenter.match(/popup\(c\)/g) || []).length, 2);
+    assert.match(openCenter, /mobilePopupContent'\)\.innerHTML=popup\(c\)/);
+    assert.match(openCenter, /new naver\.maps\.InfoWindow\(\{content:popup\(c\)/);
+});
+/** SOFTM-POPUP-BASKET-TEST END */
