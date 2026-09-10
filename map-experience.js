@@ -446,7 +446,7 @@
         const state = createSheetState(), layout = document.querySelector('.layout'), results = document.querySelector('.results');
         const map = document.querySelector('.map-card'), list = document.getElementById('list');
         const handle = document.createElement('button'); handle.type = 'button'; handle.className = 'care-sheet-handle';
-        handle.innerHTML = '<span aria-hidden="true"></span><small aria-hidden="true">목록 보기</small>';
+        handle.innerHTML = '<span aria-hidden="true"></span><small aria-hidden="true">목록 전체보기</small>'; // SOFTM-MAP-FIRST 날짜:20260911 : 지도 중심 첫 화면에서도 전체 목록으로 들어가는 조작을 바로 알아볼 수 있게 안내
         handle.setAttribute('aria-label', '목록 높이 조절: 위로 올려 펼치기, 아래로 내려 지도 크게 보기'); results.prepend(handle);
         const back = document.createElement('button'); back.type = 'button'; back.className = 'care-sheet-back';
         back.textContent = '‹'; back.setAttribute('aria-label', '이전 지도와 목록 화면으로 돌아가기'); document.querySelector('.filter-grid').prepend(back);

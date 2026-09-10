@@ -485,6 +485,16 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
  .care-map-page[data-care-workspace="search"].care-sheet-dragging { user-select:none; cursor:ns-resize; }
 }
 /** SOFTM-MOBILE-SHEET END */
+
+/** SOFTM-MAP-FIRST START 날짜:20260911 : 모바일 첫 진입에서 지도를 주 화면으로 보이면서 하단 목록과 전체 목록 접근을 함께 유지 */
+@media(max-width:1000px) and (orientation:portrait) {
+ .care-map-page[data-care-workspace="search"] .layout { grid-template-rows:65% minmax(0,1fr); }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-sheet-handle small,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="map"] .care-sheet-handle small { display:block; }
+ .care-map-page[data-care-workspace="search"].care-sheet-dragging .layout { grid-template-rows:var(--care-sheet-drag-height,65%) minmax(0,1fr); }
+}
+/** SOFTM-MAP-FIRST END */
+
 /** SOFTM-MOBILE-SHEET START 날짜:20260909 : 전국 주간의 페이지 이동 버튼을 지도보기 버튼이 가리지 않도록 분리 */
 @media(max-width:1000px) {
  .care-map-page[data-care-workspace="search"][data-care-sheet="list"]:has(#pager) .care-sheet-map-button { bottom:calc(116px + env(safe-area-inset-bottom)); }
