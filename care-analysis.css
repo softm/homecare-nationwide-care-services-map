@@ -18,3 +18,4 @@
 .analysis-origin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}.analysis-origin-row p{margin:0;flex:1}.analysis-origin-row button{flex-shrink:0;font-size:.9rem}.analysis-origin-row+.analysis-note{margin:6px 0}
 @media(max-width:520px){.analysis-origin-row{align-items:flex-start}.analysis-origin-row button{padding:8px 10px}}
 /** SOFTM-ANALYSIS-ORIGIN END */
+.analysis-page .analysis-primary:hover{background:#124a91;color:#fff;border-color:#124a91} /* SOFTM-ANALYSIS-HOVER 날짜:20260911 : 일반 버튼의 밝은 hover 배경이 흰 글자를 가리지 않도록 주요 행동의 대비를 유지 */
