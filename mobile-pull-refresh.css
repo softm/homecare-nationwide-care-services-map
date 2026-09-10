@@ -1,0 +1,36 @@
+/** SOFTM-MOBILE-PULL-REFRESH START 날짜:20260910 : 당김 거리와 새로고침 준비 상태를 목록 위에서 작게 확인하도록 표시 */
+.care-pull-refresh {
+    --care-pull-distance:0px;
+    position:fixed;
+    z-index:30000;
+    top:calc(6px + env(safe-area-inset-top));
+    left:50%;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    min-height:38px;
+    padding:0 14px;
+    border:1px solid #c9d9ea;
+    border-radius:22px;
+    background:#fff;
+    color:#254b73;
+    box-shadow:0 5px 18px #183b632b;
+    font:700 13px/1 system-ui,-apple-system,sans-serif;
+    opacity:0;
+    pointer-events:none;
+    transform:translate(-50%,calc(-100% - 12px + var(--care-pull-distance)));
+    transition:opacity .12s ease,transform .12s ease;
+}
+.care-pull-refresh.is-visible { opacity:1; }
+.care-pull-refresh.is-ready { border-color:#2878ff; color:#175cb5; }
+.care-pull-refresh-icon { font-size:20px; transform:rotate(0); transition:transform .12s ease; }
+.care-pull-refresh.is-ready .care-pull-refresh-icon { transform:rotate(180deg); }
+.care-pull-refresh.is-refreshing .care-pull-refresh-icon { animation:care-pull-refresh-spin .7s linear infinite; }
+@keyframes care-pull-refresh-spin { to { transform:rotate(360deg); } }
+@media(min-width:1001px) { .care-pull-refresh { display:none; } }
+@media(prefers-reduced-motion:reduce) {
+    .care-pull-refresh { transition:none; }
+    .care-pull-refresh-icon { transition:none; }
+    .care-pull-refresh.is-refreshing .care-pull-refresh-icon { animation:none; }
+}
+/** SOFTM-MOBILE-PULL-REFRESH END */
