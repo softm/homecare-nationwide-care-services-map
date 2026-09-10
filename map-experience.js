@@ -42,6 +42,24 @@
         button.classList.add('care-region-research'); button.textContent = '↻ 이 지역 재검색';
         button.setAttribute('aria-label', '현재 지도 영역에서 이 지역 재검색');
         button.onclick = () => controller.research();
+        /** SOFTM-VIEWPORT-RESIZE START 날짜:20260910 : 목록을 접거나 회전해 늘어난 지도 영역도 수동 재검색과 같은 범위로 조회 */
+        let resizeTimer, width = host.clientWidth, height = host.clientHeight;
+        const resizeObserver = new ResizeObserver(() => {
+            const nextWidth = host.clientWidth, nextHeight = host.clientHeight;
+            if (nextWidth === width && nextHeight === height) return;
+            width = nextWidth; height = nextHeight;
+            clearTimeout(resizeTimer);
+            if (!width || !height || workspace !== 'search' || detailOrigin) return;
+            resizeTimer = setTimeout(() => {
+                if (!host.clientWidth || !host.clientHeight || workspace !== 'search' || detailOrigin || !config.enabled()) return;
+                options.resizeMap?.();
+                requestAnimationFrame(() => {
+                    if (workspace === 'search' && !detailOrigin && host.clientWidth && host.clientHeight && config.enabled()) void controller.research();
+                });
+            }, 400);
+        });
+        resizeObserver.observe(host);
+        /** SOFTM-VIEWPORT-RESIZE END */
         return controller;
     }
     /** SOFTM-VIEWPORT-RESEARCH END */
