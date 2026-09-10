@@ -5,10 +5,10 @@
 <title>사진으로 기관 찾기 | 돌봄한눈</title>
 <meta name="description" content="공단 등록사진으로 지역별 돌봄기관을 찾아보고 관심 기관의 공간을 비교하세요.">
 <meta name="robots" content="noindex,follow">
-<!-- SOFTM-PHOTO-EXPLORE START 날짜:20260910 : 기존 검색 대표 페이지와 구분한 사진 탐색 도구를 제공 -->
-<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260910-scope1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
-<script src="care-data.js" defer></script><script src="nhis-static-data.js" defer></script><script src="map-experience.js?v=20260910-photos1" defer></script><script src="photo-viewer.js?v=20260910-photos1" defer></script>
-<script type="module" src="care-photos.js?v=20260910-scope1"></script>
+<!-- SOFTM-PHOTO-EXPLORE START 날짜:20260911 : 갤러리와 기관별 보기를 같은 사진 탐색 도구로 제공 -->
+<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260911-gallery1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
+<script src="care-data.js" defer></script><script src="nhis-static-data.js" defer></script><script src="map-experience.js?v=20260910-photos1" defer></script><script src="photo-viewer.js?v=20260911-gallery1" defer></script>
+<script type="module" src="care-photos.js?v=20260911-gallery1"></script>
 <!-- SOFTM-PHOTO-EXPLORE END -->
 </head>
 <body class="care-photo-page">
@@ -25,8 +25,19 @@
 <label>시·군·구<select id="photoCity" name="c"><option value="">전체</option></select></label>
 <label class="care-photo-query">기관명<input id="photoQuery" name="q" type="search" placeholder="기관 이름을 입력하세요" autocomplete="off"></label><button type="submit" class="care-photo-primary">찾기</button>
 </form>
-<div class="care-photo-result-head"><div><h2>사진이 있는 기관</h2><p id="photoStatus" role="status" aria-live="polite">기관 자료를 불러오고 있습니다.</p></div><button type="button" id="photoCompare" disabled>담은 기관 사진 비교 <span id="photoSavedCount">0</span></button></div>
+<!-- SOFTM-PHOTO-GALLERY START 날짜:20260911 : 보기 방식에 맞는 제목으로 현재 결과를 안내 -->
+<div class="care-photo-result-head"><div><h2 id="photoResultTitle">기관 사진 갤러리</h2><p id="photoStatus" role="status" aria-live="polite">기관 자료를 불러오고 있습니다.</p></div><button type="button" id="photoCompare" disabled>담은 기관 사진 비교 <span id="photoSavedCount">0</span></button></div>
+<!-- SOFTM-PHOTO-GALLERY END -->
 <p id="photoNotice" class="care-photo-note">사진은 현재 시설 상태와 다를 수 있습니다. 등록일은 촬영일과 구분하며, 사진 수는 수집된 자료 기준입니다.</p>
+<!-- SOFTM-PHOTO-GALLERY START 날짜:20260911 : 사진의 밀도와 크기를 선택해 많은 사진을 같은 검색 범위에서 탐색 -->
+<div class="care-photo-viewbar"><div id="photoModes" class="care-photo-modes" role="group" aria-label="사진 보기 모드">
+<button type="button" data-mode="gallery" aria-pressed="true"><span aria-hidden="true">▦</span> 갤러리</button>
+<button type="button" data-mode="dense" aria-pressed="false"><span aria-hidden="true">▦</span> 촘촘히</button>
+<button type="button" data-mode="large" aria-pressed="false"><span aria-hidden="true">▣</span> 크게</button>
+<button type="button" data-mode="institutions" aria-pressed="false"><span aria-hidden="true">▤</span> 기관별</button>
+</div><p id="photoModeHint">여러 기관의 사진을 모아 봅니다. 사진을 누르면 크게 볼 수 있습니다.</p></div>
+<div id="photoGalleryErrors" class="care-photo-gallery-errors" hidden><p id="photoGalleryErrorText" role="status"></p><button id="photoGalleryRetry" type="button">실패한 사진 자료 재시도</button></div>
+<!-- SOFTM-PHOTO-GALLERY END -->
 <div id="photoResults" class="care-photo-grid" aria-busy="true"></div>
 <button type="button" id="photoRetry" hidden>자료 다시 불러오기</button>
 <div class="care-photo-more"><button type="button" id="photoMore" hidden>24곳 더 보기</button></div>

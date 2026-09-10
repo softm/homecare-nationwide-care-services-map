@@ -76,6 +76,7 @@
     function showPhoto() {
         const photo = photos[current], token = ++renderToken;
         caption.textContent = photo.title;
+        if (photo.institution) dialog.querySelector('#photoViewerInstitution').textContent = photo.institution; // SOFTM-PHOTO-GALLERY 날짜:20260911 : 여러 기관의 사진을 넘길 때 소속 기관도 함께 갱신
         counter.textContent = `${current + 1} / ${photos.length}`;
         counter.setAttribute('aria-label', `전체 ${photos.length}장 중 ${current + 1}번째 사진`);
         previous.hidden = next.hidden = photos.length < 2;
@@ -127,7 +128,7 @@
             try {
                 const url = new URL(image.currentSrc || image.src, document.baseURI);
                 if (!['http:', 'https:'].includes(url.protocol)) return [];
-                return [{ button, url: url.href, title: image.alt || '기관 등록사진' }];
+                return [{ button, url: url.href, title: image.alt || '기관 등록사진', institution: button.dataset.photoInstitution || '' }]; // SOFTM-PHOTO-GALLERY 날짜:20260911 : 갤러리 항목별 기관명을 확대 탐색에 전달
             } catch { return []; }
         });
         const index = items.findIndex(item => item.button === trigger);
