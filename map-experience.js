@@ -359,7 +359,9 @@
         notice.querySelector('p').textContent = message;
     }
     /** SOFTM-ROUTE-ERROR-ALERT END */
+    let routeSimulation; // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 경로 결과 수명에 모의주행을 연결
     function renderRoute(state) {
+        routeSimulation?.set(state.phase === 'success' ? state.result : null); // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 기관·출발지 변경과 재탐색 시 이전 주행을 즉시 제거
         routeState = state;
         showRouteError(state.phase === 'error' ? state.error || '잠시 후 다시 탐색해 주세요.' : ''); // SOFTM-ROUTE-ERROR-ALERT 날짜:20260909 : 실패를 즉시 알리고 재탐색 시작 시 이전 오류를 제거
         const result = state.result, status = routeOutput.querySelector('[role="status"]');
@@ -801,6 +803,7 @@
         routeOutput.innerHTML = '<p role="status"></p><div class="care-route-summary"></div><details class="care-route-itinerary" hidden></details>';
         bar.querySelector('.care-saved-footer').before(routeOutput);
         const mapTools = document.createElement('div'); mapTools.className = 'care-saved-map-tools'; mapTools.innerHTML = '<strong>담은 기관</strong><button type="button" data-saved-fit>전체 위치</button><button type="button" data-care-view="list">목록 보기</button>'; document.querySelector('.map-card .map-wrap').before(mapTools);
+        routeSimulation = root.CareRouteSimulation.mount(document.querySelector('.map-card .map-wrap'), options.basketMap.simulationMap); // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 두 지도의 경로 재생 조작을 공용 지도 영역에 연결
         basketMap = root.CareBasketMap.create({ ...options.basketMap, state: renderRoute });
         originController = createOrigin({
             search: query => root.NaverGeocoder.searchAddresses(query),
