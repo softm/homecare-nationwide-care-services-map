@@ -10,6 +10,8 @@
 .care-sort-dialog label { display:flex; align-items:center; gap:5px; padding:10px 12px; border:1px solid #d5d9de; border-radius:24px; cursor:pointer; }
 .care-sort-dialog label:has(input:checked) { border-color:#1c64d1; color:#1756b4; background:#edf5ff; font-weight:700; }
 .care-sort-dialog input { accent-color:#1c64d1; min-height:0; width:16px; height:16px; margin:0; padding:0; }
+.care-sort-dialog .care-sort-origins.is-disabled { opacity:.68; } /* SOFTM-SORT-ORIGIN 날짜:20260910 : 거리와 무관한 정렬에서는 기준 위치가 적용되지 않음을 시각적으로 구분 */
+.care-sort-origin-help { flex-basis:100%; margin:2px 2px 0; color:#526276; font-size:13px; line-height:1.55; } /* SOFTM-SORT-ORIGIN 날짜:20260910 : 지도 중심과 내 위치의 갱신 차이를 선택 자리에서 설명 */
 .care-sort-help,.care-sort-status { font-size:13px; line-height:1.6; color:#526276; }
 .care-sort-status { color:#a12b25; }
 .care-sort-apply { width:100%; min-height:48px; border:0; border-radius:12px; color:white; background:#2176ef; font-size:18px; cursor:pointer; }
