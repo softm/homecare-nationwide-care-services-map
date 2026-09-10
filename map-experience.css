@@ -246,6 +246,11 @@
 .care-map-page .care-basket button:disabled { background:#eef2f6; border-color:#e0e6ed; color:#8a95a3; cursor:default; }
 .care-map-page .care-basket .care-text-button { padding:4px 0; border:0; font-size:14px; text-align:left; background:transparent; white-space:normal; }
 .care-map-page .care-basket-button[aria-pressed="true"] { color:#175cb5; background:#edf5ff; border-color:#b3d0f4; }
+/** SOFTM-POPUP-BASKET START 날짜:20260911 : 상세를 연 직후 비교 행동을 찾고 담김 상태를 색상과 문구로 함께 구분 */
+.care-popup-basket-action { flex:0 0 auto; padding:10px 16px; border-bottom:1px solid #d8e4ef; background:#f7faff; }
+.care-map-page .care-popup-basket-action .care-basket-button { width:100%; min-height:48px; border-color:#175cb5; background:#175cb5; color:#fff; font-weight:800; }
+.care-map-page .care-popup-basket-action .care-basket-button[aria-pressed="true"] { border-color:#9dc1ec; background:#e7f2ff; color:#134f94; }
+/** SOFTM-POPUP-BASKET END */
 .care-saved-empty { text-align:center; padding:38px 8px; }
 .care-saved-empty > span { display:block; color:#7e9abb; font-size:38px; }
 .care-saved-empty h3 { font-size:18px; line-height:1.5; }
