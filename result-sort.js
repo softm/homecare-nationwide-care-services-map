@@ -69,7 +69,7 @@
   /** SOFTM-SORT-ORIGIN END */
   // SOFTM-SORT-FIXED-ACTION 날짜:20260909 : 옵션만 스크롤하고 적용 동작은 하단에 고정
   const modes=dialog.querySelector('.care-sort-modes');
-  for(const option of [...select.options].sort((a,b)=>{const rank=value=>value==='accuracy'?0:value==='distance'?1:2;return rank(a.value)-rank(b.value);})){const label=document.createElement('label'),radio=document.createElement('input');radio.type='radio';radio.name='careSortMode';radio.value=option.value;label.append(radio,document.createTextNode(option.textContent));modes.append(label);}
+  for(const option of [...select.options].sort((a,b)=>{const rank=value=>value==='rating'?0:value==='accuracy'?1:value==='distance'?2:3;return rank(a.value)-rank(b.value);})){const label=document.createElement('label'),radio=document.createElement('input');radio.type='radio';radio.name='careSortMode';radio.value=option.value;label.append(radio,document.createTextNode(option.textContent));modes.append(label);} // SOFTM-SORT-SCORE-FIRST 날짜:20260910 : 두 지도에서 공단 평가점수순을 가장 먼저 찾을 수 있도록 배치
   document.body.append(dialog);let generation=0;
   const apply=dialog.querySelector('.care-sort-apply'),status=dialog.querySelector('.care-sort-status'),origins=dialog.querySelector('.care-sort-origins'),originHelp=dialog.querySelector('.care-sort-origin-help'),sortHelp=dialog.querySelector('.care-sort-help');
   /** SOFTM-SORT-ORIGIN START 날짜:20260910 : 선택한 중심점이 실제 적용되는 조건과 현재 기준을 정렬 버튼에 표시 */
