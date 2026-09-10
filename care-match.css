@@ -26,8 +26,19 @@
 .care-match-choices label:has(input:checked) { background:#edf5ff; border-color:#3478c4; }
 .care-match-choices input { width:18px; height:18px; flex:none; }
 .care-match-confirm { background:#f5f8fc; border:1px solid #dbe6f1; border-radius:12px; padding:16px; margin-top:20px; }
-.care-match-summary { padding:14px; margin:6px 0 12px; border:1px solid #c5d9ef; border-radius:12px; background:#f1f7ff; color:#244c76; overflow-wrap:anywhere; font-size:13px; line-height:1.6; }
-.care-match-summary h3 { font-size:15px; margin:0 0 8px; }
+/** SOFTM-MATCH-PANEL START 날짜:20260910 : 조건 설정 버튼과 선택값을 하나의 카드로 연결해 별개 기능처럼 보이는 문제를 방지 */
+.care-map-page .care-match-panel { margin:4px 12px 10px; overflow:hidden; border:1px solid #a7c7e8; border-radius:12px; background:#f1f7ff; color:#244c76; }
+.care-map-page .care-match-panel > .care-match-start { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin:0; border:0; border-radius:0; text-align:left; }
+.care-map-page .care-match-panel > .care-match-start small { color:#55728f; font-size:11px; font-weight:650; white-space:nowrap; }
+.care-map-page .care-match-panel.active > .care-match-start { border-bottom:1px solid #c5d9ef; background:#e8f2ff; }
+.care-match-summary { padding:12px; margin:0; border:0; border-radius:0; background:transparent; color:#244c76; overflow-wrap:anywhere; font-size:13px; line-height:1.6; }
+.care-match-selection > b { display:block; margin-bottom:7px; font-size:12px; }
+.care-match-selected-list { display:flex; flex-wrap:wrap; gap:5px; }
+.care-match-selected-chip,.care-match-selected-empty { display:inline-flex; align-items:center; min-height:25px; padding:3px 8px; border-radius:999px; background:#fff; color:#245b90; font-size:11px; font-weight:750; }
+.care-match-selected-empty { color:#687b8e; }
+.care-match-result-count { display:inline-block; margin:9px 8px 0 0!important; }
+.care-match-guidance { color:#60758b; font-size:11px; }
+/** SOFTM-MATCH-PANEL END */
 .care-match-summary p { margin:8px 0; }
 .care-match-summary summary { cursor:pointer; padding:8px 0; font-weight:650; }
 .care-match-summary ul { padding-left:18px; }
