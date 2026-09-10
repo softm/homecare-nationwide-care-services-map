@@ -109,3 +109,10 @@
 @media(max-width:600px){.care-photo-main{padding:16px 12px 32px}.care-photo-intro h1{font-size:24px}.care-photo-intro>p:last-child{display:none}.care-photo-result-head h2{font-size:20px}.care-photo-scope{margin-top:12px}.care-photo-viewbar p{display:none}}
 @media(prefers-reduced-motion:reduce){.care-photo-grid .care-photo-tile .care-photo-card-body{transition:none}}
 /** SOFTM-PHOTO-WALL END */
+
+/** SOFTM-PHOTO-SAVE-UNIT START 날짜:20260911 : 기관 저장 상태를 사진 선택 강조와 분리하고 실제 추가 수를 눈에 보이게 안내 */
+.care-photo-save-help{font-size:13px;color:#405772;margin:10px 0 4px}
+.care-photo-grid .care-photo-tile [data-photo-save]:disabled{background:#fff;color:#405772;border-color:#ccd6df;opacity:1;cursor:default;font-weight:500}
+.care-photo-save-feedback{position:sticky;bottom:14px;z-index:5;max-width:680px;margin:16px auto 0;padding:12px 16px;border:1px solid #b8cde0;border-radius:10px;background:#edf5ff;color:#203c58;box-shadow:0 3px 12px #173c7520;font-size:14px}
+.care-photo-save-feedback:empty{display:none}
+/** SOFTM-PHOTO-SAVE-UNIT END */

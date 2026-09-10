@@ -6,9 +6,9 @@
 <meta name="description" content="공단 등록사진으로 지역별 돌봄기관을 찾아보고 관심 기관의 공간을 비교하세요.">
 <meta name="robots" content="noindex,follow">
 <!-- SOFTM-PHOTO-EXPLORE START 날짜:20260911 : 사진 중심 배치와 기관별 보기를 같은 탐색 도구로 제공 -->
-<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260911-wall1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
+<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260911-save1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
 <script src="care-data.js" defer></script><script src="nhis-static-data.js" defer></script><script src="map-experience.js?v=20260910-photos1" defer></script><script src="photo-viewer.js?v=20260911-gallery1" defer></script>
-<script type="module" src="care-photos.js?v=20260911-wall1"></script>
+<script type="module" src="care-photos.js?v=20260911-save1"></script>
 <!-- SOFTM-PHOTO-EXPLORE END -->
 </head>
 <body class="care-photo-page">
@@ -28,6 +28,9 @@
 <!-- SOFTM-PHOTO-GALLERY START 날짜:20260911 : 보기 방식에 맞는 제목으로 현재 결과를 안내 -->
 <div class="care-photo-result-head"><div><h2 id="photoResultTitle">기관 사진 갤러리</h2><p id="photoStatus" role="status" aria-live="polite">기관 자료를 불러오고 있습니다.</p></div><button type="button" id="photoCompare" disabled>담은 기관 사진 비교 <span id="photoSavedCount">0</span></button></div>
 <!-- SOFTM-PHOTO-GALLERY END -->
+<!-- SOFTM-PHOTO-SAVE-UNIT START 날짜:20260911 : 사진별 선택으로 오해하지 않도록 기관 단위 저장을 안내 -->
+<p class="care-photo-save-help">비교함에는 <strong>기관 단위</strong>로 담습니다. 같은 기관의 사진 여러 장도 비교함에서는 <strong>1곳</strong>입니다.</p>
+<!-- SOFTM-PHOTO-SAVE-UNIT END -->
 <p id="photoNotice" class="care-photo-note">사진은 현재 시설 상태와 다를 수 있습니다. 등록일은 촬영일과 구분하며, 사진 수는 수집된 자료 기준입니다.</p>
 <!-- SOFTM-PHOTO-GALLERY START 날짜:20260911 : 사진의 밀도와 크기를 선택해 많은 사진을 같은 검색 범위에서 탐색 -->
 <div class="care-photo-viewbar"><div id="photoModes" class="care-photo-modes" role="group" aria-label="사진 보기 모드">
@@ -41,7 +44,7 @@
 <div id="photoResults" class="care-photo-grid" aria-busy="true"></div>
 <button type="button" id="photoRetry" hidden>자료 다시 불러오기</button>
 <div class="care-photo-more"><button type="button" id="photoMore" hidden>24곳 더 보기</button></div>
-<p id="photoAnnouncement" class="care-photo-sr" role="status" aria-live="polite"></p>
+<p id="photoAnnouncement" class="care-photo-save-feedback" role="status" aria-live="polite"></p>
 <noscript>사진 탐색에는 자바스크립트가 필요합니다. <a href="daycare-map.html">주야간보호 안내 보기</a></noscript>
 </main>
 <footer class="care-photo-footer">공공자료 기반 독립 정보 서비스 · <a href="about.html">자료 출처와 서비스 소개</a></footer>

@@ -34,14 +34,27 @@ function options(select, values, label, value = '') {
     select.value = values.includes(value) ? value : '';
 }
 function cities(value = '') { options($('photoCity'), searchRows().filter(row => !$('photoProvince').value || row.p === $('photoProvince').value).map(row => row.c), scopeMode === 'map' ? '지도 표시 시·군·구' : '전체', value); }
+let saveFeedbackTimer; // SOFTM-PHOTO-SAVE-UNIT 날짜:20260911 : 담기 안내가 사진을 계속 가리지 않도록 마지막 알림만 잠시 유지
 function syncBasket() {
     if (!basket) return;
     const ids = basket.ids(); $('photoSavedCount').textContent = `${ids.length}곳`;
     $('photoCompare').disabled = !ids.length;
+    /** SOFTM-PHOTO-SAVE-UNIT START 날짜:20260911 : 사진 선택 체크와 기관 비교함 상태를 구분해 중복 선택 오인을 방지 */
     document.querySelectorAll('[data-photo-save]').forEach(button => {
-        const saved = basket.has(button.dataset.photoSave);
-        button.setAttribute('aria-pressed', String(saved)); button.textContent = button.hasAttribute('data-photo-compact') ? (saved ? '✓ 담음' : '+ 담기') : (saved ? '✓ 비교에 담음' : '+ 비교에 담기'); // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 위 담기는 작은 버튼으로 유지
+        const saved = basket.has(button.dataset.photoSave), tile = button.hasAttribute('data-photo-compact');
+        const name = button.closest('.care-photo-card')?.querySelector('h3')?.textContent || '이 기관';
+        if (tile) {
+            button.removeAttribute('aria-pressed'); button.disabled = saved;
+            button.textContent = saved ? '담은 기관' : '기관 담기';
+            button.setAttribute('aria-label', `${name} ${saved ? '이미 비교함에 담은 기관' : '기관 비교함에 담기'}`);
+            button.title = saved ? '같은 기관은 비교함에 한 번만 담깁니다. 기관별 보기에서 뺄 수 있습니다.' : '이 사진의 기관 1곳을 비교함에 담습니다.';
+        } else {
+            button.disabled = false; button.setAttribute('aria-pressed', String(saved));
+            button.textContent = saved ? '기관 빼기' : '+ 기관 담기';
+            button.setAttribute('aria-label', `${name} ${saved ? '비교함에서 빼기' : '비교함에 담기'}`);
+        }
     });
+    /** SOFTM-PHOTO-SAVE-UNIT END */
 }
 function writeUrl() {
     const query = new URLSearchParams({ type, scope: scopeMode, mode, ...controls() }); // SOFTM-PHOTO-GALLERY 날짜:20260911 : 범위 토큰과 별개로 보기 모드를 복원
@@ -61,10 +74,8 @@ function render({ append = false } = {}) {
         const imageButton = figure.querySelector('.care-photo-image');
         imageButton.tabIndex = 0; imageButton.dataset.photoOpen = row.i; imageButton.setAttribute('aria-label', `${row.n} 사진 보기`);
         const body = document.createElement('div'); body.className = 'care-photo-card-body';
-        body.innerHTML = `<h3>${escapeHtml(row.n)}</h3><p>${escapeHtml(row.a)}</p><p class="care-photo-count">등록사진 ${summary.count}장</p><div class="care-photo-card-actions"><button type="button" data-photo-open="${escapeHtml(row.i)}">사진 보기</button><a href="${escapeHtml(mapUrl(type, row))}" rel="nofollow">지도에서 보기</a><button type="button" data-photo-save="${escapeHtml(row.i)}" data-photo-compact aria-label="${escapeHtml(row.n)} 비교에 담기" aria-pressed="false">+ 담기</button></div>`;
-        body.append(info);
-        /** SOFTM-PHOTO-WALL END */
-        card.append(figure, body); host.append(card);
+        body.innerHTML = `<h3>${escapeHtml(row.n)}</h3><p>${escapeHtml(row.a)}</p><p class="care-photo-count">등록사진 ${summary.count}장</p><div class="care-photo-card-actions"><button type="button" data-photo-open="${escapeHtml(row.i)}">사진 보기</button><a href="${escapeHtml(mapUrl(type, row))}" rel="nofollow">지도에서 보기</a><button type="button" data-photo-save="${escapeHtml(row.i)}" aria-label="${escapeHtml(row.n)} 비교에 담기" aria-pressed="false">+ 기관 담기</button></div>`;
+        card.append(figure, body); host.append(card); // SOFTM-PHOTO-SAVE-UNIT 날짜:20260911 : 기관 카드는 갤러리 전용 설명 객체를 참조하지 않음
     }
     $('photoStatus').textContent = type === 'nursing-hospital' ? '요양병원은 공단 등록사진 제공 대상이 아닙니다.' : matches.length ? `${matches.length.toLocaleString()}곳 중 ${Math.min(limit, matches.length)}곳 표시 · 기관명순` : '조건에 맞는 사진 등록 기관이 없습니다.';
     /** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 빈 지도·범위 유실·사진 미등록을 전국 검색 결과와 구분 */
@@ -206,8 +217,15 @@ $('photoResults').onclick = event => {
     const row = rows.find(row => row.i === (button.dataset.photoSave || button.dataset.photoOpen));
     if (!row) return;
     if (button.hasAttribute('data-photo-save')) {
+        /** SOFTM-PHOTO-SAVE-UNIT START 날짜:20260911 : 갤러리는 기관 한 곳 추가만 수행하며 반복 클릭으로 다른 사진의 기관을 해제하지 않음 */
+        const compact = button.hasAttribute('data-photo-compact');
+        if (compact && basket.has(row.i)) return;
         basket.toggle(row.i); syncBasket();
-        $('photoAnnouncement').textContent = `${row.n}, ${basket.has(row.i) ? '담았습니다' : '담은 기관에서 뺐습니다'}. 총 ${basket.ids().length}곳`;
+        $('photoAnnouncement').textContent = basket.has(row.i)
+            ? `${row.n} · 기관 1곳을 담았습니다. 비교함 총 ${basket.ids().length}곳. 같은 기관의 사진에는 ‘담은 기관’으로 표시됩니다.`
+            : `${row.n} · 비교함에서 뺐습니다. 총 ${basket.ids().length}곳.`;
+        clearTimeout(saveFeedbackTimer); saveFeedbackTimer = setTimeout(() => { $('photoAnnouncement').textContent = ''; }, 6000);
+        /** SOFTM-PHOTO-SAVE-UNIT END */
     } else openComparison({ rows: [row], type, opener: button, title: '기관 등록사진' });
 };
 window.addEventListener('pageshow', event => {
