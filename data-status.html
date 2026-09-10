@@ -1,0 +1,172 @@
+<!doctype html>
+<!-- SOFTM-DATA-STATUS START 날짜:20260910 : 이용자가 공개된 수집 결과와 자동 갱신 경과를 한 화면에서 확인하도록 제공 -->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="dcterms.modified" content="2026-09-10">
+  <title>데이터 수집·갱신 현황 | 돌봄한눈</title>
+  <meta name="description" content="돌봄한눈의 국민건강보험공단·건강보험심사평가원 공개자료 수집률, 최근 갱신 실행과 유형별 기관 자료 기준일을 확인합니다.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <link rel="canonical" href="https://homecare.designboard.net/data-status.html">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="돌봄한눈">
+  <meta property="og:title" content="데이터 수집·갱신 현황 | 돌봄한눈">
+  <meta property="og:description" content="공개자료 수집률과 최근 자동 갱신 결과, 유형별 기관 자료 기준일을 확인합니다.">
+  <meta property="og:url" content="https://homecare.designboard.net/data-status.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="데이터 수집·갱신 현황 | 돌봄한눈">
+  <meta name="twitter:description" content="공개자료 수집률과 최근 자동 갱신 결과를 확인합니다.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://homecare.designboard.net/data-status.html#webpage",
+    "name": "돌봄한눈 데이터 수집·갱신 현황",
+    "url": "https://homecare.designboard.net/data-status.html",
+    "description": "돌봄한눈이 사용하는 공개자료의 수집률, 최근 갱신 실행과 자료 기준일",
+    "inLanguage": "ko-KR",
+    "isPartOf": { "@id": "https://homecare.designboard.net/#website" }
+  }
+  </script>
+  <link rel="stylesheet" href="seo-landing.css?v=20260904-3">
+  <link rel="stylesheet" href="data-status.css?v=20260910-1">
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+  <header class="site-head">
+    <div class="container site-head-inner">
+      <a class="brand" href="index.html">돌봄한눈</a>
+      <nav class="status-head-nav" aria-label="주요 메뉴">
+        <a href="about.html">서비스 소개</a>
+        <a class="home-link" href="index.html">기관 유형 찾기 <span aria-hidden="true">→</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="status-intro" aria-labelledby="page-title">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="현재 위치">
+          <a href="index.html">홈</a><span aria-hidden="true">›</span><span aria-current="page">데이터 현황</span>
+        </nav>
+        <div class="status-intro-row">
+          <div>
+            <p class="eyebrow">공개자료 수집 상태</p>
+            <h1 id="page-title">데이터 수집·갱신 현황</h1>
+            <p class="lead">현재 공개된 기관목록·상세·평가·사진의 수집 상태와 자동 갱신 경과입니다.</p>
+          </div>
+          <button class="refresh-button" id="refreshStatus" type="button">최신 상태 확인</button>
+        </div>
+        <div class="publish-state" role="status" aria-live="polite">
+          <span class="state-dot" aria-hidden="true"></span>
+          <strong id="publishStateLabel">자료 확인 중</strong>
+          <span id="publishedAt">배포 자료를 불러오고 있습니다.</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="container status-content">
+      <section class="status-section" aria-labelledby="collection-title">
+        <div class="status-section-head">
+          <div><p class="section-kicker">현재 공개 자료</p><h2 id="collection-title">수집 범위별 현황</h2></div>
+          <p>기관목록을 기준으로 상세와 사진의 수집률을 계산합니다.</p>
+        </div>
+        <div class="table-shell">
+          <table class="status-table">
+            <thead><tr><th scope="col">수집 자료</th><th scope="col">현재 건수</th><th scope="col">기준 건수</th><th scope="col">수집률</th><th scope="col">상태</th><th scope="col">최근 갱신</th></tr></thead>
+            <tbody id="collectionRows"><tr class="loading-row"><td colspan="6">수집 현황을 불러오고 있습니다.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="status-section" aria-labelledby="published-run-title">
+        <div class="status-section-head">
+          <div><p class="section-kicker">배포된 최신 결과</p><h2 id="published-run-title">최근 수집·변경 경과</h2></div>
+          <p>마지막으로 공개 사이트에 반영된 수집 실행을 기준으로 표시합니다.</p>
+        </div>
+        <div class="table-shell">
+          <table class="status-table">
+            <thead><tr><th scope="col">구분</th><th scope="col">실행 내용</th><th scope="col">대상</th><th scope="col">처리</th><th scope="col">변경·성공</th><th scope="col">실패·미완료</th><th scope="col">확인 시각</th></tr></thead>
+            <tbody id="publishedRunRows"><tr class="loading-row"><td colspan="7">최근 수집 결과를 불러오고 있습니다.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="status-section" aria-labelledby="runs-title">
+        <div class="status-section-head">
+          <div><p class="section-kicker">GitHub Actions</p><h2 id="runs-title">최근 자동·수동 실행</h2></div>
+          <a class="text-link" href="https://github.com/softm/homecare-nationwide-care-services-map/actions/workflows/refresh-nhis-static.yml">Actions에서 전체 보기 <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="table-shell">
+          <table class="status-table run-table">
+            <thead><tr><th scope="col">실행 내용</th><th scope="col">구분</th><th scope="col">상태</th><th scope="col">시작</th><th scope="col">소요시간</th><th scope="col">실행 번호</th></tr></thead>
+            <tbody id="workflowRows"><tr class="loading-row"><td colspan="6">최근 실행을 확인하고 있습니다.</td></tr></tbody>
+          </table>
+        </div>
+        <p class="table-note" id="workflowNote">실행 중인 작업이 있으면 자동으로 다시 확인합니다.</p>
+      </section>
+
+      <section class="status-section" aria-labelledby="category-title">
+        <div class="status-section-head">
+          <div><p class="section-kicker">지도 반영 결과</p><h2 id="category-title">기관 유형별 자료</h2></div>
+          <p>같은 기관이 여러 급여를 제공하면 유형별 건수에 각각 포함됩니다.</p>
+        </div>
+        <div class="table-shell">
+          <table class="status-table">
+            <thead><tr><th scope="col">기관 유형</th><th scope="col">자료 출처</th><th scope="col">기관 수</th><th scope="col">평가 연결</th><th scope="col">자료 기준일</th><th scope="col">상태</th></tr></thead>
+            <tbody id="categoryRows"><tr class="loading-row"><td colspan="6">유형별 자료를 불러오고 있습니다.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="status-section" aria-labelledby="detail-title">
+        <div class="status-section-head">
+          <div><p class="section-kicker">전체 상세 수집</p><h2 id="detail-title">14개 샤드 처리 경과</h2></div>
+          <p id="shardSummary">체크포인트를 확인하고 있습니다.</p>
+        </div>
+        <div class="table-shell compact-table-shell">
+          <table class="status-table compact-table">
+            <thead><tr><th scope="col">샤드</th><th scope="col">상태</th><th scope="col">처리 기관</th><th scope="col">API 호출</th><th scope="col">완료 시각</th></tr></thead>
+            <tbody id="shardRows"><tr class="loading-row"><td colspan="5">상세 수집 경과를 불러오고 있습니다.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="status-section" aria-labelledby="schedule-title">
+        <div class="status-section-head">
+          <div><p class="section-kicker">자동 갱신 정책</p><h2 id="schedule-title">정기 실행 일정</h2></div>
+          <p>표시 시각은 한국시간입니다.</p>
+        </div>
+        <div class="table-shell">
+          <table class="status-table">
+            <thead><tr><th scope="col">작업</th><th scope="col">실행 시각</th><th scope="col">수집 모드</th><th scope="col">수집 범위</th><th scope="col">API 호출 상한</th><th scope="col">갱신 목적</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">매일 증분 갱신</th><td>매일 03:23</td><td><code>incremental</code></td><td>전체</td><td class="number-cell">900회</td><td>신규·변경 기관 반영</td></tr>
+              <tr><th scope="row">매일 순환 갱신</th><td>매일 04:41</td><td><code>rotation</code></td><td>상세·사진</td><td class="number-cell">6,800회</td><td>14개 샤드 순환 갱신</td></tr>
+              <tr><th scope="row">월간 원본 갱신</th><td>매월 1일 05:17</td><td><code>incremental</code></td><td>목록·평가</td><td class="number-cell">300회</td><td>시설현황·평가 원본 점검</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="status-explanation" aria-labelledby="read-title">
+        <h2 id="read-title">표를 읽는 기준</h2>
+        <ul>
+          <li>이 페이지의 수집 수치는 공개 사이트에 반영된 정적 데이터 기준입니다.</li>
+          <li>GitHub Actions 표는 진행 중인 실행과 최근 실행 결과를 별도로 확인합니다.</li>
+          <li>평가 연결 수는 평가 대상 전체의 완료율이 아니라 공개 평가자료가 연결된 기관 수입니다.</li>
+          <li>사진 정보는 사진 파일이 아닌 공단 원본 사진의 제목·날짜·주소를 뜻합니다.</li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container"><a href="index.html">돌봄한눈</a> <span>공개자료 기반 요양·돌봄기관 검색·비교</span></div>
+  </footer>
+  <script type="module" src="data-status.js?v=20260910-1"></script>
+</body>
+</html>
+<!-- SOFTM-DATA-STATUS END -->

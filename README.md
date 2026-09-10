@@ -87,6 +87,8 @@ npm run check
 
 자동·수동 수집 종류, 실행 주기, 명령, Run ID 확인과 전체 완료 판정은 [`docs/DATA_COLLECTION.md`](docs/DATA_COLLECTION.md)를 기준으로 운영합니다. <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 실행 중복과 체크포인트 누락 없이 수집을 이어가도록 운영 절차를 단일 문서로 연결 -->
 
+공개된 수집률, 최근 데이터 변경, 유형별 기준일과 최근 Actions 실행은 [`data-status.html`](data-status.html)에서 확인합니다. 페이지는 정적 수집 결과와 현재 실행 상태를 구분해 표시하며 비밀키를 사용하지 않습니다. <!-- SOFTM-DATA-STATUS 날짜:20260910 : 운영자가 별도 명령 없이 공개 데이터 갱신 경과를 확인 -->
+
 로컬 키는 `.env.local`의 `DATA_GO_KR_SERVICE_KEY`에만 저장합니다. 저장소에는 빈 예제만 있고, GitHub Actions에는 같은 이름의 Repository Secret을 등록합니다.
 
 로컬에서 아직 없는 사진정보만 전체 수집하려면 `.venv/bin/python -u scripts/collect_missing_nhis_photos.py --workers 3 --max-photos 10`을 실행합니다. 기존 사진과 상세 완료 기록을 보존하고 사진 전용 진행 기록으로 재개합니다. <!-- SOFTM-NHIS-MISSING-PHOTOS 날짜:20260904 : 완료된 상세 샤드 때문에 사진 수집이 생략되지 않도록 전용 명령 안내 -->

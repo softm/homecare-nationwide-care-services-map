@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "python3 -m http.server 3000",
     "build": "python3 scripts/build_nationwide_care_services.py && python3 scripts/build_care_photos.py && node scripts/build-regional-seo.mjs && node scripts/sync-seo-entrypoints.mjs",
-    "check": "node --test scripts/care-photos.test.mjs && python3 scripts/build_care_photos.py --check && node --test scripts/care-match.test.mjs scripts/care-insights.test.mjs scripts/result-sort.test.mjs scripts/voice-search.test.mjs scripts/mobile-sheet.test.mjs scripts/mobile-pull-refresh.test.mjs scripts/mobile-viewport-research.test.mjs scripts/check-search-readiness.test.mjs scripts/category-landing-ads.test.mjs scripts/validate-regional-seo.test.mjs scripts/submit-indexnow.test.mjs && node scripts/build-regional-seo.mjs --check && node scripts/sync-seo-entrypoints.mjs --check && node scripts/validate-project.mjs && node scripts/validate-regional-seo.mjs && python3 scripts/validate_nhis_static.py",
+    "check": "node --test scripts/care-photos.test.mjs && python3 scripts/build_care_photos.py --check && node --test scripts/care-match.test.mjs scripts/data-status.test.mjs scripts/care-insights.test.mjs scripts/result-sort.test.mjs scripts/voice-search.test.mjs scripts/mobile-sheet.test.mjs scripts/mobile-pull-refresh.test.mjs scripts/mobile-viewport-research.test.mjs scripts/check-search-readiness.test.mjs scripts/category-landing-ads.test.mjs scripts/validate-regional-seo.test.mjs scripts/submit-indexnow.test.mjs && node scripts/build-regional-seo.mjs --check && node scripts/sync-seo-entrypoints.mjs --check && node scripts/validate-project.mjs && node scripts/validate-regional-seo.mjs && python3 scripts/validate_nhis_static.py",
     "check:search": "node scripts/check-search-readiness.mjs",
     "notify:indexnow": "node scripts/submit-indexnow.mjs"
   },
@@ -18,6 +18,7 @@
   "_mobileSheetComment": "SOFTM-MOBILE-SHEET 날짜:20260909 : 모바일 목록 단계와 상세 복귀의 회귀검사를 기본 검증에 포함",
   "_voiceSearchComment": "SOFTM-VOICE-SEARCH 날짜:20260909 : 인식 취소·권한 오류와 오래된 음성 응답을 기본 검사에 포함",
   "_resultSortComment": "SOFTM-RESULT-SORT 날짜:20260909 : 중심점·관련도·좌표 누락 정렬을 기본 검사에 포함",
+  "_dataStatusComment": "SOFTM-DATA-STATUS 날짜:20260910 : 공개 수집률과 실행 경과 계산을 기본 검사에 포함",
   "_photoComment": "SOFTM-PHOTO-INDEX 날짜:20260910 : 수집 후 사진 요약 인덱스 생성과 원본 일치 검사를 같은 빌드에 포함",
   "_mobilePullRefreshComment": "SOFTM-MOBILE-PULL-REFRESH 날짜:20260910 : 모바일 내부 목록의 당김 임계값과 두 지도 공용 연결을 기본 검사에 포함"
 }
