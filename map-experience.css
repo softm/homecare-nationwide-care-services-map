@@ -179,7 +179,7 @@
 .care-map-page .select-tools,.care-map-page .route-actions { margin-top:12px; padding:8px 10px; background:#f5f7fa; border-radius:8px; }
 .care-map-page .route-tools > p,.care-map-page .selected { display:none; }
 /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 글자 링크처럼 보이던 작업 전환을 누를 수 있는 두 칸과 선택 표시로 구분 */
-.care-workspace-tabs { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:stretch; gap:6px; position:sticky; top:var(--care-nav-height,0px); z-index:80; margin:0 0 20px; padding:6px; border:1px solid #cdd8e5; border-radius:15px; background:#eaf0f6; box-shadow:0 3px 10px #172c4308; } /* SOFTM-WORKSPACE-NO-BACK 날짜:20260910 : 별도 이전 칸 없이 작업 탭과 화면 크기 전환만 표시 */
+.care-workspace-tabs { display:grid; grid-template-columns:48px minmax(0,1fr) auto; align-items:stretch; gap:6px; position:sticky; top:var(--care-nav-height,0px); z-index:80; margin:0 0 20px; padding:6px; border:1px solid #cdd8e5; border-radius:15px; background:#eaf0f6; box-shadow:0 3px 10px #172c4308; } /* SOFTM-WORKSPACE-BACK-ICON 날짜:20260910 : 화살표 전용 복귀 칸과 작업 탭을 한 줄에 유지 */
 .care-workspace-tab-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; min-width:0; } /* SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 탭 의미를 유지하면서 확대 버튼과 시각적으로 한 줄에 배치 */
 .care-workspace-tabs button { display:flex; align-items:center; justify-content:center; gap:12px; position:relative; min-width:0; min-height:76px; padding:12px 18px; border:1px solid #cdd8e5; border-radius:10px; background:#f4f7fa; color:#46617d; font-size:18px; font-weight:700; cursor:pointer; transition:background .18s,border-color .18s,box-shadow .18s; }
 .care-workspace-tabs button::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:3px; border-radius:3px 3px 0 0; background:transparent; }
@@ -197,6 +197,16 @@
 .care-workspace-tabs button.care-just-added { background:#e9f3ff; border-color:#4382cb; box-shadow:0 0 0 3px #a8cef84d; }
 .care-workspace-tabs .care-just-added [data-saved-count] { background:#175cb5; color:#fff; }
 .care-workspace-tabs .care-just-added .care-tab-hint { color:#175cb5; font-weight:700; }
+/* SOFTM-WORKSPACE-BACK-ICON START 날짜:20260910 : 이전 글자 없이 충분한 터치 영역과 명확한 화살표를 제공 */
+.care-map-page .care-workspace-tabs .care-workspace-back { flex:0 0 48px; width:48px; min-width:48px; min-height:44px; padding:8px; background:#fff; color:#214b78; border:1px solid #c6d6e6; border-radius:10px; }
+.care-map-page .care-workspace-back svg { width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+@media(min-width:1001px) {
+ .care-map-page .care-workspace-tabs { grid-template-columns:minmax(0,1fr); }
+ .care-map-page .care-workspace-tabs .care-workspace-back { position:fixed; top:4px; left:8px; width:52px; height:44px; z-index:181; }
+ .care-map-page .category-nav { left:68px; }
+ .care-map-page .care-workspace-tabs::before { content:""; position:fixed; top:0; left:0; width:68px; height:52px; box-sizing:border-box; background:#fff; border-bottom:1px solid #d6e1ee; z-index:180; }
+}
+/* SOFTM-WORKSPACE-BACK-ICON END */
 /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 크게 보기와 원상복구 상태가 명확히 구분되는 화면 크기 토글 제공 */
 .care-workspace-tabs .care-layout-toggle { flex-direction:column; gap:4px; width:112px; min-width:112px; padding:8px 10px; border-color:#175cb5; background:#175cb5; color:#fff; font-size:13px; line-height:1.25; }
 .care-workspace-tabs .care-layout-toggle:hover { border-color:#114b94; background:#114b94; color:#fff; }
