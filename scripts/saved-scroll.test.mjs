@@ -44,9 +44,26 @@ test('마지막 기관까지 스크롤하면 마지막 카드가 선택되고 �
     assert.equal(h.focused.at(-1)[0], 'c'); assert.ok(parseFloat(h.tail.style.height) > 0);
 });
 test('모바일 문서 스크롤도 선택을 갱신한다', () => {
-    const h = harness(false); h.scroll(220);
+    const h = harness(false); h.scroll(100); // SOFTM-SAVED-SCROLL-EARLY 날짜:20260910 : 카드가 상단에 닿기 전에도 문서 스크롤 선택이 반영되는지 확인
     assert.deepEqual(h.focused.at(-1), ['b', true, true]); assert.equal(h.tail.isConnected, false);
 });
+/** SOFTM-SAVED-SCROLL-EARLY START 날짜:20260910 : 위쪽 35% 기준의 빠른 선택·역방향 복귀·첫 진입을 실제 스크롤 이벤트로 검증 */
+test('다음 카드가 목록 상단에서 충분히 떨어져 있을 때 미리 선택하고 역방향도 복원한다', () => {
+    const h = harness(); h.scroll(80);
+    assert.ok(h.cards[1].getBoundingClientRect().top > 100 + 55);
+    assert.deepEqual(h.focused.at(-1), ['b', true, true]);
+    assert.equal(h.cards[1].attrs['aria-current'], 'true');
+    h.scroll(20);
+    assert.deepEqual(h.focused.at(-1), ['a', true, true]);
+    assert.equal(h.cards[1].attrs['aria-current'], undefined);
+});
+test('모바일 첫 진입과 맨 위 복귀는 첫 기관을 선택한다', () => {
+    const h = harness(false);
+    assert.deepEqual(h.focused.at(-1), ['a', false, true]);
+    h.scroll(100); h.scroll(0);
+    assert.deepEqual(h.focused.at(-1), ['a', true, true]);
+});
+/** SOFTM-SAVED-SCROLL-EARLY END */
 test('모바일 페이지 끝에서는 화면에 보이는 마지막 기관을 선택한다', () => {
     const h = harness(false); h.scroll(200, true);
     assert.equal(h.focused.at(-1)[0], 'c');
