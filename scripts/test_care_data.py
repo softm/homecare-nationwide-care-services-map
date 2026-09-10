@@ -1,10 +1,24 @@
 # /** SOFTM-DATA-UNIFIED START 날짜:20260904 : 수집 자료의 새 기관·급여·평가·인력이 지도 인덱스에서 빠지거나 다른 급여로 섞이는 회귀를 방지 */
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from build_nationwide_care_services import ROOT, CATEGORY_CODES, DEMENTIA_CODES, build_record, read_json, update_facility_head_count, update_index_counts
+from build_nationwide_care_services import ROOT, CATEGORY_CODES, DEMENTIA_CODES, build_record, read_json, update_facility_head_count, update_index_counts, write_json
 
 
 class CareDataTest(unittest.TestCase):
+    # /** SOFTM-DATA-GZIP START 날짜:20260910 : 로컬과 Actions의 같은 지도 데이터가 gzip 헤더 차이만으로 변경되지 않도록 검사 */
+    def test_gzip_output_uses_the_same_unix_header(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "sample.json.gz"
+            first_revision = write_json(path, [{"기관": "돌봄한눈"}])
+            first_payload = path.read_bytes()
+            second_revision = write_json(path, [{"기관": "돌봄한눈"}])
+            self.assertEqual(first_payload[9], 3)
+            self.assertEqual(first_payload, path.read_bytes())
+            self.assertEqual(first_revision, second_revision)
+    # /** SOFTM-DATA-GZIP END */
+
     # /** SOFTM-HOME-COUNT-TEST START 날짜:20260907 : 치매 CSS 선택자가 요양원 카드 수를 덮는 실제 회귀와 잘못된 카드 구조를 생성 전에 차단 */
     def test_home_counts_are_updated_inside_each_category_card(self):
         html = '''<meta name="dcterms.modified" content="2026-09-04">

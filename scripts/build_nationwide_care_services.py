@@ -37,7 +37,11 @@ def read_json(path):
 def write_json(path, value):
     payload = (json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n").encode()
     if path.suffix == ".gz":
-        payload = gzip.compress(payload, mtime=0)
+        # /** SOFTM-DATA-GZIP START 날짜:20260910 : macOS와 GitHub Linux 빌드가 같은 데이터에 서로 다른 gzip 헤더를 만들지 않도록 고정 */
+        compressed = bytearray(gzip.compress(payload, mtime=0))
+        compressed[9] = 3
+        payload = bytes(compressed)
+        # /** SOFTM-DATA-GZIP END */
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists() or path.read_bytes() != payload:
         path.write_bytes(payload)
