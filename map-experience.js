@@ -504,19 +504,34 @@
             search.className = 'search-btn care-mobile-search'; search.textContent = '조회';
             search.onclick = () => options.mobileSearch?.(); filters.querySelector('.filter-grid').append(search);
         }
+        /** SOFTM-FILTER-CLOSE START 날짜:20260910 : 닫기를 조회와 같은 실행 버튼으로 오인하지 않도록 패널 상단과 바깥 영역에 닫기 동작을 분리 */
         const toggle = document.createElement('button');
         toggle.type = 'button'; toggle.className = 'care-mobile-filter-toggle';
-        toggle.textContent = '검색조건'; toggle.setAttribute('aria-expanded', 'false');
+        toggle.textContent = '검색조건'; toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-label', '검색조건 열기');
         filters.id ||= 'careMobileFilters'; toggle.setAttribute('aria-controls', filters.id);
         filters.querySelector('.filter-grid').append(toggle);
-        const setOpen = open => {
+        const panelHead = document.createElement('div'); panelHead.className = 'care-filter-panel-head';
+        const panelTitle = document.createElement('strong'); panelTitle.textContent = '검색조건';
+        const close = document.createElement('button'); close.type = 'button'; close.className = 'care-filter-panel-close'; close.textContent = '×'; close.setAttribute('aria-label', '검색조건 닫기');
+        panelHead.append(panelTitle, close); filters.prepend(panelHead);
+        const backdrop = document.createElement('button'); backdrop.type = 'button'; backdrop.className = 'care-filter-backdrop'; backdrop.hidden = true; backdrop.setAttribute('aria-label', '검색조건 닫기');
+        document.body.append(backdrop);
+        const setOpen = (open, restoreFocus = false) => {
             document.body.classList.toggle('care-mobile-filters-open', open);
-            toggle.setAttribute('aria-expanded', String(open)); toggle.textContent = open ? '조건 닫기' : '검색조건';
+            toggle.setAttribute('aria-expanded', String(open)); toggle.setAttribute('aria-label', open ? '검색조건 열림' : '검색조건 열기');
+            backdrop.hidden = !open;
+            if (!open && restoreFocus) toggle.focus({ preventScroll: true });
         };
-        toggle.onclick = () => setOpen(!document.body.classList.contains('care-mobile-filters-open'));
+        toggle.onclick = () => { const open = document.body.classList.contains('care-mobile-filters-open'); setOpen(!open, open); };
+        close.onclick = () => setOpen(false, true);
+        backdrop.onclick = () => setOpen(false, true);
         document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') setOpen(false); });
         document.getElementById('searchBtn')?.addEventListener('click', () => setOpen(false));
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Escape' || !document.body.classList.contains('care-mobile-filters-open')) return;
+            e.preventDefault(); e.stopImmediatePropagation(); setOpen(false, true);
+        }, true);
+        /** SOFTM-FILTER-CLOSE END */
         let active = null, frame = 0, scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 실제 목록 스크롤만 지도 이동을 허용
         /** SOFTM-LIST-SCROLL-END START 날짜:20260910 : 마지막 기관도 상단 선택 기준선까지 올려 자동 선택할 수 있도록 목록 끝 여유를 계산 */
         const scrollTail = document.createElement('div');
