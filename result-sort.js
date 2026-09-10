@@ -20,7 +20,11 @@
  function compare(a,b,{mode,query,point,coord}){
   return (mode==='accuracy'?relevance(b,query)-relevance(a,query):0)||distance(point,coord(a))-distance(point,coord(b))||a.n.localeCompare(b.n,'ko')||String(a.i).localeCompare(String(b.i));
  }
+ /** SOFTM-DEFAULT-SCORE START 날짜:20260910 : 두 지도의 공단 평가점수 정렬을 통일하고 미확인 점수를 마지막에 표시 */
+ function score(row){const value=row.es??row.ev?.score;return typeof value==='number'&&Number.isFinite(value)?value:-Infinity;}
+ /** SOFTM-DEFAULT-SCORE END */
  function sort(rows){
+  if(config?.select.value==='rating'){rows.sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n,'ko'));return true;} // SOFTM-DEFAULT-SCORE 날짜:20260910 : 평가점수는 좌표 유무와 관계없이 높은 순으로 정렬
   if(!config||!['accuracy','distance'].includes(config.select.value))return false;
   const point=origin==='current'?currentPoint:config.center();
   for(const row of rows){const value=distance(point,config.coord(row));row._distance=Number.isFinite(value)?value:undefined;}
