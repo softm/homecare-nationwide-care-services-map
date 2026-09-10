@@ -116,3 +116,41 @@ test('범위 재전달은 이전 사진 페이지의 집합을 덮어쓰지 않�
     saveScope(storage,{type:'daycare',ids:['1'],source:'https://other.example/'},'bad');assert.equal(readScope(storage,'bad'),null);
 });
 /** SOFTM-PHOTO-TEST END */
+
+/** SOFTM-PHOTO-GALLERY START 날짜:20260911 : 대량 사진의 요청 제한·순서·취소·재시도를 회귀검사 */
+const { createGallery } = await import('../care-photo-gallery.js');
+test('갤러리는 동시 3곳·회당 6곳만 읽고 응답 순서와 관계없이 기관 순서를 유지', async () => {
+    const rows = Array.from({ length: 20 }, (_, i) => ({ i: String(i) }));
+    let active = 0, peak = 0, calls = 0;
+    const gallery = createGallery(rows, async id => {
+        calls++; peak = Math.max(peak, ++active);
+        await new Promise(resolve => setTimeout(resolve, id === '0' ? 20 : 1)); active--;
+        return { photos: Array.from({ length: 20 }, (_, j) => ({ title: `${id}-${j}` })) };
+    });
+    const first = gallery.next(); assert.equal(first, gallery.next());
+    let state = await first;
+    assert.equal(calls, 6); assert.equal(peak, 3); assert.equal(state.items.length, 60);
+    assert.deepEqual(state.items.map(x => x.photo.title).slice(0, 21), [...Array.from({ length: 20 }, (_, j) => `0-${j}`), '1-0']);
+    state = await gallery.next(); assert.equal(calls, 6); assert.equal(state.items.length, 120);
+    assert.equal(new Set(state.items.map(x => x.key)).size, 120);
+});
+test('빈 사진·실패한 요청을 구분하고 재시도는 실패한 기관만 복구', async () => {
+    let fail = true; const calls = [];
+    const gallery = createGallery([{ i: 'empty' }, { i: 'bad' }, { i: 'ok' }], async id => {
+        calls.push(id); if (id === 'bad' && fail) throw new Error('503');
+        return { photos: id === 'empty' ? [] : [{ title: id }] };
+    });
+    let state = await gallery.next(); assert.equal(state.empty, 1); assert.equal(state.failures.length, 1); assert.equal(state.more, false);
+    fail = false; state = await gallery.next({ retry: true });
+    assert.deepEqual(calls, ['empty', 'bad', 'ok', 'bad']); assert.equal(state.failures.length, 0);
+    assert.deepEqual(state.items.map(x => x.row.i), ['ok', 'bad']);
+});
+test('검색을 바꿔 취소하면 오래된 사진을 추가하거나 나머지 기관 요청을 시작하지 않음', async () => {
+    let release; let calls = 0;
+    const gallery = createGallery(Array.from({ length: 10 }, (_, i) => ({ i: String(i) })), async () => {
+        calls++; await new Promise(resolve => { release = resolve; }); return { photos: [{}] };
+    }, { concurrency: 1 });
+    const pending = gallery.next(); gallery.cancel(); release();
+    const state = await pending; assert.equal(calls, 1); assert.equal(state.items.length, 0);
+});
+/** SOFTM-PHOTO-GALLERY END */
