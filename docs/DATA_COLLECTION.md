@@ -32,6 +32,8 @@ GitHub Actions
 
 Actions 목록의 `WORKFLOW` 열은 공통 워크플로 이름을 표시하고 `TITLE` 열은 실행별 목적을 표시한다. `run-name`은 새 실행부터 적용되며 이미 시작된 실행 제목은 바뀌지 않는다. <!-- SOFTM-NHIS-RUN-NAME 날짜:20260903 : 같은 워크플로의 여러 실행을 제목으로 구분하는 방법을 기록 -->
 
+공개 사이트의 `data-status.html`에서는 배포된 `manifest.json`·변경 기록·체크포인트로 수집률과 샤드 경과를 표시하고, GitHub 공개 API로 최근 Actions 8회의 대기·실행·성공·실패 상태를 표시한다. 진행 중일 때만 90초 뒤 다시 확인하며 API 조회가 실패해도 배포된 정적 수집 현황은 계속 제공한다. <!-- SOFTM-DATA-STATUS 날짜:20260910 : 공개 반영 완료 자료와 현재 실행 상태를 한 페이지에서 구분해 확인 -->
+
 | 실행 예 | Actions `TITLE` 표시 |
 |---|---|
 | 사진 제외 전체 수동 수집 | `NHIS 수동 · mode=full · scope=catalog,details,evaluations · 기관=전체 · shard=14` |

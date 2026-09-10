@@ -14,6 +14,7 @@
 | 지도 화면영역 판별 | GitHub Pages 정적 파일·사용자 브라우저 | `region-bounds.js`, `viewport-regions.js` | 화면과 겹치는 시군구를 모두 후보로 조회한 뒤 실제 기관 좌표로 판별 | 로컬 정적 자료, 역주소 표본 조회 없음 | 없음 | <!-- SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 지도 화면의 검색 누락을 막는 경계 자료의 책임과 호출 경로를 명시 -->
 | 기관 기본 데이터 | GitHub Pages 정적 파일 | `data/care/*.json.gz`, `data/care/manifest.json`, `care-data.js` | 지도 목록·마커·필터의 기본 자료 | 예, 상대경로 정적 파일 | 없음 |
 | 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/details/**/*.json.gz`, 기타 `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 파일 | 브라우저 인증정보 없음 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 상세 압축 파일과 그 외 JSON의 배포 형식을 구분 -->
+| 데이터 수집 현황 | GitHub Pages 정적 파일·GitHub 공개 API | `data-status.html`, `data-status.js`, 수집 매니페스트, Actions 최근 실행 API | 공개된 수집률·변경 경과·유형별 기준일과 실행 상태 표시 | 정적 JSON과 공개 Actions 상태 조회 | 인증정보 없음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 비밀키 없이 공개 수집 결과와 진행 중 실행을 구분해 확인 -->
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py`, 로컬 사진 전용 `scripts/collect_missing_nhis_photos.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | OpenAPI는 `DATA_GO_KR_SERVICE_KEY`, 공개 사진 페이지는 키 불필요 | <!-- SOFTM-NHIS-MISSING-PHOTOS 날짜:20260904 : 로컬 사진 전용 실행 위치와 공개 페이지 인증 경계를 명시 -->
 | 길찾기 서버 | Vercel Functions | `services/vercel-api/api/directions.js` | 네이버 Directions 15 자동차 경로 중계 | `POST /api/directions`만 호출 | `NAVER_MAPS_API_KEY_ID`, `NAVER_MAPS_API_SECRET` |
 | 광고 설정 | GitHub Pages 정적 파일 및 광고 사업자 | `index-ad-config.js`, `category-landing-ad-config.js`, `category-landing-ads.js`, 두 지도 광고 설정 | 화면별 PC·모바일·목록 광고 슬롯 설정 | 예 | 광고 설정 파일의 공개 클라이언트 값만 사용 | <!-- SOFTM-INDEX-AD-UNIT 날짜:20260904 : 인덱스 승인 단위가 다른 지도 광고와 섞이지 않도록 인프라 경계를 명시 -->
@@ -31,6 +32,8 @@
 | 기관 기본 목록 | 브라우저 | `data/care/manifest.json`, 유형별 `.json.gz` | 공용 `care-data.js`가 수집 JSON에서 생성한 검색 자료를 로드 | 생성물 직접 수정 금지 | <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 실제 지도 입력을 수집 데이터로 통일 -->
 | 공단 상세 | 브라우저 | `data/nhis/details/{기관기호 앞 2자리}/{기관기호}.json.gz` | `nhis-static-data.js`가 필요한 기관 파일만 받아 gzip 해제 후 로드 | 실시간 공단 API 프록시 금지 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 브라우저의 실제 압축 상세 요청 경로를 기록 -->
 | 공단 사진 | 브라우저 | `data/nhis/photos/{기관기호 앞 2자리}/{기관기호}.json` | 사진 탭을 열 때 정적 사진 매니페스트 로드 | 원본 이미지는 공단 공개 URL 사용 가능 |
+| 수집 현황 | 브라우저 | `data/nhis/manifest.json`, `changes.json`, `checkpoints/*.json`, `data/care/manifest.json` | 공개된 수집률·최근 변경·유형별 기준일·샤드 완료 경과 표시 | 원본 수집 파일이나 비밀키는 읽지 않음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 화면에 공개할 운영 지표와 비공개 수집 자격정보의 경계를 고정 -->
+| 최근 Actions 실행 | 브라우저→GitHub 공개 API | `api.github.com/repos/softm/homecare-nationwide-care-services-map/actions/workflows/refresh-nhis-static.yml/runs` | 최근 8회와 진행 중 상태 표시, 실행 중일 때만 90초 후 재확인 | 인증 없이 공개 저장소의 실행 메타정보만 조회 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 정적 매니페스트 반영 전에도 현재 실행 여부를 확인 -->
 | 자동차 길찾기 | 브라우저→Vercel | `https://daycare-directions-proxy.vercel.app/api/directions` | Vercel이 Secret을 붙여 네이버 Directions 15 호출 | 유일하게 유지하는 런타임 서버 API |
 | 공단 원천 수집 | GitHub Actions→공공데이터 | 기관검색·시설상세 API, 시설현황·평가 파일 | Python 수집기가 재시도·호출 예산·샤드 체크포인트를 적용 | 키를 HTML·JSON·로그에 기록하지 않음 |
 | 공단 화면 보완 수집 | GitHub Actions→공단 공개 상세 페이지 | 기본정보(11)·인력/근속(14)·CCTV(19) 탭 | 공개 표의 항목·셀 구조를 상세 JSON에 병합 | 브라우저 실시간 호출 금지 |
