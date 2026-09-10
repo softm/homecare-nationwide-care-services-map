@@ -592,17 +592,23 @@
             const top = Math.max(0, rect.top, tabs.getBoundingClientRect().bottom);
             const bottom = Math.min(root.innerHeight, rect.bottom);
             const footerHeight = bar.querySelector('.care-saved-footer').getBoundingClientRect().height;
+            /** SOFTM-SAVED-SCROLL-EARLY START 날짜:20260910 : 카드를 맨 위까지 밀지 않아도 읽는 위치에서 선택되도록 가시 목록의 위쪽 35%를 기준으로 사용 */
+            const visibleBottom = bottom - footerHeight;
+            if (visibleBottom <= top) return;
+            const selectionOffset = (visibleBottom - top) * 0.35;
+            const selectionLine = top + selectionOffset;
             if (ownScroll) {
                 if (!tail.isConnected) list.append(tail);
-                const height = Math.max(0, bottom - top - footerHeight - cards.at(-1).getBoundingClientRect().height - 55);
+                const height = Math.max(0, visibleBottom - top - cards.at(-1).getBoundingClientRect().height - selectionOffset);
                 tail.style.height = `${cards.length > 1 ? height : 0}px`;
             } else tail.remove();
-            if (bottom <= top) return;
-            const visible = cards.filter(card => { const r = card.getBoundingClientRect(); return r.bottom > top && r.top < bottom - footerHeight; });
+            const visible = cards.filter(card => { const r = card.getBoundingClientRect(); return r.bottom > top && r.top < visibleBottom; });
+            const atStart = (ownScroll ? bar.scrollTop : root.scrollY) <= 2;
             const atEnd = ownScroll
                 ? bar.scrollHeight > bar.clientHeight && bar.scrollTop + bar.clientHeight >= bar.scrollHeight - 2
                 : document.documentElement.scrollHeight > root.innerHeight && root.scrollY + root.innerHeight >= document.documentElement.scrollHeight - 2;
-            const card = atEnd ? visible.at(-1) : visible.find(node => node.getBoundingClientRect().bottom > top + 55) || visible.at(-1);
+            const card = atEnd ? visible.at(-1) : atStart ? visible[0] : visible.find(node => node.getBoundingClientRect().bottom > selectionLine) || visible.at(-1);
+            /** SOFTM-SAVED-SCROLL-EARLY END */
             if (!card) return;
             if (active !== card) {
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
