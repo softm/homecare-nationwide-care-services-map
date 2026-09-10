@@ -44,3 +44,9 @@
 @media(max-width:520px){.care-photo-top{padding:16px;gap:12px}.care-photo-top nav{gap:10px;font-size:13px}.care-photo-brand{font-size:22px}.care-photo-main{padding:24px 16px 40px}.care-photo-grid{grid-template-columns:1fr;gap:18px}.care-photo-filters{padding:14px;gap:10px}.care-photo-result-head{align-items:flex-start;flex-direction:column}.care-photo-result-head>button{width:100%}.care-photo-dialog{width:calc(100vw - 16px);height:calc(100dvh - 16px);border-radius:12px}.care-photo-dialog-head{padding:16px 14px 8px}.care-photo-dialog-head h2{font-size:20px}.care-photo-categories{padding:10px 14px}.care-photo-columns{padding:14px;gap:12px}.care-photo-column{flex-basis:calc(100vw - 72px)}.care-photo-column:only-child{flex-basis:100%}}
 .care-saved-actions [data-photo-compare]{grid-column:1/-1}
 /** SOFTM-PHOTO-UI END */
+
+/** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 지도 범위와 전체 탐색 전환을 검색 결과 위에서 명확히 구분 */
+.care-photo-scope{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;margin-top:20px;border:1px solid #c6d5e3;border-radius:12px;background:#edf3f9}
+.care-photo-scope p{margin:0;font-size:14px;color:#27445f}.care-photo-scope button{flex-shrink:0}.care-photo-map-status{display:block;padding:0 12px;color:#9c3927;font-size:13px}.care-photo-map-status:empty{display:none}
+@media(max-width:520px){.care-photo-scope{align-items:stretch;flex-direction:column}}
+/** SOFTM-PHOTO-MAP-SCOPE END */

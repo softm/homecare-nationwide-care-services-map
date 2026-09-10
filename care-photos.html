@@ -6,16 +6,19 @@
 <meta name="description" content="공단 등록사진으로 지역별 돌봄기관을 찾아보고 관심 기관의 공간을 비교하세요.">
 <meta name="robots" content="noindex,follow">
 <!-- SOFTM-PHOTO-EXPLORE START 날짜:20260910 : 기존 검색 대표 페이지와 구분한 사진 탐색 도구를 제공 -->
-<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260910-1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
+<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260910-scope1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
 <script src="care-data.js" defer></script><script src="nhis-static-data.js" defer></script><script src="map-experience.js?v=20260910-photos1" defer></script><script src="photo-viewer.js?v=20260910-photos1" defer></script>
-<script type="module" src="care-photos.js?v=20260910-1"></script>
+<script type="module" src="care-photos.js?v=20260910-scope1"></script>
 <!-- SOFTM-PHOTO-EXPLORE END -->
 </head>
 <body class="care-photo-page">
 <!-- SOFTM-PHOTO-EXPLORE START 날짜:20260910 : 보호자가 사진 탐색에서 기존 비교함으로 이어갈 수 있는 작업 화면 -->
 <header class="care-photo-top"><a href="index.html" class="care-photo-brand">돌봄한눈</a><nav aria-label="주요 메뉴"><a href="nationwide-care-services-map.html?type=daycare" id="photoMapLink">지도에서 찾기</a><a href="about.html">서비스 소개</a></nav></header>
 <main class="care-photo-main">
-<div class="care-photo-intro"><p class="care-photo-eyebrow">공간을 살펴보고, 방문을 준비하세요</p><h1>사진으로 기관 찾기</h1><p>공단에 등록된 사진을 살펴보고 관심 있는 기관을 담아 비교하세요.</p></div>
+<div class="care-photo-intro"><p class="care-photo-eyebrow">공간을 살펴보고, 방문을 준비하세요</p><h1>사진으로 기관 찾기</h1><p>지도에 표시된 기관의 사진을 살펴보고 관심 있는 기관을 담아 비교하세요.</p></div>
+<!-- SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 사진 검색의 기본 범위가 현재 지도임을 알리고 전체 탐색은 명시적으로 전환 -->
+<section class="care-photo-scope" aria-label="사진 탐색 범위"><p id="photoScopeStatus" role="status">지도에 표시된 기관 기준</p><button id="photoAllScope" type="button">전체 기관에서 찾기</button></section>
+<!-- SOFTM-PHOTO-MAP-SCOPE END -->
 <form id="photoSearch" class="care-photo-filters">
 <label>기관 유형<select id="photoType" name="type"><option value="daycare">주·야간보호센터</option></select></label>
 <label>시·도<select id="photoProvince" name="p"><option value="">전국</option></select></label>
