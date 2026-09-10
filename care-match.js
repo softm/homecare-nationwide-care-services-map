@@ -38,6 +38,17 @@ export function destinationUrl(draft, filters, base) {
     globalThis.CareAdvancedSearch.writeState(p, effective.advanced);
     return url;
 }
+/** SOFTM-MATCH-LIST-COMPACT START 날짜:20260910 : 좁은 목록에서는 실제 확인된 특화서비스만 남겨 기관 기본정보를 빠르게 비교하도록 제한 */
+export function compactHighlights(conditions, limit = 2) {
+    const confirmed = (conditions || []).filter(condition => condition.status === 'confirmed' && String(condition.id).startsWith('feature:'));
+    return { items: confirmed.slice(0, limit), remaining: Math.max(0, confirmed.length - limit) };
+}
+function renderCompactHighlights(conditions) {
+    const highlights = compactHighlights(conditions);
+    if (!highlights.items.length) return '';
+    return `<div class="care-match-list-highlights"><strong>확인된 특화</strong>${highlights.items.map(item => `<span>${escape(item.label)}</span>`).join('')}${highlights.remaining ? `<small>외 ${highlights.remaining}개</small>` : ''}</div>`;
+}
+/** SOFTM-MATCH-LIST-COMPACT END */
 export function mount(config) {
     let storage; try { storage = window.sessionStorage; } catch {}
     let saved = readPreferences(storage), manifest = null, featureIndex = null, featureError = false;
@@ -87,9 +98,12 @@ export function mount(config) {
             const conditions = byId.get(String(id))?.conditions || [];
             let host = row.querySelector('.care-match-reasons');
             if (snapshot.pending || snapshot.error || !conditions.length) { host?.remove(); return; }
-            if (!host) { host = document.createElement('section'); host.className = 'care-match-reasons'; host.setAttribute('aria-label', '선택한 중요 조건의 확인 근거'); row.querySelector('.care-row-actions').before(host); host.addEventListener('click', event => event.stopPropagation()); host.addEventListener('keydown', event => event.stopPropagation()); }
-            const html = renderConditions(conditions);
+            /** SOFTM-MATCH-LIST-COMPACT START 날짜:20260910 : 평가·인력·미확인 사유의 카드별 반복을 없애고 확인된 특화 항목만 짧게 노출 */
+            const html = renderCompactHighlights(conditions);
+            if (!html) { host?.remove(); return; }
+            if (!host) { host = document.createElement('section'); host.className = 'care-match-reasons'; host.setAttribute('aria-label', '확인된 특화서비스'); row.querySelector('.care-row-actions').before(host); host.addEventListener('click', event => event.stopPropagation()); host.addEventListener('keydown', event => event.stopPropagation()); }
             if (reasonMarkup.get(host) !== html) { host.innerHTML = html; reasonMarkup.set(host, html); }
+            /** SOFTM-MATCH-LIST-COMPACT END */
         });
     }
     function refresh() { if (!renderFrame) renderFrame = requestAnimationFrame(renderResults); }

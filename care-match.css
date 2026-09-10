@@ -35,7 +35,13 @@
 .care-match-summary li span { display:block; }
 .care-match-summary button { min-height:44px; border:1px solid #a7c5e5; border-radius:8px; background:white; color:#215789; padding:8px 10px; cursor:pointer; margin-top:6px; }
 .care-match-note { color:#675224; }
-.care-match-reasons { border-top:1px solid #e4ebf4; margin-top:12px; padding-top:6px; cursor:default; }
+/** SOFTM-MATCH-LIST-COMPACT START 날짜:20260910 : 기관 목록의 특화정보를 짧은 표식으로 보여 카드 높이와 반복 설명을 줄임 */
+.care-match-reasons { border-top:1px solid #e4ebf4; margin-top:8px; padding-top:8px; cursor:default; }
+.care-match-list-highlights { display:flex; align-items:center; flex-wrap:wrap; gap:5px; font-size:11px; line-height:1.35; }
+.care-match-list-highlights strong { color:#315d87; font-size:11px; }
+.care-match-list-highlights span { padding:3px 7px; border-radius:999px; background:#dcefe5; color:#185e40; font-weight:700; }
+.care-match-list-highlights small { color:#5d7186; font-size:11px; }
+/** SOFTM-MATCH-LIST-COMPACT END */
 .care-match-conditions { padding:0; margin:8px 0; list-style:none; font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
 .care-match-conditions li { margin:0 0 12px; }
 .care-map-page .care-match-conditions p { font-size:13px; color:#465c74; margin:5px 0; }

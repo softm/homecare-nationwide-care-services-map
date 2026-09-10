@@ -816,7 +816,7 @@
         options = config; rowById = new Map(allRows().map(row => [String(row.i), row]));
         /** SOFTM-CARE-MATCH START 날짜:20260910 : 공용 질문 흐름이 준비되지 않아도 기존 지도는 계속 사용할 수 있게 독립 초기화 */
         if (options.match) {
-            const connect = (attempt = 0) => import(`./care-match.js?v=20260910-match1&attempt=${attempt}`).then(module => {
+            const connect = (attempt = 0) => import(`./care-match.js?v=20260910-match-list-compact1&attempt=${attempt}`).then(module => { // SOFTM-MATCH-LIST-COMPACT 날짜:20260910 : 간결해진 기관 요약을 이전 캐시 없이 적용
                 matchController = module.mount({ ...options.match, type: options.type, allRows, onChange: updateInsights });
             }).catch(() => {
                 if (document.querySelector('.care-match-load-retry')) return;
