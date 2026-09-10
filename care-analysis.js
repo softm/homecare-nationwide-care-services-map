@@ -1,6 +1,7 @@
 /** SOFTM-CARE-ANALYSIS START 날짜:20260911 : 주소 한 번 입력으로 생활권 전체의 선택 근거와 상담 질문을 묶고 입력 변경·취소 후 늦은 응답을 차단 */
 import { analyzeInstitutions, radiusBounds } from './care-analysis-engine.js?v=20260911-1';
 import { resolveCoordinates } from './care-analysis-data.js?v=20260911-1';
+import { readOrigin, createOriginBinding } from './care-analysis-origin.js?v=20260911-binding1'; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 지도 위치와 현재 위치를 같은 취소 가능한 기본값으로 연결
 import { escapeHtml as esc, readJson, mapUrl, thumbnail, openComparison } from './care-photos-common.js?v=20260910-1';
 
 const $ = id => document.getElementById(id);
@@ -10,6 +11,7 @@ const validPoint = p => p && Number.isFinite(p.lat) && Number.isFinite(p.lng) &&
 const memory = new Map();
 let generation = 0, sdkTask, current = null, limit = 12, view = 'nearby', busy = false;
 let storage; try { storage = sessionStorage; } catch {}
+let originController; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 주소를 직접 고치면 자동 위치 응답을 폐기
 
 function bounded(task, milliseconds = 20000) {
     let timer;
@@ -28,7 +30,7 @@ function renderCriteria() {
     $('analysisMap').href = `nationwide-care-services-map.html?type=${encodeURIComponent(type)}`;
 }
 function setBusy(value) {
-    busy = value; $('analysisRun').disabled = value; $('analysisCancel').hidden = !value;
+    busy = value; $('analysisRun').disabled = value || originController?.state().phase === 'loading'; $('analysisCancel').hidden = !value; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 위치 확인 중 빈 주소로 분석을 시작하지 않음
     $('analysisResults').setAttribute('aria-busy', String(value));
     if (!value) $('analysisProgress').hidden = true;
 }
@@ -84,11 +86,16 @@ function draft() {
     return { type, radiusKm: Number($('analysisRadius').value), address: $('analysisAddress').value.trim(), criteria: criteriaFor(type), selected };
 }
 async function submit(event) {
+    originController?.cancel(); // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 분석을 시작한 뒤 역주소 응답이 기준 주소를 바꾸지 않음
     event?.preventDefault(); if (!$('analysisForm').reportValidity()) return;
     const input = draft(); if (!input.address) return;
     invalidate('기준 주소를 확인하고 있습니다.'); const token = generation; setBusy(true);
     try {
         await loadSdk(); if (token !== generation) return;
+        /** SOFTM-ANALYSIS-ORIGIN START 날짜:20260911 : 자동 연결한 좌표는 주소를 다시 검색하지 않고 그대로 분석 */
+        const bound = originController.state();
+        if (bound.point && input.address === bound.label) { await run(input, { point: bound.point, label: bound.label }, token); return; }
+        /** SOFTM-ANALYSIS-ORIGIN END */
         const addresses = await NaverGeocoder.searchAddresses(input.address); if (token !== generation) return;
         if (!addresses.length) throw new Error('주소를 찾지 못했습니다. 시·군·구와 도로명·건물번호를 입력해 주세요.');
         if (addresses.length === 1) { await run(input, addresses[0], token); return; }
@@ -192,6 +199,28 @@ function syncBasket() {
 $('analysisType').innerHTML = Object.entries(labels).map(([type, label]) => `<option value="${type}">${label}</option>`).join('');
 const initialType = new URLSearchParams(location.search).get('type');
 $('analysisType').value = Object.hasOwn(labels, initialType) ? initialType : 'daycare'; renderCriteria();
+/** SOFTM-ANALYSIS-ORIGIN START 날짜:20260911 : 지도에서 온 위치를 우선하고 직접 진입은 현재 위치로 채우며 수동 입력을 보존 */
+originController = createOriginBinding({
+    locate: options => bounded(CareLocation.request(options), 36000),
+    describe: async point => { await loadSdk(); const address = await bounded(NaverGeocoder.reverseGeocode(point.lat, point.lng), 10000); return address?.fullAddress || address?.address || ''; },
+    changed: state => {
+        $('analysisLocate').disabled = state.phase === 'loading';
+        $('analysisRun').disabled = busy || state.phase === 'loading';
+        if (state.phase === 'ready') {
+            $('analysisAddress').value = state.label;
+            $('analysisOriginStatus').textContent = `${state.source === 'map' ? '지도에서 보고 있던 위치' : '현재 위치'}가 기본 적용됐습니다. 다른 곳을 원하면 주소를 바꿔 주세요.`;
+            if (!busy && !current) $('analysisStatus').textContent = '기준 위치가 준비됐습니다. 한 번에 분석을 눌러 주세요.'; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 기본값이 채워진 뒤 주소 재입력을 요구하는 안내를 남기지 않음
+        } else if (state.phase === 'loading') $('analysisOriginStatus').textContent = '기준 위치를 자동으로 확인하고 있습니다. 주소를 직접 입력해도 됩니다.';
+        else if (state.phase === 'error') $('analysisOriginStatus').textContent = `${state.error} 주소를 직접 입력하거나 현재 위치를 다시 눌러 주세요.`;
+        else $('analysisOriginStatus').textContent = '입력한 주소를 기준으로 분석합니다.';
+    }
+});
+$('analysisAddress').addEventListener('input', () => originController.clear());
+$('analysisLocate').onclick = () => { invalidate('현재 위치를 기준으로 분석할 준비를 합니다.'); $('analysisAddress').value = ''; void originController.locate(); };
+const savedPoint = readOrigin(storage, new URLSearchParams(location.search).get('origin'), $('analysisType').value);
+if (savedPoint) void originController.bind(savedPoint);
+else if (!$('analysisAddress').value.trim()) void originController.locate();
+/** SOFTM-ANALYSIS-ORIGIN END */
 $('analysisForm').addEventListener('submit', submit);
 $('analysisForm').addEventListener('input', () => { if (busy || current || !$('analysisAddressChoices').hidden) invalidate(); });
 $('analysisType').addEventListener('change', () => { invalidate(); renderCriteria(); });
@@ -206,6 +235,6 @@ $('analysisResults').addEventListener('click', event => {
     else if (button.dataset.analysisSave) { current.basket.toggle(button.dataset.analysisSave); syncBasket(); $('analysisStatus').textContent = `비교함에 ${current.basket.ids().length}곳을 담았습니다.`; }
     else if (button.dataset.analysisPhotos) { const row = current.report.nearby.find(entry => String(entry.row.i) === button.dataset.analysisPhotos)?.row; if (row) openComparison({ rows: [row], type: current.input.type, opener: button, title: `${row.n} 등록사진` }); }
 });
-window.addEventListener('pagehide', () => { generation++; if (busy) { setBusy(false); $('analysisStatus').textContent = '분석이 중단되었습니다. 입력 조건을 확인하고 다시 분석해 주세요.'; } });
+window.addEventListener('pagehide', () => { generation++; originController.cancel(); if (busy) { setBusy(false); $('analysisStatus').textContent = '분석이 중단되었습니다. 입력 조건을 확인하고 다시 분석해 주세요.'; } }); // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 화면 이탈 뒤 자동 위치 응답도 차단
 window.addEventListener('pageshow', () => { if (current) { current.basket = CareMapExperience.createBasket(storage, current.input.type); syncBasket(); } });
 /** SOFTM-CARE-ANALYSIS END */

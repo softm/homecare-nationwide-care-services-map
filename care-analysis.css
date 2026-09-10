@@ -13,3 +13,8 @@
 @media(max-width:800px){.analysis-inputs{grid-template-columns:1fr 1fr}.analysis-address{grid-column:1/-1}.analysis-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.analysis-intro h1{font-size:1.9rem}}
 @media(max-width:520px){.analysis-main{padding:22px 16px 40px}.analysis-top{padding:16px;align-items:flex-start}.analysis-top nav{gap:6px 12px;justify-content:flex-end}.analysis-brand{white-space:nowrap}.analysis-intro h1 br{display:block}.analysis-form{padding:18px}.analysis-inputs{gap:12px;grid-template-columns:1fr}.analysis-cards,.analysis-bars{grid-template-columns:1fr}.analysis-stats{gap:8px}.analysis-stats>div{padding-left:8px}.analysis-stats strong{font-size:1.5rem}.analysis-stats span{font-size:.8rem}.analysis-summary{padding:18px}.analysis-submit .analysis-primary{flex:1}.analysis-submit span{width:100%}.analysis-card .care-photo-image{height:190px}}
 /** SOFTM-CARE-ANALYSIS END */
+
+/** SOFTM-ANALYSIS-ORIGIN START 날짜:20260911 : 자동 연결된 위치의 출처와 재설정 버튼을 작은 화면에서도 함께 제공 */
+.analysis-origin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}.analysis-origin-row p{margin:0;flex:1}.analysis-origin-row button{flex-shrink:0;font-size:.9rem}.analysis-origin-row+.analysis-note{margin:6px 0}
+@media(max-width:520px){.analysis-origin-row{align-items:flex-start}.analysis-origin-row button{padding:8px 10px}}
+/** SOFTM-ANALYSIS-ORIGIN END */

@@ -6,25 +6,29 @@
 <meta name="description" content="거주지 주변 돌봄기관의 거리, 공개 평가, 특화서비스와 사진을 한 번에 살펴보고 상담할 기관을 정하세요.">
 <meta name="robots" content="noindex,follow">
 <!-- SOFTM-CARE-ANALYSIS START 날짜:20260911 : 집 주변의 선택 근거와 상담 준비를 한 화면에서 제공 -->
-<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-analysis.css?v=20260911-1">
+<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-analysis.css?v=20260911-binding1">
 <link rel="stylesheet" href="care-photos.css?v=20260911-gallery1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
 <script src="care-data.js" defer></script><script src="advanced-search.js" defer></script>
 <script src="region-bounds.js" defer></script><script src="viewport-regions.js" defer></script>
+<script src="care-location.js?v=20260911-binding1" defer></script><!-- SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 공용 현재 위치 요청으로 직접 진입의 기본값을 연결 -->
 <script src="naver-geocoder.js" defer></script><script src="nhis-static-data.js" defer></script>
 <script src="map-experience.js?v=20260911-analysis1" defer></script><script src="photo-viewer.js?v=20260911-gallery1" defer></script>
-<script type="module" src="care-analysis.js?v=20260911-1"></script>
+<script type="module" src="care-analysis.js?v=20260911-binding1"></script>
 <!-- SOFTM-CARE-ANALYSIS END -->
 </head>
 <body class="analysis-page">
 <!-- SOFTM-CARE-ANALYSIS START 날짜:20260911 : 질문 단계를 거치지 않고 생활권 분석을 바로 실행 -->
 <header class="analysis-top"><a href="index.html" class="analysis-brand">돌봄한눈</a><nav aria-label="주요 메뉴"><a href="nationwide-care-services-map.html?type=daycare" id="analysisMap">지도에서 찾기</a><a href="about.html">서비스 소개</a></nav></header>
 <main class="analysis-main">
-<div class="analysis-intro"><p>어디부터 알아볼지, 한눈에</p><h1>우리 집 주변 기관 <br>한 번에 분석</h1><p>주소와 돌봄 유형을 정하면 가까운 후보부터 기관별 차이, 상담 질문까지 정리해 드려요.</p></div>
+<div class="analysis-intro"><p>어디부터 알아볼지, 한눈에</p><h1>우리 집 주변 기관 <br>한 번에 분석</h1><p>기본 위치에서 돌봄 유형만 정하면 가까운 후보부터 기관별 차이, 상담 질문까지 정리해 드려요.</p></div>
 <form id="analysisForm" class="analysis-form">
 <div class="analysis-inputs"><label class="analysis-address">기준 주소<input id="analysisAddress" required maxlength="160" autocomplete="off" placeholder="예: 성남시 분당구 정자일로 95" aria-describedby="analysisAddressHelp"></label>
 <label>찾는 돌봄<select id="analysisType"><option value="daycare">주·야간보호센터</option></select></label>
 <label>집 주변 범위<select id="analysisRadius"><option value="1">직선 1km</option><option value="3" selected>직선 3km</option><option value="5">직선 5km</option><option value="10">직선 10km</option></select></label></div>
-<p id="analysisAddressHelp" class="analysis-note">도로명·건물번호까지 입력하면 정확해요. 입력한 집 주소는 공유 링크나 브라우저 저장소에 남기지 않습니다.</p>
+<!-- SOFTM-ANALYSIS-ORIGIN START 날짜:20260911 : 자동 위치의 출처와 직접 주소 변경을 함께 제공 -->
+<div class="analysis-origin-row"><p id="analysisOriginStatus" class="analysis-note" role="status">기준 위치를 자동으로 확인하고 있습니다.</p><button id="analysisLocate" type="button">현재 위치</button></div>
+<p id="analysisAddressHelp" class="analysis-note">다른 곳을 분석하려면 도로명·건물번호를 입력해 주세요.</p>
+<!-- SOFTM-ANALYSIS-ORIGIN END -->
 <details class="analysis-preferences"><summary>함께 확인하고 싶은 조건 <span id="analysisPreferenceCount">선택 안 함</span></summary><p>원하는 항목만 고르세요. 조건을 고르지 않아도 거리·공개정보·상담 질문을 함께 분석합니다.</p><fieldset id="analysisCriteria"><legend class="analysis-sr">희망 조건</legend></fieldset></details>
 <div class="analysis-submit"><button id="analysisRun" class="analysis-primary" type="submit">한 번에 분석</button><button id="analysisCancel" type="button" hidden>분석 취소</button><span>이동시간·송영·빈자리는 기관에 확인해요.</span></div>
 </form>
