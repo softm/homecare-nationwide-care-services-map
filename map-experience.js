@@ -563,7 +563,7 @@
         const photoCache = new Map();
         const photoObserver = new IntersectionObserver(entries => {
             for (const entry of entries) {
-                if (!entry.isIntersecting || !media.matches) continue;
+                if (!entry.isIntersecting) continue; // SOFTM-DESKTOP-LIST-PHOTO 날짜:20260910 : PC에서도 화면에 들어온 기관 카드부터 대표사진을 불러와 초기 부하를 제한
                 const row = entry.target; photoObserver.unobserve(row);
                 const id = row.dataset.id || row.querySelector('[data-care-basket]')?.dataset.careBasket;
                 if (!id || options.type === 'nursing-hospital') continue;
