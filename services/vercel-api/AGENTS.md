@@ -26,3 +26,5 @@
 3. `npm run check`를 실행한다.
 4. Vercel 연결이 필요하면 `.vercel/project.json`을 새 프로젝트 기준으로 생성한다.
 5. 배포 후 프런트엔드 두 프로젝트의 기존 API 기준 주소를 새 주소로 교체하고 브라우저에서 전체 흐름을 검수한다.
+
+- 길찾기 완료 전 `node scripts/check-directions-readiness.mjs`로 공개 서버가 `https://homecare.designboard.net` Origin을 허용하고 실제 도로경로를 반환하는지 확인한다. 소스의 CORS 설정만으로 배포 완료를 판단하지 않으며, 통신 실패와 서버 오류는 사용자가 원인을 구분할 수 있는 문구로 표시한다. <!-- SOFTM-DIRECTIONS-READINESS 날짜:20260905 : 길찾기 서버의 코드·배포 불일치와 원인을 알 수 없는 오류 재발 방지 -->
