@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { gunzipSync } from 'node:zlib';
 import { classify, filterRows, mapUrl, photoUrl, readJson } from '../care-photos-common.js';
+import { visibleMarkerIds, saveScope, readScope, scopedRows } from '../care-photo-scope.js';
 
 test('제목 분류는 명시한 공간만 분류하고 미상·행사 사진을 기타로 유지', () => {
     for (const [title, group] of [['생활실','생활공간'],['생활실 화장실','위생'],['시설 전경','외관'],['정원','외관'],['인지 프로그램','프로그램/재활'],['물리치료실','프로그램/재활'],['식당','식사'],['생신잔치','기타'],['','기타']]) assert.equal(classify(title), group);
@@ -88,5 +89,30 @@ test('지도 초기 선택은 사용자가 새 조회를 시작하면 늦은 응
     vm.runInContext(code,context);vm.runInContext("initialPhotoEntry={i:'1'}",context);
     const task=vm.runInContext('openInitialPhotoInstitution()',context);current=false;finish({});await task;
     assert.equal(focused,0);
+});
+test('현재 화면 안에서 지도에 연결된 마커만 사진 기본 범위로 사용', () => {
+    const map={getBounds:()=>({hasLatLng:point=>point.inside})};
+    const marker=(shown,inside)=>({getMap:()=>shown?map:null,getPosition:()=>({inside})});
+    const entries=[['1',marker(true,true)],['2',marker(false,true)],['3',marker(true,false)],['1',marker(true,true)]];
+    assert.deepEqual(visibleMarkerIds(map,entries),['1']);
+    assert.deepEqual(visibleMarkerIds(null,entries),[]);
+});
+test('지도 범위를 세션으로 전달하며 빈 집합과 손실된 범위를 전국으로 대체하지 않음', () => {
+    const data=new Map(), storage={setItem:(k,v)=>data.set(k,v),getItem:k=>data.get(k)};
+    const token=saveScope(storage,{type:'daycare',ids:['2','2'],source:'nationwide-daycare-map.html?share=1'},'test-token');
+    const scope=readScope(storage,token); assert.deepEqual(scope.ids,['2']);
+    const rows=[{i:'1',n:'같은기관'},{i:'2',n:'같은기관'}];
+    assert.deepEqual(scopedRows(rows,scope),[rows[1]]);
+    assert.deepEqual(scopedRows(rows,{ids:[]}),[]);
+    assert.deepEqual(scopedRows(rows,readScope(storage,'missing')),[]);
+    assert.equal(readScope(null,token),null);
+    assert.throws(()=>saveScope(null,{type:'daycare',ids:[],source:'nationwide-daycare-map.html'},'test-token'));
+});
+test('범위 재전달은 이전 사진 페이지의 집합을 덮어쓰지 않으며 외부 복귀 URL을 거부', () => {
+    const data=new Map(), storage={setItem:(k,v)=>data.set(k,v),getItem:k=>data.get(k)};
+    saveScope(storage,{type:'daycare',ids:['1'],source:'nationwide-care-services-map.html'},'first');
+    saveScope(storage,{type:'daycare',ids:['2'],source:'nationwide-care-services-map.html'},'second');
+    assert.deepEqual(readScope(storage,'first').ids,['1']);assert.deepEqual(readScope(storage,'second').ids,['2']);
+    saveScope(storage,{type:'daycare',ids:['1'],source:'https://other.example/'},'bad');assert.equal(readScope(storage,'bad'),null);
 });
 /** SOFTM-PHOTO-TEST END */
