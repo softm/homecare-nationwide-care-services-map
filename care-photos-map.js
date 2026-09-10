@@ -1,3 +1,4 @@
+import { searchTools } from './search-tools.js?v=20260911-1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
 /** SOFTM-PHOTO-MAP START 날짜:20260910 : 두 지도의 현재 검색조건과 담은 기관 순서를 공용 사진 탐색·비교에 전달 */
 import { openComparison } from './care-photos-common.js?v=20260910-1';
 import { saveScope, visibleMarkerIds } from './care-photo-scope.js?v=20260910-1';
@@ -9,7 +10,7 @@ function mount() {
     const link = document.createElement('a'); link.className = 'care-photo-map-entry';
     link.setAttribute('aria-labelledby', 'carePhotoEntryTitle');
     link.setAttribute('aria-describedby', 'carePhotoEntryHint');
-    link.innerHTML = `<span class="care-photo-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg></span><span class="care-photo-entry-copy"><strong id="carePhotoEntryTitle">사진으로 기관 찾기</strong><span id="carePhotoEntryHint">현재 지도에 표시된 기관</span></span><span class="care-photo-entry-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>`;
+    link.innerHTML = `<span class="care-photo-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg></span><span class="care-photo-entry-copy"><strong id="carePhotoEntryTitle">사진으로 찾기</strong><span id="carePhotoEntryHint">현재 지도에 표시된 기관</span></span><span class="care-photo-entry-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>`;
     /** SOFTM-PHOTO-ENTRY-BUTTON END */
     /** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 지역명 재검색 대신 클릭 시점의 표시 마커를 세션으로 넘겨 긴 URL과 범위 확대를 방지 */
     link.href = `care-photos.html?${new URLSearchParams({ type, scope: 'map' })}`;
@@ -39,7 +40,7 @@ function mount() {
     link.addEventListener('contextmenu', updateLink);
     /** SOFTM-PHOTO-MAP-SCOPE END */
     const heading = document.querySelector('.results .list-head,.results .result-head');
-    if (heading) heading.after(link);
+    if (heading) searchTools(heading).append(link); // SOFTM-SEARCH-TOOLS 날짜:20260911 : 사진 찾기를 목록을 가리지 않는 공용 도구로 이동
     else document.querySelector('.results').prepend(link);
     link.after(status);
     const button = document.createElement('button'); button.type = 'button'; button.textContent = '사진 비교';

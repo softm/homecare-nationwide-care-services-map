@@ -1,0 +1,17 @@
+/** SOFTM-SEARCH-TOOLS START 날짜:20260911 : 큰 배너 세 줄을 같은 높이의 도구 한 줄로 압축해 기관 목록 우선 표시 */
+.care-map-page .care-search-tools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:10px 12px; border-bottom:1px solid #e1e8ef; flex:none; }
+.care-map-page .care-search-tools .care-match-panel { display:contents; }
+.care-map-page .care-search-tools .care-match-start,
+.care-map-page .care-search-tools .care-photo-map-entry,
+.care-map-page .care-search-tools .care-analysis-entry { display:flex; align-items:center; justify-content:center; box-sizing:border-box; width:100%; min-width:0; min-height:44px; margin:0; padding:8px 4px!important; border:1px solid #ccdaea!important; border-radius:8px; background:#f5f8fc!important; color:#254f7b!important; box-shadow:none; font-size:13px; font-weight:700; text-align:center; text-decoration:none; gap:0; }
+.care-map-page .care-search-tools .care-match-start { order:0; }
+.care-map-page .care-search-tools .care-photo-map-entry { order:1; }
+.care-map-page .care-search-tools .care-analysis-entry { order:2; }
+.care-search-tools .care-match-start-action,.care-search-tools .care-photo-entry-icon,.care-search-tools .care-photo-entry-arrow,.care-search-tools .care-photo-entry-copy > span { display:none; }
+.care-search-tools .care-photo-entry-copy strong { font-size:13px; color:inherit; }
+.care-search-tools .care-match-summary,.care-search-tools .care-photo-map-status { grid-column:1/-1; order:3; margin:0; }
+.care-search-tools .care-photo-map-status:empty { display:none; }
+.care-map-page .results .list-head,.care-map-page .results .result-head { min-height:48px; padding:6px 12px; gap:6px; }
+.care-map-page .results .select-tools { margin:0; padding:2px 12px; border-radius:0; background:#fff; }
+@media(max-width:480px) { .care-map-page .care-search-tools { gap:6px; padding:8px; } }
+/** SOFTM-SEARCH-TOOLS END */
