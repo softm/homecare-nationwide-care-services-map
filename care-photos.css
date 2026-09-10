@@ -85,3 +85,27 @@
 @media(max-width:1000px){.care-photo-grid[data-mode="gallery"]{grid-template-columns:repeat(3,minmax(0,1fr))}.care-photo-grid[data-mode="dense"]{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:600px){.care-photo-grid[data-mode="gallery"],.care-photo-grid[data-mode="dense"]{grid-template-columns:repeat(2,minmax(0,1fr))}.care-photo-grid[data-mode="gallery"]{gap:12px}.care-photo-grid[data-mode="dense"]{gap:6px}.care-photo-grid[data-mode="large"]{grid-template-columns:1fr}.care-photo-modes{width:100%;gap:2px}.care-photo-modes button{padding:7px 4px;font-size:12px;flex:1}.care-photo-modes span{margin-right:2px;font-size:16px}.care-photo-tile .care-photo-card-actions{flex-direction:column}.care-photo-gallery-errors{align-items:stretch;flex-direction:column}}
 /** SOFTM-PHOTO-GALLERY END */
+
+/** SOFTM-PHOTO-WALL START 날짜:20260911 : 사진 아래 반복 설명을 줄이고 원본 비율의 사진과 필요한 행동에 집중 */
+.care-photo-page{background:#fff}.care-photo-main,.care-photo-top{max-width:1600px}
+.care-photo-main{padding-top:20px}.care-photo-intro .care-photo-eyebrow{display:none}.care-photo-intro h1{font-size:28px;margin:0 0 6px}.care-photo-intro>p:last-child{font-size:14px}
+.care-photo-filters{margin:16px 0;padding:14px;border-radius:10px}.care-photo-scope{margin-top:16px;padding:8px 12px}.care-photo-note{font-size:12px;margin:8px 0 14px}.care-photo-viewbar{margin-bottom:20px}
+.care-photo-grid:is([data-mode="gallery"],[data-mode="dense"]){display:block;position:relative}
+.care-photo-grid:is([data-mode="gallery"],[data-mode="dense"])>.care-photo-tile{position:absolute}
+.care-photo-grid .care-photo-tile{border:0;border-radius:4px;background:#edf3f9;position:relative;overflow:hidden}
+.care-photo-grid .care-photo-tile .care-photo-image img{aspect-ratio:auto;height:auto;max-height:none;min-height:0;object-fit:contain}
+.care-photo-tile .care-photo-image img:not([src]){aspect-ratio:4/3}
+.care-photo-grid .care-photo-tile .care-photo-card-body{position:absolute;inset:auto 0 0;padding:38px 12px 12px;background:linear-gradient(transparent,rgba(0,0,0,.8) 45%);color:#fff;opacity:0;pointer-events:none;transition:opacity .15s;max-height:100%;overflow:auto}
+.care-photo-tile:hover .care-photo-card-body,.care-photo-tile:focus-within .care-photo-card-body{opacity:1!important;pointer-events:none!important}
+.care-photo-grid .care-photo-tile h3{color:#fff;font-size:14px;margin:0;text-shadow:0 1px 3px #000;line-height:1.4}
+.care-photo-grid .care-photo-tile .care-photo-card-actions{display:flex;flex-direction:row;gap:6px;margin-top:8px}
+.care-photo-grid .care-photo-tile .care-photo-card-actions>*{flex:none;color:#fff;background:#172c43b3;border:1px solid #ffffff70;font-size:12px;padding:7px 10px;min-height:36px}
+.care-photo-grid .care-photo-tile button[aria-pressed="true"]{background:#175cb5;border-color:#8fc5ff}
+.care-photo-tile-info{font-size:12px;margin-top:6px}.care-photo-tile-info summary{cursor:pointer;width:fit-content;padding:4px 0}.care-photo-tile-info p{color:#fff;margin:4px 0 0;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+.care-photo-tile:has(.care-photo-image-error:not([hidden])) .care-photo-card-body{position:static;background:#20374a;opacity:1;pointer-events:auto;padding:12px}
+.care-photo-tile .care-photo-card-actions,.care-photo-tile-info{pointer-events:auto}
+.care-photo-tile .care-photo-image:focus-visible{outline-offset:-4px}
+@media(hover:none),(pointer:coarse),(max-width:600px){.care-photo-grid .care-photo-tile .care-photo-card-body{opacity:1;pointer-events:none;padding:24px 8px 8px;max-height:75%}.care-photo-grid .care-photo-tile h3{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.care-photo-grid .care-photo-tile .care-photo-card-actions{gap:4px;margin-top:4px}.care-photo-grid .care-photo-tile .care-photo-card-actions>*{font-size:11px;padding:6px;min-height:44px}.care-photo-tile-info summary{min-height:32px}.care-photo-tile-info:not([open]){position:absolute;top:0;right:6px}.care-photo-tile-info:not([open]) summary{font-size:10px;background:#172c43c9;border-radius:4px;padding:5px}}
+@media(max-width:600px){.care-photo-main{padding:16px 12px 32px}.care-photo-intro h1{font-size:24px}.care-photo-intro>p:last-child{display:none}.care-photo-result-head h2{font-size:20px}.care-photo-scope{margin-top:12px}.care-photo-viewbar p{display:none}}
+@media(prefers-reduced-motion:reduce){.care-photo-grid .care-photo-tile .care-photo-card-body{transition:none}}
+/** SOFTM-PHOTO-WALL END */

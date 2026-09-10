@@ -3,6 +3,8 @@ import { escapeHtml, readJson, filterRows, mapUrl, thumbnail, openComparison } f
 import { readScope, scopedRows } from './care-photo-scope.js?v=20260910-1';
 import { createGallery } from './care-photo-gallery.js?v=20260911-1'; // SOFTM-PHOTO-GALLERY 날짜:20260911 : 기관 사진 요청량을 제한하는 공용 로더 사용
 const $ = id => document.getElementById(id);
+import { mountMasonry } from './care-photo-masonry.js?v=20260911-1'; // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 비율과 화면 폭에 맞춰 빈 공간을 채움
+mountMasonry($('photoResults')); // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 추가·모드 변경·이미지 복구 시 같은 배치를 갱신
 const labels = { facility: '요양원·공동생활가정', daycare: '주·야간보호센터', 'home-care': '방문요양센터', 'home-nursing': '방문간호센터', 'home-bath': '방문목욕기관', 'short-stay': '단기보호센터', 'welfare-equipment': '복지용구사업소', dementia: '치매전담형 기관', 'nursing-hospital': '요양병원' };
 const initial = new URLSearchParams(location.search);
 $('photoType').innerHTML = Object.entries(labels).map(([id, label]) => `<option value="${id}">${label}</option>`).join('');
@@ -38,7 +40,7 @@ function syncBasket() {
     $('photoCompare').disabled = !ids.length;
     document.querySelectorAll('[data-photo-save]').forEach(button => {
         const saved = basket.has(button.dataset.photoSave);
-        button.setAttribute('aria-pressed', String(saved)); button.textContent = saved ? '✓ 비교에 담음' : '+ 비교에 담기';
+        button.setAttribute('aria-pressed', String(saved)); button.textContent = button.hasAttribute('data-photo-compact') ? (saved ? '✓ 담음' : '+ 담기') : (saved ? '✓ 비교에 담음' : '+ 비교에 담기'); // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 위 담기는 작은 버튼으로 유지
     });
 }
 function writeUrl() {
@@ -59,7 +61,9 @@ function render({ append = false } = {}) {
         const imageButton = figure.querySelector('.care-photo-image');
         imageButton.tabIndex = 0; imageButton.dataset.photoOpen = row.i; imageButton.setAttribute('aria-label', `${row.n} 사진 보기`);
         const body = document.createElement('div'); body.className = 'care-photo-card-body';
-        body.innerHTML = `<h3>${escapeHtml(row.n)}</h3><p>${escapeHtml(row.a)}</p><p class="care-photo-count">등록사진 ${summary.count}장</p><div class="care-photo-card-actions"><button type="button" data-photo-open="${escapeHtml(row.i)}">사진 보기</button><a href="${escapeHtml(mapUrl(type, row))}" rel="nofollow">지도에서 보기</a><button type="button" data-photo-save="${escapeHtml(row.i)}" aria-pressed="false">+ 비교에 담기</button></div>`;
+        body.innerHTML = `<h3>${escapeHtml(row.n)}</h3><p>${escapeHtml(row.a)}</p><p class="care-photo-count">등록사진 ${summary.count}장</p><div class="care-photo-card-actions"><button type="button" data-photo-open="${escapeHtml(row.i)}">사진 보기</button><a href="${escapeHtml(mapUrl(type, row))}" rel="nofollow">지도에서 보기</a><button type="button" data-photo-save="${escapeHtml(row.i)}" data-photo-compact aria-label="${escapeHtml(row.n)} 비교에 담기" aria-pressed="false">+ 담기</button></div>`;
+        body.append(info);
+        /** SOFTM-PHOTO-WALL END */
         card.append(figure, body); host.append(card);
     }
     $('photoStatus').textContent = type === 'nursing-hospital' ? '요양병원은 공단 등록사진 제공 대상이 아닙니다.' : matches.length ? `${matches.length.toLocaleString()}곳 중 ${Math.min(limit, matches.length)}곳 표시 · 기관명순` : '조건에 맞는 사진 등록 기관이 없습니다.';
@@ -72,7 +76,7 @@ function render({ append = false } = {}) {
     syncBasket();
 }
 /** SOFTM-PHOTO-GALLERY START 날짜:20260911 : 레이아웃 전환은 이미 읽은 사진을 재사용하고 검색 변경은 이전 응답을 분리 */
-const modeHints = { gallery: '여러 기관의 사진을 모아 봅니다. 사진을 누르면 크게 볼 수 있습니다.', dense: '많은 사진을 한눈에 훑어보세요. 사진을 누르면 원래 비율로 크게 볼 수 있습니다.', large: '공간을 자세히 살펴보세요. 사진의 원래 비율을 유지합니다.', institutions: '기관별 대표사진과 주소를 보고 관심 기관을 담아 보세요.' };
+const modeHints = { gallery: '사진을 누르면 크게 볼 수 있습니다. 기관명과 담기는 사진 위에서 확인하세요.', dense: '많은 사진을 한눈에 훑어보세요. 사진을 누르면 원래 비율로 크게 볼 수 있습니다.', large: '공간을 자세히 살펴보세요. 사진의 원래 비율을 유지합니다.', institutions: '기관별 대표사진과 주소를 보고 관심 기관을 담아 보세요.' };
 let savedMode; try { savedMode = storage?.getItem('carePhotoView:v1'); } catch {}
 let mode = Object.hasOwn(modeHints, initial.get('mode')) ? initial.get('mode') : Object.hasOwn(modeHints, savedMode) ? savedMode : 'gallery';
 let gallery = null, galleryBusy = false;
@@ -91,9 +95,22 @@ function renderGallery() {
         const card = document.createElement('article'); card.className = 'care-photo-card care-photo-tile'; card.dataset.photoKey = key;
         const figure = thumbnail(photo, { viewer: true });
         const trigger = figure.querySelector('button'); trigger.dataset.photoInstitution = row.n;
+        /** SOFTM-PHOTO-WALL START 날짜:20260911 : 지연 이미지가 오기 전에도 높이를 예약해 전체 사진 동시 요청을 방지 */
+        const image = figure.querySelector('img'); image.style.aspectRatio = '4 / 3';
+        const size = () => { if (image.naturalWidth && image.naturalHeight) image.style.aspectRatio = `${image.naturalWidth} / ${image.naturalHeight}`; };
+        image.addEventListener('load', size); if (image.complete) size();
+        /** SOFTM-PHOTO-WALL END */
         trigger.setAttribute('aria-label', `${row.n} · ${photo.title || '등록사진'} 크게 보기`);
         const body = document.createElement('div'); body.className = 'care-photo-card-body';
-        body.innerHTML = `<h3>${escapeHtml(row.n)}</h3><div class="care-photo-card-actions"><a href="${escapeHtml(mapUrl(type, row))}" rel="nofollow">지도 보기</a><button type="button" data-photo-save="${escapeHtml(row.i)}" aria-pressed="false">+ 비교에 담기</button></div>`;
+        /** SOFTM-PHOTO-WALL START 날짜:20260911 : 긴 설명은 사진 위 정보 펼침으로 옮겨 사진 탐색 밀도를 유지 */
+        const caption = figure.querySelector('figcaption');
+        const info = document.createElement('details'); info.className = 'care-photo-tile-info';
+        const toggle = document.createElement('summary'); toggle.textContent = '사진 정보';
+        const detail = document.createElement('p'); detail.textContent = caption.textContent;
+        info.append(toggle, detail); caption.remove();
+        body.innerHTML = `<h3>${escapeHtml(row.n)}</h3><div class="care-photo-card-actions"><a href="${escapeHtml(mapUrl(type, row))}" rel="nofollow">지도 보기</a><button type="button" data-photo-save="${escapeHtml(row.i)}" data-photo-compact aria-label="${escapeHtml(row.n)} 비교에 담기" aria-pressed="false">+ 담기</button></div>`;
+        body.append(info);
+        /** SOFTM-PHOTO-WALL END */
         card.append(figure, body); host.append(card);
     }
     const total = matches.reduce((sum, row) => sum + summaries[row.i].count, 0);
