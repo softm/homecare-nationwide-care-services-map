@@ -61,3 +61,34 @@ test('광고 미노출만 제휴 배너로 대체하고 표시 광고·이전 �
     assert.deepEqual([empty.innerHTML, shown.innerHTML, detached.innerHTML], ['partner', 'ad', 'old']);
 });
 /** SOFTM-SHORT-LIST-AD END */
+/** SOFTM-SEARCH-LIST-SCROLL START 날짜:20260910 : 빠른 끝 스크롤과 광고 간격에서도 가시 기관 강조가 남는지 회귀 검사 */
+function searchListPicker() {
+    const code = fs.readFileSync(new URL('../map-experience.js', import.meta.url), 'utf8');
+    const start = code.indexOf('    function pickSearchScrollRow');
+    const end = code.indexOf('    /** SOFTM-SEARCH-LIST-SCROLL END */', start);
+    const context = {};
+    vm.createContext(context);
+    vm.runInContext(code.slice(start, end), context);
+    return context.pickSearchScrollRow;
+}
+const fakeRow = (name, top, bottom) => ({ name, getBoundingClientRect: () => ({ top, bottom }) });
+test('기관 목록을 광고 뒤 맨 끝으로 한 번에 내려도 마지막으로 보이는 기관을 강조한다', () => {
+    const pick = searchListPicker();
+    const rows = [fakeRow('첫 기관', -10, 210), fakeRow('둘째 기관', 210, 431), fakeRow('마지막 기관', 431, 631)];
+    const row = pick(rows, { top: 589, bottom: 786 }, { scrollTop: 599, clientHeight: 197, scrollHeight: 796 });
+    assert.equal(row.name, '마지막 기관');
+    const fractionalEnd = pick(rows, { top: 589, bottom: 786 }, { scrollTop: 597.5, clientHeight: 197, scrollHeight: 796 });
+    assert.equal(fractionalEnd.name, '마지막 기관');
+});
+test('기관 목록의 일반 스크롤과 맨 위에서는 현재 기준선 기관과 첫 기관을 선택한다', () => {
+    const pick = searchListPicker();
+    const rows = [fakeRow('첫 기관', 100, 250), fakeRow('둘째 기관', 250, 400), fakeRow('셋째 기관', 400, 550)];
+    assert.equal(pick(rows, { top: 200, bottom: 500 }, { scrollTop: 120, clientHeight: 300, scrollHeight: 900 }).name, '둘째 기관');
+    assert.equal(pick(rows, { top: 100, bottom: 500 }, { scrollTop: 0, clientHeight: 400, scrollHeight: 900 }).name, '첫 기관');
+});
+test('기관이 보이지 않는 중간 광고 구간에서는 이전 강조를 바꾸지 않는다', () => {
+    const pick = searchListPicker();
+    const rows = [fakeRow('위 기관', 10, 90), fakeRow('아래 기관', 510, 650)];
+    assert.equal(pick(rows, { top: 200, bottom: 500 }, { scrollTop: 300, clientHeight: 300, scrollHeight: 1000 }), null);
+});
+/** SOFTM-SEARCH-LIST-SCROLL END */
