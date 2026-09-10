@@ -136,7 +136,7 @@
         photos = items;
         current = index;
         opener = trigger;
-        const institution = gallery.closest('.detail-sheet,.popup')?.querySelector('h3')?.textContent.trim();
+        const institution = gallery.dataset.photoInstitution || gallery.closest('.detail-sheet,.popup')?.querySelector('h3')?.textContent.trim(); // SOFTM-PHOTO-INSTITUTION 날짜:20260910 : 비교창에서도 확대 사진의 소속 기관을 명확히 표시
         dialog.querySelector('#photoViewerInstitution').textContent = institution || '공단 등록사진';
         document.documentElement.classList.add('photo-viewer-open');
         if (!dialog.open) dialog.showModal();

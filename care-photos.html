@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>사진으로 기관 찾기 | 돌봄한눈</title>
+<meta name="description" content="공단 등록사진으로 지역별 돌봄기관을 찾아보고 관심 기관의 공간을 비교하세요.">
+<meta name="robots" content="noindex,follow">
+<!-- SOFTM-PHOTO-EXPLORE START 날짜:20260910 : 기존 검색 대표 페이지와 구분한 사진 탐색 도구를 제공 -->
+<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260910-1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
+<script src="care-data.js" defer></script><script src="nhis-static-data.js" defer></script><script src="map-experience.js?v=20260910-photos1" defer></script><script src="photo-viewer.js?v=20260910-photos1" defer></script>
+<script type="module" src="care-photos.js?v=20260910-1"></script>
+<!-- SOFTM-PHOTO-EXPLORE END -->
+</head>
+<body class="care-photo-page">
+<!-- SOFTM-PHOTO-EXPLORE START 날짜:20260910 : 보호자가 사진 탐색에서 기존 비교함으로 이어갈 수 있는 작업 화면 -->
+<header class="care-photo-top"><a href="index.html" class="care-photo-brand">돌봄한눈</a><nav aria-label="주요 메뉴"><a href="nationwide-care-services-map.html?type=daycare" id="photoMapLink">지도에서 찾기</a><a href="about.html">서비스 소개</a></nav></header>
+<main class="care-photo-main">
+<div class="care-photo-intro"><p class="care-photo-eyebrow">공간을 살펴보고, 방문을 준비하세요</p><h1>사진으로 기관 찾기</h1><p>공단에 등록된 사진을 살펴보고 관심 있는 기관을 담아 비교하세요.</p></div>
+<form id="photoSearch" class="care-photo-filters">
+<label>기관 유형<select id="photoType" name="type"><option value="daycare">주·야간보호센터</option></select></label>
+<label>시·도<select id="photoProvince" name="p"><option value="">전국</option></select></label>
+<label>시·군·구<select id="photoCity" name="c"><option value="">전체</option></select></label>
+<label class="care-photo-query">기관명<input id="photoQuery" name="q" type="search" placeholder="기관 이름을 입력하세요" autocomplete="off"></label><button type="submit" class="care-photo-primary">찾기</button>
+</form>
+<div class="care-photo-result-head"><div><h2>사진이 있는 기관</h2><p id="photoStatus" role="status" aria-live="polite">기관 자료를 불러오고 있습니다.</p></div><button type="button" id="photoCompare" disabled>담은 기관 사진 비교 <span id="photoSavedCount">0</span></button></div>
+<p id="photoNotice" class="care-photo-note">사진은 현재 시설 상태와 다를 수 있습니다. 등록일은 촬영일과 구분하며, 사진 수는 수집된 자료 기준입니다.</p>
+<div id="photoResults" class="care-photo-grid" aria-busy="true"></div>
+<button type="button" id="photoRetry" hidden>자료 다시 불러오기</button>
+<div class="care-photo-more"><button type="button" id="photoMore" hidden>24곳 더 보기</button></div>
+<p id="photoAnnouncement" class="care-photo-sr" role="status" aria-live="polite"></p>
+<noscript>사진 탐색에는 자바스크립트가 필요합니다. <a href="daycare-map.html">주야간보호 안내 보기</a></noscript>
+</main>
+<footer class="care-photo-footer">공공자료 기반 독립 정보 서비스 · <a href="about.html">자료 출처와 서비스 소개</a></footer>
+<!-- SOFTM-PHOTO-EXPLORE END -->
+</body></html>

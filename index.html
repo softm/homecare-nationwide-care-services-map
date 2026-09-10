@@ -128,7 +128,8 @@
     /** SOFTM-AD-FIT START 날짜:20260904 : 320px 화면에서도 승인된 모바일 광고를 축소하거나 양옆을 자르지 않도록 실제 너비를 확보 */
     @media(max-width:799px){.ad-zone{width:100vw;max-width:none;margin-inline:calc((100% - 100vw)/2);padding-inline:0;border-inline:0;border-radius:0}.ad-label{margin-inline:16px}.house-banner{width:calc(100% - 32px)}}
     /** SOFTM-AD-FIT END */
-  </style>
+  .home-nav:has(a[href="care-photos.html"]){flex-wrap:wrap;column-gap:16px;row-gap:0} /* SOFTM-PHOTO-NAV 날짜:20260910 : 사진 탐색 메뉴가 작은 화면에서도 겹치지 않도록 줄바꿈 허용 */
+</style>
 <link rel="stylesheet" href="seo-entrypoints.css?v=20260904-1"> <!-- SOFTM-SEO-ENTRYPOINTS 날짜:20260904 : 지역 탐색 링크를 작은 화면에서도 읽고 선택할 수 있도록 전용 서식을 연결 -->
 </head>
 <body>
@@ -136,7 +137,7 @@
   <a class="skip-link" href="#main">본문으로 바로가기</a>
   <header class="home-head"><div class="home-head-inner">
     <a class="home-brand" href="index.html"><span class="brand-symbol"><svg class="care-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="m5 14 11-9 11 9v13H5Z"/><path d="M16 23s-6-3.8-6-7a3.3 3.3 0 0 1 6-1.8 3.3 3.3 0 0 1 6 1.8c0 3.2-6 7-6 7Z"/></svg></span>돌봄한눈</a>
-    <nav class="home-nav" aria-label="주요 메뉴"><a href="#categories">기관 찾기</a><a href="#cost-guide">비용 안내</a><a class="about-nav" href="about.html">서비스 소개</a></nav>
+    <nav class="home-nav" aria-label="주요 메뉴"><a href="#categories">기관 찾기</a><a href="#cost-guide">비용 안내</a><a class="about-nav" href="about.html">서비스 소개</a><a href="care-photos.html">사진으로 찾기</a><!-- SOFTM-PHOTO-ENTRY 날짜:20260910 : 시설 사진으로 기관을 고르는 탐색 경로 제공 --></nav>
   </div></header>
   <!-- SOFTM-HOME-NAV END -->
   <main class="wrap" id="main">

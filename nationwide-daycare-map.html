@@ -69,6 +69,10 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <link rel="stylesheet" href="care-match.css?v=20260910-1"> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문과 기관별 선택 근거의 공용 화면을 연결 -->
 <link rel="stylesheet" href="map-experience.css?v=20260910-brief2"> <!-- SOFTM-WORKSPACE-NO-BACK 날짜:20260910 : 이전 칸을 제거한 하단 탭 배치를 이전 캐시 없이 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
+<!-- SOFTM-PHOTO-MAP START 날짜:20260910 : 기존 비교함과 사진 탐색을 같은 기관 순서로 연결 -->
+<link rel="stylesheet" href="care-photos.css?v=20260910-1">
+<script type="module" src="care-photos-map.js?v=20260910-1"></script>
+<!-- SOFTM-PHOTO-MAP END -->
 </head>
 <body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급을 구분하고 자료 설명을 쉽게 제공 -->
@@ -122,7 +126,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="care-location.js?v=20260909-1"></script> <!-- SOFTM-MOBILE-ASSETS 날짜:20260909 : 모바일 지도·목록과 위치 팝업 변경을 이전 캐시 없이 적용 -->
 <script src="naver-geocoder.js?v=20260905-3"></script> <!-- SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도에 법정동 상세주소 보완을 함께 적용 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
-<script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
+<script src="photo-viewer.js?v=20260910-photos1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260910 : 공용 확대창에서 비교 중인 사진의 소속 기관도 표시 -->
 <script src="advanced-search.js?v=20260910-match1"></script><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 전국 요양과 동일한 상세검색 판정을 사용 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 특화 판정 연결을 최신 버전으로 함께 적용 -->
 <script src="map-share-state.js?v=20260905-1"></script> <!-- SOFTM-SHARE-COMPACT 날짜:20260905 : 기존 긴 공유 주소도 조회조건 해석과 지도 인증 전에 짧게 변환 -->
 <script src="care-data.js?v=20260904-data"></script> <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 전국 요양과 같은 수집 JSON을 공유 -->

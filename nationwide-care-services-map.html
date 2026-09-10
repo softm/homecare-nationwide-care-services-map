@@ -61,6 +61,10 @@
 <link rel="stylesheet" href="care-match.css?v=20260910-1"> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문과 기관별 선택 근거의 공용 화면을 연결 -->
 <link rel="stylesheet" href="map-experience.css?v=20260910-brief2"> <!-- SOFTM-WORKSPACE-NO-BACK 날짜:20260910 : 이전 칸을 제거한 하단 탭 배치를 이전 캐시 없이 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
+<!-- SOFTM-PHOTO-MAP START 날짜:20260910 : 기존 비교함과 사진 탐색을 같은 기관 순서로 연결 -->
+<link rel="stylesheet" href="care-photos.css?v=20260910-1">
+<script type="module" src="care-photos-map.js?v=20260910-1"></script>
+<!-- SOFTM-PHOTO-MAP END -->
 </head>
 <body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
 <header class="page-head"><div class="head-row"><div><h1 id="pageTitle">전국 주야간보호센터 지도</h1><p>돌봄한눈에서 현재 위치를 기준으로 공개 기관정보·평가·인력을 조회합니다.</p></div><a class="legacy-link" href="index.html">돌봄한눈 홈</a></div></header>
@@ -106,7 +110,7 @@
 <script src="care-location.js?v=20260909-1"></script> <!-- SOFTM-MOBILE-ASSETS 날짜:20260909 : 모바일 지도·목록과 위치 팝업 변경을 이전 캐시 없이 적용 -->
 <script src="naver-geocoder.js?v=20260905-3"></script> <!-- SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도에 법정동 상세주소 보완을 함께 적용 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
-<script src="photo-viewer.js?v=20260904-1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260904 : 사진 클릭과 탐색을 공용 확대창으로 연결 -->
+<script src="photo-viewer.js?v=20260910-photos1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260910 : 공용 확대창에서 비교 중인 사진의 소속 기관도 표시 -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <script src="advanced-search.js?v=20260910-match1"></script><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공단 제공 서비스와 설립주체의 공통 판정을 로드 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 특화 판정 연결을 최신 버전으로 함께 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 공식 수가 계산과 세션 비교함을 같은 공용 모듈로 연결 -->
@@ -572,6 +576,30 @@ function closePopupOnEscape(event){
 }
 /** SOFTM-POPUP-ESC END */
 function bindEvents(){$('province').onchange=()=>{updateCities();searchByControls()};$('city').onchange=searchByControls;$('searchBtn').onclick=()=>searchByControls(true);$('q').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();searchByControls(true)}};$('sort').onchange=applySort;$('selectAll').onchange=e=>{selected=e.target.checked?new Set(areaRows.map(c=>c.i)):new Set();for(const [id,m] of markers)m.setMap(selected.has(id)?map:null);renderList();fitSelectedMarkers()};$('compareClose').onclick=closeCompare;$('compareExcel').onclick=downloadCompareExcel;$('compareLayer').onclick=e=>{if(e.target===$('compareLayer'))closeCompare()};$('shareBtn').onclick=shareState;$('locateBtn').onclick=()=>useCurrentLocation(false);$('zoomInBtn').onclick=()=>mapReady&&map.setZoom(Math.min(19,map.getZoom()+1),true);$('zoomOutBtn').onclick=()=>mapReady&&map.setZoom(Math.max(7,map.getZoom()-1),true);$('detailClose').onclick=closeDetail;document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>toggleMultiFilter(b.dataset.filter,b.dataset.value));document.addEventListener('keydown',closePopupOnEscape)} // SOFTM-MARKER-SELECTION-FIT 날짜:20260910 : 전체 지도 표시 변경도 현재 표시 마커 범위로 맞춤 // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 버튼과 Enter 완료 후에만 결과 지도로 이동 // SOFTM-POPUP-ESC 날짜:20260904 : 비교표뿐 아니라 기관 상세도 Esc로 닫을 수 있도록 연결 // SOFTM-BASKET-ROUTE 날짜:20260904 : 방문 경로 대상을 비교함 순서로 통일 // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결
+/** SOFTM-PHOTO-SELECT START 날짜:20260910 : 같은 이름의 기관을 잘못 열지 않고 사진에서 고른 기관기호로 최초 진입 */
+let initialPhotoEntry=null,initialPhotoVersion=-1;
+function preparePhotoInstitution(){
+ const id=params.get('institution');
+ if(!id)return;
+ initialPhotoEntry=DATA.find(row=>row.i===id)||null;
+ if(!initialPhotoEntry){toast('선택한 기관을 현재 유형에서 찾을 수 없습니다.');return}
+ $('province').value=initialPhotoEntry.p;updateCities();$('city').value=initialPhotoEntry.c;$('q').value=initialPhotoEntry.n;
+}
+function showInitialPhotoPreview(){
+ showDataPreview(initialPhotoEntry?[initialPhotoEntry]:filtered,initialPhotoEntry?'사진에서 선택한 기관':'전국 데이터');
+ if(initialPhotoEntry){focusCenter(initialPhotoEntry.i);initialPhotoVersion=refreshToken}
+}
+async function openInitialPhotoInstitution(){
+ const row=initialPhotoEntry;initialPhotoEntry=null;
+ if(!row)return;
+ const query=beginCareQuery();clearTimeout(refreshTimer);skipIdleUntil=Infinity;
+ try{
+  const outcome=await loadMarkers([row],{fit:true,regionText:'사진에서 선택한 기관',query});
+  if(query.current()&&!outcome?.cancelled)focusCenter(row.i);
+ }catch(error){if(query.current()){showDataPreview([row],'선택한 기관',query);focusCenter(row.i);setStatus('기관 정보 표시',error.message)}}
+ finally{if(skipIdleUntil===Infinity)skipIdleUntil=Date.now()+1500}
+}
+/** SOFTM-PHOTO-SELECT END */
 /** SOFTM-SEO-REGION-ENTRY START 날짜:20260904 : 지역 검색에서 고른 기관·지역을 현재 위치 조회가 덮어쓰지 않도록 최초 검색을 우선 적용 */
 async function openInitialRegionSearch(){
  clearTimeout(refreshTimer);skipIdleUntil=Infinity;
@@ -589,7 +617,7 @@ function bindCareViewportResearch(){
  search:()=>refreshFromMap()});
 }
 /** SOFTM-VIEWPORT-RESEARCH END */
-function initNaver(){if(mapReady||!window.naver||!window.naver.maps)return;map=new window.naver.maps.Map('naverMap',{center:new window.naver.maps.LatLng(36.35,127.8),zoom:7,minZoom:7,maxZoom:19,zoomControl:false,scrollWheel:true,pinchZoom:true,draggable:true});mapReady=true;const hasSharedView=params.has('lat')&&params.has('lng')&&params.has('z'),lat=Number(params.get('lat')),lng=Number(params.get('lng')),zoom=Number(params.get('z'));if(hasSharedView&&Number.isFinite(lat)&&Number.isFinite(lng)&&Number.isFinite(zoom)&&lat>=33&&lat<=39&&lng>=124&&lng<=132&&zoom>=7&&zoom<=19){skipIdleUntil=Date.now()+800;map.setCenter(new window.naver.maps.LatLng(lat,lng));map.setZoom(zoom);setTimeout(()=>{skipIdleUntil=0;refreshFromMap()},900)}else if($('q').value.trim()||$('province').value||$('city').value){void openInitialRegionSearch()}else useCurrentLocation(true);window.naver.maps.Event.addListener(map,'click',()=>closeDetail());window.naver.maps.Event.addListener(map,'dragstart',()=>{closeDetail(false);CareMapExperience.cancelDetail();if(CareMapExperience.isBasketMap())return;beginCareQuery();clearTimeout(refreshTimer);showLoading('지도를 이동하는 중','이동이 끝나면 화면 중앙을 기준으로 기관 데이터를 확인합니다.');setStatus('지도 이동 중')});window.naver.maps.Event.addListener(map,'dragend',()=>{if(CareMapExperience.isBasketMap()||careViewportResearch?.pending())return;clearTimeout(refreshTimer);const center=map.getCenter();setBase({lat:center.lat(),lng:center.lng()},'지도 중심 기준 위치',false);skipIdleUntil=Date.now()+900;showLoading('현재 지도 데이터를 확인하는 중','화면 중앙 주변 기관을 찾고 있습니다.');refreshTimer=setTimeout(async()=>{skipIdleUntil=0;await refreshFromMap()},420)});window.naver.maps.Event.addListener(map,'idle',scheduleRefresh);bindCareViewportResearch()} // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 직접 지도 이동이 시작되면 진행 중 상세조회가 이전 화면 결과를 덮지 않도록 취소 // SOFTM-BASKET-MAP 날짜:20260904 : 비교함 지도 이동은 기관 자동검색 없이 담은 기관만 유지 // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 두 지도의 확대·축소와 수동 재검색을 공용 처리에 연결
+function initNaver(){if(mapReady||!window.naver||!window.naver.maps)return;map=new window.naver.maps.Map('naverMap',{center:new window.naver.maps.LatLng(36.35,127.8),zoom:7,minZoom:7,maxZoom:19,zoomControl:false,scrollWheel:true,pinchZoom:true,draggable:true});mapReady=true;const hasSharedView=params.has('lat')&&params.has('lng')&&params.has('z'),lat=Number(params.get('lat')),lng=Number(params.get('lng')),zoom=Number(params.get('z'));if(initialPhotoEntry&&initialPhotoVersion===refreshToken&&activeDetail?.i===initialPhotoEntry.i){void openInitialPhotoInstitution()}else if(hasSharedView&&Number.isFinite(lat)&&Number.isFinite(lng)&&Number.isFinite(zoom)&&lat>=33&&lat<=39&&lng>=124&&lng<=132&&zoom>=7&&zoom<=19){skipIdleUntil=Date.now()+800;map.setCenter(new window.naver.maps.LatLng(lat,lng));map.setZoom(zoom);setTimeout(()=>{skipIdleUntil=0;refreshFromMap()},900)}else if($('q').value.trim()||$('province').value||$('city').value){void openInitialRegionSearch()}else useCurrentLocation(true);window.naver.maps.Event.addListener(map,'click',()=>closeDetail());window.naver.maps.Event.addListener(map,'dragstart',()=>{closeDetail(false);CareMapExperience.cancelDetail();if(CareMapExperience.isBasketMap())return;beginCareQuery();clearTimeout(refreshTimer);showLoading('지도를 이동하는 중','이동이 끝나면 화면 중앙을 기준으로 기관 데이터를 확인합니다.');setStatus('지도 이동 중')});window.naver.maps.Event.addListener(map,'dragend',()=>{if(CareMapExperience.isBasketMap()||careViewportResearch?.pending())return;clearTimeout(refreshTimer);const center=map.getCenter();setBase({lat:center.lat(),lng:center.lng()},'지도 중심 기준 위치',false);skipIdleUntil=Date.now()+900;showLoading('현재 지도 데이터를 확인하는 중','화면 중앙 주변 기관을 찾고 있습니다.');refreshTimer=setTimeout(async()=>{skipIdleUntil=0;await refreshFromMap()},420)});window.naver.maps.Event.addListener(map,'idle',scheduleRefresh);bindCareViewportResearch()} // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 직접 지도 이동이 시작되면 진행 중 상세조회가 이전 화면 결과를 덮지 않도록 취소 // SOFTM-BASKET-MAP 날짜:20260904 : 비교함 지도 이동은 기관 자동검색 없이 담은 기관만 유지 // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 두 지도의 확대·축소와 수동 재검색을 공용 처리에 연결 // SOFTM-PHOTO-SELECT 날짜:20260910 : 사진에서 선택한 기관기호를 초기 목록·상세·지도에 동일하게 적용
 /** SOFTM-MAP-RESTORE END */
 window.initNaver=initNaver;
 function loadNaver(){if(window.naver&&window.naver.maps){initNaver();return}const s=document.createElement('script');s.async=true;s.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=etfcybk8vf&submodules=geocoder&callback=initNaver';s.onload=()=>{let tries=0;const ready=()=>{if(window.naver&&window.naver.maps){initNaver();return}if(++tries<40)setTimeout(ready,100);else setStatus('지도 연결 지연','목록과 검색은 사용할 수 있습니다. 지도를 새로고침해 주세요.')};ready()};s.onerror=()=>{hideLoading();setStatus('지도 로드 실패','목록 검색은 계속 사용할 수 있습니다. 지도 API 인증을 확인해 주세요.')};document.head.appendChild(s);setTimeout(()=>{if(!mapReady&&window.naver&&window.naver.maps)initNaver();if(!mapReady)setStatus('지도 연결 지연','목록과 검색은 사용할 수 있습니다. 지도를 새로고침해 주세요.')},12000)} // SOFTM-MAPS-KEY 날짜:20260902 : Geocoding 권한이 연결된 신규 Maps API Key ID로 SDK 인증을 통일
@@ -644,7 +672,7 @@ function careMatchAdapter(){return {
  clearLegacy:key=>{params.delete(key==='capacity'?'cap':'staff');const url=new URL(location.href);url.search=params.toString();history.replaceState(null,'',url);void searchByControls(false)}
 }}
 /** SOFTM-CARE-MATCH END */
-async function boot(){MANIFEST=await CareData.manifest();CONFIG=MANIFEST[TYPE];renderNav();initMeta();updateSeo();bindEvents();await loadCategoryData();initFilters();restoreState();advancedSearch=await CareAdvancedSearch.mount({host:$('advancedSearch'),type:TYPE,rows:DATA,resultTarget:document.querySelector('.layout'),onChange:refreshAfterFilterClick,region:()=>({province:$('province').value,city:$('city').value})});CareResultSort.mount({select:$('sort'),center:()=>mapReady?{lat:map.getCenter().lat(),lng:map.getCenter().lng()}:null,coord:cachedCoord,apply:applySort});CareMapExperience.init({type:TYPE,match:careMatchAdapter(),rows:()=>DATA,compare:compareSelected,basketMap:careBasketAdapter(),mobileFocus:focusMobileRow,scrollDetail:updateDetailFromScroll,detail:focusCenter,closeDetail,resizeMap:()=>{if(!mapReady)return;const center=map.getCenter();clearTimeout(refreshTimer);skipIdleUntil=Math.max(skipIdleUntil,Date.now()+1200);window.naver.maps.Event.trigger(map,"resize");map.setCenter(center)}});applyFilters();showDataPreview(filtered,'전국 데이터');initCareAds();loadNaver()} // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 공용 상세검색이 실제 조회 완료와 결과 영역을 안내하도록 연결 // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결 // SOFTM-MOBILE-MAP 날짜:20260909 : 공용 목록 스크롤을 각 지도의 마커 강조와 연결 // SOFTM-MOBILE-SHEET 날짜:20260909 : 높이 변경이 상세 이동의 재검색 차단 시간을 줄이지 않도록 보존 // SOFTM-RESULT-SORT 날짜:20260909 : 정렬 시 검색 범위와 지도 이동을 보존하고 공용 기준을 적용 // SOFTM-CARE-MATCH 날짜:20260910 : 질문·조건별 근거를 기존 지도 부팅과 연결
+async function boot(){MANIFEST=await CareData.manifest();CONFIG=MANIFEST[TYPE];renderNav();initMeta();updateSeo();bindEvents();await loadCategoryData();initFilters();restoreState();preparePhotoInstitution();advancedSearch=await CareAdvancedSearch.mount({host:$('advancedSearch'),type:TYPE,rows:DATA,resultTarget:document.querySelector('.layout'),onChange:refreshAfterFilterClick,region:()=>({province:$('province').value,city:$('city').value})});CareResultSort.mount({select:$('sort'),center:()=>mapReady?{lat:map.getCenter().lat(),lng:map.getCenter().lng()}:null,coord:cachedCoord,apply:applySort});CareMapExperience.init({type:TYPE,match:careMatchAdapter(),rows:()=>DATA,compare:compareSelected,basketMap:careBasketAdapter(),mobileFocus:focusMobileRow,scrollDetail:updateDetailFromScroll,detail:focusCenter,closeDetail,resizeMap:()=>{if(!mapReady)return;const center=map.getCenter();clearTimeout(refreshTimer);skipIdleUntil=Math.max(skipIdleUntil,Date.now()+1200);window.naver.maps.Event.trigger(map,"resize");map.setCenter(center)}});applyFilters();showInitialPhotoPreview();initCareAds();loadNaver()} // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 공용 상세검색이 실제 조회 완료와 결과 영역을 안내하도록 연결 // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결 // SOFTM-MOBILE-MAP 날짜:20260909 : 공용 목록 스크롤을 각 지도의 마커 강조와 연결 // SOFTM-MOBILE-SHEET 날짜:20260909 : 높이 변경이 상세 이동의 재검색 차단 시간을 줄이지 않도록 보존 // SOFTM-RESULT-SORT 날짜:20260909 : 정렬 시 검색 범위와 지도 이동을 보존하고 공용 기준을 적용 // SOFTM-CARE-MATCH 날짜:20260910 : 질문·조건별 근거를 기존 지도 부팅과 연결 // SOFTM-PHOTO-SELECT 날짜:20260910 : 사진에서 선택한 기관기호를 초기 목록·상세·지도에 동일하게 적용
 /** SOFTM-MAP-EXPERIENCE END */
 boot().catch(error=>{hideLoading();$('list').innerHTML=`<div class="empty">${esc(error.message)}</div>`;setStatus('데이터 로드 실패',error.message)});
 </script>
