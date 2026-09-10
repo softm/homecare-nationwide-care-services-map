@@ -179,7 +179,7 @@
 .care-map-page .select-tools,.care-map-page .route-actions { margin-top:12px; padding:8px 10px; background:#f5f7fa; border-radius:8px; }
 .care-map-page .route-tools > p,.care-map-page .selected { display:none; }
 /** SOFTM-TAB-FEEDBACK START 날짜:20260905 : 글자 링크처럼 보이던 작업 전환을 누를 수 있는 두 칸과 선택 표시로 구분 */
-.care-workspace-tabs { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:stretch; gap:6px; position:sticky; top:var(--care-nav-height,0px); z-index:80; margin:0 0 20px; padding:6px; border:1px solid #cdd8e5; border-radius:15px; background:#eaf0f6; box-shadow:0 3px 10px #172c4308; } /* SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 작업 탭 옆에 화면 크기 전환 버튼을 배치 */
+.care-workspace-tabs { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:stretch; gap:6px; position:sticky; top:var(--care-nav-height,0px); z-index:80; margin:0 0 20px; padding:6px; border:1px solid #cdd8e5; border-radius:15px; background:#eaf0f6; box-shadow:0 3px 10px #172c4308; } /* SOFTM-WORKSPACE-NO-BACK 날짜:20260910 : 별도 이전 칸 없이 작업 탭과 화면 크기 전환만 표시 */
 .care-workspace-tab-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; min-width:0; } /* SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 탭 의미를 유지하면서 확대 버튼과 시각적으로 한 줄에 배치 */
 .care-workspace-tabs button { display:flex; align-items:center; justify-content:center; gap:12px; position:relative; min-width:0; min-height:76px; padding:12px 18px; border:1px solid #cdd8e5; border-radius:10px; background:#f4f7fa; color:#46617d; font-size:18px; font-weight:700; cursor:pointer; transition:background .18s,border-color .18s,box-shadow .18s; }
 .care-workspace-tabs button::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:3px; border-radius:3px 3px 0 0; background:transparent; }
@@ -569,13 +569,6 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid input,.care-map-page.care-mobile-filters-open .filters .filter-grid button,.care-map-page.care-mobile-filters-open .filters .filter-grid select { min-height:44px; }
 /* SOFTM-FILTER-LAYOUT END */
 
-/* SOFTM-WORKSPACE-BACK START 날짜:20260910 : 작업 탭 옆 복귀 버튼을 PC·모바일에서 동일하게 접근 가능하게 유지 */
-.care-map-page .care-workspace-tabs { grid-template-columns:52px minmax(0,1fr) auto; }
-.care-map-page .care-workspace-tabs .care-workspace-back { display:flex; flex-direction:column; justify-content:center; gap:0; padding:2px; min-height:44px; font-size:12px; background:#fff; color:#214b78; border:1px solid #c6d6e6; border-radius:10px; }
-.care-workspace-back > span:first-child { font-size:23px; line-height:1; }
-@media(min-width:1001px) { .care-map-page .care-workspace-tabs { grid-template-columns:52px minmax(0,1fr); } }
-/* SOFTM-WORKSPACE-BACK END */
-
 /* SOFTM-CARE-INSIGHTS START 날짜:20260910 : 좁은 목록 패널에서도 긴 기관명과 근거·상담 질문을 잘림 없이 읽도록 표시 */
 .care-insights { margin:16px 0; border:1px solid #bed2e8; border-radius:14px; background:#f3f8ff; min-width:0; }
 .care-insights[hidden] { display:none; }
@@ -593,15 +586,6 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-insight-source { font-size:12px; color:#53647a; margin:14px 0 0; }
 .care-insights summary:focus-visible { outline:3px solid #246cd0; outline-offset:2px; border-radius:8px; }
 /* SOFTM-CARE-INSIGHTS END */
-
-/* SOFTM-BACK-TOP-MENU START 날짜:20260910 : 최상위 메뉴가 있는 PC에서는 이전 버튼을 메뉴 맨 왼쪽에 고정해 작업 탭과 구분 */
-@media(min-width:1001px) {
- .care-map-page .care-workspace-tabs { grid-template-columns:minmax(0,1fr); }
- .care-map-page .care-workspace-tabs .care-workspace-back { position:fixed; top:4px; left:8px; width:52px; height:44px; z-index:181; }
- .care-map-page .category-nav { left:68px; }
- .care-map-page .care-workspace-tabs::before { content:""; position:fixed; top:0; left:0; width:68px; height:52px; box-sizing:border-box; background:#fff; border-bottom:1px solid #d6e1ee; z-index:180; } /* SOFTM-BACK-BACKGROUND 날짜:20260910 : 메뉴 옆 빈 영역에 아래쪽 문구가 비치지 않도록 불투명 배경을 채움 */
-}
-/* SOFTM-BACK-TOP-MENU END */
 
 /** SOFTM-SAVED-SCROLL START 날짜:20260910 : 담은 기관에서도 스크롤 선택과 마지막 카드 접근을 명확하게 표시 */
 .care-basket-item.care-scroll-active { background:#edf5ff; border-color:#8bb7eb; box-shadow:inset 4px 0 #2777df; }

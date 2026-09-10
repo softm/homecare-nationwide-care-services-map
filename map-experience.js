@@ -754,18 +754,6 @@
     }
     /** SOFTM-DRAG-FEEDBACK END */
     /** SOFTM-WORKSPACE START 날짜:20260905 : 같은 지도 DOM을 유지하면서 기관 찾기와 담은 기관의 입력·목록만 전환 */
-    /** SOFTM-WORKSPACE-BACK START 날짜:20260910 : 화면을 벗어나기 전에 상세·경로·목록 단계부터 복원하는 명시적 뒤로가기 */
-    function goBack() {
-        if (detailOrigin) { options.closeDetail?.(); return; }
-        if (routePanel) { editRoute(false); return; }
-        if (workspace === 'saved') { setWorkspace('search'); return; }
-        if (document.body.classList.contains('care-mobile-filters-open')) { document.querySelector('.care-mobile-filter-toggle')?.click(); return; }
-        if (media.matches && mobileSheet?.state() === 'list') { mobileSheet.set('split'); return; }
-        if (workspaceExpanded) { setWorkspaceExpanded(false); return; }
-        if (root.history.length > 1) root.history.back();
-        else root.location.assign('index.html');
-    }
-    /** SOFTM-WORKSPACE-BACK END */
     function init(config) {
         if (options) return;
         options = config; rowById = new Map(allRows().map(row => [String(row.i), row]));
@@ -775,7 +763,7 @@
         media = root.matchMedia('(max-width: 1000px)');
         const layout = document.querySelector('.layout'), results = document.querySelector('.results');
         results.id = 'careSearchResults';
-        tabs = document.createElement('nav'); tabs.className = 'care-workspace-tabs'; tabs.setAttribute('aria-label', '기관 찾기와 화면 크기');
+        tabs = document.createElement('nav'); tabs.className = 'care-workspace-tabs'; tabs.setAttribute('aria-label', '기관 찾기와 담은 기관'); // SOFTM-WORKSPACE-NO-BACK 날짜:20260910 : 작은 화면의 하단은 두 작업 전환에만 사용해 표시가 깨지지 않게 함
         /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 작업 탭 옆에서 지도·목록 확대와 원상복구를 한 버튼으로 전환 */
         tabs.innerHTML = `<div class="care-workspace-tab-list" role="tablist" aria-label="기관 찾기와 담은 기관"><button type="button" id="careSearchTab" role="tab" data-workspace="search" aria-selected="true" aria-controls="careSearchResults"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg><span class="care-tab-copy"><span class="care-tab-title">기관 찾기</span><span class="care-tab-hint" aria-hidden="true">지역 · 조건으로 검색</span></span></button><button type="button" id="careSavedTab" role="tab" data-workspace="saved" aria-selected="false" aria-controls="careSavedPanel" tabindex="-1"><svg class="care-tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4Z"></path></svg><span class="care-tab-copy"><span class="care-tab-title">담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span></span><span class="care-tab-hint" aria-hidden="true">비교 · 경로탐색</span></span></button></div><button type="button" class="care-layout-toggle" data-layout-expand aria-pressed="false" aria-label="지도와 목록 크게 보기" title="지도와 목록 크게 보기"><svg class="care-layout-toggle-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path><path class="care-layout-restore-path" d="M9 9H5V5M15 9h4V5M9 15H5v4M15 15h4v4"></path></svg><span data-layout-label>크게 보기</span></button>`;
         /** SOFTM-WORKSPACE-EXPAND END */
@@ -809,13 +797,6 @@
         layout.prepend(bar); layout.prepend(results);
         dock = document.createElement('button'); dock.type = 'button'; dock.className = 'care-saved-dock'; dock.dataset.workspace = 'saved'; document.body.append(dock);
         dock.innerHTML = '담은 기관 <span class="care-count-wrap"><span data-saved-count>0</span><span class="care-count-feedback" aria-hidden="true" hidden>+1</span></span>곳 보기 <span aria-hidden="true">→</span>'; // SOFTM-TAB-FEEDBACK 날짜:20260905 : 상단 탭이 보이지 않을 때도 담긴 개수의 변화를 즉시 전달
-        /** SOFTM-WORKSPACE-BACK START 날짜:20260910 : 지도와 목록을 탐색하는 중에도 복귀 조작을 항상 노출 */
-        const back = document.createElement('button');
-        back.type = 'button'; back.className = 'care-workspace-back';
-        back.setAttribute('aria-label', '이전 화면으로 돌아가기'); back.title = '이전 화면으로 돌아가기';
-        back.innerHTML = '<span aria-hidden="true">←</span><span>이전</span>';
-        back.addEventListener('click', goBack); tabs.prepend(back);
-        /** SOFTM-WORKSPACE-BACK END */
         routeOutput = document.createElement('section'); routeOutput.className = 'care-route-output'; routeOutput.setAttribute('aria-label', '경로탐색 결과');
         routeOutput.innerHTML = '<p role="status"></p><div class="care-route-summary"></div><details class="care-route-itinerary" hidden></details>';
         bar.querySelector('.care-saved-footer').before(routeOutput);
