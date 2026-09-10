@@ -79,9 +79,63 @@ function renderFact(text) {
 export function render(rows, config) {
     const report = analyze(rows, config);
     /** SOFTM-BRIEF-READABILITY START 날짜:20260910 : 요약·기관별 정보·상담 질문을 별도 영역으로 나누어 읽는 순서를 명확히 함 */
-    return `<div class="care-insight-intro"><h3>선택 전에 살펴볼 차이</h3><ul>${report.summary.map(text => `<li>${escape(text)}</li>`).join('')}</ul></div>
+    // SOFTM-CARE-MATCH 날짜:20260910 : 선택한 중요 조건의 비교 근거를 일반 기관 요약보다 먼저 제공
+    return `${config?.match ? renderMatchComparison(rows, { ...config.match, type: config.type, sourceDate: config.sourceDate }) : ''}<div class="care-insight-intro"><h3>선택 전에 살펴볼 차이</h3><ul>${report.summary.map(text => `<li>${escape(text)}</li>`).join('')}</ul></div>
     <div class="care-insight-cards">${report.cards.map((card, index) => `<article class="care-insight-card"><h4><span class="care-insight-number">${index + 1}</span><span>${escape(card.name)}</span></h4><dl class="care-insight-facts">${card.facts.map(renderFact).join('')}</dl><details><summary>방문·전화 상담 질문 ${card.questions.length}개</summary><ol class="care-insight-questions">${card.questions.map(text => `<li>${escape(text)}</li>`).join('')}</ol></details><button type="button" class="care-saved-detail" data-saved-detail="${escape(card.id)}">기관 상세 보기</button></article>`).join('')}</div>
     <p class="care-insight-source">근거: ${escape(report.source)} · 검색 자료 기준일 ${escape(report.sourceDate || '미확인')}. 개별 항목의 변경일과 평가연도는 다를 수 있습니다. 공개 인력은 실제 근무조나 서비스 품질을 뜻하지 않습니다. 거리·비용·실시간 이용 가능 여부는 이 요약에서 추정하지 않습니다.</p>`;
     /** SOFTM-BRIEF-READABILITY END */
 }
 /** SOFTM-CARE-INSIGHTS END */
+
+/** SOFTM-CARE-MATCH START 날짜:20260910 : 희망 조건을 필터나 추천점수로 바꾸지 않고 공개 근거의 확인 여부와 상담 질문으로 설명 */
+const featureGroupIds = new Set(['dementia', 'cognitive', 'respite', 'integrated']);
+export function criteriaFor(type, groups = globalThis.CareAdvancedSearch?.groupsFor(type) || []) {
+    if (type === 'nursing-hospital') return [];
+    const criteria = [{ id: 'evaluation-ab', label: '공단 평가 A·B등급', kind: 'evaluation' }];
+    if (type !== 'welfare-equipment') criteria.push({ id: 'nurse', label: '간호사 등록', kind: 'staff', fields: ['rn'] }, { id: 'rehab', label: '물리·작업치료사 등록', kind: 'staff', fields: ['pt', 'ot'] });
+    for (const group of groups) if (featureGroupIds.has(group.id)) criteria.push({ id: `feature:${group.id}`, label: group.label, kind: 'feature', keys: group.options.map(option => option[0]) });
+    return criteria;
+}
+export function assess(row, criterion, context = {}) {
+    let status = 'unknown', evidence = '', question = '';
+    const date = context.sourceDate || '미확인';
+    if (criterion.kind === 'evaluation') {
+        const grade = row.g || row.ev?.grade, year = row.ey || row.ev?.year;
+        status = /^[A-E]$/.test(grade || '') ? (['A', 'B'].includes(grade) ? 'confirmed' : 'different') : 'unknown';
+        evidence = status === 'unknown' ? '공단 평가등급이 확인되지 않습니다. 낮은 평가라는 뜻은 아닙니다.' : `공개 평가 ${grade}등급 · ${year ? `${year}년` : '평가연도 미확인'}. 평가연도가 다르면 점수를 직접 비교하기 어렵습니다.`;
+        question = '최근 공단 평가 결과와 평가연도를 확인할 수 있나요?';
+    } else if (criterion.kind === 'staff') {
+        const multiple = String(row.t || '').split(',').filter(Boolean).length > 1;
+        const values = criterion.fields.map(key => row[key]);
+        if (row.staffMissing || multiple) evidence = multiple ? '복수 급여의 인력이 합산되어 해당 급여의 실제 배치를 따로 확인해야 합니다.' : '인력 자료가 일부 누락되어 등록 여부를 판단하지 않았습니다.';
+        else {
+            status = values.some(value => number(value) && value > 0) ? 'confirmed' : values.every(number) ? 'different' : 'unknown';
+            evidence = criterion.fields.map(key => `${staff.find(([field]) => field === key)?.[1] || key} ${number(row[key]) ? `${format(row[key])}명` : '미확인'}`).join(' · ') + '. 공개 등록 인원이며 근무 시간대별 배치나 프로그램 운영 여부는 별도 확인이 필요합니다.';
+        }
+        question = criterion.id === 'rehab' ? '물리·작업치료 인력의 실제 근무시간과 이용할 수 있는 프로그램은 무엇인가요?' : '현재 간호사의 실제 근무시간과 이용 시간대의 배치는 어떻게 되나요?';
+    } else {
+        status = context.hasFeature && criterion.keys.some(key => context.hasFeature(row, key)) ? 'confirmed' : 'unknown';
+        evidence = status === 'confirmed' ? '공단 공개 특화서비스 수집 목록에서 제공기관으로 확인됩니다.' : context.featureError ? '특화서비스 자료를 불러오지 못해 확인하지 못했습니다.' : '공단 수집 목록에서 제공 여부가 확인되지 않습니다. 제공하지 않는다는 뜻은 아닙니다.';
+        question = `${criterion.label}을 현재 이용할 수 있나요? 대상과 이용 절차를 알려 주세요.`;
+    }
+    return { id: criterion.id, label: criterion.label, status, evidence, question, source: criterion.kind === 'feature' ? '공단 공개 특화서비스 목록' : '공단 수집 자료', sourceDate: criterion.kind === 'feature' ? context.featureDate || '미확인' : date };
+}
+export function analyzeMatch(rows, context) {
+    const criteria = criteriaFor(context.type).filter(item => (context.preferences || []).includes(item.id));
+    const unique = [...new Map(rows.map(row => [String(row.i), row])).values()];
+    const cards = unique.map(row => ({ id: String(row.i), name: row.n, conditions: criteria.map(criterion => assess(row, criterion, context)) }));
+    const counts = criteria.map(criterion => ({ id: criterion.id, label: criterion.label, confirmed: 0, different: 0, unknown: 0 }));
+    for (const card of cards) card.conditions.forEach((condition, index) => counts[index][condition.status]++);
+    return { total: unique.length, counts, cards, scope: context.scope || '현재 조회 범위' };
+}
+const statusLabels = { confirmed: '확인', different: '조건과 다름', unknown: '미확인' };
+export function renderConditions(conditions) {
+    const item = condition => `<li><strong>${escape(condition.label)}</strong> <span class="care-match-badge ${condition.status}">${statusLabels[condition.status]}</span><p>${escape(condition.evidence)}</p><small>${escape(condition.source)} · 기준일 ${escape(condition.sourceDate)}</small></li>`;
+    return `<ul class="care-match-conditions">${conditions.slice(0, 3).map(item).join('')}</ul>${conditions.length > 3 ? `<details class="care-match-more"><summary>나머지 조건 ${conditions.length - 3}개 보기</summary><ul class="care-match-conditions">${conditions.slice(3).map(item).join('')}</ul></details>` : ''}`;
+}
+export function renderMatchComparison(rows, context) {
+    const report = analyzeMatch(rows, context);
+    if (!report.counts.length) return '<section class="care-match-comparison"><h3>선택한 중요 조건</h3><p>아직 선택한 조건이 없습니다. ‘내 조건에 맞는 기관 찾기’에서 중요 조건을 정할 수 있습니다.</p></section>';
+    return `<section class="care-match-comparison"><h3>중요 조건으로 비교한 ${report.total}곳</h3><ul>${report.counts.map(item => `<li><b>${escape(item.label)}</b>: ${report.total && item.confirmed === report.total ? '담은 기관 모두 확인' : `확인 ${item.confirmed}곳 · 조건과 다름 ${item.different}곳 · 미확인 ${item.unknown}곳`}</li>`).join('')}</ul>${report.cards.map(card => `<article><h4>${escape(card.name)}</h4>${renderConditions(card.conditions)}<details><summary>이 조건으로 상담할 질문</summary><ul>${card.conditions.map(condition => `<li>${escape(condition.question)}</li>`).join('')}</ul></details></article>`).join('')}</section>`;
+}
+/** SOFTM-CARE-MATCH END */

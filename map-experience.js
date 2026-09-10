@@ -109,6 +109,7 @@
             cancel() { generation++; if (state.phase === 'loading') publish({ phase: 'idle', error: '' }); }
         };
     }
+    let matchController = null; // SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 검색·비교함의 중요 조건을 같은 인스턴스로 연결
     let routeStartRevision = 0; // SOFTM-ROUTE-DIRECT 날짜:20260910 : 출발지 대기 중 취소된 즉시 탐색을 다시 실행하지 않음
     let options, basket, bar, media, detailOrigin, view = 'list', workspace = 'search', routePanel = false;
     let rowById = new Map(), restoreGeneration = 0, routeRevision = 0, readyTimer = null, searchMapFocusTimer = null;
@@ -163,6 +164,7 @@
     function evaluationLabel(row) { const grade = row.g || row.ev?.grade; return ['A', 'B', 'C', 'D', 'E'].includes(grade) ? `기관 평가 ${grade}등급` : grade === 'N' ? '신설·미평가' : '기관 평가 미확인'; }
     function refresh() {
         if (!basket || !bar) return;
+        matchController?.refresh(); // SOFTM-CARE-MATCH 날짜:20260910 : 목록 재렌더와 페이지 변경에도 선택 근거를 다시 연결
         const selected = rows();
         tabs.querySelector('[data-saved-count]').textContent = selected.length;
         bar.querySelector('.care-basket-count').textContent = `${selected.length}곳`;
@@ -305,7 +307,8 @@
     /** SOFTM-CARE-INSIGHTS START 날짜:20260910 : 설명을 요청한 경우에만 자료를 읽고 변경된 비교함에 이전 결과가 남지 않게 갱신 */
     let insightRevision = 0, insightAttempt = 0, insightTask;
     function loadInsights() {
-        if (!insightTask) insightTask = import(`./care-insights.js?v=20260910-2${insightAttempt ? `&retry=${insightAttempt}` : ''}`).catch(error => {
+        // SOFTM-CARE-MATCH 날짜:20260910 : 중요 조건 판정과 비교 설명이 같은 엔진 버전을 사용
+        if (!insightTask) insightTask = import(`./care-insights.js?v=20260910-match1${insightAttempt ? `&retry=${insightAttempt}` : ''}`).catch(error => {
             insightTask = null; insightAttempt++; throw error;
         });
         return insightTask;
@@ -320,7 +323,7 @@
         try {
             const [insights, manifest] = await Promise.all([loadInsights(), root.CareData.manifest()]);
             if (revision !== insightRevision || !panel.open) return;
-            host.innerHTML = insights.render(rows(), { type: options.type, sourceDate: manifest[options.type]?.sourceDate });
+            host.innerHTML = insights.render(rows(), { type: options.type, sourceDate: manifest[options.type]?.sourceDate, match: matchController?.context() }); // SOFTM-CARE-MATCH 날짜:20260910 : 담기·삭제 때 현재 중요 조건으로 비교 근거를 갱신
         } catch {
             if (revision !== insightRevision || !panel.open) return;
             host.innerHTML = '<p>기관 설명을 불러오지 못했습니다. 기존 비교표는 계속 이용할 수 있습니다.</p><button type="button" data-insight-retry>다시 시도</button>';
@@ -765,6 +768,19 @@
     function init(config) {
         if (options) return;
         options = config; rowById = new Map(allRows().map(row => [String(row.i), row]));
+        /** SOFTM-CARE-MATCH START 날짜:20260910 : 공용 질문 흐름이 준비되지 않아도 기존 지도는 계속 사용할 수 있게 독립 초기화 */
+        if (options.match) {
+            const connect = (attempt = 0) => import(`./care-match.js?v=20260910-match1&attempt=${attempt}`).then(module => {
+                matchController = module.mount({ ...options.match, type: options.type, allRows, onChange: updateInsights });
+            }).catch(() => {
+                if (document.querySelector('.care-match-load-retry')) return;
+                const retry = document.createElement('button'); retry.className = 'care-match-start care-match-load-retry'; retry.type = 'button'; retry.textContent = '내 조건에 맞는 기관 찾기 · 다시 불러오기';
+                retry.onclick = () => { retry.remove(); void connect(attempt + 1); };
+                document.querySelector('.results .list-head,.results .result-head').after(retry);
+            });
+            void connect();
+        }
+        /** SOFTM-CARE-MATCH END */
         let storage; try { storage = root.sessionStorage; } catch {}
         basket = createBasket(storage, options.type); basket.retain(new Set(rowById.keys()));
         document.body.classList.add('care-map-page'); prepareFilters();
@@ -922,7 +938,8 @@
     function isBasketMap() { return workspace === 'saved'; }
     function exitBasketMap() { if (basketMap?.active()) setWorkspace('search', false); }
     function contains(id) { return basket?.has(id) || false; }
-    root.CareMapExperience = Object.freeze({ init, createSheetState, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
+    function refreshMatch() { matchController?.refresh(); } // SOFTM-CARE-MATCH 날짜:20260910 : 전체 조회 완료와 진행 상태를 공용 설명에 전달
+    root.CareMapExperience = Object.freeze({ refreshMatch, init, createSheetState, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-MAP-EXPERIENCE END */

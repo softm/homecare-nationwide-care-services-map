@@ -356,7 +356,22 @@
         if (countActive()) host.querySelector('details').open = true;
         return { matches: row => !(loadError && hasDataFilter()) && model.matches(row, state), write: params => writeState(params, state), state: () => ({ ...state, features: [...state.features] }), report, cancel }; // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 기본조회 완료와 상세조회 취소도 공용 상태에 반영
     }
-    const api = { mount, createMatcher, readState, writeState, sanitize, addressParts, groupsFor, emptyState };
+    /** SOFTM-CARE-MATCH START 날짜:20260910 : 질문 안내에서도 동일한 특화 판정과 기존 조건의 명칭·전환 규칙을 사용 */
+    function describeState(state, type) {
+        const labels = [];
+        if (state.owner !== '') labels.push(`설립주체: ${OWNER_LABELS[Number(state.owner)] || '미확인'}`);
+        if (state.facility) labels.push(state.facility === 'home' ? '노인요양공동생활가정' : '노인요양시설');
+        if (state.address) labels.push(`${state.addressMode === 'road' ? '도로명' : '읍·면·동'}: ${state.address}`);
+        for (const group of groupsFor(type)) for (const [key, label] of group.options) if (state.features.includes(key)) labels.push(`${group.label} · ${label}`);
+        return labels;
+    }
+    function matchesLegacy(row, { capacity = '', staff = '' } = {}) {
+        const capacityMatch = !capacity || (capacity === '1-20' ? row.z <= 20 : capacity === '21-40' ? row.z >= 21 && row.z <= 40 : capacity === '41-60' ? row.z >= 41 && row.z <= 60 : row.z >= 61);
+        const newInstitution = row.d && row.d >= '2023-06-10';
+        return capacityMatch && (!staff || staff === 'rehab' && row.pt + row.ot > 0 || staff === 'nurse' && row.rn > 0 || staff === 'nursing' && row.rn + row.na > 0 || staff === 'new' && newInstitution);
+    }
+    const api = { mount, createMatcher, readState, writeState, sanitize, addressParts, groupsFor, emptyState, loadIndex, describeState, matchesLegacy };
+    /** SOFTM-CARE-MATCH END */
     root.CareAdvancedSearch = Object.freeze(api);
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window === 'undefined' ? globalThis : window);

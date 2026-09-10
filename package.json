@@ -6,10 +6,11 @@
   "scripts": {
     "serve": "python3 -m http.server 3000",
     "build": "python3 scripts/build_nationwide_care_services.py && node scripts/build-regional-seo.mjs && node scripts/sync-seo-entrypoints.mjs",
-    "check": "node --test scripts/care-insights.test.mjs scripts/result-sort.test.mjs scripts/voice-search.test.mjs scripts/mobile-sheet.test.mjs scripts/mobile-viewport-research.test.mjs scripts/check-search-readiness.test.mjs scripts/category-landing-ads.test.mjs scripts/validate-regional-seo.test.mjs scripts/submit-indexnow.test.mjs && node scripts/build-regional-seo.mjs --check && node scripts/sync-seo-entrypoints.mjs --check && node scripts/validate-project.mjs && node scripts/validate-regional-seo.mjs && python3 scripts/validate_nhis_static.py",
+    "check": "node --test scripts/care-match.test.mjs scripts/care-insights.test.mjs scripts/result-sort.test.mjs scripts/voice-search.test.mjs scripts/mobile-sheet.test.mjs scripts/mobile-viewport-research.test.mjs scripts/check-search-readiness.test.mjs scripts/category-landing-ads.test.mjs scripts/validate-regional-seo.test.mjs scripts/submit-indexnow.test.mjs && node scripts/build-regional-seo.mjs --check && node scripts/sync-seo-entrypoints.mjs --check && node scripts/validate-project.mjs && node scripts/validate-regional-seo.mjs && python3 scripts/validate_nhis_static.py",
     "check:search": "node scripts/check-search-readiness.mjs",
     "notify:indexnow": "node scripts/submit-indexnow.mjs"
   },
+  "_careMatchComment": "SOFTM-CARE-MATCH 날짜:20260910 : 조건별 근거 판정과 유형 전환·집계 회귀검사를 기본 검사에 포함",
   "_insightsComment": "SOFTM-CARE-INSIGHTS 날짜:20260910 : 근거 없는 기관 순위와 누락 자료 해석의 회귀검사를 기본 검사에 포함",
   "_seoComment": "SOFTM-DATA-REGIONS 날짜:20260904 : 수집 자료로 지도 인덱스를 먼저 만들고 지역 목록·사이트맵까지 함께 갱신",
   "_indexNowComment": "SOFTM-INDEXNOW 날짜:20260907 : 실제 변경 URL만 공개 키 확인 후 네이버에 통지하도록 실행 경로를 고정",
