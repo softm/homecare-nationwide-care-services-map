@@ -563,12 +563,27 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-route-error-alert p { margin:8px 0 0; font-size:15px; line-height:1.6; overflow-wrap:anywhere; }
 .care-route-error-alert button { flex:none; min-width:44px; min-height:44px; padding:4px; border:0; border-radius:8px; background:transparent; color:inherit; font-size:28px; cursor:pointer; }
 /* SOFTM-ROUTE-ERROR-ALERT END */
-/* SOFTM-FILTER-LAYOUT START 날짜:20260909 : 좁은 사이드바에서 조건 제목과 버튼이 섞여 줄바꿈되지 않도록 그룹별 격자로 정렬 */
-.care-map-page .filters .filter-lines { margin-top:16px; padding-top:0; border-top:0; display:grid; gap:16px; }
-.care-map-page .filters .filter-line { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:0; padding:14px 0 0; border-top:1px solid #e5ebf2; }
-.care-map-page .filters .filter-line strong { grid-column:1/-1; min-width:0; margin:0 0 3px; font-size:13px; line-height:1.5; color:#53647a; }
-.care-map-page .filters .filter-line .seg { min-width:0; min-height:40px; padding:8px 4px; border-radius:8px; font-size:13px; line-height:1.4; font-weight:650; white-space:nowrap; }
-.care-map-page .filters .confidence-line { grid-template-columns:repeat(2,minmax(0,1fr)); }
+/* SOFTM-FILTER-HIERARCHY START 날짜:20260910 : 기본 평가조건의 높이를 줄이고 상세조건을 별도 선택 단계로 분명하게 표시 */
+.care-map-page .filters .filter-lines { margin-top:10px; padding:10px; border:1px solid #dce5ef; border-radius:12px; background:#f8fafc; display:grid; gap:8px; }
+.care-map-page .filters .filter-line { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; margin:0; padding:0; border:0; }
+.care-map-page .filters .filter-line + .filter-line { padding-top:8px; border-top:1px solid #e2e9f1; }
+.care-map-page .filters .filter-line strong { grid-column:1/-1; min-width:0; margin:0; font-size:12px; line-height:1.35; color:#53647a; }
+.care-map-page .filters .filter-line .seg { min-width:0; min-height:34px; padding:5px 3px; border-radius:8px; font-size:12px; line-height:1.3; font-weight:650; white-space:nowrap; }
+.care-map-page .filters .confidence-line { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.care-map-page .care-extra-filters { margin:10px 0 2px; overflow:hidden; border:1px solid #b9d0e7; border-radius:12px; background:#fff; box-shadow:0 3px 12px #174a7812; }
+.care-map-page .care-extra-filters > summary { display:grid; grid-template-columns:34px minmax(0,1fr) auto; align-items:center; gap:10px; min-height:58px; padding:9px 12px; list-style:none; color:#173f6b; cursor:pointer; }
+.care-map-page .care-extra-filters > summary::-webkit-details-marker { display:none; }
+.care-extra-icon { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:#e5f1ff; color:#1767bd; }
+.care-extra-icon::before { content:'＋'; font-size:22px; font-weight:500; line-height:1; }
+.care-extra-copy { display:block; min-width:0; }
+.care-extra-copy strong { display:block; font-size:15px; line-height:1.35; }
+.care-extra-copy small { display:block; margin-top:2px; color:#60758a; font-size:12px; font-weight:500; line-height:1.35; overflow-wrap:anywhere; }
+.care-extra-action { color:#1767bd; font-size:12px; font-weight:750; white-space:nowrap; }
+.care-extra-action::before { content:'펼쳐보기 ›'; }
+.care-extra-filters[open] > summary { border-bottom:1px solid #dce6f0; background:#f4f8fd; }
+.care-extra-filters[open] .care-extra-icon::before { content:'−'; }
+.care-extra-filters[open] .care-extra-action::before { content:'접기 ∧'; }
+@media(max-width:1000px) and (orientation:portrait) { .care-map-page[data-care-workspace="search"].care-mobile-filters-open .filters { max-height:calc(100dvh - 58px - env(safe-area-inset-bottom,0px)); } }
 .care-map-page.care-mobile-filters-open .filters .filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid .care-voice-input { grid-column:1/-1; grid-row:1; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid #province { grid-column:1; grid-row:2; }
@@ -577,7 +592,7 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid .care-mobile-filter-toggle { grid-column:2; grid-row:3; white-space:nowrap; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid select { width:100%; min-width:0; box-sizing:border-box; font-size:14px; padding:8px; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid input,.care-map-page.care-mobile-filters-open .filters .filter-grid button,.care-map-page.care-mobile-filters-open .filters .filter-grid select { min-height:44px; }
-/* SOFTM-FILTER-LAYOUT END */
+/* SOFTM-FILTER-HIERARCHY END */
 
 /* SOFTM-FILTER-CLOSE START 날짜:20260910 : 펼친 조건은 상단 닫기와 바깥 영역으로 닫고 조회를 유일한 하단 실행으로 표시 */
 .care-filter-panel-head,.care-filter-backdrop { display:none; }

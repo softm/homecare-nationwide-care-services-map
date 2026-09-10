@@ -675,13 +675,15 @@
         heading.className = 'care-search-heading';
         heading.innerHTML = '<div><h2>어느 지역에서 찾으세요?</h2><p>지역이나 기관명을 입력하고, 마음에 드는 기관을 비교에 담아 보세요.</p></div><a href="care-cost.html">월 예상 비용 알아보기 →</a>';
         filters.prepend(heading);
+        /** SOFTM-FILTER-HIERARCHY START 날짜:20260910 : 기본조건 아래의 상세조건을 독립된 다음 단계로 인식할 수 있도록 제목과 펼침 상태를 구조화 */
         const advanced = document.createElement('details');
         advanced.className = 'care-extra-filters';
-        advanced.innerHTML = '<summary>상세조건 <span>인력 · 제공 서비스</span></summary><p class="care-grade-help">기관 평가 A~E는 공단의 기관 평가입니다. 이용자의 장기요양등급 1~5등급·인지지원등급과 다릅니다.</p><div class="care-extra-basic"></div>'; // SOFTM-BASIC-FILTER 날짜:20260904 : 평가 관련 기본 조건은 접지 않고 검색창 아래에서 바로 조작
+        advanced.innerHTML = '<summary><span class="care-extra-icon" aria-hidden="true"></span><span class="care-extra-copy"><strong>상세조건</strong><small>설립주체 · 인력 · 제공 서비스</small></span><span class="care-extra-action" aria-hidden="true"></span></summary><p class="care-grade-help">기관 평가 A~E는 공단의 기관 평가입니다. 이용자의 장기요양등급 1~5등급·인지지원등급과 다릅니다.</p><div class="care-extra-basic"></div>';
         if (options.type === 'nursing-hospital') {
-            advanced.querySelector('summary span').textContent = '상세 주소';
+            advanced.querySelector('.care-extra-copy small').textContent = '읍·면·동 · 도로명 주소';
             advanced.querySelector('.care-grade-help').remove();
         }
+        /** SOFTM-FILTER-HIERARCHY END */
         filters.append(advanced);
         for (const id of ['capacity', 'staff']) { const node = document.getElementById(id); if (node) advanced.querySelector('.care-extra-basic').append(node); }
         for (const node of filters.querySelectorAll('#advancedSearch, .filter-note')) advanced.append(node); // SOFTM-WORKSPACE 날짜:20260905 : 중첩된 상세검색도 한 영역에 모으고 평가 기본조건은 펼쳐 유지
