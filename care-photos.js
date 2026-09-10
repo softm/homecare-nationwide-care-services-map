@@ -134,6 +134,7 @@ function renderGallery() {
     $('photoGalleryRetry').disabled = galleryBusy;
     host.setAttribute('aria-busy', String(galleryBusy));
     syncBasket();
+    scheduleAutoPhotos(); // SOFTM-PHOTO-AUTOLOAD 날짜:20260911 : 배치 후에도 끝이 화면 안이면 다음 사진으로 화면을 채움
 }
 async function morePhotos(retry = false) {
     if (!gallery || galleryBusy) return;
@@ -162,6 +163,32 @@ $('photoModes').onclick = event => {
     if (mode === 'institutions') { render(); $('photoMore').textContent = '24곳 더 보기'; $('photoMore').disabled = false; $('photoResults').setAttribute('aria-busy', 'false'); }
     else { if (previous === 'institutions') $('photoResults').replaceChildren(); renderGallery(); if (!gallery.snapshot().items.length) void morePhotos(); }
 };
+/** SOFTM-PHOTO-AUTOLOAD START 날짜:20260911 : 목록 끝 근처에서만 다음 묶음을 읽고 중복·오류·확대창 뒤 자동 요청을 방지 */
+let autoPhotoFrame = 0;
+const autoPhotoEnd = $('photoAutoLoad');
+function scheduleAutoPhotos() {
+    if (autoPhotoFrame) return;
+    // 메이슨리 배치가 높이를 반영한 다음 끝 위치를 판별한다.
+    autoPhotoFrame = requestAnimationFrame(() => {
+        autoPhotoFrame = requestAnimationFrame(() => {
+            autoPhotoFrame = 0;
+            if (!gallery || galleryBusy || mode === 'institutions' || document.hidden || document.querySelector('dialog[open]')) return;
+            const state = gallery.snapshot();
+            if (!state.more || !state.items.length || state.failures.length) return;
+            const bounds = autoPhotoEnd.getBoundingClientRect();
+            if (bounds.top <= innerHeight + 400 && bounds.bottom >= 0) void morePhotos();
+        });
+    });
+}
+if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) scheduleAutoPhotos();
+    }, { rootMargin: '0px 0px 400px 0px' });
+    observer.observe(autoPhotoEnd);
+}
+document.addEventListener('visibilitychange', scheduleAutoPhotos);
+document.addEventListener('close', scheduleAutoPhotos, true);
+/** SOFTM-PHOTO-AUTOLOAD END */
 $('photoGalleryRetry').onclick = () => void morePhotos(true);
 updateMode();
 /** SOFTM-PHOTO-GALLERY END */

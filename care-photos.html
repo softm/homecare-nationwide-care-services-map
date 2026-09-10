@@ -8,7 +8,7 @@
 <!-- SOFTM-PHOTO-EXPLORE START 날짜:20260911 : 사진 중심 배치와 기관별 보기를 같은 탐색 도구로 제공 -->
 <link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260911-save1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
 <script src="care-data.js" defer></script><script src="nhis-static-data.js" defer></script><script src="map-experience.js?v=20260910-photos1" defer></script><script src="photo-viewer.js?v=20260911-gallery1" defer></script>
-<script type="module" src="care-photos.js?v=20260911-save1"></script>
+<script type="module" src="care-photos.js?v=20260911-auto1"></script>
 <!-- SOFTM-PHOTO-EXPLORE END -->
 </head>
 <body class="care-photo-page">
@@ -43,7 +43,9 @@
 <!-- SOFTM-PHOTO-GALLERY END -->
 <div id="photoResults" class="care-photo-grid" aria-busy="true"></div>
 <button type="button" id="photoRetry" hidden>자료 다시 불러오기</button>
-<div class="care-photo-more"><button type="button" id="photoMore" hidden>24곳 더 보기</button></div>
+<!-- SOFTM-PHOTO-AUTOLOAD START 날짜:20260911 : 끝 위치를 관찰하되 수동 더 보기도 유지 -->
+<div id="photoAutoLoad" class="care-photo-more"><button type="button" id="photoMore" hidden>24곳 더 보기</button></div>
+<!-- SOFTM-PHOTO-AUTOLOAD END -->
 <p id="photoAnnouncement" class="care-photo-save-feedback" role="status" aria-live="polite"></p>
 <noscript>사진 탐색에는 자바스크립트가 필요합니다. <a href="daycare-map.html">주야간보호 안내 보기</a></noscript>
 </main>
