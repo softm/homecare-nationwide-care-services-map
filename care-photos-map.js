@@ -5,7 +5,12 @@ function mount() {
     const actions = document.querySelector('.care-saved-actions');
     if (!actions || !window.CareMapExperience) return false;
     const type = location.pathname.endsWith('nationwide-daycare-map.html') ? 'daycare' : new URLSearchParams(location.search).get('type') || 'daycare';
-    const link = document.createElement('a'); link.className = 'care-photo-map-entry'; link.textContent = '사진으로 기관 찾기 →';
+    /** SOFTM-PHOTO-ENTRY-BUTTON START 날짜:20260910 : 텍스트 링크로 놓치던 사진 탐색을 아이콘과 설명을 갖춘 주요 행동으로 표시 */
+    const link = document.createElement('a'); link.className = 'care-photo-map-entry';
+    link.setAttribute('aria-labelledby', 'carePhotoEntryTitle');
+    link.setAttribute('aria-describedby', 'carePhotoEntryHint');
+    link.innerHTML = `<span class="care-photo-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/></svg></span><span class="care-photo-entry-copy"><strong id="carePhotoEntryTitle">사진으로 기관 찾기</strong><span id="carePhotoEntryHint">현재 지도에 표시된 기관</span></span><span class="care-photo-entry-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>`;
+    /** SOFTM-PHOTO-ENTRY-BUTTON END */
     /** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 지역명 재검색 대신 클릭 시점의 표시 마커를 세션으로 넘겨 긴 URL과 범위 확대를 방지 */
     link.href = `care-photos.html?${new URLSearchParams({ type, scope: 'map' })}`;
     const status = document.createElement('span'); status.className = 'care-photo-map-status'; status.setAttribute('role', 'status');

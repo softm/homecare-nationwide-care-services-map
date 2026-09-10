@@ -38,7 +38,21 @@
 .care-photo-categories{display:flex;gap:8px;overflow:auto;padding:12px 24px;background:#fff;border-bottom:1px solid #dce3e3;flex-shrink:0}.care-photo-categories button{white-space:nowrap}.care-photo-categories button[aria-pressed="true"]{color:white;background:#175cb5}
 .care-photo-columns{display:flex;align-items:flex-start;gap:18px;overflow:auto;min-height:0;padding:24px;overscroll-behavior:contain;flex:1}
 .care-photo-column{flex:0 0 320px;min-width:0;background:#fff;border:1px solid #dce3e3;border-radius:12px;padding:16px}.care-photo-column:only-child{flex-basis:min(100%,660px);margin-inline:auto}.care-photo-column h3{margin:0;font-size:19px;overflow-wrap:anywhere}.care-photo-column>p{font-size:14px;color:#53667b;margin:6px 0}.care-photo-column>a{font-size:14px}.care-photo-gallery{margin-top:16px}.care-photo-gallery .care-photo-figure{margin-bottom:18px}.care-photo-gallery .care-photo-image img{object-fit:contain}
-.care-photo-map-entry{display:block;padding:8px 12px;color:#175cb5;font-size:14px;font-weight:700;text-decoration:none}
+/** SOFTM-PHOTO-ENTRY-BUTTON START 날짜:20260910 : 목록의 다른 안내와 구분되는 버튼 대비와 충분한 터치 영역을 제공 */
+.care-map-page .care-photo-map-entry{box-sizing:border-box;display:flex;align-items:center;gap:12px;flex:none;min-height:72px;margin:4px 12px 12px;padding:12px 14px;border:1px solid #144d96;border-radius:12px;background:linear-gradient(110deg,#175cb5,#19477e);color:#fff;text-decoration:none;box-shadow:0 4px 10px #174e8926;transition:background .15s,box-shadow .15s}
+.care-photo-entry-icon{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border:1px solid #ffffff38;border-radius:10px;background:#ffffff16}
+.care-photo-entry-icon svg{width:26px;height:26px;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.care-photo-entry-copy{display:grid;gap:3px;min-width:0;flex:1}
+.care-photo-entry-copy strong{font-size:16px;font-weight:800;line-height:1.4;word-break:keep-all}
+.care-photo-entry-copy>span{font-size:13px;font-weight:500;line-height:1.4;color:#e2efff;word-break:keep-all}
+.care-photo-entry-arrow{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:50%;background:#ffffff1c}
+.care-photo-entry-arrow svg{width:19px;height:19px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.care-map-page .care-photo-map-entry:focus-visible{outline:3px solid #f2b84b;outline-offset:3px;box-shadow:0 0 0 5px #fff}
+.care-map-page .care-photo-map-entry:active{background:#123b70;box-shadow:0 1px 3px #174e8920}
+@media(hover:hover){.care-map-page .care-photo-map-entry:hover{background:linear-gradient(110deg,#124e9d,#103a6c);box-shadow:0 5px 14px #174e8940}}
+@media(max-width:520px){.care-map-page .care-photo-map-entry{min-height:64px;margin:4px 10px 8px;padding:10px 12px;gap:10px}.care-photo-entry-icon{flex-basis:36px;width:36px;height:36px}.care-photo-entry-arrow{flex-basis:24px;height:24px}}
+@media(prefers-reduced-motion:reduce){.care-map-page .care-photo-map-entry{transition:none}}
+/** SOFTM-PHOTO-ENTRY-BUTTON END */
 @media(min-width:1300px){.care-photo-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:800px){.care-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.care-photo-filters label{min-width:calc(50% - 12px)}.care-photo-filters button{width:100%}}
 @media(max-width:520px){.care-photo-top{padding:16px;gap:12px}.care-photo-top nav{gap:10px;font-size:13px}.care-photo-brand{font-size:22px}.care-photo-main{padding:24px 16px 40px}.care-photo-grid{grid-template-columns:1fr;gap:18px}.care-photo-filters{padding:14px;gap:10px}.care-photo-result-head{align-items:flex-start;flex-direction:column}.care-photo-result-head>button{width:100%}.care-photo-dialog{width:calc(100vw - 16px);height:calc(100dvh - 16px);border-radius:12px}.care-photo-dialog-head{padding:16px 14px 8px}.care-photo-dialog-head h2{font-size:20px}.care-photo-categories{padding:10px 14px}.care-photo-columns{padding:14px;gap:12px}.care-photo-column{flex-basis:calc(100vw - 72px)}.care-photo-column:only-child{flex-basis:100%}}
