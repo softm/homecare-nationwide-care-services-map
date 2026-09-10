@@ -734,7 +734,7 @@
         /** SOFTM-CARE-INSIGHTS START 날짜:20260910 : 두 지도의 담은 기관에서 설명과 상담 질문으로 바로 진입 */
         const insightsPanel = document.createElement('details');
         insightsPanel.className = 'care-insights';
-        insightsPanel.innerHTML = '<summary>기관 차이 알아보기<span>공개정보 요약 · 방문 전 질문</span></summary><div class="care-insight-content" aria-busy="false"></div>';
+        insightsPanel.innerHTML = '<summary>기관 비교 브리핑<span>공개정보 요약 · 방문 전 질문</span></summary><div class="care-insight-content" aria-busy="false"></div>'; // SOFTM-INSIGHT-NAME 날짜:20260910 : 담은 기관의 비교 요약이라는 의미가 드러나도록 사용자 지정 명칭 적용
         insightsPanel.addEventListener('toggle', updateInsights);
         bar.querySelector('.care-order-help').before(insightsPanel);
         /** SOFTM-CARE-INSIGHTS END */
