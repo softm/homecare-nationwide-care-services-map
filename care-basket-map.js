@@ -9,6 +9,21 @@
         return '도로 경로를 불러오지 못했습니다. 다시 탐색해 주세요.';
     }
     /** SOFTM-ROUTE-ERROR END */
+    /** SOFTM-ROUTE-ORDER START 날짜:20260911 : 되돌아오는 도로에서도 요청한 방문 순번과 실제 경로 도착 지점을 직접 연결 */
+    function orderedStops(rows, points, path, summary = {}) {
+        const waypointMeta = Array.isArray(summary.waypoints) ? summary.waypoints : [];
+        const routeMeta = [...waypointMeta, summary.goal];
+        const indices = routeMeta.length === rows.length ? routeMeta.map(item => Number(item?.pointIndex)) : [];
+        const locations = routeMeta.map(item => item?.location);
+        const metadataMatches = indices.length === rows.length && indices.every((index, position) => {
+            const location = locations[position], point = points[position];
+            const closeToRequested = Array.isArray(location) && location.length >= 2 && validPoint({ lng: Number(location[0]), lat: Number(location[1]) })
+                && Math.hypot(Number(location[0]) - point.lng, Number(location[1]) - point.lat) < .01;
+            return Number.isInteger(index) && index >= 0 && index < path.length && closeToRequested && (!position || index >= indices[position - 1]);
+        });
+        return rows.map((row, index) => ({ id: String(row.i), name: row.n, point: points[index], ...(metadataMatches ? { pathIndex: indices[index] } : {}) }));
+    }
+    /** SOFTM-ROUTE-ORDER END */
     function create(adapter) {
         let snapshot = null, generation = 0, controller = null, timer = null, ids = [], fitted = [];
         let state = { phase: 'idle', count: 0, placed: 0, missing: [], result: null };
@@ -64,8 +79,8 @@
                 adapter.draw(data.path);
                 fitted = [origin.point, ...points, ...data.path.map(([lng, lat]) => ({ lat, lng }))];
                 adapter.fit(fitted);
-                // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 검증된 도로 좌표와 방문 기관 좌표를 모의주행에 전달
-                publish('success', { result: { distance, duration, path: data.path, origin, stops: rows.map((row, index) => ({ id: String(row.i), name: row.n, point: points[index] })) } });
+                // SOFTM-ROUTE-ORDER 날짜:20260911 : 요청 순서와 응답 경로의 경유지 인덱스를 함께 전달해 모의주행 목적지를 정확히 연결
+                publish('success', { result: { distance, duration, path: data.path, origin, stops: orderedStops(rows, points, data.path, data.summary) } });
             } catch (error) {
                 if (current() && (error.name !== 'AbortError' || timedOut)) publish('error', { error: timedOut ? '경로 응답이 지연되고 있습니다. 다시 탐색해 주세요.' : routeErrorMessage(error) }); // SOFTM-ROUTE-ERROR 날짜:20260905 : 통신·응답 형식·처리 오류를 같은 문구로 숨기지 않음
             } finally { if (current()) { clearTimeout(timer); controller = null; } }
@@ -73,6 +88,6 @@
         }
         return Object.freeze({ active, has: id => ids.includes(String(id)), show, exit, fit() { if (active() && fitted.length) adapter.fit(fitted); }, state: () => state });
     }
-    root.CareBasketMap = Object.freeze({ create });
+    root.CareBasketMap = Object.freeze({ create, orderedStops }); // SOFTM-ROUTE-ORDER 날짜:20260911 : 실제 응답의 방문 순서 연결을 회귀검사에서 직접 확인
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-WORKSPACE-ROUTE END */

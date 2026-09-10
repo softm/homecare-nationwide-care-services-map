@@ -1,13 +1,16 @@
 /** SOFTM-ROUTE-SIMULATION START 날짜:20260910 : 계산된 도로 경로를 거리 비례로 재생하고 재탐색 시 이전 주행을 제거 */
 (function(root){
  'use strict';
+ /** SOFTM-ROUTE-ORDER START 날짜:20260911 : 차량 위치와 목적지 도착 판정이 같은 누적 도로거리 기준을 공유 */
+ function distance(a,b){
+  const r=Math.PI/180,dLat=(b[1]-a[1])*r,dLng=(b[0]-a[0])*r;
+  const value=Math.sin(dLat/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dLng/2)**2;
+  return 6371000*2*Math.asin(Math.min(1,Math.sqrt(value)));
+ }
+ function pathLengths(path){const lengths=[0];for(let i=1;i<path.length;i++)lengths.push(lengths[i-1]+distance(path[i-1],path[i]));return lengths;}
+ /** SOFTM-ROUTE-ORDER END */
  function trajectory(path){
-  const lengths=[0];
-  for(let i=1;i<path.length;i++){
-   const [x,y]=path[i-1],[nx,ny]=path[i],r=Math.PI/180;
-   const a=Math.sin((ny-y)*r/2)**2+Math.cos(y*r)*Math.cos(ny*r)*Math.sin((nx-x)*r/2)**2;
-   lengths.push(lengths[i-1]+6371000*2*Math.asin(Math.min(1,Math.sqrt(a))));
-  }
+  const lengths=pathLengths(path);
   const total=lengths.at(-1);
   return fraction=>{
    const target=Math.max(0,Math.min(1,fraction))*total;
@@ -17,13 +20,16 @@
    return [path[low-1][0]+(path[low][0]-path[low-1][0])*t,path[low-1][1]+(path[low][1]-path[low-1][1])*t];
   };
  }
- /** SOFTM-SIMULATION-ACTIVE START 날짜:20260910 : 방문 순서대로 경로상의 도착 지점을 잡고 해당 기관 마커만 강조 */
+ /** SOFTM-ROUTE-ORDER START 날짜:20260911 : API가 알려 준 방문 지점을 우선해 되돌아오는 도로에서도 순번별 도착 시점을 보존 */
  function milestones(path,stops=[]){
-  const lengths=[0],scale=Math.cos(path[0][1]*Math.PI/180);
+  const lengths=pathLengths(path),scale=Math.cos(path[0][1]*Math.PI/180);
   const metric=(a,b)=>Math.hypot((b[0]-a[0])*scale,b[1]-a[1]);
-  for(let i=1;i<path.length;i++)lengths.push(lengths[i-1]+metric(path[i-1],path[i]));
   const total=lengths.at(-1);let previous=0;
-  return stops.filter(stop=>Number.isFinite(stop.point?.lng)&&Number.isFinite(stop.point?.lat)).map((stop,index,valid)=>{
+  return stops.filter(stop=>Number.isInteger(stop.pathIndex)||(Number.isFinite(stop.point?.lng)&&Number.isFinite(stop.point?.lat))).map((stop,index,valid)=>{
+   if(Number.isInteger(stop.pathIndex)&&stop.pathIndex>=0&&stop.pathIndex<path.length){
+    const fraction=total?Math.max(previous,lengths[stop.pathIndex]/total):previous;
+    previous=index===valid.length-1?1:fraction;return {...stop,fraction:previous};
+   }
    let best=Infinity,fraction=previous;
    for(let i=1;i<path.length;i++){
     const a=path[i-1],b=path[i],dx=(b[0]-a[0])*scale,dy=b[1]-a[1],span=lengths[i]-lengths[i-1];
@@ -37,6 +43,8 @@
    previous=fraction;return {...stop,fraction};
   });
  }
+ /** SOFTM-ROUTE-ORDER END */
+ /** SOFTM-SIMULATION-ACTIVE START 날짜:20260910 : 방문 순서대로 해당 기관 마커만 강조 */
  function highlighter(getMarker){
   let current=null,icon=null,zIndex=0;
   return id=>{
