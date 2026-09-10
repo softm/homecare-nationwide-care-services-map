@@ -35,6 +35,7 @@ function makeDaycareHarness(rows = []) {
         externalToast: (...args) => toasts.push(args),
     });
     vm.runInContext(`
+        let daycareMatchPending=false;const CareMapExperience={refreshMatch(){},exitBasketMap(){}}; // SOFTM-CARE-MATCH 날짜:20260910 : 조회 순서 검증에서 설명 상태 연결을 제공
         let advancedSearch=null,daycareSearchGeneration=0,activeDaycareSearch=null,mapProgressGeneration=0;
         let mapRequest=0,mapReady=true,mapTimer=null,boundsTimer=null,dragSearchTimer=null,progressHideTimer=null;
         let DATA=externalRows,filtered=[],selected=new Set(),mapSearchIds=null,routeOrder=[],mapMarkers=[],basePoint=null;
@@ -172,6 +173,7 @@ function makeCareHarness(rows) {
         externalGeocode: row => deferred.get(row.i) || Promise.resolve(row.coord || null),
     });
     vm.runInContext(`
+        let careMatchRows=[],careMatchScope='',careMatchPending=false,careMatchError=false;const CareMapExperience={refreshMatch(){},exitBasketMap(){}}; // SOFTM-CARE-MATCH 날짜:20260910 : 실제 전체 후보·조회 경쟁 검증에 설명 상태를 연결
         let refreshToken=0,resultCount=0,activeCareQuery=null,mapReady=true;
         let filtered=externalRows,areaRows=[],selected=new Set(),markers=new Map(),basePoint=null,skipIdleUntil=0;
         const PAGE_LIMIT=90,MAP_CANDIDATE_LIMIT=300;
@@ -204,7 +206,7 @@ function makeCareHarness(rows) {
             deferred.set(id, new Promise(done => { resolve = done; }));
             return resolve;
         },
-        snapshot: () => JSON.parse(vm.runInContext('JSON.stringify({count:resultCount,ids:areaRows.map(row=>row.i),markers:[...markers.keys()]})', context)),
+        snapshot: () => JSON.parse(vm.runInContext('JSON.stringify({count:resultCount,insightCount:careMatchRows.length,ids:areaRows.map(row=>row.i),markers:[...markers.keys()]})', context)), // SOFTM-CARE-MATCH 날짜:20260910 : 페이지 제한 전 설명 집계 수를 검증에 노출
     };
 }
 
@@ -214,6 +216,7 @@ test('통합 지역조회: 351곳 전체 건수는 지도·목록 300곳 표시 
     assert.equal(result.count, 351);
     assert.equal(result.markerCount, 300);
     assert.equal(harness.snapshot().ids.length, 300);
+    assert.equal(harness.snapshot().insightCount, 351); // SOFTM-CARE-MATCH 날짜:20260910 : 설명 집계는 표시 제한 전 전체 후보를 사용
     assert.ok(harness.snapshot().markers.every(id => harness.snapshot().ids.includes(id)), '중심순으로 고른 모든 마커가 목록·체크 집합에도 포함됨');
     assert.equal(harness.elements.get('areaCount').textContent, '351곳');
     assert.equal(harness.reports.at(-1).count, 351);
@@ -251,6 +254,7 @@ test('통합 지도 미준비: 미리보기 90곳과 전체 필터 결과 150곳
     assert.equal(result.markerCount, 0);
     assert.equal(result.mapReady, false);
     assert.equal(harness.snapshot().ids.length, 90);
+    assert.equal(harness.snapshot().insightCount, 150); // SOFTM-CARE-MATCH 날짜:20260910 : 지도 미준비 상태에서도 전체 후보로 설명
     assert.equal(harness.elements.get('areaCount').textContent, '150곳');
 });
 /** SOFTM-SEARCH-FEEDBACK END */

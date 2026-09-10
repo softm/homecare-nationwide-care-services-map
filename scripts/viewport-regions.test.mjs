@@ -95,6 +95,7 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
         mapReady: true, refreshToken: 0, clearMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },
         cachedCoord: row => row._coord, hav: () => 0, PAGE_LIMIT: 90, MAP_CANDIDATE_LIMIT: 300,
         geocode: async row => row._coord, basePoint: null, showLoading() {}, hideLoading() {},
+        careMatchPending: false, careMatchRows: [], CareMapExperience: { refreshMatch() {} }, // SOFTM-CARE-MATCH 날짜:20260910 : 실제 조회 전체 결과를 설명에도 전달하는 계약을 제공
         $: () => node, areaRows: [], selected: new Set(), sortRows() {}, markers: placed,
         /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 조회 완료 계약을 제공하면서 기존 전체 화면 후보 검증을 유지 */
         markerIcon() {}, renderList() {}, setStatus() {}, updateAreaLocation() {}, rows, resultCount: 0, // SOFTM-LOCATION-ROW 날짜:20260909 : 지도 후보 검사는 별도 위치줄 표시를 모의 처리
@@ -105,6 +106,7 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
     await vm.runInContext('loadMarkers(rows)', sandbox);
     assert.equal(placed.size, 351);
     assert.equal(sandbox.areaRows.length, 351);
+    assert.equal(sandbox.careMatchRows.length, 351); // SOFTM-CARE-MATCH 날짜:20260910 : 표시 제한을 넘는 후보도 설명 집계에서 누락되지 않게 검증
 });
 
 test('전용 지도도 축소 화면에서 800번째 이후 기관까지 최종 좌표 확인에 전달', async () => {
