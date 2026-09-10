@@ -11,6 +11,21 @@
             }, 5200);
         });
     }
+    /** SOFTM-SEARCH-LIST-SCROLL START 날짜:20260910 : 목록 끝 광고까지 빠르게 이동해도 강조가 이전 기관에 남지 않도록 가시 기관과 스크롤 끝을 함께 판정 */
+    function pickSearchScrollRow(rows, listRect, scrollState) {
+        if (!rows.length) return null;
+        const visible = rows.filter(node => {
+            const rect = node.getBoundingClientRect();
+            return rect.bottom > listRect.top && rect.top < listRect.bottom;
+        });
+        const atStart = scrollState.scrollTop <= 2;
+        const atEnd = scrollState.scrollHeight > scrollState.clientHeight
+            && scrollState.scrollTop + scrollState.clientHeight >= scrollState.scrollHeight - 2;
+        if (atStart) return visible[0] || rows[0];
+        if (atEnd) return visible.at(-1) || rows.at(-1);
+        return visible.find(node => node.getBoundingClientRect().bottom > listRect.top + 55) || visible.at(-1) || null;
+    }
+    /** SOFTM-SEARCH-LIST-SCROLL END */
     function createZoomResearch({ enabled, prepare, search }, clock = root) {
         let userUntil = 0, pending = false, timer;
         const clear = () => { clock.clearTimeout(timer); timer = null; };
@@ -570,17 +585,21 @@
         const sync = () => {
             frame = 0;
             if (workspace !== 'search') return; // SOFTM-DESKTOP-MAP 날짜:20260909 : PC 목록 스크롤도 모바일과 같은 마커 선택을 사용
-            const top = list.getBoundingClientRect().top;
+            /** SOFTM-SEARCH-LIST-SCROLL START 날짜:20260910 : 광고가 선택 기준선을 지난 상태에서도 현재 보이는 기관으로 강조를 갱신 */
+            const requested = scrollRequested;
+            scrollRequested = false;
+            const listRect = list.getBoundingClientRect();
             const rows = [...list.querySelectorAll('.row')];
-            const row = rows.find(node => node.getBoundingClientRect().bottom > top + 55);
+            const row = pickSearchScrollRow(rows, listRect, list);
+            /** SOFTM-SEARCH-LIST-SCROLL END */
             if (!row) return;
             const id = row.dataset.id || row.querySelector('[data-care-basket]')?.dataset.careBasket;
             if (active !== row) {
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
                 active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
             }
-            if (scrollRequested) options.scrollDetail?.(id); // SOFTM-SCROLL-DETAIL 날짜:20260909 : 사용자가 목록을 스크롤할 때만 열린 상세를 현재 기관으로 갱신
-            options.mobileFocus?.(id, scrollRequested && (!media.matches || root.matchMedia('(orientation:landscape)').matches || mobileSheet?.state() !== 'list')); scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 지도 갱신 자체가 다시 지도를 이동시키지 않도록 제한
+            if (requested) options.scrollDetail?.(id); // SOFTM-SCROLL-DETAIL 날짜:20260909 : 사용자가 목록을 스크롤할 때만 열린 상세를 현재 기관으로 갱신
+            options.mobileFocus?.(id, requested && (!media.matches || root.matchMedia('(orientation:landscape)').matches || mobileSheet?.state() !== 'list')); // SOFTM-SEARCH-LIST-SCROLL 날짜:20260910 : 기관이 없는 광고 구간에서도 지난 스크롤 의도를 다음 화면 갱신에 남기지 않음
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
         const observe = () => { photoObserver.disconnect(); updateScrollTail(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); }; // SOFTM-LIST-SCROLL-END 날짜:20260910 : 목록이 다시 그려질 때 끝 스크롤 여유도 새 높이로 갱신
