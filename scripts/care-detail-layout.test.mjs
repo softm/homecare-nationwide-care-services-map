@@ -24,3 +24,20 @@ test('주소와 기관명에 HTML이 있어도 실행되는 마크업을 만들�
  assert.ok(!html.includes('<script>'));assert.ok(!html.includes('<img'));assert.match(html,/data-care-address="&quot;&gt;&lt;script&gt;/);
 });
 /** SOFTM-DETAIL-LAYOUT END */
+
+/** SOFTM-MAP-LINK START 날짜:20260911 : 주소·명칭 결합 재발과 좌표 없는 기관의 연결 오류를 방지 */
+test('외부 지도는 주소만 검색하고 카카오는 확인 좌표를 바로 연다',()=>{
+ const result=context.window.CareDetailLayout.externalMaps(c,point);
+ assert.equal(decodeURIComponent(new URL(result.naver).pathname),'/p/search/'+c.a);
+ assert.equal(decodeURIComponent(new URL(result.kakao).pathname),'/link/map/'+c.n+',37.5,127.1');
+});
+test('좌표 미확인은 주소, 주소 누락은 기관명 하나만 검색한다',()=>{
+ for(const p of [null,{lat:NaN,lng:127},{lat:0,lng:0}]){
+  const result=context.window.CareDetailLayout.externalMaps(c,p);
+  assert.equal(decodeURIComponent(new URL(result.kakao).pathname),'/link/search/'+c.a);
+ }
+ const result=context.window.CareDetailLayout.externalMaps({n:'센터 & 분원',a:'  '},null);
+ assert.equal(decodeURIComponent(new URL(result.naver).pathname),'/p/search/센터 & 분원');
+ assert.equal(decodeURIComponent(new URL(result.kakao).pathname),'/link/search/센터 & 분원');
+});
+/** SOFTM-MAP-LINK END */
