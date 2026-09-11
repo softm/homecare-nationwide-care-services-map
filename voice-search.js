@@ -54,6 +54,12 @@
         if (!input || input.closest('.care-voice-input')) return;
         const icon = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg>';
         const wrapper = document.createElement('div'); wrapper.className = 'care-voice-input'; input.before(wrapper); wrapper.append(input);
+        /** SOFTM-SEARCH-CLEAR START 날짜:20260911 : 긴 검색어를 지우기 위해 키보드 삭제를 반복하지 않고 입력창 안에서 한 번에 초기화 */
+        const clear = document.createElement('button'); clear.type = 'button'; clear.className = 'care-search-clear'; clear.setAttribute('aria-label', '검색어 지우기'); clear.title = '검색어 지우기'; clear.textContent = '×'; wrapper.append(clear);
+        const syncClear = () => { clear.hidden = !input.value; };
+        clear.onclick = () => { input.value = ''; input.dispatchEvent(new Event('input', { bubbles: true })); syncClear(); input.focus({ preventScroll: true }); };
+        input.addEventListener('input', syncClear); syncClear();
+        /** SOFTM-SEARCH-CLEAR END */
         const trigger = document.createElement('button'); trigger.type = 'button'; trigger.className = 'care-voice-trigger'; trigger.setAttribute('aria-label', '음성검색'); trigger.innerHTML = icon; wrapper.append(trigger);
         const dialog = document.createElement('dialog'); dialog.className = 'care-voice-dialog'; dialog.setAttribute('aria-labelledby', 'careVoiceTitle');
         dialog.innerHTML = '<button type="button" class="care-voice-close" aria-label="음성검색 닫기">×</button><h2 id="careVoiceTitle">음성으로 검색</h2><p class="care-voice-example">지역명이나 기관명을 말해보세요<br><span>“광명” · “행복주간보호센터”</span></p><button type="button" class="care-voice-record" aria-label="음성 인식 시작">' + icon + '</button><p class="care-voice-status" role="status" aria-live="polite"></p><label for="careVoiceText">검색어 확인·수정</label><input id="careVoiceText" type="search" autocomplete="off" placeholder="검색어를 직접 입력할 수도 있어요"><button type="button" class="care-voice-submit">이 내용으로 조회</button><p class="care-voice-notice">음성은 브라우저의 음성 인식 서비스에서 처리될 수 있습니다.</p>';
@@ -62,7 +68,7 @@
         const Recognition = root.SpeechRecognition || root.webkitSpeechRecognition;
         const session = createSession(Recognition, result => {
             if (!dialog.open) return;
-            if (result.text !== undefined && result.text.trim()) { transcript.value = result.text; input.value = result.text; } // SOFTM-VOICE-TEXT 날짜:20260909 : 인식 텍스트를 확인창과 실제 검색창에 즉시 함께 반영
+            if (result.text !== undefined && result.text.trim()) { transcript.value = result.text; input.value = result.text; syncClear(); } // SOFTM-SEARCH-CLEAR 날짜:20260911 : 음성으로 채운 검색어도 지우기 버튼 상태에 즉시 반영
             status.textContent = result.message;
             const busy = ['listening', 'starting', 'stopping'].includes(result.state);
             record.disabled = result.state === 'stopping'; // SOFTM-VOICE-TEXT 날짜:20260909 : 최종 결과를 기다리는 동안 재시작으로 결과가 취소되지 않도록 보호
@@ -81,8 +87,8 @@
             if (record.dataset.listening === 'true') { session.stop(); } // SOFTM-VOICE-TEXT 날짜:20260909 : 중지 시 abort 대신 stop으로 마지막 텍스트를 수신
             else session.start();
         };
-        transcript.oninput = () => { stop(); input.value = transcript.value; submit.disabled = !transcript.value.trim(); };
-        submit.onclick = () => { const text = transcript.value.trim(); if (!text) return; input.value = text; close(); search(); };
+        transcript.oninput = () => { stop(); input.value = transcript.value; syncClear(); submit.disabled = !transcript.value.trim(); };
+        submit.onclick = () => { const text = transcript.value.trim(); if (!text) return; input.value = text; syncClear(); close(); search(); };
         transcript.onkeydown = event => { if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); submit.click(); } };
         dialog.querySelector('.care-voice-close').onclick = close;
         dialog.addEventListener('cancel', event => { event.preventDefault(); event.stopPropagation(); close(); });

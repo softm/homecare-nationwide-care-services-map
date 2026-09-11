@@ -150,6 +150,28 @@
 }
 @media(prefers-reduced-motion:reduce) { .care-map-page *, .care-map-page *::before, .care-map-page *::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
 /** SOFTM-MAP-EXPERIENCE END */
+
+/** SOFTM-MAP-NAVIGATION START 날짜:20260911 : 지도 상단에서 현재 유형 안내와 서비스 소개를 찾고 모바일 검색조건에서도 같은 경로를 사용 */
+.care-context-links,.care-mobile-context-links { display:none; }
+@media(min-width:1001px) {
+ .care-map-page .category-nav { box-sizing:border-box; padding-right:330px; overflow:hidden; }
+ .care-map-page .category-inner { box-sizing:border-box; width:100%; min-width:0; overflow-x:auto; scrollbar-width:none; }
+ .care-map-page .category-inner::-webkit-scrollbar { display:none; }
+ .care-map-page .category-inner > a { flex:none; }
+ .care-map-page .care-context-links { position:fixed; inset:0 0 auto auto; z-index:182; display:flex; align-items:center; gap:6px; width:330px; min-height:52px; padding:6px 12px; border-bottom:1px solid #d6e1ee; border-left:1px solid #d6e1ee; background:#fff; box-shadow:-8px 0 14px #ffffff; }
+ .care-map-page .care-context-links a { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:7px 12px; border:1px solid #c6d6e6; border-radius:10px; background:#fff; color:#355674; font-size:13px; font-weight:750; text-decoration:none; }
+ .care-map-page .care-context-links .care-context-guide { background:#edf5ff; border-color:#a9c7e7; color:#175cb5; }
+ .care-map-page .care-context-links a:hover { border-color:#719aca; background:#f6faff; color:#175cb5; }
+ .care-map-page .care-context-nav .category-inner { align-items:center; }
+ .care-map-page .care-context-nav .care-context-brand { color:#172c43; font-size:18px; font-weight:850; letter-spacing:-.04em; }
+ .care-map-page.care-type-enabled .care-type-header { padding-right:342px; }
+}
+@media(max-width:1000px) {
+ .care-map-page.care-mobile-filters-open .care-mobile-context-links { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px 0 14px; }
+ .care-map-page .care-mobile-context-links a { display:flex; align-items:center; justify-content:center; min-height:44px; padding:8px 10px; border:1px solid #c6d6e6; border-radius:10px; background:#fff; color:#355674; font-size:14px; font-weight:750; text-align:center; text-decoration:none; }
+ .care-map-page .care-mobile-context-links .care-context-guide { background:#edf5ff; border-color:#a9c7e7; color:#175cb5; }
+}
+/** SOFTM-MAP-NAVIGATION END */
 /** SOFTM-WORKSPACE START 날짜:20260905 : 기관 목록을 중심으로 탐색하고 담은 기관·방문 계획의 작업 영역을 분리 */
 .care-map-page [hidden] { display:none!important; }
 .care-map-page .layout { display:grid; grid-template-columns:minmax(340px,400px) minmax(0,1fr); gap:20px; align-items:start; }

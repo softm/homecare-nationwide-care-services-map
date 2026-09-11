@@ -1,6 +1,13 @@
 /** SOFTM-VOICE-SEARCH START 날짜:20260909 : 검색창 크기를 유지하며 음성 입력과 확인을 하단 창으로 분리 */
 .care-voice-input { position:relative; min-width:0; }
-.care-voice-input #q { width:100%; box-sizing:border-box; padding-right:48px; }
+.care-voice-input #q { width:100%; box-sizing:border-box; padding-right:88px; }
+.care-voice-input #q::-webkit-search-cancel-button { appearance:none; }
+/** SOFTM-SEARCH-CLEAR START 날짜:20260911 : 검색어가 있을 때만 입력창 안에 독립된 지우기 동작을 표시하고 음성 버튼과 겹치지 않도록 분리 */
+.care-search-clear { position:absolute; right:44px; top:50%; transform:translateY(-50%); display:grid; place-items:center; width:40px; height:40px; min-height:40px; padding:0; border:0; border-radius:50%; background:transparent; color:#607387; font-size:25px; font-weight:500; line-height:1; cursor:pointer; }
+.care-search-clear:hover { background:#edf3f9; color:#173f6b; }
+.care-search-clear:focus-visible { outline:3px solid #175cb5; outline-offset:1px; }
+.care-search-clear[hidden] { display:none; }
+/** SOFTM-SEARCH-CLEAR END */
 .care-voice-trigger { position:absolute; right:2px; top:50%; transform:translateY(-50%); display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:10px; background:transparent; color:#25425d; cursor:pointer; }
 .care-voice-dialog { box-sizing:border-box; position:fixed; inset:auto 0 0; width:min(100%,520px); max-height:90dvh; margin:auto auto 0; padding:28px 24px calc(20px + env(safe-area-inset-bottom)); border:0; border-radius:24px 24px 0 0; color:#182b3b; background:white; overflow:auto; text-align:center; }
 .care-voice-dialog::backdrop { background:rgb(0 0 0 / .48); }

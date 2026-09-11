@@ -3,9 +3,17 @@
 .care-photo-page *,.care-photo-dialog *{box-sizing:border-box}
 .care-photo-page button,.care-photo-page select,.care-photo-page input,.care-photo-dialog button{font:inherit}
 .care-photo-page a,.care-photo-dialog a{color:var(--care-blue,#175cb5)}
-.care-photo-top{max-width:1280px;margin:auto;padding:22px 28px;display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #dce3e3}
-.care-photo-brand{font-size:24px;font-weight:850;text-decoration:none;color:#172c43!important}
-.care-photo-top nav{display:flex;align-items:center;gap:20px;font-size:14px}
+/** SOFTM-PHOTO-HEADER START 날짜:20260911 : 유형 안내 화면과 같은 브랜드 표식·높이·정렬을 사용해 서로 다른 서비스처럼 보이지 않도록 통일 */
+.care-photo-top{border-bottom:1px solid #dce3e3;background:#fff}
+.care-photo-top-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;width:min(1120px,calc(100% - 48px));min-height:76px;margin:auto}
+.care-photo-brand{display:inline-flex;align-items:center;gap:10px;min-height:48px;color:#172c43!important;font-size:24px;font-weight:750;letter-spacing:-.05em;text-decoration:none}
+.care-photo-brand-symbol{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border-radius:13px;background:#175cb5;color:#fff}
+.care-photo-brand-symbol .care-icon{width:28px;height:28px}
+.care-photo-top nav{display:flex;align-items:center;gap:18px;font-size:16px}
+.care-photo-top nav a{display:inline-flex;align-items:center;gap:10px;min-height:48px;color:#53667b;text-decoration:none;white-space:nowrap}
+.care-photo-top nav a::after{content:'→';color:#175cb5;font-weight:800}
+.care-photo-top nav a:hover{color:#175cb5;text-decoration:underline}
+/** SOFTM-PHOTO-HEADER END */
 .care-photo-main{max-width:1280px;margin:auto;padding:30px 28px 60px}
 .care-photo-intro h1{font-size:clamp(28px,4vw,38px);line-height:1.25;margin:5px 0 12px;letter-spacing:-1px}
 .care-photo-intro p{margin:0;color:#53667b}.care-photo-intro .care-photo-eyebrow{color:#175cb5;font-size:14px;font-weight:700}
@@ -55,7 +63,8 @@
 /** SOFTM-PHOTO-ENTRY-COMPACT END */
 @media(min-width:1300px){.care-photo-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:800px){.care-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.care-photo-filters label{min-width:calc(50% - 12px)}.care-photo-filters button{width:100%}}
-@media(max-width:520px){.care-photo-top{padding:16px;gap:12px}.care-photo-top nav{gap:10px;font-size:13px}.care-photo-brand{font-size:22px}.care-photo-main{padding:24px 16px 40px}.care-photo-grid{grid-template-columns:1fr;gap:18px}.care-photo-filters{padding:14px;gap:10px}.care-photo-result-head{align-items:flex-start;flex-direction:column}.care-photo-result-head>button{width:100%}.care-photo-dialog{width:calc(100vw - 16px);height:calc(100dvh - 16px);border-radius:12px}.care-photo-dialog-head{padding:16px 14px 8px}.care-photo-dialog-head h2{font-size:20px}.care-photo-categories{padding:10px 14px}.care-photo-columns{padding:14px;gap:12px}.care-photo-column{flex-basis:calc(100vw - 72px)}.care-photo-column:only-child{flex-basis:100%}}
+@media(max-width:700px){.care-photo-top-inner{width:calc(100% - 32px);min-height:72px;gap:14px}.care-photo-brand{gap:8px;font-size:22px}.care-photo-brand-symbol{flex-basis:36px;width:36px;height:36px}.care-photo-top nav{gap:8px;font-size:14px}.care-photo-top nav a:last-child{display:none}}
+@media(max-width:520px){.care-photo-main{padding:24px 16px 40px}.care-photo-grid{grid-template-columns:1fr;gap:18px}.care-photo-filters{padding:14px;gap:10px}.care-photo-result-head{align-items:flex-start;flex-direction:column}.care-photo-result-head>button{width:100%}.care-photo-dialog{width:calc(100vw - 16px);height:calc(100dvh - 16px);border-radius:12px}.care-photo-dialog-head{padding:16px 14px 8px}.care-photo-dialog-head h2{font-size:20px}.care-photo-categories{padding:10px 14px}.care-photo-columns{padding:14px;gap:12px}.care-photo-column{flex-basis:calc(100vw - 72px)}.care-photo-column:only-child{flex-basis:100%}}
 .care-saved-actions [data-photo-compare]{grid-column:1/-1}
 /** SOFTM-PHOTO-UI END */
 
@@ -87,7 +96,7 @@
 /** SOFTM-PHOTO-GALLERY END */
 
 /** SOFTM-PHOTO-WALL START 날짜:20260911 : 사진 아래 반복 설명을 줄이고 원본 비율의 사진과 필요한 행동에 집중 */
-.care-photo-page{background:#fff}.care-photo-main,.care-photo-top{max-width:1600px}
+.care-photo-page{background:#fff}.care-photo-main{max-width:1600px}
 .care-photo-main{padding-top:20px}.care-photo-intro .care-photo-eyebrow{display:none}.care-photo-intro h1{font-size:28px;margin:0 0 6px}.care-photo-intro>p:last-child{font-size:14px}
 .care-photo-filters{margin:16px 0;padding:14px;border-radius:10px}.care-photo-scope{margin-top:16px;padding:8px 12px}.care-photo-note{font-size:12px;margin:8px 0 14px}.care-photo-viewbar{margin-bottom:20px}
 .care-photo-grid:is([data-mode="gallery"],[data-mode="dense"]){display:block;position:relative}

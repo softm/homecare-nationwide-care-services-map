@@ -2,6 +2,36 @@
 (function (root) {
     'use strict';
     const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    /** SOFTM-MAP-NAVIGATION START 날짜:20260911 : 지도에서 현재 유형 안내와 서비스 설명으로 바로 이동할 수 있도록 유형별 목적지를 한곳에서 관리 */
+    const CATEGORY_GUIDES = Object.freeze({
+        facility: { href: 'nursing-home-map.html', label: '요양원·공동생활가정 안내' },
+        daycare: { href: 'daycare-map.html', label: '주·야간보호 안내' },
+        'home-care': { href: 'home-care-map.html', label: '방문요양 안내' },
+        'home-nursing': { href: 'home-nursing-map.html', label: '방문간호 안내' },
+        'home-bath': { href: 'home-bath-map.html', label: '방문목욕 안내' },
+        'short-stay': { href: 'short-stay-care-map.html', label: '단기보호 안내' },
+        'welfare-equipment': { href: 'welfare-equipment-map.html', label: '복지용구 안내' },
+        dementia: { href: 'dementia-care-map.html', label: '치매전담형 안내' },
+        'nursing-hospital': { href: 'nursing-hospital-map.html', label: '요양병원 안내' }
+    });
+    function categoryGuide(type) { return CATEGORY_GUIDES[type] || CATEGORY_GUIDES.daycare; }
+    function createContextLinks(className) {
+        const guide = categoryGuide(options?.type), links = document.createElement('div');
+        links.className = className; links.setAttribute('role', 'navigation'); links.setAttribute('aria-label', '현재 유형과 서비스 안내');
+        links.innerHTML = `<a class="care-context-guide" href="${escape(guide.href)}">${escape(guide.label)}</a><a href="about.html">서비스 소개</a>`;
+        return links;
+    }
+    function installPageNavigation() {
+        let nav = document.querySelector('.category-nav');
+        if (!nav) {
+            nav = document.createElement('nav'); nav.className = 'category-nav care-context-nav'; nav.setAttribute('aria-label', '돌봄한눈 안내');
+            nav.innerHTML = '<div class="category-inner"><a class="care-context-brand" href="index.html">돌봄한눈</a></div>';
+            document.body.prepend(nav);
+        }
+        if (!document.body.querySelector(':scope > .care-context-links')) document.body.append(createContextLinks('care-context-links'));
+        return nav;
+    }
+    /** SOFTM-MAP-NAVIGATION END */
     /** SOFTM-VIEWPORT-RESEARCH START 날짜:20260909 : 사용자 확대·축소만 재조회하고 내부 지도 이동과 별도 수동 재검색을 구분 */
     function ensureListAdFallback(host, fallback) {
         host.querySelectorAll('.list-ad-slot,.daycare-list-ad-slot').forEach(slot => {
@@ -558,6 +588,7 @@
         const panelTitle = document.createElement('strong'); panelTitle.textContent = '검색조건';
         const close = document.createElement('button'); close.type = 'button'; close.className = 'care-filter-panel-close'; close.textContent = '×'; close.setAttribute('aria-label', '검색조건 닫기');
         panelHead.append(panelTitle, close); filters.prepend(panelHead);
+        panelHead.after(createContextLinks('care-mobile-context-links')); // SOFTM-MAP-NAVIGATION 날짜:20260911 : 상단 유형 메뉴가 숨는 모바일에서도 안내 링크를 검색조건 안에 제공
         const backdrop = document.createElement('button'); backdrop.type = 'button'; backdrop.className = 'care-filter-backdrop'; backdrop.hidden = true; backdrop.setAttribute('aria-label', '검색조건 닫기');
         document.body.append(backdrop);
         const setOpen = (open, restoreFocus = false) => {
@@ -839,7 +870,7 @@
         if (media.matches && mobileSheet?.state() === 'list') { mobileSheet.set('split'); return; }
         if (workspaceExpanded) { setWorkspaceExpanded(false); return; }
         if (root.history.length > 1) root.history.back();
-        else root.location.assign('index.html');
+        else root.location.assign(categoryGuide(options?.type).href); // SOFTM-MAP-NAVIGATION 날짜:20260911 : 직접 연 지도에서도 현재 유형 안내 화면으로 복귀
     }
     /** SOFTM-WORKSPACE-BACK-ICON END */
     function init(config) {
@@ -860,7 +891,7 @@
         /** SOFTM-CARE-MATCH END */
         let storage; try { storage = root.sessionStorage; } catch {}
         basket = createBasket(storage, options.type); basket.retain(new Set(rowById.keys()));
-        document.body.classList.add('care-map-page'); prepareFilters();
+        document.body.classList.add('care-map-page'); installPageNavigation(); prepareFilters();
         media = root.matchMedia('(max-width: 1000px)');
         const layout = document.querySelector('.layout'), results = document.querySelector('.results');
         results.id = 'careSearchResults';
