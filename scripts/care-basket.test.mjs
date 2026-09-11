@@ -39,6 +39,37 @@ test('담은 기관 표시·상세용 번호가 검색 체크와 무관하고 �
     assert.equal(h.mode.state().phase, 'success'); assert.equal(h.mode.state().result.origin.label, origin.label);
     h.mode.exit(); assert.equal(h.saved, h.original); assert.deepEqual(h.markers, ['search']); assert.deepEqual(h.saved.conditions, ['A', 'high']); assert.equal(h.route, null);
 });
+/** SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 체크한 경우만 방문 배열을 최적화하고 변경 전후를 화면에 전달하는지 검증 */
+test('최적경로 선택 시 출발지 좌표거리 기준으로 요청·마커·알림 배열을 함께 변경', async () => {
+    const h = harness(), list = [row('3'), row('1'), row('2')];
+    await h.mode.show(list, { route: true, origin, optimize: true });
+    assert.deepEqual(h.markers, [['1', 1], ['2', 2], ['3', 3]]);
+    assert.deepEqual(h.requests[0].body.waypoints, [row('1').point, row('2').point]);
+    assert.deepEqual(h.requests[0].body.goal, row('3').point);
+    assert.equal(h.mode.state().result.optimization.changed, true);
+    assert.deepEqual(h.mode.state().result.optimization.before.map(item => item.id), ['3', '1', '2']);
+    assert.deepEqual(h.mode.state().result.optimization.after.map(item => item.id), ['1', '2', '3']);
+    assert.deepEqual(h.mode.state().result.stops.map(item => item.id), ['1', '2', '3']);
+});
+test('최적경로 미선택 시 수동 방문 배열을 유지하고 화면 알림에 미선택 상태를 전달', async () => {
+    const h = harness(), list = [row('3'), row('1'), row('2')];
+    await h.mode.show(list, { route: true, origin, optimize: false });
+    assert.deepEqual(h.requests[0].body.waypoints, [row('3').point, row('1').point]);
+    assert.deepEqual(h.mode.state().result.optimization, {
+        requested: false,
+        changed: false,
+        before: list.map(item => ({ id: item.i, name: item.n })),
+        after: list.map(item => ({ id: item.i, name: item.n }))
+    });
+});
+test('방문 경로 화면에 최적경로 체크와 순서 변경 알림 영역을 함께 제공', () => {
+    const source = readFileSync(new URL('../map-experience.js', import.meta.url), 'utf8');
+    assert.match(source, /data-route-optimize/);
+    assert.match(source, /care-route-order-change/);
+    assert.match(source, /변경 전/);
+    assert.match(source, /변경 후/);
+});
+/** SOFTM-ROUTE-OPTIMIZE END */
 /** SOFTM-ROUTE-ORDER START 날짜:20260911 : 담은 순서와 Directions 응답의 경유지 인덱스를 같은 기관 순번으로 전달하는지 검증 */
 test('응답 경유지 인덱스를 담은 기관 순서대로 모의주행에 전달', async () => {
     const h = harness(), list = [row('3'), row('1'), row('2')];
