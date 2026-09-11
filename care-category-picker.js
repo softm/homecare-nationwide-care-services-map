@@ -70,6 +70,23 @@
   }
   /** SOFTM-CATEGORY-BACK END */
   /** SOFTM-TYPE-MENU-TEXT END */
+  /** SOFTM-CATEGORY-VISIBLE START 날짜:20260911 : 선택 후 새 화면과 회전·글꼴 로딩에서도 활성 유형을 메뉴 안에 노출 */
+  let revealFrame=0;
+  function revealSelectedCategory(){
+   cancelAnimationFrame(revealFrame);
+   revealFrame=requestAnimationFrame(()=>{
+    const active=menu.querySelector('[aria-current="true"]');if(!active||!menu.clientWidth)return;
+    const item=active.getBoundingClientRect(),viewport=menu.getBoundingClientRect();
+    if(item.left<viewport.left+4||item.right>viewport.right-4)
+     menu.scrollLeft+=item.left-viewport.left-(menu.clientWidth-item.width)/2;
+   });
+  }
+  revealSelectedCategory();
+  if(root.ResizeObserver){const observer=new ResizeObserver(revealSelectedCategory);observer.observe(menu);const active=menu.querySelector('[aria-current="true"]');if(active)observer.observe(active);}
+  else root.addEventListener('resize',revealSelectedCategory);
+  root.addEventListener('pageshow',revealSelectedCategory);
+  document.fonts?.ready.then(revealSelectedCategory);
+  /** SOFTM-CATEGORY-VISIBLE END */
   const panel=document.createElement('section');panel.id='careTypePanel';panel.className='care-type-panel';panel.hidden=true;panel.setAttribute('aria-labelledby','careTypeTitle');
   panel.innerHTML='<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header><p class="care-type-intro">필요한 돌봄을 고르면 지도에서 기관을 보여드려요.</p><div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="false">전체 유형 보기 · 9개</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>';
   document.querySelector('.results').append(panel);
