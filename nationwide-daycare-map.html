@@ -74,13 +74,13 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <!-- SOFTM-PHOTO-MAP START 날짜:20260910 : 기존 비교함과 사진 탐색을 같은 기관 순서로 연결 -->
 <link rel="stylesheet" href="care-photos.css?v=20260911-entry-compact1"> <!-- SOFTM-PHOTO-ENTRY-COMPACT 날짜:20260911 : 줄인 사진 탐색 버튼을 이전 캐시 없이 적용 -->
-<script type="module" src="care-photos-map.js?v=20260911-tools1"></script>
+<script type="module" src="care-photos-map.js?v=20260911-mapfirst1"></script>
 <!-- SOFTM-CARE-ANALYSIS START 날짜:20260911 : 지도 탐색에서 집 주변의 공개정보 일괄 분석으로 연결 -->
 <link rel="stylesheet" href="care-analysis.css?v=20260911-binding1">
-<script type="module" src="care-analysis-entry.js?v=20260911-tools1"></script>
+<script type="module" src="care-analysis-entry.js?v=20260911-mapfirst1"></script>
 <!-- SOFTM-CARE-ANALYSIS END -->
 <!-- SOFTM-PHOTO-MAP END -->
-<link rel="stylesheet" href="search-tools.css?v=20260911-identity1"> <!-- SOFTM-SEARCH-TOOLS 날짜:20260911 : 목록 앞 기능을 압축한 공용 배치 적용 -->
+<link rel="stylesheet" href="search-tools.css?v=20260911-mapfirst1"> <!-- SOFTM-SEARCH-TOOLS 날짜:20260911 : 목록 앞 기능을 압축한 공용 배치 적용 -->
 </head>
 <body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급을 구분하고 자료 설명을 쉽게 제공 -->
@@ -152,7 +152,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
 <link rel="stylesheet" href="care-basket-share.css?v=20260911"> <!-- SOFTM-BASKET-SHARE 날짜:20260911 : 모바일에서도 공유 링크와 확인 조작을 제공 -->
 <script src="care-basket-share.js?v=20260911-query1"></script> <!-- SOFTM-BASKET-SHARE-QUERY 날짜:20260911 : 공유 앱이 보존하는 주소 형식과 기존 링크 복원을 즉시 적용 -->
-<script src="map-experience.js?v=20260911-tools1-map-first1"></script> <!-- SOFTM-ORIGIN-COMPACT 날짜:20260911 : 출발지의 압축 배치를 새 캐시로 적용 --> <!-- SOFTM-SIMULATION-BLINK 날짜:20260911 : 목적지 마커 연결을 이전 공용 모듈 캐시 없이 적용 --> <!-- SOFTM-SAVED-SCROLL-EARLY 날짜:20260910 : 담은 기관의 빠른 스크롤 선택 기준을 이전 캐시 없이 적용 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 공용 질문과 조건 설명을 최신 지도 모듈로 연결 --> <!-- SOFTM-WORKSPACE-BACK-ICON 날짜:20260910 : 글자 없는 이전 버튼 동작을 이전 캐시 없이 적용 --> <!-- SOFTM-FILTER-CLOSE 날짜:20260910 : 조건 패널의 새 닫기 동작을 이전 캐시 없이 적용 --> <!-- SOFTM-SEARCH-LIST-SCROLL 날짜:20260910 : 빠른 목록 끝 스크롤 강조 수정을 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-PANEL 날짜:20260910 : 조건 설정과 선택값을 묶은 모듈을 이전 캐시 없이 적용 --> <!-- SOFTM-FILTER-HIERARCHY 날짜:20260910 : 상세조건 카드 구조를 이전 캐시 없이 적용 --> <!-- SOFTM-DESKTOP-LIST-PHOTO 날짜:20260910 : PC에서도 기관 대표사진을 불러오는 공용 로더를 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-PANEL-ACTION 날짜:20260911 : 명확한 조건 설정 버튼과 축약 패널을 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-CLEAR 날짜:20260911 : 맞춤 조건 지우기 동작을 이전 캐시 없이 적용 --> <!-- SOFTM-MAP-FIRST 날짜:20260911 : 모바일 전체 목록 진입 안내를 이전 캐시 없이 적용 -->
+<script src="map-experience.js?v=20260911-tools1-map-first1-mapfirst1"></script> <!-- SOFTM-ORIGIN-COMPACT 날짜:20260911 : 출발지의 압축 배치를 새 캐시로 적용 --> <!-- SOFTM-SIMULATION-BLINK 날짜:20260911 : 목적지 마커 연결을 이전 공용 모듈 캐시 없이 적용 --> <!-- SOFTM-SAVED-SCROLL-EARLY 날짜:20260910 : 담은 기관의 빠른 스크롤 선택 기준을 이전 캐시 없이 적용 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 공용 질문과 조건 설명을 최신 지도 모듈로 연결 --> <!-- SOFTM-WORKSPACE-BACK-ICON 날짜:20260910 : 글자 없는 이전 버튼 동작을 이전 캐시 없이 적용 --> <!-- SOFTM-FILTER-CLOSE 날짜:20260910 : 조건 패널의 새 닫기 동작을 이전 캐시 없이 적용 --> <!-- SOFTM-SEARCH-LIST-SCROLL 날짜:20260910 : 빠른 목록 끝 스크롤 강조 수정을 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-PANEL 날짜:20260910 : 조건 설정과 선택값을 묶은 모듈을 이전 캐시 없이 적용 --> <!-- SOFTM-FILTER-HIERARCHY 날짜:20260910 : 상세조건 카드 구조를 이전 캐시 없이 적용 --> <!-- SOFTM-DESKTOP-LIST-PHOTO 날짜:20260910 : PC에서도 기관 대표사진을 불러오는 공용 로더를 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-PANEL-ACTION 날짜:20260911 : 명확한 조건 설정 버튼과 축약 패널을 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-CLEAR 날짜:20260911 : 맞춤 조건 지우기 동작을 이전 캐시 없이 적용 --> <!-- SOFTM-MAP-FIRST 날짜:20260911 : 모바일 전체 목록 진입 안내를 이전 캐시 없이 적용 -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>

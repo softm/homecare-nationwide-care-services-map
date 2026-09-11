@@ -29,3 +29,13 @@
 .care-map-page .results .select-tools { margin:0; padding:2px 12px; border-radius:0; background:#fff; }
 @media(max-width:480px) { .care-map-page .care-search-tools { gap:6px; padding:8px; } }
 /** SOFTM-SEARCH-TOOLS END */
+
+/** SOFTM-MAP-FIRST START 날짜:20260911 : 닫힌 도구는 작은 진입행만 남기고 펼친 도구의 기능별 디자인 유지 */
+.care-search-disclosure { flex:none; border-bottom:1px solid #dce6f0; background:#fff; }
+.care-search-disclosure > summary { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:36px; padding:6px 12px; cursor:pointer; list-style:none; color:#42617e; font-size:12px; font-weight:650; }
+.care-search-disclosure > summary::-webkit-details-marker { display:none; }
+.care-search-disclosure > summary::after { content:'＋'; font-size:18px; color:#1769bf; }
+.care-search-disclosure[open] > summary::after { content:'−'; }
+.care-search-disclosure > summary:focus-visible { outline:3px solid #ecad38; outline-offset:-3px; }
+.care-search-disclosure .care-search-tools { border-bottom:0; }
+/** SOFTM-MAP-FIRST END */

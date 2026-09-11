@@ -1,4 +1,4 @@
-import { searchTools } from './search-tools.js?v=20260911-1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
+import { searchTools } from './search-tools.js?v=20260911-mapfirst1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
 /** SOFTM-PHOTO-MAP START 날짜:20260910 : 두 지도의 현재 검색조건과 담은 기관 순서를 공용 사진 탐색·비교에 전달 */
 import { openComparison } from './care-photos-common.js?v=20260910-1';
 import { saveScope, visibleMarkerIds } from './care-photo-scope.js?v=20260910-1';

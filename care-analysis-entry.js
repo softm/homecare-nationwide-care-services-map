@@ -1,4 +1,4 @@
-import { searchTools } from './search-tools.js?v=20260911-1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
+import { searchTools } from './search-tools.js?v=20260911-mapfirst1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
 /** SOFTM-CARE-ANALYSIS START 날짜:20260911 : 두 지도의 현재 중심을 분석 기본값으로 연결하고 위치의 출처를 구분 */
 import { saveOrigin } from './care-analysis-origin.js?v=20260911-binding1';
 const heading = document.querySelector('.results .list-head,.results .result-head');

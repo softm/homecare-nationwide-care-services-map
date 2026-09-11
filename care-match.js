@@ -1,4 +1,4 @@
-import { searchTools } from './search-tools.js?v=20260911-1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
+import { searchTools } from './search-tools.js?v=20260911-mapfirst1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
 /** SOFTM-CARE-MATCH START 날짜:20260910 : 짧은 질문으로 중요 조건을 받고 기존 검색 결과를 제외하거나 재정렬하지 않은 채 선택 근거를 제공 */
 const { criteriaFor, analyzeMatch, renderConditions } = await import(`./care-insights.js?v=20260910-match1&attempt=${new URL(import.meta.url).searchParams.get('attempt') || '0'}`);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));

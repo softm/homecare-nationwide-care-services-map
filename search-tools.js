@@ -6,7 +6,13 @@ export function searchTools(heading) {
         tools.className = 'care-search-tools';
         tools.setAttribute('role', 'group');
         tools.setAttribute('aria-label', '기관 탐색 도구');
-        heading.before(tools);
+        /** SOFTM-MAP-FIRST START 날짜:20260911 : 첫 화면에는 지도와 기관을 보여주고 보조 도구는 사용자가 펼칠 때 노출 */
+        const disclosure = document.createElement('details');
+        disclosure.className = 'care-search-disclosure';
+        const summary = document.createElement('summary');
+        summary.textContent = '맞춤 조건 · 사진 찾기 · 주변 분석';
+        disclosure.append(summary, tools); heading.before(disclosure);
+        /** SOFTM-MAP-FIRST END */
     }
     return tools;
 }
