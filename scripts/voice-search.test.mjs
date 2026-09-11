@@ -22,7 +22,7 @@ test('취소한 세션의 결과와 오류는 무시한다', () => {
 test('재시작하면 이전 세션을 중지하고 새 결과만 수신한다', () => {
     const { session, instances, updates } = setup(); session.start(); session.start();
     instances[0].onresult({ results: [[{ transcript: '이전' }]] }); instances[1].onresult({ results: [[{ transcript: '현재' }]] });
-    assert.equal(updates.at(-1).text, '현재'); assert.equal(instances[0].aborted, true);
+    assert.equal(updates.at(-1).text, '현재'); assert.equal(instances[0].aborted, true); session.cancel(); // SOFTM-VOICE-RESPONSE 날짜:20260911 : 검사 종료 후 인식 대기 타이머 정리
 });
 test('권한 거부 안내를 end 이벤트가 지우지 않는다', () => {
     const { session, instances, updates } = setup(); session.start(); instances[0].onerror({ error: 'not-allowed' }); instances[0].onend();
@@ -44,3 +44,33 @@ test('중지는 취소하지 않고 최종 인식 결과를 기다린다', () =>
  assert.equal(updates.at(-2).text,'옥길동 주간보호센터');assert.equal(updates.at(-1).state,'ready');
 });
 /** SOFTM-VOICE-TEXT END */
+
+/** SOFTM-VOICE-RESPONSE START 날짜:20260911 : 서비스 시작만 발생하는 무응답과 입력 단계별 실패를 재현 */
+function responseClock(t){
+ const pending=new Map();let id=0;
+ t.mock.method(globalThis,'setTimeout',(fn,delay)=>{pending.set(++id,{fn,delay});return id;});
+ t.mock.method(globalThis,'clearTimeout',key=>pending.delete(key));
+ return ms=>{for(const [key,task] of [...pending])if(task.delay<=ms&&pending.delete(key))task.fn();};
+}
+test('입력이 시작되지 않으면 대기를 종료하고 늦은 결과를 무시한다', t => {
+ const tick=responseClock(t);
+ const {session,instances,updates}=setup();session.start();
+ assert.match(updates.at(-1).message,/마이크 입력을 기다/);
+ tick(21000);
+ assert.equal(instances[0].aborted,true);assert.match(updates.at(-1).message,/입력 시작 응답/);
+ const count=updates.length;instances[0].onresult({results:[[{transcript:'뒤늦은 검색어'}]]});assert.equal(updates.length,count);
+});
+test('소리 감지와 텍스트 변환 무응답을 구분한다', t => {
+ const tick=responseClock(t);
+ const {session,instances,updates}=setup();session.start();const r=instances[0];
+ r.onaudiostart();assert.match(updates.at(-1).message,/마이크가 연결/);
+ r.onsoundstart();assert.match(updates.at(-1).message,/소리가 들어/);
+ r.onspeechstart();assert.match(updates.at(-1).message,/말소리를 감지/);
+ tick(30000);assert.match(updates.at(-1).message,/텍스트 변환 응답이 없습니다/);assert.equal(r.aborted,true);
+});
+test('마이크 입력 이후 소리 미감지와 결과 보존을 구분한다', t => {
+ const tick=responseClock(t);const {session,instances,updates}=setup();session.start();instances[0].onaudiostart();
+ tick(30000);assert.match(updates.at(-1).message,/말소리가 감지되지/);
+ session.start();instances[1].onresult({results:[[{transcript:'광명 주간보호'}]]});tick(21000);assert.equal(updates.at(-1).state,'ready');
+});
+/** SOFTM-VOICE-RESPONSE END */
