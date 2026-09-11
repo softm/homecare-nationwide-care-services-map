@@ -9,9 +9,9 @@
         network: '음성 인식 서비스에 연결하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.'
     };
     function createSession(Recognition, update) {
-        let current = null, generation = 0, stopTimer = null; // SOFTM-VOICE-TEXT 날짜:20260909 : 최종 결과 응답이 없을 때 대기 상태를 해제
+        let current = null, generation = 0, stopTimer = null, responseTimer = null; // SOFTM-VOICE-RESPONSE 날짜:20260911 : 시작·입력·중지 단계마다 응답 없는 대기를 해제
         function cancel() {
-            clearTimeout(stopTimer); stopTimer = null;
+            clearTimeout(stopTimer); stopTimer = null; clearTimeout(responseTimer); responseTimer = null;
             generation++;
             const previous = current; current = null;
             if (previous) { try { previous.abort(); } catch {} }
@@ -20,29 +20,46 @@
             cancel();
             if (!Recognition) { update({ state: 'error', message: '이 브라우저는 음성검색을 지원하지 않습니다. 검색어를 직접 입력해 주세요.' }); return; }
             const token = generation;
-            let recognizer, failed = false, heard = false;
+            let recognizer, failed = false, heard = false, audio = false, sound = false;
             const emit = value => { if (generation === token) update(value); };
+            /** SOFTM-VOICE-RESPONSE START 날짜:20260911 : 서비스가 시작된 채 응답하지 않는 경우 실제 입력 단계에 맞춰 대기를 종료 */
+            const armResponseTimeout = (delay = 20000) => {
+                clearTimeout(responseTimer);
+                responseTimer = setTimeout(() => {
+                    if (generation !== token) return;
+                    const message = heard ? '인식한 검색어가 입력되었습니다. 확인 후 조회하거나 다시 말해 주세요.' : sound ? '소리는 감지했지만 텍스트 변환 응답이 없습니다. Chrome 음성 인식 서비스 연결을 확인하고 다시 시도해 주세요.' : audio ? '마이크는 연결됐지만 말소리가 감지되지 않았습니다. Chrome에서 선택한 마이크와 기기의 마이크 음소거를 확인해 주세요.' : '마이크 입력 시작 응답이 없습니다. Chrome의 마이크 권한과 입력 장치를 확인한 뒤 다시 시도해 주세요.';
+                    cancel(); update({ state: heard ? 'ready' : 'error', message });
+                }, delay);
+            };
+            /** SOFTM-VOICE-RESPONSE END */
             try {
                 recognizer = new Recognition(); current = recognizer;
                 recognizer.lang = 'ko-KR'; recognizer.continuous = false; recognizer.interimResults = true; recognizer.maxAlternatives = 1;
-                recognizer.onstart = () => emit({ state: 'listening', message: '듣고 있습니다. 지역명이나 기관명을 말해 주세요.' });
+                /** SOFTM-VOICE-INPUT START 날짜:20260911 : 서비스 시작을 실제 음성 감지로 오인하지 않도록 입력 단계별로 안내 */
+                recognizer.onstart = () => emit({ state: 'listening', message: '음성 인식이 시작됐습니다. 마이크 입력을 기다리고 있습니다.' });
+                recognizer.onaudiostart = () => { if (generation !== token) return; audio = true; armResponseTimeout(30000); emit({ state: 'listening', message: '마이크가 연결됐습니다. 지역명이나 기관명을 말해 주세요.' }); };
+                recognizer.onsoundstart = () => { if (generation !== token) return; sound = true; emit({ state: 'listening', message: '소리가 들어오고 있습니다. 말씀하신 내용을 인식하고 있습니다.' }); };
+                recognizer.onspeechstart = () => { if (generation !== token) return; sound = true; armResponseTimeout(30000); emit({ state: 'listening', message: '말소리를 감지했습니다. 검색어로 변환하고 있습니다.' }); };
+                /** SOFTM-VOICE-INPUT END */
                 recognizer.onresult = event => {
+                    if (generation !== token || failed) return; // SOFTM-VOICE-RESPONSE 날짜:20260911 : 종료한 인식기의 늦은 응답으로 상태가 되돌아가지 않게 보호
                     const text = Array.from(event.results, result => result[0].transcript).join(' ').trim();
                     heard ||= Boolean(text); emit({ state: 'listening', text, message: '인식한 내용을 확인해 주세요.' });
                 };
-                recognizer.onerror = event => { failed = true; emit({ state: 'error', message: messages[event.error] || '음성을 인식하지 못했습니다. 다시 시도하거나 직접 입력해 주세요.' }); };
+                recognizer.onerror = event => { if (generation !== token) return; clearTimeout(responseTimer); failed = true; emit({ state: 'error', message: messages[event.error] || '음성을 인식하지 못했습니다. 다시 시도하거나 직접 입력해 주세요.' }); };
                 recognizer.onend = () => {
                     if (generation !== token) return;
-                    clearTimeout(stopTimer); stopTimer = null; current = null;
+                    clearTimeout(stopTimer); stopTimer = null; clearTimeout(responseTimer); responseTimer = null; current = null;
                     if (!failed) emit({ state: 'ready', message: heard ? '검색어를 확인하거나 수정한 뒤 조회해 주세요.' : messages['no-speech'] });
                 };
                 emit({ state: 'starting', message: '마이크 연결 중입니다. 권한 요청이 표시되면 허용해 주세요.' });
-                recognizer.start();
-            } catch { current = null; failed = true; emit({ state: 'error', message: '음성검색을 시작하지 못했습니다. 마이크 권한을 확인하거나 직접 입력해 주세요.' }); }
+                armResponseTimeout(); recognizer.start(); // SOFTM-VOICE-RESPONSE 날짜:20260911 : 시작 이벤트조차 오지 않는 연결 지연도 종료
+            } catch { clearTimeout(responseTimer); current = null; failed = true; emit({ state: 'error', message: '음성검색을 시작하지 못했습니다. 마이크 권한을 확인하거나 직접 입력해 주세요.' }); }
         }
         /** SOFTM-VOICE-TEXT START 날짜:20260909 : 사용자가 말을 마칠 때 마지막 인식 결과를 버리지 않도록 중지와 취소를 분리 */
         function stop() {
             if (!current) return;
+            clearTimeout(responseTimer); // SOFTM-VOICE-RESPONSE 날짜:20260911 : 명시적 중지 후에는 최종 응답 타이머 하나만 사용
             update({ state: 'stopping', message: '말씀하신 내용을 텍스트로 변환하고 있습니다…' });
             stopTimer = setTimeout(() => { cancel(); update({ state: 'error', message: '음성 변환 응답이 지연됩니다. 표시된 검색어를 사용하거나 다시 말해 주세요.' }); }, 8000);
             try { current.stop(); } catch { cancel(); update({ state: 'error', message: '인식을 마치지 못했습니다. 다시 말하거나 검색어를 직접 입력해 주세요.' }); }
@@ -68,7 +85,7 @@
         const Recognition = root.SpeechRecognition || root.webkitSpeechRecognition;
         const session = createSession(Recognition, result => {
             if (!dialog.open) return;
-            if (result.text !== undefined && result.text.trim()) { transcript.value = result.text; input.value = result.text; syncClear(); } // SOFTM-SEARCH-CLEAR 날짜:20260911 : 음성으로 채운 검색어도 지우기 버튼 상태에 즉시 반영
+            if (result.text !== undefined && result.text.trim()) { transcript.value = result.text; input.value = result.text; input.dispatchEvent(new Event('input', { bubbles: true })); syncClear(); } // SOFTM-SEARCH-CLEAR 날짜:20260911 : 음성으로 채운 검색어도 지우기 버튼 상태에 즉시 반영
             status.textContent = result.message;
             const busy = ['listening', 'starting', 'stopping'].includes(result.state);
             record.disabled = result.state === 'stopping'; // SOFTM-VOICE-TEXT 날짜:20260909 : 최종 결과를 기다리는 동안 재시작으로 결과가 취소되지 않도록 보호
