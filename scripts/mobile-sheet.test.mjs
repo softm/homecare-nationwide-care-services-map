@@ -28,3 +28,18 @@ test('상세 때문에 잠시 지도를 보여도 원래 목록의 뒤로가기 
     assert.equal(sheet.back(), 'map');
 });
 /** SOFTM-MOBILE-SHEET END */
+
+/** SOFTM-RESULT-SHEET START 날짜:20260911 : 검색 전체 건수와 시트 단계별 행동 문구가 함께 바뀌는지 검증 */
+test('지도와 목록을 함께 볼 때 검색 전체 건수와 전체 목록 행동을 안내한다', () => {
+    assert.deepEqual(CareMapExperience.createSheetSummary('3곳', 'split'), {
+        count: '3곳', action: '전체 목록 보기', expanded: false, label: '검색 결과 3곳. 전체 목록 보기'
+    });
+});
+test('전체 목록에서는 지도 복귀 행동을 안내하고 로딩 건수도 구분한다', () => {
+    assert.deepEqual(CareMapExperience.createSheetSummary('31,734곳', 'list'), {
+        count: '31,734곳', action: '지도와 함께 보기', expanded: true, label: '검색 결과 31,734곳. 지도와 함께 보기'
+    });
+    assert.equal(CareMapExperience.createSheetSummary('-', 'split').count, '확인 중');
+    assert.equal(CareMapExperience.createSheetSummary('0곳', 'split').count, '0곳');
+});
+/** SOFTM-RESULT-SHEET END */
