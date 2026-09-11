@@ -83,6 +83,9 @@
 <link rel="stylesheet" href="search-tools.css?v=20260911-disclosure-button1"> <!-- SOFTM-SEARCH-TOOLS 날짜:20260911 : 목록 앞 기능을 압축한 공용 배치 적용 --> <!-- SOFTM-SEARCH-TOOLS-BUTTON 날짜:20260911 : 보조 기능 펼침 버튼과 큰 상태 아이콘을 이전 캐시 없이 적용 -->
 <link rel="stylesheet" href="care-category-picker.css?v=20260911-text2"> <!-- SOFTM-TYPE-MENU-TEXT 날짜:20260911 : 기존의 왼쪽 정렬과 버튼 크기를 이전 캐시 없이 적용 -->
 <script src="care-category-picker.js?v=20260911-text2"></script> <!-- SOFTM-TYPE-MENU-TEXT 날짜:20260911 : 기존 카테고리 순서와 주야간보호 표기를 상단에 즉시 적용 -->
+<!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20260911-1"><script src="care-detail-layout.js?v=20260911-1"></script>
+<!-- SOFTM-DETAIL-LAYOUT END -->
 </head>
 <body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
 <header class="page-head"><div class="head-row"><div><h1 id="pageTitle">전국 주야간보호센터 지도</h1><p>돌봄한눈에서 현재 위치를 기준으로 공개 기관정보·평가·인력을 조회합니다.</p></div><a class="legacy-link" href="index.html">돌봄한눈 홈</a></div></header>
@@ -578,7 +581,7 @@ function openDetail(c,reveal=true){
  activeDetail=c;officialDetailToken++;basicInfoToken++;officialActiveTab=11;
  $('detailRegion').textContent=`${c.p} ${c.c} · ${c.tn||CONFIG.label}`;$('detailName').textContent=c.n;
  const distance=Number.isFinite(c._distance)?c._distance.toFixed(1)+'km':'—',officialLabel=CONFIG.source==='hira'?'심평원 정보':'공단 원문',staff=mainStaffCount(c),capacity=Number(c.z)||0,staffRatio=!c.staffMissing&&capacity&&staff?`${(capacity/staff).toFixed(1)}명당 1명`:'—',evaluation=c.g?`${esc(c.et||CONFIG.label)} · ${c.ey||'-'}년 · ${esc(c.ed||'-')}`:CONFIG.source==='hira'?'장기요양기관 공단평가 대상과 다른 의료기관 자료입니다.':'공식 세부평가 미연결'; // SOFTM-DATA-UNIFIED 날짜:20260904 : 일부 인력 미수집일 때 정원 대비 비율을 확정값으로 계산하지 않음
- const live=CONFIG.source==='nhis'?`<section class="basic-live-card"><div class="basic-live-head"><strong>연락·이용 기본정보</strong><small>기관 기본 항목만 확인</small></div><div id="basicLive"><div class="basic-live-loading">전화번호와 운영정보를 확인하고 있습니다.</div></div></section>`:'';
+ const live=CONFIG.source==='nhis'?`<section class="basic-live-card"><div id="basicLive"><div class="basic-live-loading">전화번호와 운영정보를 확인하고 있습니다.</div></div></section>`:''; // SOFTM-DETAIL-LAYOUT 날짜:20260911 : 위치·연락처 공통 제목 아래에 연락 필드만 배치
  /** SOFTM-EQUIPMENT-VIEW START 날짜:20260904 : 사업소에 해당하지 않는 정원·돌봄인력을 0명으로 오해하지 않도록 기본정보에서 제외 */
  let basic=`<div class="detail-metrics"><div class="metric"><span>공식평가</span><b>${esc(gradeText(c))}</b></div><div class="metric"><span>평가총점</span><b>${scoreText(c)}${Number.isFinite(c.es)?'점':''}</b></div><div class="metric"><span>기준지 거리</span><b>${distance}</b></div><div class="metric"><span>정원</span><b>${capacity?`${capacity}명`:'미공개'}</b></div><div class="metric"><span>주요 돌봄인력</span><b>${staff}명</b></div><div class="metric"><span>정원 대비 인력</span><b>${staffRatio}</b></div></div>${live}<div class="detail-line"><strong>주소</strong><span>${esc(c.a)}</span></div><div class="detail-line"><strong>이용정보</strong><span>${esc(c.tn||CONFIG.label)}${capacity?` · 정원 ${capacity}명`:''}<br>${CONFIG.source==='hira'?'개설':'지정'} 후 ${operationPeriod(c.d)} 운영</span></div><div class="detail-line"><strong>기관정보</strong><span>${CONFIG.source==='hira'?'암호화 요양기호':'기관기호'} ${esc(c.i)} · ${CONFIG.source==='hira'?'개설':'지정'} ${esc(c.d||'미확인')}</span></div><div class="detail-line"><strong>평가정보</strong><span>${evaluation}<br>${esc(confidenceText(c))}</span></div><div class="detail-line"><strong>인력구성</strong><span>사회복지사 ${c.s||0} · 간호사 ${c.rn||0} · 간호조무사 ${c.na||0}<br>물리치료사 ${c.pt||0} · 작업치료사 ${c.ot||0} · 요양보호사 ${c.cw||0}</span></div><div class="detail-links"><button class="copy" id="copyName">목적지명 복사</button><button class="copy" id="copyAddress">주소 복사</button><a class="naver" href="${naverUrl(c)}" target="_blank" rel="noopener">네이버</a><a class="kakao" href="${kakaoUrl(c)}" target="_blank" rel="noopener">카카오</a><a class="official" href="${officialUrl(c)}" target="_blank" rel="noopener">${officialLabel}</a></div>`;
  /** SOFTM-DATA-UNIFIED START 날짜:20260904 : 수집되지 않은 급여 인력을 0명이나 완전한 합계로 오인하지 않도록 표시 */
@@ -593,7 +596,11 @@ function openDetail(c,reveal=true){
  const addressBlock=`<div class="detail-line"><strong>주소</strong><span>${esc(c.a)}</span></div>`;
  const evaluationBlock=`<div class="detail-line"><strong>평가정보</strong><span>${evaluation}<br>${esc(confidenceText(c))}</span></div>`;
  basic=basic.replace(addressBlock,'').replace(evaluationBlock,'').replace(live,'');
- basic=`${addressBlock}${live}${evaluationBlock}${CareMapExperience.costCard(c,TYPE)}${basic}`; // SOFTM-POPUP-BASKET 날짜:20260911 : 스크롤 아래 중복 버튼을 없애고 상세 공통 행동 영역을 단일 위치로 사용
+ /** SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소·연락과 평가 요약을 각각 같은 표면에 묶어 정보가 흩어져 보이지 않게 함 */
+ const metricEnd=basic.indexOf('<div class="detail-line">'),metrics=basic.slice(0,metricEnd);
+ basic=basic.slice(metricEnd);
+ basic=`<section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c))}${live}</section><section class="care-detail-group"><h3>${CONFIG.source==='hira'?'기관 현황':'공단 평가·기관 현황'}</h3>${metrics}${evaluationBlock}</section><section class="care-detail-group"><h3>이용·기관 정보</h3>${basic}</section>${CareMapExperience.costCard(c,TYPE)}`;
+ /** SOFTM-DETAIL-LAYOUT END */
  $('detailBasketAction').innerHTML=CareMapExperience.button(c); // SOFTM-POPUP-BASKET 날짜:20260911 : 목록과 같은 비교함 상태를 상세 상단 버튼에 연결
  /** SOFTM-MAP-EXPERIENCE END */
  $('detailBody').innerHTML=CONFIG.source==='nhis'?`<div class="detail-main-tabs" role="tablist" aria-label="기관 정보 구분"><button type="button" class="detail-main-tab active" data-detail-view="basic" role="tab" aria-selected="true">기본정보</button><button type="button" class="detail-main-tab" data-detail-view="official" role="tab" aria-selected="false">상세정보</button></div><section class="detail-view" id="detailBasic" role="tabpanel">${basic}</section><section class="detail-view detail-view-official" id="detailOfficial" role="tabpanel" hidden>${officialTabsHtml()}</section>`:`<section class="detail-view">${basic}</section>`;

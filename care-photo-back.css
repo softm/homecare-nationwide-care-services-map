@@ -1,0 +1,8 @@
+/** SOFTM-PHOTO-BACK START 날짜:20260911 : 제목 옆에 명확한 복귀 행동을 두고 작은 화면에서도 누를 크기를 유지 */
+.care-photo-title-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.care-photo-title-row .care-photo-back{display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:none;min-height:44px;padding:6px 10px 6px 6px;border:1px solid #c6d5e3;border-radius:10px;background:#fff;color:#27445f;font-size:14px;font-weight:700;text-decoration:none}
+.care-photo-back svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.care-photo-back:hover{background:#edf3f9}
+.care-photo-intro .care-photo-title-row h1{margin:0;min-width:0}
+@media(max-width:380px){.care-photo-title-row{gap:8px}.care-photo-intro .care-photo-title-row h1{font-size:21px}.care-photo-title-row .care-photo-back{padding-right:8px;font-size:13px}}
+/** SOFTM-PHOTO-BACK END */

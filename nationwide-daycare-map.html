@@ -81,6 +81,9 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-CARE-ANALYSIS END -->
 <!-- SOFTM-PHOTO-MAP END -->
 <link rel="stylesheet" href="search-tools.css?v=20260911-disclosure-button1"> <!-- SOFTM-SEARCH-TOOLS 날짜:20260911 : 목록 앞 기능을 압축한 공용 배치 적용 --> <!-- SOFTM-SEARCH-TOOLS-BUTTON 날짜:20260911 : 보조 기능 펼침 버튼과 큰 상태 아이콘을 이전 캐시 없이 적용 -->
+<!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20260911-1"><script src="care-detail-layout.js?v=20260911-1"></script>
+<!-- SOFTM-DETAIL-LAYOUT END -->
 </head>
 <body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급을 구분하고 자료 설명을 쉽게 제공 -->
@@ -448,12 +451,15 @@ function popup(c){
   <div class="popup-body" data-daycare-detail="${esc(c.i)}">
    <div class="popup-static-tabs" role="tablist" aria-label="기관 정보 구분"><button class="popup-static-tab active" type="button" data-daycare-tab="basic" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','basic')">기본정보</button><button class="popup-static-tab" type="button" data-daycare-tab="detail" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','detail')">상세정보</button><button class="popup-static-tab" type="button" data-daycare-tab="photos" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','photos')">사진</button></div>
    <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 기본정보에서 기관 비교와 등급별 비용 확인을 이어갈 수 있도록 연결 -->
-   <div class="popup-basic-panel"><div class="popup-row"><span class="popup-row-label">주소</span><span class="popup-row-value">${esc(c.a)}</span></div>
-   <div class="daycare-contact" role="status">전화번호와 운영정보를 확인하고 있습니다.</div>
+   <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 연락처를 같은 기본정보 묶음으로 제공 -->
+   <div class="popup-basic-panel"><section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c))}
+   <div class="daycare-contact" role="status">전화번호와 운영정보를 확인하고 있습니다.</div></section>
+   <section class="care-detail-group"><h3>공단 평가·기관 현황</h3>
    <div class="popup-meta">
     <div class="popup-chip">공식평가<b>${ev?(ev.year||'-')+'년 · '+esc(grade):esc(grade)}</b></div>
     <div class="popup-chip">기준지 거리<b>${distance}</b></div>
    </div>
+   </section><!-- SOFTM-DETAIL-LAYOUT END -->
    ${CareMapExperience.costCard(c,'daycare')}<!-- SOFTM-MAP-EXPERIENCE END -->
    <div class="popup-row"><span class="popup-row-label">기관정보</span><span class="popup-row-value">기관기호 ${esc(c.i)} · 정원 ${c.z}명 · 지정 ${esc(c.d||'-')}</span></div>
    <div class="popup-row"><span class="popup-row-label">평가영역</span><span class="popup-row-value">${ev?`운영 ${scoreText(ev.operation)} · 안전 ${scoreText(ev.safety)} · 권리 ${scoreText(ev.rights)}<br>제공과정 ${scoreText(ev.process)} · 제공결과 ${scoreText(ev.result)}`:'공식 세부평가 미확인'}</span></div>
