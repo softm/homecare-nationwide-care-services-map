@@ -38,9 +38,26 @@
  function mount({type,getMap,snapshot=()=>({}),resize=()=>{}}){
   let storage;try{storage=root.localStorage;}catch{}
   document.body.classList.add('care-type-enabled');document.body.classList.toggle('care-type-neutral',!type);
-  const label=categories.find(row=>row[0]===type)?.[2]||'돌봄 유형 선택';
+  /** SOFTM-TYPE-MENU START 날짜:20260911 : 설명 카드와 같은 아이콘·제목을 상단에서도 바로 선택하도록 연결 */
+  function selectType(id){
+   save(storage,id);
+   if(id===type){if(!panel.hidden)close();return;}
+   const map=getMap(),center=map?.getCenter();
+   const url=destination(location.href,id,{...snapshot(),center:center?{lat:center.lat(),lng:center.lng()}:null,zoom:map?.getZoom()});
+   if(type)location.assign(url.href);else location.replace(url.href);
+  }
   const header=document.createElement('div');header.className='care-type-header';
-  const toggle=document.createElement('button');toggle.type='button';toggle.className='care-type-toggle';toggle.textContent=label+' ▾';toggle.setAttribute('aria-controls','careTypePanel');toggle.setAttribute('aria-expanded','false');header.append(toggle);document.body.append(header);
+  const menu=document.createElement('nav');menu.className='care-type-menu';menu.setAttribute('aria-label','돌봄기관 유형');
+  for(const [id,title,official,description,icon,color]of categories){
+   const button=document.createElement('button');button.type='button';button.className='care-type-menu-item '+color;button.dataset.typeMenu=id;
+   button.innerHTML=`<span class="care-type-menu-icon" aria-hidden="true">${icon}</span><span>${title}</span>`;
+   button.title=official+' · '+description;
+   if(id===type)button.setAttribute('aria-current','true');
+   button.onclick=()=>selectType(id);menu.append(button);
+  }
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='care-type-toggle';toggle.textContent='유형 안내 ▾';toggle.setAttribute('aria-label','돌봄 유형 선택 안내');toggle.setAttribute('aria-controls','careTypePanel');toggle.setAttribute('aria-expanded','false');header.append(menu,toggle);document.body.append(header);
+  requestAnimationFrame(()=>{const active=menu.querySelector('[aria-current]');if(active)menu.scrollLeft=Math.max(0,active.offsetLeft-menu.offsetLeft-(menu.clientWidth-active.offsetWidth)/2);});
+  /** SOFTM-TYPE-MENU END */
   const panel=document.createElement('section');panel.id='careTypePanel';panel.className='care-type-panel';panel.hidden=true;panel.setAttribute('aria-labelledby','careTypeTitle');
   panel.innerHTML='<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header><p class="care-type-intro">필요한 돌봄을 고르면 지도에서 기관을 보여드려요.</p><div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="false">전체 유형 보기 · 9개</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>';
   document.querySelector('.results').append(panel);
@@ -48,7 +65,7 @@
   for(const [id,title,official,description,icon,color]of categories){
    const button=document.createElement('button');button.type='button';button.className='care-type-option '+color;button.dataset.type=id;button.hidden=list.children.length>=3;
    button.innerHTML=`<span class="care-type-icon" aria-hidden="true">${icon}</span><span><strong>${title}</strong><small>${official}</small><span>${description}</span></span><span aria-hidden="true">›</span>`;
-   button.onclick=()=>{const map=getMap(),center=map?.getCenter();const url=destination(location.href,id,{...snapshot(),center:center?{lat:center.lat(),lng:center.lng()}:null,zoom:map?.getZoom()});save(storage,id);if(type)location.assign(url.href);else location.replace(url.href);};list.append(button);
+   button.onclick=()=>selectType(id);list.append(button); // SOFTM-TYPE-MENU 날짜:20260911 : 상단 메뉴와 카드의 유형 전환 동작을 통일
   }
   const expandButton=panel.querySelector('.care-type-expand');panel.querySelector('header').insertBefore(expandButton,panel.querySelector('[data-close]'));
   let opener=toggle,previousInert=false,previousSaved=false;
