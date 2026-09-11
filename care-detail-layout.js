@@ -31,6 +31,13 @@
         return `<a class="care-list-navigation" href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${escape(c.n)} ${route.label}" title="${route.label}" onclick="event.stopPropagation()" ${external}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg><span>길안내</span></a>`;
     }
     /** SOFTM-LIST-NAVIGATION END */
+    /** SOFTM-POPUP-NAVIGATION START 날짜:20260911 : 정보 탭과 무관하게 팝업 헤더에서 해당 기관 길안내에 접근 */
+    function popupButton(c, point) {
+        const route = links(c, point);
+        const external = route.href.startsWith('https:') ? 'target="_blank" rel="noopener"' : '';
+        return `<a class="care-popup-navigation" href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${escape(c.n)} ${route.label}" title="${route.label}" onclick="event.stopPropagation()" ${external}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg></a>`;
+    }
+    /** SOFTM-POPUP-NAVIGATION END */
     document.addEventListener('click', async event => {
         const button = event.target.closest('[data-care-address]');
         if (button) {
@@ -49,6 +56,6 @@
             }
         }
     });
-    window.CareDetailLayout = {address, listButton, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
+    window.CareDetailLayout = {address, listButton, popupButton, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
 })();
 /** SOFTM-DETAIL-LAYOUT END */

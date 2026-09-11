@@ -25,3 +25,11 @@
 /** SOFTM-LIST-NAVIGATION END */
 @media(max-width:640px){.care-map-page .care-detail-group{padding:12px;margin-bottom:12px}.care-detail-address-content{gap:6px;font-size:14px}.care-map-page .care-detail-address-actions>*{width:40px;min-width:40px}.care-map-page .care-detail-group .basic-live-grid{grid-template-columns:1fr}}
 /** SOFTM-DETAIL-LAYOUT END */
+
+/** SOFTM-POPUP-NAVIGATION START 날짜:20260911 : 비교 담기와 길안내를 같은 줄 양끝에 두고 모바일 터치 영역을 확보 */
+.care-map-page .care-popup-basket-action{width:100%;gap:12px}
+.care-map-page .care-popup-navigation{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;margin-left:auto;border:1px solid #ffffffb8;border-radius:10px;background:#fff;color:#15599b;text-decoration:none;box-sizing:border-box}
+.care-map-page .care-popup-navigation svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.care-map-page .care-popup-navigation:hover{background:#e7f2ff;color:#134f94}
+.care-map-page .care-popup-navigation:focus-visible{outline:3px solid #fff;outline-offset:3px}
+/** SOFTM-POPUP-NAVIGATION END */

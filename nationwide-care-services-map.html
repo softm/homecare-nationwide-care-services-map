@@ -84,7 +84,7 @@
 <link rel="stylesheet" href="care-category-picker.css?v=20260911-back-top1-mobile-font1"> <!-- SOFTM-CATEGORY-BACK 날짜:20260911 : 이전 버튼의 상단 카테고리 배치를 이전 캐시 없이 적용 --> <!-- SOFTM-MOBILE-CATEGORY-FONT 날짜:20260911 : 상단 메뉴와 유형 안내 카드 글자를 이전 캐시 없이 적용 -->
 <script src="care-category-picker.js?v=20260911-visible1"></script> <!-- SOFTM-CATEGORY-BACK 날짜:20260911 : 기존 복귀 버튼을 카테고리 영역으로 옮기는 동작을 즉시 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
-<link rel="stylesheet" href="care-detail-layout.css?v=20260911-list-navigation1"><script src="care-detail-layout.js?v=20260911-list-navigation1"></script> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 통합 지도 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20260911-popup-navigation1"><script src="care-detail-layout.js?v=20260911-popup-navigation1"></script> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 통합 지도 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT END -->
 </head>
 <body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
@@ -606,7 +606,7 @@ function openDetail(c,reveal=true){
  basic=basic.slice(metricEnd);
  basic=`<section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c))}${live}</section><section class="care-detail-group"><h3>${CONFIG.source==='hira'?'기관 현황':'공단 평가·기관 현황'}</h3>${metrics}${evaluationBlock}</section><section class="care-detail-group"><h3>이용·기관 정보</h3>${basic}</section>${CareMapExperience.costCard(c,TYPE)}`;
  /** SOFTM-DETAIL-LAYOUT END */
- $('detailBasketAction').innerHTML=CareMapExperience.button(c); // SOFTM-POPUP-BASKET 날짜:20260911 : 목록과 같은 비교함 상태를 상세 상단 버튼에 연결
+ $('detailBasketAction').innerHTML=CareMapExperience.button(c)+CareDetailLayout.popupButton(c,cachedCoord(c)); // SOFTM-POPUP-NAVIGATION 날짜:20260911 : 비교 담기와 같은 줄 오른쪽에서 기관 길안내에 접근
  /** SOFTM-MAP-EXPERIENCE END */
  $('detailBody').innerHTML=CONFIG.source==='nhis'?`<div class="detail-main-tabs" role="tablist" aria-label="기관 정보 구분"><button type="button" class="detail-main-tab active" data-detail-view="basic" role="tab" aria-selected="true">기본정보</button><button type="button" class="detail-main-tab" data-detail-view="official" role="tab" aria-selected="false">상세정보</button></div><section class="detail-view" id="detailBasic" role="tabpanel">${basic}</section><section class="detail-view detail-view-official" id="detailOfficial" role="tabpanel" hidden>${officialTabsHtml()}</section>`:`<section class="detail-view">${basic}</section>`;
  $('detailSheet').style.visibility=reveal?'':'hidden';$('detailSheet').hidden=false;$('copyName').onclick=()=>copy(c.n,'목적지명을 복사했습니다.');$('copyAddress').onclick=()=>copy(c.a,'주소를 복사했습니다.');document.querySelectorAll('[data-detail-view]').forEach(button=>button.onclick=()=>switchDetailView(c,button.dataset.detailView));document.querySelectorAll('[data-official-tab]').forEach(button=>button.onclick=()=>loadOfficialTab(c,Number(button.dataset.officialTab)));if(CONFIG.source==='nhis')void loadBasicInfo(c)
