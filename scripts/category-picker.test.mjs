@@ -24,6 +24,13 @@ test('상단 유형 메뉴는 주야간보호를 포함한 기관 카테고리�
  assert.equal(api.menuLabel('home-care'),'방문요양');
  assert.equal(api.menuLabel('facility'),'요양원·공동생활가정');
  assert.equal(api.menuLabel('nursing-hospital'),'요양병원(의료기관)');
+ assert.deepEqual(api.menuOrder.slice(0,3),['facility','daycare','home-care']);
+ const css=readFileSync(new URL('../care-category-picker.css',import.meta.url),'utf8');
+ assert.match(css,/\.care-type-menu\{[^}]*justify-content:flex-start/);
+ assert.match(css,/\.care-type-menu-item\{[^}]*padding:8px 12px[^}]*font-size:14px/);
+ assert.match(css,/@media\(max-width:1000px\)\{[^\n]*\.care-type-menu-item\{font-size:13px;min-height:0;padding:9px 12px\}/);
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ assert.doesNotMatch(source,/menu\.scrollLeft=/);
 });
 /** SOFTM-TYPE-MENU-TEXT END */
 test('category changes retain region and map but clear incompatible constraints',()=>{
