@@ -312,10 +312,18 @@
         if (showMap && media?.matches && workspace === 'search' && mobileSheet?.state() === 'list') mobileSheet.set('split', false); // SOFTM-MOBILE-SHEET 날짜:20260909 : 전체 목록에서 상세를 열 때 지도를 함께 보여주고 이전 단계를 기억
         if (showMap && media?.matches) setView('map', false);
     }
-    function finishDetail() {
+    function finishDetail(onMapReturn) {
         const previous = detailOrigin; detailOrigin = null;
         if (!previous || previous.workspace !== workspace) return;
-        if (media?.matches) { view = previous.view; if (previous.sheet) mobileSheet?.set(previous.sheet, false); syncView(); options.resizeMap?.(); } // SOFTM-MOBILE-SHEET 날짜:20260909 : 상세를 닫으면 목록 확대 단계까지 복원
+        /** SOFTM-DETAIL-MAP-RETURN START 날짜:20260911 : 전체 목록에서 고른 기관을 닫은 뒤에도 지도에서 확인할 수 있도록 분할 화면으로 복귀 */
+        const returnToMarker = media?.matches && workspace === 'search' && previous.sheet === 'list';
+        if (media?.matches) {
+            view = returnToMarker ? 'map' : previous.view;
+            if (previous.sheet) mobileSheet?.set(returnToMarker ? 'split' : previous.sheet, false);
+            syncView(); options.resizeMap?.();
+        }
+        if (returnToMarker && typeof onMapReturn === 'function') onMapReturn();
+        /** SOFTM-DETAIL-MAP-RETURN END */
         restore(previous.position);
         if (previous.focus?.isConnected) previous.focus.focus({ preventScroll: true });
     }

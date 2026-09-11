@@ -148,7 +148,7 @@
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
 <link rel="stylesheet" href="care-basket-share.css?v=20260911"> <!-- SOFTM-BASKET-SHARE 날짜:20260911 : 모바일에서도 공유 링크와 확인 조작을 제공 -->
 <script src="care-basket-share.js?v=20260911-query1"></script> <!-- SOFTM-BASKET-SHARE-QUERY 날짜:20260911 : 공유 앱이 보존하는 주소 형식과 기존 링크 복원을 즉시 적용 -->
-<script src="map-experience.js?v=20260911-navigation1"></script> <!-- SOFTM-MAP-NAVIGATION 날짜:20260911 : 현재 유형 안내 복귀와 서비스 소개 링크를 이전 캐시 없이 적용 -->
+<script src="map-experience.js?v=20260911-detail-return1"></script> <!-- SOFTM-MAP-NAVIGATION 날짜:20260911 : 현재 유형 안내 복귀와 서비스 소개 링크를 이전 캐시 없이 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -600,7 +600,14 @@ function openDetail(c,reveal=true){
  $('detailSheet').style.visibility=reveal?'':'hidden';$('detailSheet').hidden=false;$('copyName').onclick=()=>copy(c.n,'목적지명을 복사했습니다.');$('copyAddress').onclick=()=>copy(c.a,'주소를 복사했습니다.');document.querySelectorAll('[data-detail-view]').forEach(button=>button.onclick=()=>switchDetailView(c,button.dataset.detailView));document.querySelectorAll('[data-official-tab]').forEach(button=>button.onclick=()=>loadOfficialTab(c,Number(button.dataset.officialTab)));if(CONFIG.source==='nhis')void loadBasicInfo(c)
 }
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 기관 상세 종료 후 목록·지도 전환 상태와 포커스를 복원 */
-function closeDetail(restoreView=true){officialDetailToken++;basicInfoToken++;clearTimeout(detailMoveTimer);detailMoveTimer=null;clearTimeout(markerBlinkTimer);markerBlinkTimer=null;restoreBlinkedMarker();$('detailSheet').hidden=true;$('detailSheet').style.visibility='';activeDetail=null;if(restoreView&&detailViewState&&mapReady){const view=detailViewState;detailViewState=null;clearTimeout(refreshTimer);skipIdleUntil=Date.now()+1800;map.setCenter(new window.naver.maps.LatLng(view.lat,view.lng));if(map.getZoom()!==view.zoom)map.setZoom(view.zoom)}else if(!restoreView)detailViewState=null;if(restoreView)CareMapExperience.finishDetail()}
+/** SOFTM-DETAIL-MAP-RETURN START 날짜:20260911 : 닫기 전에 선택 기관을 보존해 전체 목록에서의 복귀 위치에 사용 */
+function closeDetail(restoreView=true){const closingInstitution=activeDetail;officialDetailToken++;basicInfoToken++;clearTimeout(detailMoveTimer);detailMoveTimer=null;clearTimeout(markerBlinkTimer);markerBlinkTimer=null;restoreBlinkedMarker();$('detailSheet').hidden=true;$('detailSheet').style.visibility='';activeDetail=null;if(restoreView&&detailViewState&&mapReady){const view=detailViewState;detailViewState=null;clearTimeout(refreshTimer);skipIdleUntil=Date.now()+1800;map.setCenter(new window.naver.maps.LatLng(view.lat,view.lng));if(map.getZoom()!==view.zoom)map.setZoom(view.zoom)}else if(!restoreView)detailViewState=null;if(restoreView)CareMapExperience.finishDetail(()=>{
+ /** SOFTM-DETAIL-MAP-RETURN START 날짜:20260911 : 전체 목록 복귀 대신 방금 닫은 기관의 마커를 지도 중앙에 유지 */
+ const marker=closingInstitution&&markers.get(closingInstitution.i);
+ if(mapReady&&marker){clearTimeout(refreshTimer);skipIdleUntil=Date.now()+1800;map.setCenter(marker.getPosition());}
+ /** SOFTM-DETAIL-MAP-RETURN END */
+})}
+/** SOFTM-DETAIL-MAP-RETURN END */
 /** SOFTM-MAP-EXPERIENCE END */
 function nearestRoute(rows,start){const left=[...rows],order=[],points=[];let current=start;while(left.length){let best=0,bestD=Infinity;left.forEach((c,i)=>{const p=cachedCoord(c),d=p?hav(current,p):Infinity;if(d<bestD){bestD=d;best=i}});const c=left.splice(best,1)[0];order.push(c);current=cachedCoord(c)}return order}
 /** SOFTM-DIRECTIONS-SUMMARY START 날짜:20260902 : 유지 대상 Directions 응답의 summary 구조를 읽어 NaN 거리 표시를 방지 */
