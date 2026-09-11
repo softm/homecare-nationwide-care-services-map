@@ -18,6 +18,14 @@ test('only supported explicit selections are remembered',()=>{
  assert.deepEqual(calls,[['careCategory:v1','home-care']]);
  assert.doesNotThrow(()=>api.save({setItem(){throw Error('blocked')}},'daycare'));
 });
+/** SOFTM-TYPE-MENU-TEXT START 날짜:20260911 : 상단 메뉴가 생활 상황 문구 대신 요청한 기관 카테고리명을 유지하는지 검증 */
+test('상단 유형 메뉴는 주야간보호를 포함한 기관 카테고리명을 표시한다',()=>{
+ assert.equal(api.menuLabel('daycare'),'주야간보호');
+ assert.equal(api.menuLabel('home-care'),'방문요양');
+ assert.equal(api.menuLabel('facility'),'요양원·공동생활가정');
+ assert.equal(api.menuLabel('nursing-hospital'),'요양병원(의료기관)');
+});
+/** SOFTM-TYPE-MENU-TEXT END */
 test('category changes retain region and map but clear incompatible constraints',()=>{
  const value='https://example.test/nationwide-care-services-map.html?type=daycare&p=서울&c=강남구&cap=30&staff=nurse&grades=A&scores=high&conf=high&institution=123&basket=v1.123#careSavedPanel';
  const url=api.destination(value,'nursing-hospital',{center:{lat:37.5,lng:127},zoom:14,filters:{q:'검색'}});
