@@ -1,0 +1,62 @@
+/** SOFTM-TYPE-ENTRY START 날짜:20260911 : 지도를 남겨 둔 목록 패널에서 유형을 선택하고 모바일 첫 진입·확대 높이를 구분 */
+.care-type-enabled .category-nav{display:none!important}
+.care-type-header{position:fixed;top:0;left:68px;right:0;height:52px;z-index:181;background:#fff;border-bottom:1px solid #dbe5ef;display:flex;align-items:center;padding:5px 14px}
+.care-type-toggle{border:1px solid #bed1e5;border-radius:12px;background:#edf5fe;color:#194e85;min-height:40px;padding:7px 16px;font-weight:800;cursor:pointer}
+.care-type-open .results > :not(.care-type-panel){display:none!important}
+.care-type-panel{height:100%;min-height:0;overflow:auto;overscroll-behavior:contain;padding:20px 16px;background:#fff;color:#203d58;scrollbar-gutter:stable}
+.care-type-panel[hidden]{display:none!important}
+.care-type-panel header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.care-type-eyebrow{font-size:11px;color:#58728a;font-weight:650}
+.care-type-panel h2{margin:6px 0;font-size:22px;letter-spacing:-.04em}
+.care-type-panel [data-close]{width:40px;height:40px;flex:none;border:1px solid #dce5ed;border-radius:12px;background:#fff;font-size:25px;color:#4f667b;cursor:pointer}
+.care-type-intro{font-size:13px;line-height:1.5;margin:8px 0 16px;color:#60758a}
+.care-type-options{display:grid;gap:10px}
+.care-type-option{width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) 12px;gap:10px;align-items:center;text-align:left;border:1px solid var(--edge);border-radius:14px;padding:13px 10px;background:var(--surface);color:#203d58;box-shadow:0 2px 5px #20445b0a;cursor:pointer}
+.care-type-option.blue{--edge:#b6d1ef;--surface:#f0f7ff;--accent:#1769bc}
+.care-type-option.green{--edge:#b5dcd0;--surface:#f0faf6;--accent:#18725b}
+.care-type-option.purple{--edge:#d4c4ea;--surface:#f8f3ff;--accent:#7047a0}
+.care-type-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#fff;color:var(--accent);font-size:27px}
+.care-type-option strong{display:block;font-size:16px;color:var(--accent);margin-bottom:3px}
+.care-type-option small{display:block;font-size:12px;font-weight:700;margin-bottom:3px}
+.care-type-option span span{font-size:12px;line-height:1.45;color:#5b7084;display:block}
+.care-type-option[hidden]{display:none}
+.care-type-option:hover{border-color:var(--accent);box-shadow:0 3px 10px #193b5b20}
+.care-type-all,.care-type-expand{width:100%;min-height:44px;padding:10px;border:1px solid #ccdbe8;border-radius:10px;background:#fff;color:#245680;font-weight:700;margin-top:12px;cursor:pointer}
+.care-type-help{font-size:13px;line-height:1.6;margin-top:12px;border-top:1px solid #e3eaf0;padding-top:10px}
+.care-type-help summary{min-height:44px;cursor:pointer;color:#41658a;padding:10px 0;font-weight:700}
+.care-type-expand{display:none}
+.care-type-panel button:focus-visible,.care-type-toggle:focus-visible,.care-type-help summary:focus-visible{outline:3px solid #e6a32a;outline-offset:2px}
+.care-type-neutral .stats,.care-type-neutral .source-note,.care-type-neutral .ad-zone,.care-type-neutral .filter-lines,.care-type-neutral #advancedSearch,.care-type-neutral .filter-grid select,.care-type-neutral .map-head-actions,.care-type-neutral .select-tools,.care-type-neutral .list-head,.care-type-neutral .route-note,.care-type-neutral .care-search-disclosure{display:none!important}
+.care-type-neutral #mapHeading{font-size:18px}
+.care-type-neutral .filters{top:52px!important}
+.care-type-neutral .results{padding:0!important}
+@media(max-width:1000px) and (orientation:portrait){
+ .care-type-enabled .care-type-header{left:0;height:44px;padding:3px 10px}
+ .care-type-enabled .care-type-toggle{min-height:36px;font-size:13px;padding:5px 12px}
+ .care-type-enabled[data-care-workspace="search"] .filters{top:44px!important}
+ .care-type-enabled[data-care-workspace="search"] .layout{top:108px!important}
+ .care-type-open[data-care-workspace="search"] .layout{grid-template-rows:45% minmax(0,1fr)!important}
+ .care-type-open.care-type-expanded[data-care-workspace="search"] .layout{grid-template-rows:15% minmax(0,1fr)!important}
+ .care-type-open[data-care-workspace="search"] .layout>.map-card{visibility:visible!important;pointer-events:auto!important}
+ .care-type-panel{padding:14px 12px}
+ .care-type-panel h2{font-size:20px}
+ .care-type-expand{display:block}
+ .care-type-neutral[data-care-workspace="search"] .layout{bottom:0!important}
+ .care-type-neutral .filters{height:64px!important;display:block!important}
+ .care-type-neutral .filter-grid{display:grid!important;grid-template-columns:minmax(0,1fr) 64px!important}
+}
+@media(max-width:1000px) and (orientation:landscape){
+ .care-type-header{left:0;right:auto;width:var(--care-landscape-panel);height:44px;padding:3px 8px}
+ .care-type-enabled[data-care-workspace="search"] .filters{top:44px!important}
+ .care-type-enabled[data-care-workspace="search"] .results{padding-top:92px!important}
+ .care-type-open .results{padding-top:92px!important}
+}
+/** SOFTM-TYPE-ENTRY END */
+/** SOFTM-TYPE-ENTRY-FIT START 날짜:20260911 : 확대 조작을 패널 첫 줄에 두고 기존 목록용 상단 여백을 중복 적용하지 않음 */
+.care-type-panel h2:focus{outline:none}
+.care-type-panel header>div{flex:1;min-width:0}
+.care-type-panel header .care-type-expand{width:auto;min-height:40px;margin:0;padding:7px;white-space:nowrap;font-size:12px}
+@media(min-width:1001px){.care-type-neutral .layout>.results{top:68px!important;height:calc(100% - 68px)!important}.care-type-neutral .filter-grid{grid-template-columns:minmax(0,1fr) 64px}}
+@media(max-width:1000px) and (orientation:portrait){.care-type-option{padding:9px;gap:8px}.care-type-option small{font-size:11px}.care-type-option span span{font-size:11px}.care-type-panel h2{font-size:18px}.care-type-eyebrow{display:none}.care-type-intro{margin:6px 0 10px}}
+@media(max-width:1000px) and (orientation:landscape){.care-type-enabled[data-care-workspace="search"] .layout>.results{top:108px!important;padding-top:0!important;height:calc(100% - 160px - env(safe-area-inset-bottom))!important}.care-type-neutral[data-care-workspace="search"] .layout>.results{height:calc(100% - 108px)!important}}
+/** SOFTM-TYPE-ENTRY-FIT END */
