@@ -36,3 +36,21 @@
  .care-map-page .care-workspace-tab-list>[aria-selected="true"]::after{background:#2369df}
 }
 /** SOFTM-MOBILE-CLEAN END */
+/** SOFTM-MOBILE-TABS START 날짜:20260912 : 기관 찾기와 담은 기관에서 같은 하단 탭 위치를 유지하고 본문·고정 행동이 겹치지 않게 영역을 분리 */
+@media(max-width:1000px){
+ .care-map-page{--care-mobile-tab-space:calc(58px + env(safe-area-inset-bottom))}
+ .care-map-page[data-care-workspace="search"] .care-workspace-tabs{height:var(--care-mobile-tab-space)}
+ .care-map-page[data-care-workspace="saved"] .care-workspace-tabs{position:fixed;top:auto;bottom:0;left:0;right:0;height:var(--care-mobile-tab-space);min-height:0;margin:0;padding:4px 8px env(safe-area-inset-bottom);border-radius:0;z-index:160}
+ .care-map-page[data-care-workspace="saved"] .care-workspace-tabs button{min-height:44px;padding:5px 10px}
+ .care-map-page[data-care-workspace="saved"] .care-tab-hint,.care-map-page[data-care-workspace="saved"] .care-layout-toggle,.care-map-page[data-care-workspace="saved"] .page-head,.care-map-page[data-care-workspace="saved"] .ad-zone,.care-map-page[data-care-workspace="saved"] .source-note,.care-map-page[data-care-workspace="saved"] .care-saved-dock{display:none!important}
+ .care-map-page[data-care-workspace="saved"] .care-view-switch{position:fixed;top:44px;left:0;right:0;height:52px;margin:0;padding:4px 12px;background:#fff;border-bottom:1px solid #eee;border-radius:0;z-index:150;scroll-margin-top:44px}
+ .care-map-page[data-care-workspace="saved"] .layout{position:fixed;inset:96px 0 var(--care-mobile-tab-space);height:auto;margin:0;padding:0;display:block;overflow:hidden}
+ .care-map-page[data-care-workspace="saved"][data-care-view="list"] .layout>.care-saved-panel,.care-map-page[data-care-workspace="saved"][data-care-view="map"] .layout>.map-card{position:relative;left:auto;top:auto;width:100%;height:100%;max-height:none;min-height:0;margin:0;padding:12px;overflow:auto;border:0;border-radius:0;visibility:visible;pointer-events:auto}
+ .care-map-page[data-care-workspace="saved"] .care-saved-footer{bottom:-12px;margin-bottom:-12px;padding-bottom:12px;background:#fff}
+}
+@media(max-width:1000px) and (orientation:landscape){
+ .care-map-page[data-care-workspace="search"] .care-workspace-tabs{height:calc(52px + env(safe-area-inset-bottom))}
+ .care-map-page[data-care-workspace="saved"] .care-workspace-tabs{width:44%;right:auto;height:calc(52px + env(safe-area-inset-bottom));min-height:52px;padding-left:max(6px,env(safe-area-inset-left))}
+ .care-map-page[data-care-workspace="saved"] .care-workspace-tabs button{min-height:40px;padding:4px;font-size:13px}
+}
+/** SOFTM-MOBILE-TABS END */
