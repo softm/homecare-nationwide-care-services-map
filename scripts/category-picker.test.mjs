@@ -1,6 +1,7 @@
 /** SOFTM-TYPE-ENTRY START 날짜:20260911 : URL 우선순위·직접 선택 저장·유형 변경 조건·과거 공유 호환성을 검증 */
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import '../care-category-picker.js';
 const api=globalThis.CareCategoryPicker;
 test('explicit links beat saved choice without modifying it',()=>{
@@ -23,5 +24,14 @@ test('category changes retain region and map but clear incompatible constraints'
  assert.equal(url.searchParams.get('type'),'nursing-hospital');assert.equal(url.searchParams.get('p'),'서울');assert.equal(url.searchParams.get('c'),'강남구');assert.equal(url.searchParams.get('q'),'검색');assert.equal(url.searchParams.get('lat'),'37.5');assert.equal(url.searchParams.get('z'),'14');
  for(const key of ['cap','staff','grades','scores','conf','institution','basket'])assert.equal(url.searchParams.has(key),false);
  assert.equal(url.hash,'');assert.throws(()=>api.destination(value,'invalid'));
+});
+test('첫 유형 선택은 손대지 않은 전국 지도를 넘기지 않고 일반 진입은 현재 위치를 우선한다',()=>{
+ const source=readFileSync(new URL('../nationwide-care-services-map.html',import.meta.url),'utf8');
+ const picker=source.slice(source.indexOf('function mountCategoryPicker()'),source.indexOf('function bootUnselected()'));
+ assert.match(picker,/getMap:\(\)=>!TYPE&&!neutralViewportChosen\?null:map/);
+ const init=source.slice(source.indexOf('function initNaver()'),source.indexOf('/** SOFTM-TYPE-MAP END */'));
+ const basket=init.indexOf('CareBasketShare.hasLink'),photo=init.indexOf('initialPhotoEntry'),shared=init.indexOf('hasSharedView&&'),region=init.indexOf("$('q').value.trim()"),current=init.indexOf('else void useCurrentLocation(true)');
+ assert.ok(basket>=0&&basket<photo&&photo<shared&&shared<region&&region<current);
+ assert.doesNotMatch(init,/else void refreshFromMap\(\)/);
 });
 /** SOFTM-TYPE-ENTRY END */

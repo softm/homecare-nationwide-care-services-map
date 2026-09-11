@@ -97,4 +97,22 @@ test('전국 주간 현재 위치 성공 후 내부 기준점 갱신이 주변 �
     vm.createContext(context); vm.runInContext(code, context); await context.useCurrentLocation(false);
     assert.equal(searched, 1); assert.equal(generation, 1); assert.equal(button.disabled, false);
 });
+test('통합 지도 현재 위치 성공은 해당 좌표와 주변 조회를 유지하고 전국 범위로 맞추지 않음', async () => {
+    const source = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
+    const start = source.indexOf('async function useCurrentLocation('), baseStart = source.indexOf('function setBase(');
+    const code = source.slice(baseStart, source.indexOf('\n', baseStart)) + '\n' + source.slice(start, source.indexOf('/** SOFTM-LOCATION END */', start));
+    let searched = 0, requested = 0, fitted = 0, centered = null, zoom = null;
+    const button = { disabled: false, setAttribute() {}, removeAttribute() {} };
+    class LatLng { constructor(lat, lng) { this.lat = lat; this.lng = lng; } }
+    const context = { mapReady: true, DATA: [], baseMarker: null, skipIdleUntil: 0, $: () => button,
+        CareLocation: { request: async options => { requested++; assert.equal(options.isCurrent(), true); return point; }, hideNotice() {} },
+        beginCareQuery: () => ({ current: () => true }), hideLoading() {}, showLoading() {}, setStatus() {}, cachedCoord() {}, hav() {},
+        window: { naver: { maps: { LatLng, Point: class {}, Marker: class {} } } },
+        map: { setCenter(value) { centered = value; }, setZoom(value) { zoom = value; }, fitBounds() { fitted++; } },
+        setTimeout(callback) { callback(); }, async refreshFromMap(query) { assert.equal(query.current(), true); searched++; }
+    };
+    vm.createContext(context); vm.runInContext(code, context); await context.useCurrentLocation(true);
+    assert.equal(requested, 1); assert.deepEqual({ lat: centered.lat, lng: centered.lng }, point); assert.equal(zoom, 14);
+    assert.equal(searched, 1); assert.equal(fitted, 0); assert.equal(button.disabled, false);
+});
 /** SOFTM-LOCATION-TEST END */
