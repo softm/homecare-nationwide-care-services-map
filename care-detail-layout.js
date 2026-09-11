@@ -1,6 +1,16 @@
 /** SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 복사와 실제 목적지 내비 연결을 두 지도에서 일관되게 제공 */
 (() => {
     const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    /** SOFTM-MAP-LINK START 날짜:20260911 : 기관명과 주소를 합친 과도한 검색조건 대신 주소 또는 정확한 좌표를 전달 */
+    function externalMaps(c, point) {
+        const query = String(c.a || '').trim() || String(c.n || '').trim();
+        const valid = point && Number.isFinite(point.lat) && Number.isFinite(point.lng) && point.lat >= 31.43 && point.lat <= 44.35 && point.lng >= 122.37 && point.lng <= 132;
+        return {
+            naver: `https://map.naver.com/p/search/${encodeURIComponent(query)}`,
+            kakao: valid ? `https://map.kakao.com/link/map/${encodeURIComponent(c.n || query)},${point.lat},${point.lng}` : `https://map.kakao.com/link/search/${encodeURIComponent(query)}`
+        };
+    }
+    /** SOFTM-MAP-LINK END */
     function links(c, point, ua = navigator.userAgent) {
         const valid = point && Number.isFinite(point.lat) && Number.isFinite(point.lng) && point.lat >= 31.43 && point.lat <= 44.35 && point.lng >= 122.37 && point.lng <= 132;
         const web = valid ? `https://map.kakao.com/link/to/${encodeURIComponent(c.n)},${point.lat},${point.lng}` : `https://map.naver.com/p/search/${encodeURIComponent(c.a || c.n)}`;
@@ -30,6 +40,6 @@
             fallback.target = '_blank'; fallback.rel = 'noopener'; fallback.textContent = '웹 길안내'; status.append(fallback);
         }
     });
-    window.CareDetailLayout = {address, links};
+    window.CareDetailLayout = {address, links, externalMaps}; // SOFTM-MAP-LINK 날짜:20260911 : 두 지도 하단 외부 지도 링크의 검색 기준 공유
 })();
 /** SOFTM-DETAIL-LAYOUT END */
