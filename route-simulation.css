@@ -1,21 +1,44 @@
-/* SOFTM-ROUTE-SIMULATION START 날짜:20260910 : 지도에서 이동 차량과 재생 상태를 함께 확인하도록 조작부를 고정 */
-.care-simulation { position:absolute; left:12px; bottom:84px; z-index:90; width:min(390px,calc(100% - 100px)); box-sizing:border-box; padding:12px; background:#fff; color:#203c5a; border:1px solid #c5d7ec; border-radius:14px; box-shadow:0 4px 20px #17324d26; }
+/* SOFTM-ROUTE-SIMULATION START 날짜:20260912 : 경로를 가리지 않는 하단 축소 막대에서 이동 상태와 재생 조작을 함께 확인 */
+.care-simulation { position:absolute; left:12px; bottom:52px; z-index:90; width:min(460px,calc(100% - 100px)); box-sizing:border-box; padding:8px; background:#fff; color:#203c5a; border:1px solid #c5d7ec; border-radius:14px; box-shadow:0 4px 20px #17324d26; }
 .care-simulation[hidden] { display:none; }
-.care-simulation-heading { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; }
-.care-simulation-heading span { font-size:11px; color:#607488; }
-.care-simulation-heading output { margin-left:auto; font-size:12px; white-space:nowrap; }
-.care-simulation-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; align-items:center; }
-.care-map-page .care-simulation button,.care-map-page .care-simulation select { min-height:40px; padding:6px 8px; white-space:nowrap; font-size:12px; border:1px solid #c9d8e9; border-radius:8px; color:#234f80; background:#f6f9ff; }
-.care-simulation [data-play] { flex:1; }.care-simulation-controls label { font-size:12px; white-space:nowrap; }
-.care-simulation progress { width:100%; height:5px; display:block; margin-top:10px; accent-color:#1768c5; }
+/** SOFTM-SIMULATION-COMPACT START 날짜:20260912 : 기본 높이는 한 줄로 제한하고 재시작·속도·종료만 선택적으로 펼침 */
+.care-simulation-bar { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; }
+.care-simulation-summary { min-width:0; }
+.care-simulation-heading { display:flex; min-width:0; align-items:center; gap:6px; margin:0; font-size:14px; }
+.care-simulation-heading strong,.care-simulation-heading output { flex:0 0 auto; white-space:nowrap; }
+.care-simulation-heading output { margin-left:auto; font-size:12px; }
+.care-simulation-primary { display:flex; gap:5px; }
+.care-simulation-controls { display:grid; grid-template-columns:1fr 1.25fr .8fr; gap:6px; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid #dce5ef; }
+.care-simulation-controls[hidden] { display:none; }
+.care-map-page .care-simulation button,.care-map-page .care-simulation select { min-height:36px; padding:5px 8px; white-space:nowrap; font-size:12px; border:1px solid #c9d8e9; border-radius:8px; color:#234f80; background:#f6f9ff; }
+.care-map-page .care-simulation [data-play] { min-width:58px; border-color:#1768c5; color:#fff; background:#1768c5; }
+.care-map-page .care-simulation [data-options] { min-width:46px; }
+.care-simulation-controls label { display:flex; align-items:center; gap:4px; min-width:0; font-size:12px; white-space:nowrap; }
+.care-simulation-controls select { width:100%; min-width:0; }
+.care-simulation progress { width:100%; height:4px; display:block; margin-top:6px; accent-color:#1768c5; }
+/** SOFTM-SIMULATION-COMPACT END */
 .care-simulation-marker { display:grid; place-items:center; width:40px; height:40px; box-sizing:border-box; border:3px solid #fff; border-radius:50%; background:#1768c5; font-size:25px; box-shadow:0 2px 8px #123a6a88; }
 /* SOFTM-ROUTE-SIMULATION END */
 
-/* SOFTM-SIMULATION-ACTIVE START 날짜:20260910 : 도착 기관을 차량과 구분해 강조하고 기관명을 읽기 쉽게 표시 */
+/* SOFTM-SIMULATION-ACTIVE START 날짜:20260912 : 목적지 이름을 한 줄로 줄여 차량과 지도 경로를 함께 확인 */
 .care-simulation-active { filter:drop-shadow(0 0 5px #ffb300) drop-shadow(0 0 8px #ffb300); transform:scale(1.2); transform-origin:bottom center; }
-.care-simulation-arrival { margin:10px 0 0; padding-top:8px; border-top:1px solid #dce5ef; font-size:13px; line-height:1.5; color:#174f85; font-weight:700; overflow-wrap:anywhere; }
+.care-simulation-arrival { min-width:0; overflow:hidden; color:#174f85; font-size:11px; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
 .care-simulation-arrival[hidden] { display:none; }
 /* SOFTM-SIMULATION-ACTIVE END */
+
+/** SOFTM-SIMULATION-COMPACT START 날짜:20260912 : 모바일에서는 오른쪽 지도 버튼을 피한 낮은 막대로 모의주행을 조작 */
+@media (max-width:1000px) {
+ .care-simulation { left:8px; bottom:42px; width:min(360px,calc(100% - 80px)); padding:7px; border-radius:12px; }
+ .care-simulation-bar { gap:6px; }
+ .care-simulation-heading { gap:4px; font-size:13px; }
+ .care-simulation-heading output,.care-simulation-arrival { font-size:10px; }
+ .care-simulation-primary { gap:4px; }
+ .care-map-page .care-simulation button,.care-map-page .care-simulation select { min-height:34px; padding:4px 7px; }
+ .care-map-page .care-simulation [data-play] { min-width:52px; }
+ .care-map-page .care-simulation [data-options] { min-width:42px; }
+ .care-simulation-controls { gap:4px; margin-top:6px; padding-top:6px; }
+}
+/** SOFTM-SIMULATION-COMPACT END */
 
 /* SOFTM-SIMULATION-BLINK START 날짜:20260911 : 주행 중 향하는 기관을 쉽게 찾도록 마커를 숨기지 않고 밝기·크기를 부드럽게 반복 강조 */
 .care-simulation-playing .care-simulation-active { animation:care-simulation-blink 1s ease-in-out infinite; }

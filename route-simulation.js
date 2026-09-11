@@ -66,10 +66,11 @@
  }
  /** SOFTM-SIMULATION-CAMERA END */
  function mount(host,getMap,getMarker=()=>null){
+  /** SOFTM-SIMULATION-COMPACT START 날짜:20260912 : 작은 화면에서 지도를 가리지 않도록 기본 조작은 한 줄로 줄이고 부가 조작만 필요할 때 펼침 */
   const panel=document.createElement('section');panel.className='care-simulation';panel.hidden=true;panel.setAttribute('aria-label','모의주행');
-  panel.innerHTML='<div class="care-simulation-heading"><strong>모의주행</strong><span>경로 미리보기</span><output>0%</output></div><div class="care-simulation-controls"><button type="button" data-play>시작</button><button type="button" data-restart>처음부터</button><label>속도 <select aria-label="모의주행 속도"><option value="300">천천히</option><option value="600" selected>보통</option><option value="1200">빠르게</option></select></label><button type="button" data-stop>종료</button></div><progress max="1" value="0" aria-label="모의주행 진행률"></progress>'; // SOFTM-SIMULATION-SPEED 날짜:20260911 : 기본 600배로 빠르게 미리 보고 큰 배속 숫자 대신 익숙한 속도 단계로 선택
+  panel.innerHTML='<div class="care-simulation-bar"><div class="care-simulation-summary"><div class="care-simulation-heading"><strong>모의주행</strong><span class="care-simulation-arrival" hidden></span><output>0%</output></div><progress max="1" value="0" aria-label="모의주행 진행률"></progress></div><div class="care-simulation-primary"><button type="button" data-play>시작</button><button type="button" data-options aria-expanded="false" aria-controls="care-simulation-options">설정</button></div></div><div class="care-simulation-controls" id="care-simulation-options" hidden><button type="button" data-restart>처음부터</button><label>속도 <select aria-label="모의주행 속도"><option value="300">천천히</option><option value="600" selected>보통</option><option value="1200">빠르게</option></select></label><button type="button" data-stop>종료</button></div>'; // SOFTM-SIMULATION-SPEED 날짜:20260912 : 지도 확인을 우선하면서 기존 세 단계 속도 선택을 펼침 영역에서 유지
   /** SOFTM-SIMULATION-ACTIVE START 날짜:20260910 : 도착 기관 이름과 강조 상태를 재생·초기화에 함께 연결 */
-  const arrival=document.createElement('p');arrival.className='care-simulation-arrival';arrival.hidden=true;panel.append(arrival);
+  const arrival=panel.querySelector('.care-simulation-arrival');
   const highlight=highlighter(getMarker);let stops=[],nextStop=0,holdUntil=0;
   function resetStops(){nextStop=0;holdUntil=0;highlight(null);arrival.hidden=true;arrival.textContent='';}
   /** SOFTM-SIMULATION-NEXT START 날짜:20260911 : 이동 전에 향하는 기관을 강조해 다음 목적지를 쉽게 확인 */
@@ -80,11 +81,15 @@
   /** SOFTM-SIMULATION-NEXT END */
   /** SOFTM-SIMULATION-ACTIVE END */
   host.append(panel);
-  const play=panel.querySelector('[data-play]'),output=panel.querySelector('output'),progress=panel.querySelector('progress'),speed=panel.querySelector('select');
+  const play=panel.querySelector('[data-play]'),options=panel.querySelector('[data-options]'),controls=panel.querySelector('.care-simulation-controls'),output=panel.querySelector('output'),progress=panel.querySelector('progress'),speed=panel.querySelector('select');
+  let optionsOpen=false;
+  function setOptionsOpen(open){optionsOpen=Boolean(open);controls.hidden=!optionsOpen;options.setAttribute('aria-expanded',String(optionsOpen));options.textContent=optionsOpen?'접기':'설정';}
+  setOptionsOpen(false);
+  /** SOFTM-SIMULATION-COMPACT END */
   let route=null,pointAt,marker=null,frame=null,elapsed=0,last=0,cameraAt=0,playing=false,view=null;
   function paint(){const fraction=Math.min(1,elapsed/Math.max(1000,route.duration));output.value=`${Math.round(fraction*100)}%`;progress.value=fraction;const [lng,lat]=pointAt(fraction);marker?.setPosition(new root.naver.maps.LatLng(lat,lng));return fraction;}
   function pause(){playing=false;host.classList.remove('care-simulation-playing');cancelAnimationFrame(frame);frame=null;play.textContent=progress.value===1?'다시 재생':'계속';} // SOFTM-SIMULATION-BLINK 날짜:20260911 : 일시정지·완료·종료 시 목적지의 깜빡임도 즉시 멈춤
-  function clear(restore=true){pause();resetStops();marker?.setMap(null);marker=null;if(restore&&view){const map=getMap();map.setCenter(view.center);map.setZoom(view.zoom);}view=null;elapsed=0;output.value='0%';progress.value=0;play.textContent='시작';}
+  function clear(restore=true){pause();resetStops();setOptionsOpen(false);marker?.setMap(null);marker=null;if(restore&&view){const map=getMap();map.setCenter(view.center);map.setZoom(view.zoom);}view=null;elapsed=0;output.value='0%';progress.value=0;play.textContent='시작';} // SOFTM-SIMULATION-COMPACT 날짜:20260912 : 종료·경로 변경 뒤 지도를 다시 넓게 볼 수 있도록 설정 영역도 접음
   /** SOFTM-SIMULATION-CAMERA START 날짜:20260910 : 매 프레임 중심 이동 대신 가장자리 이탈 때만 부드럽게 이동 */
   function follow(){
    const map=getMap(),bounds=map.getBounds(),sw=bounds.getSW(),ne=bounds.getNE(),position=marker.getPosition();
@@ -103,6 +108,7 @@
   function start(){const map=getMap();if(!route||!map)return;if(progress.value>=1){elapsed=0;resetStops();}if(!marker){view={center:map.getCenter(),zoom:map.getZoom()};marker=new root.naver.maps.Marker({map,position:map.getCenter(),zIndex:10000,icon:{content:'<div class="care-simulation-marker" aria-label="모의주행 차량">🚗</div>',anchor:new root.naver.maps.Point(20,20)}});}paint();follow();if(!holdUntil)showNextDestination();playing=true;host.classList.add('care-simulation-playing');play.textContent='일시정지';last=performance.now();frame=requestAnimationFrame(tick);} // SOFTM-SIMULATION-BLINK 날짜:20260911 : 출발·재개·처음부터의 공통 진입점에서 목적지 깜빡임을 켬
   /** SOFTM-SIMULATION-NEXT END */
   play.onclick=()=>playing?pause():start();
+  options.onclick=()=>setOptionsOpen(!optionsOpen); // SOFTM-SIMULATION-COMPACT 날짜:20260912 : 사용자가 요청할 때만 부가 조작을 펼쳐 지도 가림을 최소화
   panel.querySelector('[data-restart]').onclick=()=>{pause();elapsed=0;resetStops();start();};
   panel.querySelector('[data-stop]').onclick=()=>clear();
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)pause();});
