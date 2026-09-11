@@ -24,6 +24,46 @@
         return rows.map((row, index) => ({ id: String(row.i), name: row.n, point: points[index], ...(metadataMatches ? { pathIndex: indices[index] } : {}) }));
     }
     /** SOFTM-ROUTE-ORDER END */
+    /** SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 선택한 경우에만 출발지부터 모든 기관을 방문하는 좌표거리 최단 배열을 계산 */
+    function distance(a, b) {
+        const rad = Math.PI / 180, dLat = (b.lat - a.lat) * rad, dLng = (b.lng - a.lng) * rad;
+        const value = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) ** 2;
+        return 6371000 * 2 * Math.asin(Math.min(1, Math.sqrt(value)));
+    }
+    function optimizeVisitOrder(origin, items) {
+        const count = items.length;
+        if (count < 2 || !validPoint(origin)) return [...items];
+        const states = 1 << count, width = count, all = states - 1;
+        const costs = new Float64Array(states * width), parents = new Int8Array(states * width), between = new Float64Array(width * width);
+        costs.fill(Infinity); parents.fill(-1);
+        for (let from = 0; from < count; from++) {
+            costs[(1 << from) * width + from] = distance(origin, items[from].point);
+            for (let to = 0; to < count; to++) between[from * width + to] = distance(items[from].point, items[to].point);
+        }
+        for (let mask = 1; mask < states; mask++) {
+            for (let last = 0; last < count; last++) {
+                if (!(mask & (1 << last))) continue;
+                const current = costs[mask * width + last];
+                if (!Number.isFinite(current)) continue;
+                let remaining = all ^ mask;
+                while (remaining) {
+                    const bit = remaining & -remaining, next = 31 - Math.clz32(bit), nextMask = mask | bit;
+                    const candidate = current + between[last * width + next], offset = nextMask * width + next;
+                    if (candidate < costs[offset] - .001) { costs[offset] = candidate; parents[offset] = last; }
+                    remaining ^= bit;
+                }
+            }
+        }
+        let last = 0;
+        for (let index = 1; index < count; index++) if (costs[all * width + index] < costs[all * width + last] - .001) last = index;
+        const order = new Array(count); let mask = all;
+        for (let position = count - 1; position >= 0; position--) {
+            order[position] = items[last];
+            const previous = parents[mask * width + last]; mask ^= 1 << last; last = previous;
+        }
+        return order;
+    }
+    /** SOFTM-ROUTE-OPTIMIZE END */
     function create(adapter) {
         let snapshot = null, generation = 0, controller = null, timer = null, ids = [], fitted = [];
         let state = { phase: 'idle', count: 0, placed: 0, missing: [], result: null };
@@ -35,7 +75,7 @@
             if (active()) { const saved = snapshot; snapshot = null; adapter.clear(); adapter.restore(saved); }
             ids = []; fitted = []; publish('idle', { count: 0, placed: 0, missing: [], result: null });
         }
-        async function show(rows, { route = false, fit = true, origin = null } = {}) {
+        async function show(rows, { route = false, fit = true, origin = null, optimize = false } = {}) {
             cancel();
             state = { phase: 'idle', count: rows.length, placed: 0, missing: [], result: null, origin };
             if (!adapter.ready()) { publish('waiting', { error: '지도를 연결하는 중입니다. 잠시만 기다려 주세요.' }); return state; }
@@ -57,8 +97,9 @@
                     });
                 }
                 if (!current()) return state;
-                placed.forEach(item => adapter.place(item));
-                const points = placed.map(item => item.point);
+                const visitItems = route && optimize && rows.length <= 16 && validPoint(origin?.point) && !missing.length ? optimizeVisitOrder(origin.point, placed) : placed;
+                visitItems.forEach((item, index) => adapter.place({ ...item, rank: index + 1 }));
+                const visitRows = visitItems.map(item => item.row), points = visitItems.map(item => item.point);
                 fitted = [...(validPoint(origin?.point) ? [origin.point] : []), ...points];
                 if (fit && fitted.length) adapter.fit(fitted);
                 publish('ready', { placed: placed.length, missing });
@@ -79,8 +120,13 @@
                 adapter.draw(data.path);
                 fitted = [origin.point, ...points, ...data.path.map(([lng, lat]) => ({ lat, lng }))];
                 adapter.fit(fitted);
-                // SOFTM-ROUTE-ORDER 날짜:20260911 : 요청 순서와 응답 경로의 경유지 인덱스를 함께 전달해 모의주행 목적지를 정확히 연결
-                publish('success', { result: { distance, duration, path: data.path, origin, stops: orderedStops(rows, points, data.path, data.summary) } });
+                /** SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 변경 전후 배열을 구조화해 목록 갱신과 사용자 알림이 같은 결과를 사용 */
+                const before = rows.map(row => ({ id: String(row.i), name: row.n }));
+                const after = visitRows.map(row => ({ id: String(row.i), name: row.n }));
+                const optimization = { requested: Boolean(optimize), changed: Boolean(optimize) && before.some((item, index) => item.id !== after[index]?.id), before, after };
+                ids = after.map(item => item.id);
+                publish('success', { result: { distance, duration, path: data.path, origin, stops: orderedStops(visitRows, points, data.path, data.summary), optimization } });
+                /** SOFTM-ROUTE-OPTIMIZE END */
             } catch (error) {
                 if (current() && (error.name !== 'AbortError' || timedOut)) publish('error', { error: timedOut ? '경로 응답이 지연되고 있습니다. 다시 탐색해 주세요.' : routeErrorMessage(error) }); // SOFTM-ROUTE-ERROR 날짜:20260905 : 통신·응답 형식·처리 오류를 같은 문구로 숨기지 않음
             } finally { if (current()) { clearTimeout(timer); controller = null; } }
@@ -88,6 +134,6 @@
         }
         return Object.freeze({ active, has: id => ids.includes(String(id)), show, exit, fit() { if (active() && fitted.length) adapter.fit(fitted); }, state: () => state });
     }
-    root.CareBasketMap = Object.freeze({ create, orderedStops }); // SOFTM-ROUTE-ORDER 날짜:20260911 : 실제 응답의 방문 순서 연결을 회귀검사에서 직접 확인
+    root.CareBasketMap = Object.freeze({ create, orderedStops, optimizeVisitOrder }); // SOFTM-ROUTE-OPTIMIZE 날짜:20260911 : 방문 배열 최적화와 응답 순서 연결을 회귀검사에서 직접 확인
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-WORKSPACE-ROUTE END */

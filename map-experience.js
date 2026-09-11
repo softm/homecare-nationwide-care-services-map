@@ -156,7 +156,6 @@
         };
     }
     let matchController = null; // SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 검색·비교함의 중요 조건을 같은 인스턴스로 연결
-    let routeStartRevision = 0; // SOFTM-ROUTE-DIRECT 날짜:20260910 : 출발지 대기 중 취소된 즉시 탐색을 다시 실행하지 않음
     let options, basket, bar, media, detailOrigin, view = 'list', workspace = 'search', routePanel = false;
     let rowById = new Map(), restoreGeneration = 0, routeRevision = 0, readyTimer = null, searchMapFocusTimer = null;
     let basketMap, routeOutput, originController, tabs, dock, lastItems = '', cancelBasketDrag = () => {};
@@ -329,7 +328,7 @@
         if (next === workspace) return;
         showRouteError(); // SOFTM-ROUTE-ERROR-ALERT 날짜:20260909 : 다른 작업으로 이동하면 이전 경로 오류 알림을 닫음
         workspacePositions[workspace] = remember(); workspaceViews[workspace] = view;
-        options.closeDetail?.(); cancelDetail(); cancelBasketDrag(); originController.cancel(); routeRevision++; routeStartRevision++; // SOFTM-ROUTE-DIRECT 날짜:20260910 : 작업 전환 후 대기 중 경로가 실행되지 않도록 취소
+        options.closeDetail?.(); cancelDetail(); cancelBasketDrag(); originController.cancel(); routeRevision++; // SOFTM-ROUTE-OPTIMIZE 날짜:20260911 : 작업 전환 시 진행 중인 경로 계산과 순서 적용을 함께 취소
         clearTimeout(readyTimer); workspace = next; routePanel = false; view = workspaceViews[next];
         syncView(); options.resizeMap?.();
         if (next === 'saved') showSaved(); else basketMap.exit();
@@ -388,7 +387,7 @@
     }
     /** SOFTM-CARE-INSIGHTS END */
     function changed(message = '') {
-        routeStartRevision++; routeRevision++; refresh(); // SOFTM-ROUTE-DIRECT 날짜:20260910 : 기관 구성이 바뀌면 대기 중 탐색을 취소
+        routeRevision++; refresh(); // SOFTM-ROUTE-OPTIMIZE 날짜:20260911 : 기관 구성이 바뀌면 이전 최적화 결과와 경로를 취소
         void updateInsights(); // SOFTM-CARE-INSIGHTS 날짜:20260910 : 담기·삭제·순서 변경 후 같은 구성으로 설명을 갱신
         if (workspace === 'saved') void showSaved({ fit: false });
         bar.querySelector('.care-order-status').textContent = message || (routePanel ? '방문 기관이 변경되었습니다. 경로를 다시 탐색해 주세요.' : '');
@@ -421,8 +420,29 @@
         routeSimulation?.set(state.phase === 'success' ? state.result : null); // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 기관·출발지 변경과 재탐색 시 이전 주행을 즉시 제거
         routeState = state;
         showRouteError(state.phase === 'error' ? state.error || '잠시 후 다시 탐색해 주세요.' : ''); // SOFTM-ROUTE-ERROR-ALERT 날짜:20260909 : 실패를 즉시 알리고 재탐색 시작 시 이전 오류를 제거
-        const result = state.result, status = routeOutput.querySelector('[role="status"]');
-        const messages = { locating: '기관 위치를 확인하고 있습니다…', routing: '담은 순서대로 도로 경로를 탐색하고 있습니다…', waiting: '지도를 연결하고 있습니다…' };
+        const result = state.result, status = routeOutput.querySelector('[role="status"]'), orderNotice = routeOutput.querySelector('.care-route-order-change');
+        /** SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 최적화로 바뀐 배열을 실제 방문 순서에 반영하고 변경 전후를 계속 보이는 알림으로 제공 */
+        const optimization = result?.optimization;
+        if (optimization?.requested) {
+            if (optimization.changed) {
+                basket.replace(optimization.after.map(item => item.id));
+                lastItems = '';
+                void updateInsights();
+            }
+            const orderText = items => items.map((item, index) => `${index + 1}. ${escape(item.name)}`).join(' → ');
+            orderNotice.innerHTML = optimization.changed
+                ? `<strong>최적경로를 적용해 방문 순서를 변경했습니다.</strong><dl><div><dt>변경 전</dt><dd>${orderText(optimization.before)}</dd></div><div><dt>변경 후</dt><dd>${orderText(optimization.after)}</dd></div></dl><small>출발지와 기관 좌표 사이의 예상 이동거리 기준입니다.</small>`
+                : '<strong>현재 방문 순서를 유지했습니다.</strong><p>출발지와 기관 좌표 사이의 예상 이동거리 기준 최적 순서와 같습니다.</p>';
+            orderNotice.hidden = false;
+            bar.querySelector('.care-order-status').textContent = optimization.changed ? '최적경로를 적용해 방문 순서가 변경되었습니다.' : '현재 방문 순서가 최적경로와 같아 유지되었습니다.';
+            basketAnnouncement.textContent = optimization.changed ? `최적경로를 적용해 ${optimization.after.length}곳의 방문 순서를 변경했습니다.` : '현재 방문 순서가 최적경로와 같아 유지되었습니다.';
+        } else {
+            orderNotice.hidden = true;
+            orderNotice.textContent = '';
+        }
+        /** SOFTM-ROUTE-OPTIMIZE END */
+        const optimizing = Boolean(bar.querySelector('[data-route-optimize]')?.checked);
+        const messages = { locating: '기관 위치를 확인하고 있습니다…', routing: optimizing ? '최적 방문 순서를 계산하고 도로 경로를 탐색하고 있습니다…' : '담은 순서대로 도로 경로를 탐색하고 있습니다…', waiting: '지도를 연결하고 있습니다…' };
         status.textContent = state.error || messages[state.phase] || (state.phase === 'success' ? '경로탐색 완료' : rows().length > 16 ? '방문 경로는 16곳까지 탐색할 수 있습니다.' : originState.origin ? '출발지와 방문 순서를 확인한 뒤 경로탐색을 눌러 주세요.' : '출발지를 먼저 선택해 주세요.');
         routeOutput.dataset.phase = state.phase;
         routeOutput.querySelector('.care-route-summary').innerHTML = result ? `<strong>${(result.distance / 1000).toFixed(1)}<small> km</small></strong><strong>약 ${Math.round(result.duration / 60000)}<small> 분</small></strong><span>${result.stops.length}곳 방문 · 자동차 경로</span>` : '';
@@ -431,10 +451,10 @@
         document.querySelector('.care-saved-map-tools strong').textContent = routePanel ? '방문 경로' : `담은 기관 ${rows().length}곳`;
         refresh();
     }
-    /** SOFTM-ROUTE-DIRECT START 날짜:20260910 : 경로탐색 한 번으로 출발지 확인과 도로 계산까지 이어서 실행 */
+    /** SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 출발지와 최적화 여부를 확인한 뒤 사용자가 명시적으로 경로를 실행 */
     function editRoute(open = true, locate = true) {
         if (workspace !== 'saved') setWorkspace('saved');
-        originController.cancel(); routeRevision++; routeStartRevision++; routePanel = open;
+        originController.cancel(); routeRevision++; routePanel = open;
         syncView(); setView('list', false);
         const pending = showSaved({ fit: false });
         renderOrigin();
@@ -443,25 +463,18 @@
         return pending;
     }
     async function routeBasket() {
-        if (!routePanel) {
-            const pending = editRoute(true, false), intent = routeStartRevision;
-            await pending;
-            if (intent !== routeStartRevision || workspace !== 'saved' || !routePanel) return;
-            if (!originState.origin) await originController.locate();
-            if (intent !== routeStartRevision || workspace !== 'saved' || !routePanel || !originState.origin) return;
-            await showSaved({ fit: false });
-            if (intent !== routeStartRevision || workspace !== 'saved' || !routePanel) return;
-        }
-        /** SOFTM-ROUTE-DIRECT END */
+        if (!routePanel) { void editRoute(true); return; }
         if (busy()) return;
         const revision = ++routeRevision;
         bar.querySelector('.care-order-status').textContent = '';
-        const result = await basketMap.show(rows(), { route: true, origin: originState.origin });
+        const optimize = Boolean(bar.querySelector('[data-route-optimize]')?.checked);
+        const result = await basketMap.show(rows(), { route: true, origin: originState.origin, optimize });
         if (revision !== routeRevision || workspace !== 'saved' || !routePanel || result.phase !== 'success') return;
         setView('map', false);
         document.querySelector('.map-card').scrollIntoView({ behavior: 'instant', block: 'start' });
         requestAnimationFrame(() => basketMap.fit());
     }
+    /** SOFTM-ROUTE-OPTIMIZE END */
     /** SOFTM-WORKSPACE END */
     function costCard(row, service = options?.type) {
         if (!['facility', 'daycare', 'home-care'].includes(service)) return '';
@@ -916,7 +929,7 @@
         bar = document.createElement('section'); bar.className = 'card care-basket care-saved-panel'; bar.id = 'careSavedPanel'; bar.setAttribute('role', 'tabpanel'); bar.setAttribute('aria-labelledby', 'careSavedTab');
         bar.innerHTML = `<div class="care-saved-heading"><div><h2 tabindex="-1">담은 기관 <span class="care-basket-count">0곳</span></h2><p>관심 있는 기관을 비교하고 방문을 준비하세요.</p></div><button type="button" class="care-text-button" data-basket-clear>비우기</button></div>
         <!-- SOFTM-ORIGIN-COMPACT START 날짜:20260911 : 출발지 제목과 현재 위치 행동을 같은 줄에 놓아 목록 공간 확보 -->
-        <div class="care-route-editor" hidden><button type="button" class="care-text-button" data-route-back>← 담은 기관으로 돌아가기</button><h2 tabindex="-1">방문 경로</h2><p>출발지를 정하고 방문할 순서대로 놓아 주세요.</p><fieldset class="care-origin"><legend class="care-origin-sr">출발지</legend><div class="care-origin-head"><strong aria-hidden="true">출발지</strong><button type="button" data-origin-locate>현재 위치 사용</button></div><form class="care-origin-form"><label class="care-origin-sr" for="careOriginAddress">출발지 주소 입력</label><div><input id="careOriginAddress" name="origin" type="search" placeholder="도로명과 건물번호" autocomplete="street-address"><button type="submit" data-origin-search>주소 검색</button></div></form><p class="care-origin-status" role="status"></p><ul class="care-origin-candidates"></ul><p class="care-origin-selection">출발지를 선택해 주세요.</p></fieldset></div>
+        <div class="care-route-editor" hidden><button type="button" class="care-text-button" data-route-back>← 담은 기관으로 돌아가기</button><h2 tabindex="-1">방문 경로</h2><p>출발지를 정하고 방문할 순서대로 놓아 주세요.</p><fieldset class="care-origin"><legend class="care-origin-sr">출발지</legend><div class="care-origin-head"><strong aria-hidden="true">출발지</strong><button type="button" data-origin-locate>현재 위치 사용</button></div><form class="care-origin-form"><label class="care-origin-sr" for="careOriginAddress">출발지 주소 입력</label><div><input id="careOriginAddress" name="origin" type="search" placeholder="도로명과 건물번호" autocomplete="street-address"><button type="submit" data-origin-search>주소 검색</button></div></form><p class="care-origin-status" role="status"></p><ul class="care-origin-candidates"></ul><p class="care-origin-selection">출발지를 선택해 주세요.</p></fieldset><!-- SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 실행 전에 자동 순서 변경 가능성을 명시적으로 선택 --><label class="care-route-optimize"><input type="checkbox" data-route-optimize><span><b>최적경로 찾기</b><small>선택하면 예상 이동거리가 짧은 순서로 방문 배열이 바뀔 수 있습니다.</small></span></label><!-- SOFTM-ROUTE-OPTIMIZE END --></div>
         <!-- SOFTM-ORIGIN-COMPACT END -->
         <div class="care-saved-empty"><span aria-hidden="true">♡</span><h3>관심 있는 기관을 먼저 담아 주세요</h3><p>기관 찾기에서 ‘비교에 담기’를 누르면 여기에 모입니다.</p><button type="button" data-workspace="search">기관 찾기</button></div>
         <p class="care-order-help">⠿ 손잡이를 끌어 방문 순서를 바꿀 수 있습니다.</p><span class="care-drag-help" id="careBasketDragHelp">손잡이를 끌거나 방향키로 순서를 바꿉니다. Esc를 누르면 이동을 취소합니다.</span><ol class="care-basket-items" aria-label="담은 기관 방문 순서"></ol><p class="care-order-status" role="status"></p>
@@ -939,7 +952,7 @@
         back.addEventListener('click', goBack); tabs.prepend(back);
         /** SOFTM-WORKSPACE-BACK-ICON END */
         routeOutput = document.createElement('section'); routeOutput.className = 'care-route-output'; routeOutput.setAttribute('aria-label', '경로탐색 결과');
-        routeOutput.innerHTML = '<p role="status"></p><div class="care-route-summary"></div><details class="care-route-itinerary" hidden></details>';
+        routeOutput.innerHTML = '<p role="status"></p><div class="care-route-summary"></div><div class="care-route-order-change" role="status" aria-live="polite" aria-atomic="true" hidden></div><details class="care-route-itinerary" hidden></details>';
         bar.querySelector('.care-saved-footer').before(routeOutput);
         const mapTools = document.createElement('div'); mapTools.className = 'care-saved-map-tools'; mapTools.innerHTML = '<strong>담은 기관</strong><button type="button" data-saved-fit>전체 위치</button><button type="button" data-care-view="list">목록 보기</button>'; document.querySelector('.map-card .map-wrap').before(mapTools);
         routeSimulation = root.CareRouteSimulation.mount(document.querySelector('.map-card .map-wrap'), options.basketMap.simulationMap, options.basketMap.simulationMarker); // SOFTM-ROUTE-SIMULATION 날짜:20260910 : 두 지도의 경로 재생 조작을 공용 지도 영역에 연결
@@ -980,7 +993,7 @@
             else if (node.hasAttribute('data-layout-expand')) setWorkspaceExpanded(!workspaceExpanded); // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 같은 버튼으로 확대와 원상복구를 전환
             else if (node.hasAttribute('data-basket-open')) options.compare();
             else if (node.hasAttribute('data-basket-clear')) { basket.clear(); changed(); }
-            else if (node.hasAttribute('data-route-edit')) void routeBasket(); // SOFTM-ROUTE-DIRECT 날짜:20260910 : 편집창 진입에 멈추지 않고 바로 탐색
+            else if (node.hasAttribute('data-route-edit')) void editRoute(true); // SOFTM-ROUTE-OPTIMIZE 날짜:20260911 : 실행 전에 최적화 선택과 출발지를 확인할 수 있도록 경로 편집 화면을 먼저 표시
             else if (node.hasAttribute('data-route-back')) editRoute(false);
             else if (node.hasAttribute('data-route-run')) void routeBasket();
             else if (node.hasAttribute('data-origin-locate')) void originController.locate();
@@ -998,6 +1011,15 @@
         /** SOFTM-WORKSPACE-EXPAND END */
         bar.querySelector('.care-origin-form').addEventListener('submit', event => { event.preventDefault(); const input = bar.querySelector('#careOriginAddress'); if (!input.value.trim()) { input.focus(); return; } void originController.search(input.value.trim()); });
         bar.querySelector('#careOriginAddress').addEventListener('input', () => { if (originState.phase !== 'idle') originController.clear(); });
+        /** SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 최적화 선택 변화로 이전 도로 경로가 유효하지 않음을 즉시 알리고 다시 계산하도록 초기화 */
+        bar.querySelector('[data-route-optimize]').addEventListener('change', event => {
+            routeRevision++;
+            bar.querySelector('.care-order-status').textContent = event.currentTarget.checked
+                ? '최적경로를 선택했습니다. 경로탐색 후 방문 순서가 바뀔 수 있습니다.'
+                : '현재 표시 순서대로 경로를 탐색합니다.';
+            if (routeState.phase === 'success') void showSaved({ fit: false });
+        });
+        /** SOFTM-ROUTE-OPTIMIZE END */
         document.addEventListener('toggle', event => {
             const details = event.target;
             if (!details.matches?.('details[data-cost-service]') || !details.open || details.dataset.costMounted) return;

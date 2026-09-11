@@ -755,3 +755,28 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-map-page .care-origin-candidates{margin:8px 0 0}
 @media(pointer:coarse){.care-map-page .care-origin-head button{min-height:44px}}
 /** SOFTM-ORIGIN-COMPACT END */
+
+/** SOFTM-ROUTE-OPTIMIZE START 날짜:20260911 : 최적화 선택과 실제 순서 변경 결과를 작은 화면에서도 한 흐름으로 확인 */
+.care-map-page .care-route-optimize{display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;padding:11px 12px;border:1px solid #b9cee6;border-radius:10px;background:#f5f9ff;color:#17324d;cursor:pointer}
+.care-map-page .care-route-optimize input{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:#1765c1}
+.care-map-page .care-route-optimize span{display:grid;gap:3px;min-width:0;line-height:1.45}
+.care-map-page .care-route-optimize b{font-size:15px}
+.care-map-page .care-route-optimize small{color:#52657b;font-size:12px;overflow-wrap:anywhere}
+.care-map-page .care-route-optimize:has(input:checked){border-color:#4a8bd5;background:#eaf4ff;box-shadow:inset 3px 0 #1765c1}
+.care-route-order-change{margin-top:12px;padding:12px;border:1px solid #8eb8e5;border-radius:10px;background:#fff;color:#17324d;overflow-wrap:anywhere}
+.care-route-order-change strong{display:block;color:#175cb5;font-size:15px;line-height:1.5}
+.care-route-order-change dl{display:grid;gap:8px;margin:10px 0}
+.care-route-order-change dl>div{display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px}
+.care-route-order-change dt{font-size:12px;font-weight:800;color:#52657b}
+.care-route-order-change dd,.care-route-order-change p{margin:0;font-size:13px;line-height:1.65}
+.care-route-order-change small{display:block;color:#617185;font-size:11px;line-height:1.5}
+@media(max-width:380px){.care-route-order-change dl>div{grid-template-columns:1fr;gap:2px}}
+/** SOFTM-ROUTE-OPTIMIZE END */
+
+/** SOFTM-LOCATION-FIT START 날짜:20260911 : 긴 위치명이 제목과 버튼을 밀거나 지도 헤더 높이를 늘리지 않도록 폭을 제한 */
+.care-map-page[data-care-workspace="search"] .map-head{flex-wrap:nowrap;min-width:0}
+.care-map-page[data-care-workspace="search"] .map-head .map-title{display:flex;align-items:center;flex:1 1 0;min-width:0;width:auto;overflow:hidden}
+.care-map-page[data-care-workspace="search"] .map-title h2{flex:0 1 auto;min-width:0;max-width:48%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.care-map-page[data-care-workspace="search"] .map-title #areaBadge{flex:1 1 0;min-width:0;max-width:100%;white-space:nowrap;overflow-x:auto}
+.care-map-page[data-care-workspace="search"] .map-head-actions{flex:none}
+/** SOFTM-LOCATION-FIT END */
