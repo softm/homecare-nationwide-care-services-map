@@ -459,10 +459,10 @@ function popup(c){
     <div class="popup-chip">공식평가<b>${ev?(ev.year||'-')+'년 · '+esc(grade):esc(grade)}</b></div>
     <div class="popup-chip">기준지 거리<b>${distance}</b></div>
    </div>
+   <div class="popup-row"><span class="popup-row-label">평가영역</span><span class="popup-row-value">${ev?`운영 ${scoreText(ev.operation)} · 안전 ${scoreText(ev.safety)} · 권리 ${scoreText(ev.rights)}<br>제공과정 ${scoreText(ev.process)} · 제공결과 ${scoreText(ev.result)}`:'공식 세부평가 미확인'}</span></div>
    </section><!-- SOFTM-DETAIL-LAYOUT END -->
    ${CareMapExperience.costCard(c,'daycare')}<!-- SOFTM-MAP-EXPERIENCE END -->
    <div class="popup-row"><span class="popup-row-label">기관정보</span><span class="popup-row-value">기관기호 ${esc(c.i)} · 정원 ${c.z}명 · 지정 ${esc(c.d||'-')}</span></div>
-   <div class="popup-row"><span class="popup-row-label">평가영역</span><span class="popup-row-value">${ev?`운영 ${scoreText(ev.operation)} · 안전 ${scoreText(ev.safety)} · 권리 ${scoreText(ev.rights)}<br>제공과정 ${scoreText(ev.process)} · 제공결과 ${scoreText(ev.result)}`:'공식 세부평가 미확인'}</span></div>
    <div class="popup-row"><span class="popup-row-label">인력</span><!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 인력 누락을 0명으로 오인하지 않도록 확인 범위 표시 --><span class="popup-row-value">${c.staffMissing?'[인력 일부 미확인 · 확인분] ':''}사회복지사 ${c.s} · 간호 ${c.rn} · 간호조무 ${c.na}<br>물리 ${c.pt} · 작업 ${c.ot} · 요양보호 ${c.cw}</span></div>
    <div class="popup-links"><button class="c" onclick="event.stopPropagation();copyDestinationName('${c.i}')">목적지명 복사</button><button class="c" onclick="event.stopPropagation();copyDestinationAddress('${c.i}')">주소 복사</button><a class="n" target="_blank" rel="noopener" href="${naverUrl(c)}">네이버</a><a class="k" target="_blank" rel="noopener" href="${kakaoUrl(c)}">카카오</a><a class="o" target="_blank" rel="noopener" href="${officialUrl(c)}">공단 상세</a></div></div>
    <div class="popup-static-panel" hidden></div>
