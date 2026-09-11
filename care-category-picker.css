@@ -83,3 +83,11 @@
 @media(min-width:1001px){.care-map-page.care-type-back-top .care-workspace-tabs{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:1000px){.care-type-enabled.care-type-back-top .care-type-header{padding-top:0;padding-bottom:0}.care-type-back-top .care-type-header .care-workspace-back{align-self:flex-start}}
 /** SOFTM-CATEGORY-BACK END */
+
+/** SOFTM-MOBILE-CATEGORY-FONT START 날짜:20260911 : 모바일 상단 유형명과 안내 카드의 공식 유형명을 축소하지 않고 바로 읽을 수 있는 크기로 표시 */
+@media(max-width:1000px){
+ .care-type-menu-item{font-size:15px;padding-inline:13px}
+ .care-type-enabled .care-type-header .care-type-toggle{font-size:13px}
+ .care-type-option small{font-size:14px;line-height:1.4;font-weight:800}
+}
+/** SOFTM-MOBILE-CATEGORY-FONT END */
