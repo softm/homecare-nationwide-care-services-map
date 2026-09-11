@@ -106,20 +106,19 @@
 .care-photo-save-feedback:empty{display:none}
 /** SOFTM-PHOTO-SAVE-UNIT END */
 
-/** SOFTM-PHOTO-READABILITY START 날짜:20260911 : 사진·기관명·행동을 분리하고 촘촘히에서는 정보 펼침으로 작은 타일의 가독성을 유지 */
-.care-photo-grid .care-photo-tile{background:white;border:1px solid #e0e6ed;border-radius:8px}
-.care-photo-grid .care-photo-tile .care-photo-card-body{position:static;padding:10px;background:white;color:#172c43;opacity:1;pointer-events:auto;max-height:none;overflow:visible}
-.care-photo-grid .care-photo-tile h3{font-size:14px;line-height:1.45;margin:0;color:#172c43;white-space:normal;overflow-wrap:anywhere;text-shadow:none}
-.care-photo-grid .care-photo-tile .care-photo-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
-.care-photo-grid .care-photo-tile .care-photo-card-actions>*{min-width:0;min-height:44px;margin:0;padding:8px 4px;font-size:12px;line-height:1.4;display:flex;align-items:center;justify-content:center;background:#f4f7fb;color:#175cb5;border:1px solid #c6d5e3;white-space:normal;text-align:center;word-break:keep-all}
-.care-photo-grid .care-photo-tile [data-photo-save]:not(:disabled){background:#175cb5;color:white;border-color:#175cb5}
-.care-photo-tile-panel>summary{font-size:12px;padding:10px 6px;min-height:44px;cursor:pointer;color:#27445f;text-align:center;background:#f5f7fa;list-style-position:inside}
-.care-photo-tile-info{margin-top:8px;border-top:1px solid #e4eaf0;font-size:12px}
-.care-photo-tile-info summary{padding:8px 0;min-height:36px;cursor:pointer;color:#53667b}
-.care-photo-tile-info p{margin:0 0 6px;line-height:1.5;overflow-wrap:anywhere;color:#53667b}
-.care-photo-grid[data-mode="dense"] .care-photo-card-body{padding:8px}
-.care-photo-grid[data-mode="dense"] .care-photo-card-actions{grid-template-columns:1fr}
-.care-photo-grid[data-mode="dense"] h3{font-size:12px}
+/** SOFTM-PHOTO-OVERLAY START 날짜:20260911 : 원본 비율의 사진벽에 작은 도구와 하단 제목만 얹어 사진의 연속성과 가독성을 유지 */
+.care-photo-grid .care-photo-tile{border:0;border-radius:8px;background:#eaf0f6}
+.care-photo-grid .care-photo-tile .care-photo-card-body{position:absolute;inset:0;padding:0;background:none;pointer-events:none}
+.care-photo-grid .care-photo-tile h3{position:absolute;inset:auto 0 0;margin:0;padding:28px 12px 10px;color:#fff;font-size:13px;line-height:1.4;font-weight:650;background:linear-gradient(transparent,rgba(10,18,28,.75));text-shadow:0 1px 3px #0006;pointer-events:none}
+.care-photo-grid .care-photo-tile .care-photo-card-actions{position:absolute;top:6px;right:6px;display:flex;flex-direction:row;flex-wrap:nowrap;gap:2px;margin:0;pointer-events:auto}
+.care-photo-grid .care-photo-tile .care-photo-card-actions>*{display:grid;place-items:center;flex:none;width:40px;height:40px;min-height:40px;padding:10px;margin:0;border:0;border-radius:50%;background:radial-gradient(circle,#fffffff0 16px,transparent 17px);color:#263e51;box-shadow:none;transition:background .15s,transform .15s}
+.care-photo-grid .care-photo-tile .care-photo-card-actions svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.care-photo-grid .care-photo-tile .care-photo-card-actions>*:hover{background:radial-gradient(circle,#fff 16px,transparent 17px);transform:translateY(-1px)}
+.care-photo-grid .care-photo-tile [data-photo-save]:disabled{background:radial-gradient(circle,#e9f1f9ed 16px,transparent 17px);color:#345976;border-color:transparent;opacity:1}
+.care-photo-caption-hidden{position:absolute!important;width:1px;height:1px;padding:0!important;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .care-photo-tile .care-photo-image:focus-visible{outline-offset:-4px}
-@media(max-width:600px){.care-photo-grid .care-photo-tile .care-photo-card-body{padding:8px}.care-photo-grid .care-photo-tile h3{font-size:12px}.care-photo-grid .care-photo-tile .care-photo-card-actions{gap:4px}.care-photo-grid .care-photo-tile .care-photo-card-actions>*{font-size:11px;padding:7px 3px}.care-photo-grid[data-mode="dense"] h3{font-size:11px}}
-/** SOFTM-PHOTO-READABILITY END */
+.care-photo-grid[data-mode="dense"] h3{font-size:11px;padding:22px 8px 8px}
+@media(hover:hover) and (pointer:fine){.care-photo-tile .care-photo-card-actions{opacity:0}.care-photo-tile:hover .care-photo-card-actions,.care-photo-tile:focus-within .care-photo-card-actions{opacity:1}}
+@media(max-width:600px){.care-photo-grid .care-photo-tile h3{font-size:11px;padding:24px 8px 8px}.care-photo-grid[data-mode="dense"] h3{display:none}.care-photo-grid[data-mode="dense"] .care-photo-card-actions{top:2px;right:2px;gap:0}.care-photo-grid[data-mode="dense"] .care-photo-card-actions>*{width:40px;height:40px}.care-photo-grid .care-photo-tile .care-photo-card-actions{opacity:1}}
+@media(prefers-reduced-motion:reduce){.care-photo-grid .care-photo-tile .care-photo-card-actions>*{transition:none}}
+/** SOFTM-PHOTO-OVERLAY END */
