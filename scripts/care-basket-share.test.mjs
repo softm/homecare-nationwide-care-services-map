@@ -9,12 +9,24 @@ const { createUrl, readLink, copyLink, shareLink } = context.CareBasketShare;
 const ids = ['24119001267', '11110000001', '24119001267'];
 const base = 'https://homecare.designboard.net/nationwide-daycare-map.html?q=개인검색&lat=37&lng=127&institution=old#old';
 const plain = value => JSON.parse(JSON.stringify(value));
-test('공유는 유형과 담은 방문 순서만 전달하며 검색·좌표·과거 선택을 제외', () => {
+test('공유는 앱이 보존하는 쿼리로 유형과 방문 순서만 전달하며 검색·좌표·과거 선택을 제외', () => {
  const url = new URL(createUrl(base, 'daycare', ids));
- assert.equal(url.pathname, '/nationwide-care-services-map.html'); assert.equal(url.search, '?type=daycare');
- assert.equal(url.searchParams.has('lat'), false); assert.equal(url.hash.includes('old'), false);
+ assert.equal(url.pathname, '/nationwide-care-services-map.html');
+ assert.equal(url.searchParams.get('type'), 'daycare'); assert.equal(url.searchParams.has('basket'), true);
+ assert.equal(url.searchParams.has('lat'), false); assert.equal(url.hash, '');
  assert.deepEqual(plain(readLink(url.href, 'daycare', new Set(ids))), { ids: ids.slice(0, 2), missing: 0, total: 2 });
 });
+/** SOFTM-BASKET-SHARE-QUERY START 날짜:20260911 : 공유 앱이 해시를 제거하는 실제 실패 조건과 기존 링크 호환을 함께 검증 */
+test('공유 링크는 해시가 제거되어도 쿼리에 담은 기관을 유지하고 기존 해시 링크도 복원한다', () => {
+ const created = new URL(createUrl(base, 'daycare', ids));
+ created.hash = '';
+ assert.deepEqual(plain(readLink(created.href, 'daycare', new Set(ids))), { ids: ids.slice(0, 2), missing: 0, total: 2 });
+ const legacy = `${base.split('#')[0]}#basket=v1.${ids.join('%2C')}`;
+ assert.deepEqual(plain(readLink(legacy, 'daycare', new Set(ids))), { ids: ids.slice(0, 2), missing: 0, total: 2 });
+ assert.equal(context.CareBasketShare.hasLink(created.href), true);
+ assert.equal(context.CareBasketShare.hasLink(legacy), true);
+});
+/** SOFTM-BASKET-SHARE-QUERY END */
 test('요양병원의 긴 기관기호도 그대로 복원하고 현재 유형에 없는 기관만 누락 안내', () => {
  const hospital = 'JDQ4MTYyMiM1MSMkMSMkNCMkOTkkNTgxMzUxIzExIyQxIyQzIyQ2MiQ0NjEwMDIjNDEjJDEjJDgjJDgz';
  const url = createUrl(base, 'nursing-hospital', [hospital, 'missing']);
