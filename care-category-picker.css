@@ -72,3 +72,14 @@
 .care-type-header .care-type-toggle{flex:none;white-space:nowrap;font-size:12px;padding:5px 10px;min-height:36px;background:#fff}
 @media(max-width:1000px){.care-type-header{gap:5px}.care-type-menu-item{font-size:13px;min-height:0;padding:9px 12px}.care-type-enabled .care-type-header .care-type-toggle{font-size:11px;padding:4px 7px;min-height:32px}}
 /** SOFTM-TYPE-MENU-TEXT END */
+
+/** SOFTM-CATEGORY-BACK START 날짜:20260911 : 이전 버튼은 카테고리 왼쪽에 고정하고 하단 작업 탭의 빈 복귀 칸을 제거 */
+.care-type-back-top .care-type-header{left:0;padding-left:6px}
+.care-type-back-top .care-type-header .care-workspace-back{display:flex;align-items:center;justify-content:center;flex:0 0 44px;width:44px;min-width:44px;height:44px;min-height:44px;padding:8px;border:1px solid #c6d6e6;border-radius:10px;background:#fff;color:#214b78;cursor:pointer;box-sizing:border-box}
+.care-type-back-top .care-type-header .care-workspace-back:hover{background:#edf5ff;border-color:#719aca}
+.care-type-back-top .care-type-header .care-workspace-back:focus-visible{outline:3px solid #175cb5;outline-offset:-3px}
+.care-map-page.care-type-back-top .care-workspace-tabs{grid-template-columns:minmax(0,1fr) auto}
+.care-map-page.care-type-back-top .care-workspace-tabs::before{display:none}
+@media(min-width:1001px){.care-map-page.care-type-back-top .care-workspace-tabs{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1000px){.care-type-enabled.care-type-back-top .care-type-header{padding-top:0;padding-bottom:0}.care-type-back-top .care-type-header .care-workspace-back{align-self:flex-start}}
+/** SOFTM-CATEGORY-BACK END */

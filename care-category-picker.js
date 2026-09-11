@@ -62,6 +62,13 @@
    button.onclick=()=>selectType(id);menu.append(button);
   }
   const toggle=document.createElement('button');toggle.type='button';toggle.className='care-type-toggle';toggle.textContent='유형 안내 ▾';toggle.setAttribute('aria-label','돌봄 유형 선택 안내');toggle.setAttribute('aria-controls','careTypePanel');toggle.setAttribute('aria-expanded','false');header.append(menu,toggle);document.body.append(header);
+  /** SOFTM-CATEGORY-BACK START 날짜:20260911 : 이전 동작을 유지한 채 카테고리 스크롤 밖으로 옮겨 모바일에서도 상단에서 복귀 */
+  const back=document.querySelector('.care-workspace-back');
+  if(back){
+   back.closest('.care-workspace-tabs')?.setAttribute('aria-label','기관 찾기와 담은 기관');
+   header.prepend(back);document.body.classList.add('care-type-back-top');
+  }
+  /** SOFTM-CATEGORY-BACK END */
   /** SOFTM-TYPE-MENU-TEXT END */
   const panel=document.createElement('section');panel.id='careTypePanel';panel.className='care-type-panel';panel.hidden=true;panel.setAttribute('aria-labelledby','careTypeTitle');
   panel.innerHTML='<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header><p class="care-type-intro">필요한 돌봄을 고르면 지도에서 기관을 보여드려요.</p><div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="false">전체 유형 보기 · 9개</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>';
