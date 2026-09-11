@@ -61,14 +61,14 @@
 @media(max-width:1000px) and (orientation:landscape){.care-type-enabled[data-care-workspace="search"] .layout>.results{top:108px!important;padding-top:0!important;height:calc(100% - 160px - env(safe-area-inset-bottom))!important}.care-type-neutral[data-care-workspace="search"] .layout>.results{height:calc(100% - 108px)!important}}
 /** SOFTM-TYPE-ENTRY-FIT END */
 
-/** SOFTM-TYPE-MENU-TEXT START 날짜:20260911 : 아이콘 카드형 상단 메뉴를 기존의 단순한 텍스트형 카테고리 스타일로 복원 */
-.care-type-header{gap:8px;padding-left:8px;padding-right:8px}
-.care-type-menu{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-width:0;height:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+/** SOFTM-TYPE-MENU-TEXT START 날짜:20260911 : 기존 상단 메뉴의 왼쪽 정렬과 글자·여백 크기를 그대로 유지 */
+.care-type-header{gap:6px;padding:4px 8px 4px 12px}
+.care-type-menu{display:flex;align-items:center;justify-content:flex-start;gap:6px;flex:1;min-width:0;height:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
 .care-type-menu::-webkit-scrollbar{display:none}
-.care-type-menu-item{display:flex;align-items:center;justify-content:center;flex:none;white-space:nowrap;min-height:40px;padding:8px 15px;border:0;border-radius:999px;background:#fff;color:#52657b;font-size:13px;font-weight:900;cursor:pointer}
+.care-type-menu-item{display:flex;align-items:center;justify-content:center;flex:none;white-space:nowrap;min-height:0;padding:8px 12px;border:0;border-radius:999px;background:#fff;color:#52657b;font-size:14px;font-weight:900;cursor:pointer}
 .care-type-menu-item:hover{background:#edf5ff;color:#173f6b}
 .care-type-menu-item[aria-current="true"]{background:#173f6b;color:#fff;box-shadow:0 5px 15px #173f6b40}
 .care-type-menu-item:focus-visible{outline:3px solid #e6a32a;outline-offset:-2px}
 .care-type-header .care-type-toggle{flex:none;white-space:nowrap;font-size:12px;padding:5px 10px;min-height:36px;background:#fff}
-@media(max-width:1000px){.care-type-menu{justify-content:flex-start}.care-type-header{gap:5px}.care-type-menu-item{font-size:12px;min-height:34px;padding:6px 11px}.care-type-enabled .care-type-header .care-type-toggle{font-size:11px;padding:4px 7px;min-height:32px}}
+@media(max-width:1000px){.care-type-header{gap:5px}.care-type-menu-item{font-size:13px;min-height:0;padding:9px 12px}.care-type-enabled .care-type-header .care-type-toggle{font-size:11px;padding:4px 7px;min-height:32px}}
 /** SOFTM-TYPE-MENU-TEXT END */
