@@ -6,8 +6,8 @@ import vm from 'node:vm';
 
 function harness() {
  const classes=()=>{const values=new Set();return {add:value=>values.add(value),remove:value=>values.delete(value),contains:value=>values.has(value)};};
- const element=()=>({classList:classes(),hidden:false,textContent:'',value:0,setAttribute(){},append(){},remove(){}});
- const controls=Object.fromEntries(['[data-play]','[data-restart]','[data-stop]','output','progress','select'].map(key=>[key,element()]));
+ const element=()=>{const attributes=new Map();return {classList:classes(),hidden:false,textContent:'',value:0,setAttribute:(key,value)=>attributes.set(key,String(value)),getAttribute:key=>attributes.get(key),append(){},remove(){}};};
+ const controls=Object.fromEntries(['[data-play]','[data-options]','[data-restart]','[data-stop]','.care-simulation-controls','.care-simulation-arrival','output','progress','select'].map(key=>[key,element()]));
  controls.select.value='60';
  const panel={...element(),querySelector:key=>controls[key]},host=element(),events={},frames=new Map();
  let now=0,frameId=0;
@@ -49,4 +49,16 @@ test('새 경로·화면 해제는 재생 상태와 기존 기관 강조를 함�
  h.controls['[data-play]'].onclick();h.simulation.destroy();
  assert.equal(h.host.classList.contains('care-simulation-playing'),false);assert.equal(h.a.icon.content,'기관 A');
 });
+/** SOFTM-SIMULATION-COMPACT START 날짜:20260912 : 모바일 지도를 우선하는 축소 상태와 사용자가 여는 부가 조작을 회귀 검사 */
+test('모의주행 부가 조작은 기본으로 접히고 설정 버튼으로만 펼쳐진다',()=>{
+ const h=harness(),options=h.controls['[data-options]'],details=h.controls['.care-simulation-controls'];
+ assert.equal(details.hidden,true);assert.equal(options.getAttribute('aria-expanded'),'false');assert.equal(options.textContent,'설정');
+ options.onclick();assert.equal(details.hidden,false);assert.equal(options.getAttribute('aria-expanded'),'true');assert.equal(options.textContent,'접기');
+ h.controls['[data-stop]'].onclick();assert.equal(details.hidden,true);assert.equal(options.getAttribute('aria-expanded'),'false');
+});
+test('모바일 모의주행은 지도 오른쪽 조작부를 피하는 축소 너비를 사용한다',()=>{
+ const css=fs.readFileSync(new URL('../route-simulation.css',import.meta.url),'utf8');
+ assert.match(css,/@media \(max-width:1000px\)/);assert.match(css,/width:min\(360px,calc\(100% - 80px\)\)/);assert.match(css,/\.care-simulation-controls\[hidden\] \{ display:none; \}/);
+});
+/** SOFTM-SIMULATION-COMPACT END */
 /** SOFTM-SIMULATION-BLINK END */
