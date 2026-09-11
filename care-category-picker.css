@@ -61,18 +61,14 @@
 @media(max-width:1000px) and (orientation:landscape){.care-type-enabled[data-care-workspace="search"] .layout>.results{top:108px!important;padding-top:0!important;height:calc(100% - 160px - env(safe-area-inset-bottom))!important}.care-type-neutral[data-care-workspace="search"] .layout>.results{height:calc(100% - 108px)!important}}
 /** SOFTM-TYPE-ENTRY-FIT END */
 
-/** SOFTM-TYPE-MENU START 날짜:20260911 : 제목과 아이콘을 함께 보여주고 좁은 화면에서는 메뉴만 가로 스크롤 */
-.care-type-header{gap:10px;padding-left:6px;padding-right:8px}
-.care-type-menu{display:flex;align-items:center;gap:5px;flex:1;min-width:0;height:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+/** SOFTM-TYPE-MENU-TEXT START 날짜:20260911 : 아이콘 카드형 상단 메뉴를 기존의 단순한 텍스트형 카테고리 스타일로 복원 */
+.care-type-header{gap:8px;padding-left:8px;padding-right:8px}
+.care-type-menu{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-width:0;height:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
 .care-type-menu::-webkit-scrollbar{display:none}
-.care-type-menu-item{display:flex;align-items:center;gap:6px;flex:none;white-space:nowrap;min-height:38px;padding:5px 10px;border:1px solid transparent;border-radius:12px;background:#fff;color:#466078;font-size:13px;font-weight:750;cursor:pointer}
-.care-type-menu-item.blue{--accent:#1769bc;--surface:#edf6ff}
-.care-type-menu-item.green{--accent:#18725b;--surface:#edf9f3}
-.care-type-menu-item.purple{--accent:#7047a0;--surface:#f6efff}
-.care-type-menu-icon{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:var(--surface);color:var(--accent);font-size:20px}
-.care-type-menu-item:hover{background:var(--surface);color:var(--accent)}
-.care-type-menu-item[aria-current="true"]{background:var(--surface);border-color:var(--accent);color:var(--accent);box-shadow:0 2px 5px #203d5814}
-.care-type-menu-item:focus-visible{outline:2px solid #e6a32a;outline-offset:-2px}
-.care-type-header .care-type-toggle{flex:none;white-space:nowrap;font-size:12px;padding:5px 9px;min-height:34px;background:#fff}
-@media(max-width:1000px){.care-type-header{gap:5px}.care-type-menu-item{font-size:12px;min-height:34px;padding:3px 7px}.care-type-menu-icon{width:23px;height:23px;font-size:18px}.care-type-enabled .care-type-header .care-type-toggle{font-size:11px;padding:4px 6px;min-height:32px}}
-/** SOFTM-TYPE-MENU END */
+.care-type-menu-item{display:flex;align-items:center;justify-content:center;flex:none;white-space:nowrap;min-height:40px;padding:8px 15px;border:0;border-radius:999px;background:#fff;color:#52657b;font-size:13px;font-weight:900;cursor:pointer}
+.care-type-menu-item:hover{background:#edf5ff;color:#173f6b}
+.care-type-menu-item[aria-current="true"]{background:#173f6b;color:#fff;box-shadow:0 5px 15px #173f6b40}
+.care-type-menu-item:focus-visible{outline:3px solid #e6a32a;outline-offset:-2px}
+.care-type-header .care-type-toggle{flex:none;white-space:nowrap;font-size:12px;padding:5px 10px;min-height:36px;background:#fff}
+@media(max-width:1000px){.care-type-menu{justify-content:flex-start}.care-type-header{gap:5px}.care-type-menu-item{font-size:12px;min-height:34px;padding:6px 11px}.care-type-enabled .care-type-header .care-type-toggle{font-size:11px;padding:4px 7px;min-height:32px}}
+/** SOFTM-TYPE-MENU-TEXT END */
