@@ -30,12 +30,14 @@
 @media(max-width:480px) { .care-map-page .care-search-tools { gap:6px; padding:8px; } }
 /** SOFTM-SEARCH-TOOLS END */
 
-/** SOFTM-MAP-FIRST START 날짜:20260911 : 닫힌 도구는 작은 진입행만 남기고 펼친 도구의 기능별 디자인 유지 */
-.care-search-disclosure { flex:none; border-bottom:1px solid #dce6f0; background:#fff; }
-.care-search-disclosure > summary { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:36px; padding:6px 12px; cursor:pointer; list-style:none; color:#42617e; font-size:12px; font-weight:650; }
+/** SOFTM-MAP-FIRST START 날짜:20260911 : 접힌 탐색 도구의 전체 영역과 펼침 상태를 버튼 외형과 큰 아이콘으로 바로 인식 */
+.care-search-disclosure { flex:none; padding:7px 8px; border-bottom:1px solid #dce6f0; background:#f7f9fc; }
+.care-search-disclosure > summary { display:flex; align-items:center; justify-content:space-between; gap:10px; box-sizing:border-box; min-height:52px; padding:7px 8px 7px 14px; border:1.5px solid #b9cde2; border-radius:14px; background:linear-gradient(135deg,#fff,#edf5ff); box-shadow:0 3px 10px #17324d14; cursor:pointer; list-style:none; color:#24527f; font-size:14px; font-weight:800; line-height:1.4; transition:border-color .15s,background .15s,box-shadow .15s; }
 .care-search-disclosure > summary::-webkit-details-marker { display:none; }
-.care-search-disclosure > summary::after { content:'＋'; font-size:18px; color:#1769bf; }
-.care-search-disclosure[open] > summary::after { content:'−'; }
-.care-search-disclosure > summary:focus-visible { outline:3px solid #ecad38; outline-offset:-3px; }
+.care-search-disclosure > summary::after { content:'＋'; display:grid; place-items:center; flex:0 0 36px; width:36px; height:36px; border-radius:11px; background:#1769bf; color:#fff; box-shadow:0 3px 8px #175b9f3d; font-size:25px; font-weight:500; line-height:1; }
+.care-search-disclosure > summary:hover { border-color:#78a4d0; background:#edf5ff; box-shadow:0 4px 12px #17324d20; }
+.care-search-disclosure[open] > summary { border-color:#78a4d0; background:#e8f3ff; }
+.care-search-disclosure[open] > summary::after { content:'−'; background:#114f93; }
+.care-search-disclosure > summary:focus-visible { outline:3px solid #ecad38; outline-offset:2px; }
 .care-search-disclosure .care-search-tools { border-bottom:0; }
 /** SOFTM-MAP-FIRST END */
