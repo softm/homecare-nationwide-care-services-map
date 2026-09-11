@@ -442,12 +442,32 @@
             back() { const next = previous; previous = state; state = next; return state; }
         };
     }
+    /** SOFTM-RESULT-SHEET START 날짜:20260911 : 지도 중심 화면에서도 전체 결과 수와 목록 진입 행동을 즉시 이해하도록 안내 */
+    function createSheetSummary(countText, sheetState = 'split') {
+        const rawCount = String(countText ?? '').trim();
+        const count = rawCount && rawCount !== '-' ? rawCount : '확인 중';
+        const expanded = sheetState === 'list';
+        const action = expanded ? '지도와 함께 보기' : '전체 목록 보기';
+        return { count, action, expanded, label: `검색 결과 ${count}. ${action}` };
+    }
+    /** SOFTM-RESULT-SHEET END */
     function installMobileSheet() {
         const state = createSheetState(), layout = document.querySelector('.layout'), results = document.querySelector('.results');
         const map = document.querySelector('.map-card'), list = document.getElementById('list');
+        /** SOFTM-RESULT-SHEET START 날짜:20260911 : 작은 손잡이를 결과 수와 전체 목록 행동이 보이는 시트 헤더로 확장 */
         const handle = document.createElement('button'); handle.type = 'button'; handle.className = 'care-sheet-handle';
-        handle.innerHTML = '<span aria-hidden="true"></span><small aria-hidden="true">목록 전체보기</small>'; // SOFTM-MAP-FIRST 날짜:20260911 : 지도 중심 첫 화면에서도 전체 목록으로 들어가는 조작을 바로 알아볼 수 있게 안내
-        handle.setAttribute('aria-label', '목록 높이 조절: 위로 올려 펼치기, 아래로 내려 지도 크게 보기'); results.prepend(handle);
+        handle.innerHTML = '<span class="care-sheet-grip" aria-hidden="true"></span><span class="care-sheet-summary"><span>검색 결과</span><strong class="care-sheet-count" aria-live="polite">확인 중</strong></span><span class="care-sheet-action">전체 목록 보기</span>';
+        handle.setAttribute('aria-controls', list.id); handle.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown Home End'); results.prepend(handle);
+        const countSource = document.querySelector('#areaCount,#filteredCount');
+        const summaryCount = handle.querySelector('.care-sheet-count'), summaryAction = handle.querySelector('.care-sheet-action');
+        const syncSummary = () => {
+            const summary = createSheetSummary(countSource?.textContent, state.state());
+            summaryCount.textContent = summary.count; summaryAction.textContent = summary.action;
+            handle.setAttribute('aria-expanded', String(summary.expanded));
+            handle.setAttribute('aria-label', `${summary.label}. 위아래로 밀어 지도와 목록 높이 조절`);
+        };
+        if (countSource && typeof MutationObserver !== 'undefined') new MutationObserver(syncSummary).observe(countSource, { childList: true, characterData: true, subtree: true });
+        /** SOFTM-RESULT-SHEET END */
         const back = document.createElement('button'); back.type = 'button'; back.className = 'care-sheet-back';
         back.textContent = '‹'; back.setAttribute('aria-label', '이전 지도와 목록 화면으로 돌아가기'); document.querySelector('.filter-grid').prepend(back);
         const mapButton = document.createElement('button'); mapButton.type = 'button'; mapButton.className = 'care-sheet-map-button'; mapButton.textContent = '지도보기'; document.body.append(mapButton);
@@ -457,7 +477,7 @@
         const sync = () => {
             document.body.dataset.careSheet = landscape.matches ? 'split' : state.state(); // SOFTM-LANDSCAPE 날짜:20260909 : 세로에서 선택한 목록 단계를 보존한 채 가로에서는 지도와 목록을 함께 표시
             back.hidden = !active() || state.state() !== 'list'; mapButton.hidden = !active() || state.state() !== 'list';
-            handle.setAttribute('aria-expanded', String(state.state() === 'list'));
+            syncSummary(); // SOFTM-RESULT-SHEET 날짜:20260911 : 시트 단계가 바뀌면 펼치기 행동과 접근성 이름을 함께 갱신
             if (workspace === 'search') map.inert = active() && state.state() === 'list';
         };
         const transition = (action, restoreTop) => {
@@ -1002,7 +1022,9 @@
     function exitBasketMap() { if (basketMap?.active()) setWorkspace('search', false); }
     function contains(id) { return basket?.has(id) || false; }
     function refreshMatch() { matchController?.refresh(); } // SOFTM-CARE-MATCH 날짜:20260910 : 전체 조회 완료와 진행 상태를 공용 설명에 전달
-    root.CareMapExperience = Object.freeze({ refreshMatch, init, createSheetState, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
+    /** SOFTM-RESULT-SHEET START 날짜:20260911 : 결과 헤더 문구와 펼침 상태를 DOM 없이 회귀검사하도록 공개 */
+    root.CareMapExperience = Object.freeze({ refreshMatch, init, createSheetState, createSheetSummary, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
+    /** SOFTM-RESULT-SHEET END */
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-MAP-EXPERIENCE END */

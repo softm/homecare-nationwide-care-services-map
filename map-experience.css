@@ -495,6 +495,36 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 }
 /** SOFTM-MAP-FIRST END */
 
+/** SOFTM-RESULT-SHEET START 날짜:20260911 : 검색 결과 수와 첫 기관 카드를 지도 아래에서 바로 인지하도록 시트 첫 화면을 재배치 */
+@media(max-width:1000px) and (orientation:portrait) {
+ .care-map-page[data-care-workspace="search"] .care-sheet-handle { display:grid; flex:0 0 56px; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:10px minmax(0,1fr); column-gap:10px; width:100%; height:56px; min-height:56px; padding:3px 14px 7px; box-sizing:border-box; border-bottom:1px solid #e0e8f1; text-align:left; }
+ .care-map-page[data-care-workspace="search"] .care-sheet-handle > .care-sheet-grip { grid-column:1/-1; grid-row:1; justify-self:center; width:42px; height:5px; border-radius:4px; background:#9ca8b4; }
+ .care-map-page[data-care-workspace="search"] .care-sheet-handle > .care-sheet-summary,.care-map-page[data-care-workspace="search"] .care-sheet-handle > .care-sheet-action { width:auto; height:auto; border-radius:0; background:transparent; }
+ .care-map-page[data-care-workspace="search"] .care-sheet-summary { grid-column:1; grid-row:2; display:flex; align-items:center; gap:6px; min-width:0; color:#203a56; font-size:14px; font-weight:750; white-space:nowrap; }
+ .care-map-page[data-care-workspace="search"] .care-sheet-count { display:inline-flex; align-items:center; min-height:25px; padding:2px 7px; border-radius:999px; background:#e8f2ff; color:#175cb5; font-size:15px; font-weight:850; font-variant-numeric:tabular-nums; }
+ .care-map-page[data-care-workspace="search"] .care-sheet-action { grid-column:2; grid-row:2; display:flex; align-items:center; justify-self:end; gap:5px; color:#175cb5; font-size:13px; font-weight:800; white-space:nowrap; }
+ .care-map-page[data-care-workspace="search"] .care-sheet-action::after { content:'↑'; font-size:17px; line-height:1; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="list"] .care-sheet-action::after { content:'↓'; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="map"] .layout { grid-template-rows:minmax(0,1fr) 56px; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="map"] .care-sheet-handle { flex-basis:56px; height:56px; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .results > .list-head,.care-map-page[data-care-workspace="search"][data-care-sheet="split"] .results > .result-head { display:none; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools { gap:4px; padding:4px 8px; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-match-start,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-photo-map-entry,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-analysis-entry { min-height:44px; height:44px; padding:3px!important; gap:2px; box-shadow:none; font-size:11px; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-match-start::before,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-photo-map-entry::before,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-analysis-entry::before { width:17px; height:17px; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-match-start::after,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-photo-map-entry::after,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-analysis-entry::after,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-match-summary,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-photo-map-status { display:none; }
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-photo-entry-copy strong,
+ .care-map-page[data-care-workspace="search"][data-care-sheet="split"] .care-search-tools .care-match-start-title { font-size:11px; }
+}
+/** SOFTM-RESULT-SHEET END */
+
 /** SOFTM-MOBILE-SHEET START 날짜:20260909 : 전국 주간의 페이지 이동 버튼을 지도보기 버튼이 가리지 않도록 분리 */
 @media(max-width:1000px) {
  .care-map-page[data-care-workspace="search"][data-care-sheet="list"]:has(#pager) .care-sheet-map-button { bottom:calc(116px + env(safe-area-inset-bottom)); }
