@@ -15,7 +15,7 @@ export function mountMasonry(host) {
         const width = host.clientWidth;
         if (!width) return;
         const dense = host.dataset.mode === 'dense', gap = width < 600 ? 8 : dense ? 12 : 20;
-        const columns = width < 600 ? 2 : width < 1000 ? (dense ? 4 : 3) : (dense ? 6 : 4);
+        const columns = width < 600 ? (dense ? 3 : 2) : width < 1000 ? (dense ? 4 : 3) : (dense ? 6 : 4); // SOFTM-PHOTO-READABILITY 날짜:20260911 : 모바일에서도 두 모드의 사진 밀도를 분명하게 구분
         const tileWidth = (width - gap * (columns - 1)) / columns, heights = Array(columns).fill(0);
         for (const tile of tiles) {
             const column = heights.indexOf(Math.min(...heights));

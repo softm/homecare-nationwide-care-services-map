@@ -3,7 +3,7 @@ import { escapeHtml, readJson, filterRows, mapUrl, thumbnail, openComparison } f
 import { readScope, scopedRows } from './care-photo-scope.js?v=20260910-1';
 import { createGallery } from './care-photo-gallery.js?v=20260911-1'; // SOFTM-PHOTO-GALLERY 날짜:20260911 : 기관 사진 요청량을 제한하는 공용 로더 사용
 const $ = id => document.getElementById(id);
-import { mountMasonry } from './care-photo-masonry.js?v=20260911-1'; // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 비율과 화면 폭에 맞춰 빈 공간을 채움
+import { mountMasonry } from './care-photo-masonry.js?v=20260911-readable1'; // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 비율과 화면 폭에 맞춰 빈 공간을 채움
 mountMasonry($('photoResults')); // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 추가·모드 변경·이미지 복구 시 같은 배치를 갱신
 const labels = { facility: '요양원·공동생활가정', daycare: '주·야간보호센터', 'home-care': '방문요양센터', 'home-nursing': '방문간호센터', 'home-bath': '방문목욕기관', 'short-stay': '단기보호센터', 'welfare-equipment': '복지용구사업소', dementia: '치매전담형 기관', 'nursing-hospital': '요양병원' };
 const initial = new URLSearchParams(location.search);
@@ -87,7 +87,7 @@ function render({ append = false } = {}) {
     syncBasket();
 }
 /** SOFTM-PHOTO-GALLERY START 날짜:20260911 : 레이아웃 전환은 이미 읽은 사진을 재사용하고 검색 변경은 이전 응답을 분리 */
-const modeHints = { gallery: '사진을 누르면 크게 볼 수 있습니다. 기관명과 담기는 사진 위에서 확인하세요.', dense: '많은 사진을 한눈에 훑어보세요. 사진을 누르면 원래 비율로 크게 볼 수 있습니다.', large: '공간을 자세히 살펴보세요. 사진의 원래 비율을 유지합니다.', institutions: '기관별 대표사진과 주소를 보고 관심 기관을 담아 보세요.' };
+const modeHints = { gallery: '사진 아래에서 기관명과 지도 보기·기관 담기를 바로 확인하세요.', dense: '작은 사진을 더 많이 봅니다. 기관 정보에서 지도 보기·담기를 펼칠 수 있습니다.', large: '공간을 자세히 살펴보세요. 사진의 원래 비율을 유지합니다.', institutions: '기관별 대표사진과 주소를 보고 관심 기관을 담아 보세요.' };
 let savedMode; try { savedMode = storage?.getItem('carePhotoView:v1'); } catch {}
 let mode = Object.hasOwn(modeHints, initial.get('mode')) ? initial.get('mode') : Object.hasOwn(modeHints, savedMode) ? savedMode : 'gallery';
 let gallery = null, galleryBusy = false;
@@ -96,6 +96,7 @@ function updateMode() {
     $('photoResults').toggleAttribute('data-photo-gallery', mode !== 'institutions');
     $('photoResultTitle').textContent = mode === 'institutions' ? '사진이 있는 기관' : '기관 사진 갤러리';
     $('photoModeHint').textContent = modeHints[mode];
+    document.querySelectorAll('.care-photo-tile-panel').forEach(panel => { panel.open = mode !== 'dense'; panel.querySelector(':scope > summary').hidden = mode !== 'dense'; }); // SOFTM-PHOTO-READABILITY 날짜:20260911 : 촘촘히는 기관 행동을 필요할 때 펼쳐 사진 밀도를 유지
     $('photoModes').querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
     $('photoGalleryErrors').hidden = mode === 'institutions' || !gallery?.snapshot().failures.length;
 }
@@ -122,7 +123,12 @@ function renderGallery() {
         body.innerHTML = `<h3>${escapeHtml(row.n)}</h3><div class="care-photo-card-actions"><a href="${escapeHtml(mapUrl(type, row))}" rel="nofollow">지도 보기</a><button type="button" data-photo-save="${escapeHtml(row.i)}" data-photo-compact aria-label="${escapeHtml(row.n)} 비교에 담기" aria-pressed="false">+ 담기</button></div>`;
         body.append(info);
         /** SOFTM-PHOTO-WALL END */
-        card.append(figure, body); host.append(card);
+        /** SOFTM-PHOTO-READABILITY START 날짜:20260911 : 기관 행동을 사진 밖 독립 영역에 두어 작은 사진에서도 잘리지 않음 */
+        const panel = document.createElement('details'); panel.className = 'care-photo-tile-panel'; panel.open = mode !== 'dense';
+        const panelToggle = document.createElement('summary'); panelToggle.textContent = '기관 정보'; panelToggle.hidden = mode !== 'dense';
+        panelToggle.setAttribute('aria-label', `${row.n} 기관 정보와 담기`);
+        panel.append(panelToggle, body); card.append(figure, panel); host.append(card);
+        /** SOFTM-PHOTO-READABILITY END */
     }
     const total = matches.reduce((sum, row) => sum + summaries[row.i].count, 0);
     if (matches.length) $('photoStatus').textContent = `${matches.length.toLocaleString()}곳 · 수집 사진 ${total.toLocaleString()}장 중 ${state.items.length.toLocaleString()}장 표시${state.empty ? ` · 빈 사진 자료 ${state.empty}곳` : ''}${galleryBusy ? ' · 불러오는 중…' : ''}`;
