@@ -3,20 +3,21 @@
     'use strict';
     const types = new Set(['facility', 'daycare', 'home-care', 'home-nursing', 'home-bath', 'short-stay', 'welfare-equipment', 'dementia', 'nursing-hospital']);
     const validId = id => typeof id === 'string' && /^[A-Za-z0-9_=-]{1,160}$/.test(id);
-    const hasLink = value => new URLSearchParams(new URL(value).hash.slice(1)).has('basket');
+    /** SOFTM-BASKET-SHARE-QUERY START 날짜:20260911 : 공유 앱이 URL 조각을 버려도 담은 기관이 남도록 쿼리를 우선 사용하고 기존 해시 링크도 읽음 */
+    const basketValue = url => url.searchParams.get('basket') ?? new URLSearchParams(url.hash.slice(1)).get('basket');
+    const hasLink = value => basketValue(new URL(value)) !== null;
     function createUrl(value, type, ids) {
         if (!types.has(type) || !ids.length || !ids.every(validId)) throw new Error('공유할 기관 목록을 확인해 주세요.');
         const url = new URL('nationwide-care-services-map.html', value);
         url.search = ''; url.hash = '';
         url.searchParams.set('type', type);
-        url.hash = new URLSearchParams({ basket: `v1.${[...new Set(ids)].join(',')}` }).toString();
+        url.searchParams.set('basket', `v1.${[...new Set(ids)].join(',')}`);
         if (url.href.length > 24000) throw new Error('공유할 기관이 너무 많습니다. 목록을 나누어 공유해 주세요.');
         return url.href;
     }
     function readLink(value, type, valid) {
-        const url = new URL(value), params = new URLSearchParams(url.hash.slice(1));
-        if (!params.has('basket')) return null;
-        const raw = params.get('basket');
+        const url = new URL(value), raw = basketValue(url);
+        if (raw === null) return null;
         if (!types.has(type) || (url.searchParams.get('type') || 'daycare') !== type || !raw.startsWith('v1.') || raw.length > 24000) return { error: '올바르지 않은 담은 기관 공유 링크입니다.' };
         const ids = raw.slice(3).split(',');
         if (!ids.length || !ids.every(validId)) return { error: '공유 링크의 기관 목록을 읽을 수 없습니다.' };
@@ -80,7 +81,8 @@
             if (!incoming) return;
             open();
             const consume = () => {
-                const url = new URL(root.location.href), hash = new URLSearchParams(url.hash.slice(1)); hash.delete('basket'); url.hash = hash.toString();
+                const url = new URL(root.location.href), hash = new URLSearchParams(url.hash.slice(1));
+                url.searchParams.delete('basket'); hash.delete('basket'); url.hash = hash.toString();
                 root.history.replaceState(root.history.state, '', url.href);
             };
             const message = incoming.error || (!incoming.ids.length ? '공유된 기관을 현재 자료에서 찾을 수 없습니다. 기존 담은 기관은 유지됩니다.' : '');
@@ -97,6 +99,7 @@
         root.setTimeout(receive, 0);
         root.addEventListener('hashchange', receive);
     }
+    /** SOFTM-BASKET-SHARE-QUERY END */
     root.CareBasketShare = Object.freeze({ createUrl, readLink, hasLink, copyLink, shareLink, mount });
 })(globalThis);
 /** SOFTM-BASKET-SHARE END */
