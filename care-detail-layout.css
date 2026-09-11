@@ -17,5 +17,11 @@
 .care-detail-address-status:empty{display:none}
 .care-map-page .care-detail-group .daycare-contact{padding-bottom:0}
 .care-map-page .care-detail-group .popup-meta{margin:0}
+/** SOFTM-LIST-NAVIGATION START 날짜:20260911 : 목록 행동에서 길안내 아이콘과 문구를 하나의 충분한 터치 버튼으로 표시 */
+.care-map-page .care-row-actions .care-list-navigation{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:10px 12px;border:1px solid #a9c9e8;border-radius:9px;background:#edf6ff;color:#175cb5;font-size:14px;font-weight:750;line-height:1;text-decoration:none;white-space:nowrap}
+.care-map-page .care-row-actions .care-list-navigation:hover{border-color:#6da1d2;background:#dfefff;color:#104f93}
+.care-map-page .care-row-actions .care-list-navigation:focus-visible{outline:3px solid #175cb54d;outline-offset:2px}
+.care-map-page .care-row-actions .care-list-navigation svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+/** SOFTM-LIST-NAVIGATION END */
 @media(max-width:640px){.care-map-page .care-detail-group{padding:12px;margin-bottom:12px}.care-detail-address-content{gap:6px;font-size:14px}.care-map-page .care-detail-address-actions>*{width:40px;min-width:40px}.care-map-page .care-detail-group .basic-live-grid{grid-template-columns:1fr}}
 /** SOFTM-DETAIL-LAYOUT END */

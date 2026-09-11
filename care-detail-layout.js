@@ -24,6 +24,13 @@
         const route = links(c, point);
         return `<div class="care-detail-address"><span class="care-detail-label">주소</span><div class="care-detail-address-content"><span>${escape(c.a || '주소 미공개')}</span><div class="care-detail-address-actions"><button type="button" data-care-address="${escape(c.a || '')}" aria-label="주소 복사" title="주소 복사" ${c.a?'':'disabled'}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button><a href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${route.label}" title="${route.label}" ${route.href.startsWith('https:')?'target="_blank" rel="noopener"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg></a></div></div><span class="care-detail-address-status" role="status"></span></div>`;
     }
+    /** SOFTM-LIST-NAVIGATION START 날짜:20260911 : 목록에서 목적지 행동을 아이콘과 문구가 함께 있는 버튼으로 바로 인식하도록 제공 */
+    function listButton(c, point) {
+        const route = links(c, point);
+        const external = route.href.startsWith('https:') ? 'target="_blank" rel="noopener"' : '';
+        return `<a class="care-list-navigation" href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${escape(c.n)} ${route.label}" title="${route.label}" onclick="event.stopPropagation()" ${external}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg><span>길안내</span></a>`;
+    }
+    /** SOFTM-LIST-NAVIGATION END */
     document.addEventListener('click', async event => {
         const button = event.target.closest('[data-care-address]');
         if (button) {
@@ -34,12 +41,14 @@
         }
         const nav = event.target.closest('[data-care-nav]');
         if (nav?.getAttribute('href').startsWith('nmap:')) {
-            const status = nav.closest('.care-detail-address').querySelector('[role="status"]');
-            status.replaceChildren(document.createTextNode('앱이 열리지 않으면 '));
-            const fallback = document.createElement('a'); fallback.href = nav.dataset.webFallback;
-            fallback.target = '_blank'; fallback.rel = 'noopener'; fallback.textContent = '웹 길안내'; status.append(fallback);
+            const status = nav.closest('.care-detail-address')?.querySelector('[role="status"]'); // SOFTM-LIST-NAVIGATION 날짜:20260911 : 목록 버튼에는 상세 주소 상태 영역이 없어도 내비 연결을 중단하지 않음
+            if (status) {
+                status.replaceChildren(document.createTextNode('앱이 열리지 않으면 '));
+                const fallback = document.createElement('a'); fallback.href = nav.dataset.webFallback;
+                fallback.target = '_blank'; fallback.rel = 'noopener'; fallback.textContent = '웹 길안내'; status.append(fallback);
+            }
         }
     });
-    window.CareDetailLayout = {address, links, externalMaps}; // SOFTM-MAP-LINK 날짜:20260911 : 두 지도 하단 외부 지도 링크의 검색 기준 공유
+    window.CareDetailLayout = {address, listButton, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
 })();
 /** SOFTM-DETAIL-LAYOUT END */
