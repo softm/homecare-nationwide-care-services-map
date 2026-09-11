@@ -488,7 +488,7 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 /** SOFTM-RESEARCH-BOTTOM END */
 
 /** SOFTM-MOBILE-CATEGORY-FONT START 날짜:20260911 : 전국 주간 단독 지도의 모바일 카테고리도 통합 지도와 같은 읽기 크기로 표시 */
-@media(max-width:1000px){.care-map-page .category-nav a{font-size:15px}}
+@media(max-width:1000px){.care-map-page .category-nav a{font-size:17px}}
 /** SOFTM-MOBILE-CATEGORY-FONT END */
 /** SOFTM-MARKER-SIZE START 날짜:20260909 : 밀집 기관과 지도 지명을 덜 가리도록 기본 핀과 선택 강조 크기를 함께 축소 */
 .care-map-page .map-marker { width:32px; height:32px; border-width:2px; border-radius:11px 11px 11px 3px; box-shadow:0 2px 5px #14283e40; }
