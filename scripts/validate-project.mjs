@@ -52,6 +52,7 @@ const categoryLandingPages = {
 };
 const indexCategories = Object.keys(categoryLandingPages);
 const landingPages = [...new Set(Object.values(categoryLandingPages))];
+const longTermCareLandingPages = landingPages.filter(page => page !== categoryLandingPages['nursing-hospital']); // SOFTM-LTC-KEYWORD 날짜:20260911 : 요양병원을 장기요양기관 키워드 검사 대상에서 제외
 /** SOFTM-SEO-LANDING END */
 
 for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html); // SOFTM-DAYCARE-LANDING 날짜:20260904 : 안내와 분리된 기존 전용 지도의 스크립트 검사도 유지
@@ -99,6 +100,30 @@ for (const required of ['요양원 찾기에서 먼저 비교할 네 가지', '�
   if (!facilityLanding.includes(required)) fail(`nursing-home-map.html: 검색 의도 안내 누락 ${required}`);
 }
 /** SOFTM-SEO-FACILITY-CHECK END */
+/** SOFTM-LTC-KEYWORD START 날짜:20260911 : 홈페이지와 8개 유형의 장기요양기관 주제를 강화하되 요양병원 오분류를 방지 */
+const homeDescription = '돌봄한눈은 전국 장기요양기관과 요양병원의 위치, 공단·심평원 공개정보를 지역별로 찾고 비교하는 독립 정보 서비스입니다.';
+if (!indexSource.includes('<title>돌봄한눈 | 전국 장기요양기관·요양병원 찾기</title>')) fail('index.html: 장기요양기관 대표 제목 불일치');
+if (!indexSource.includes(`<meta name="description" content="${homeDescription}">`)) fail('index.html: 장기요양기관 대표 설명 불일치');
+if (!indexSource.match(/<h1\b[^>]*>[\s\S]*?장기요양기관[\s\S]*?돌봄한눈[\s\S]*?<\/h1>/)) fail('index.html: 장기요양기관·브랜드 대표 H1 불일치');
+if (!indexSource.includes('"alternateName":"돌봄한눈 장기요양기관 찾기"')) fail('index.html: 장기요양기관 WebSite 별칭 누락');
+for (const htmlFile of longTermCareLandingPages) {
+  const source = read(htmlFile);
+  const description = source.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] || '';
+  const ogDescription = source.match(/<meta\s+property="og:description"\s+content="([^"]*)"/)?.[1] || '';
+  const twitterDescription = source.match(/<meta\s+name="twitter:description"\s+content="([^"]*)"/)?.[1] || '';
+  const firstEyebrow = source.match(/<p\s+class="eyebrow">([^<]*)<\/p>/)?.[1] || '';
+  const structured = [...source.matchAll(/<script\s+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(match => JSON.parse(match[1]));
+  if (![description, ogDescription, twitterDescription, firstEyebrow, JSON.stringify(structured)].every(value => value.includes('장기요양기관'))) fail(`${htmlFile}: 장기요양기관 설명 신호 누락`);
+  if (!source.includes('<meta name="dcterms.modified" content="2026-09-11">')) fail(`${htmlFile}: 장기요양기관 변경일 누락`);
+}
+for (const htmlFile of ['index.html', ...landingPages]) {
+  if (/<meta\s+name=["']keywords["']/i.test(read(htmlFile))) fail(`${htmlFile}: 검색효과 없는 meta keywords 사용`);
+}
+const nursingHospitalSource = read(categoryLandingPages['nursing-hospital']);
+const nursingHospitalHead = nursingHospitalSource.match(/<head>[\s\S]*?<\/head>/)?.[0] || '';
+const nursingHospitalEyebrow = nursingHospitalSource.match(/<p\s+class="eyebrow">([^<]*)<\/p>/)?.[1] || '';
+if (nursingHospitalHead.includes('장기요양기관') || nursingHospitalEyebrow.includes('장기요양기관')) fail('nursing-hospital-map.html: 요양병원을 장기요양기관으로 표현함');
+/** SOFTM-LTC-KEYWORD END */
 if (!indexSource.includes('index-ad-config.js') || !indexSource.includes('initIndexAds()')) fail('index.html: 인덱스 전용 광고 초기화 누락'); // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 요양 광고 설정을 잘못 재사용하지 않도록 전용 설정 파일을 검사
 const indexAdConfig = runFiles(['index-ad-config.js']).INDEX_AD_CONFIG; // SOFTM-INDEX-AD-UNIT 날짜:20260903 : 승인된 인덱스 광고 크기와 단위를 독립 검증
 if (indexAdConfig?.kakao?.desktop?.width !== 728 || indexAdConfig?.kakao?.desktop?.height !== 90) fail('인덱스 PC 광고는 728×90 배너여야 합니다.');
@@ -125,13 +150,13 @@ const robotsSource = read('robots.txt');
 const sitemapDirectives = [...robotsSource.matchAll(/^Sitemap:\s*(\S+)/gim)].map(match => match[1]);
 if (sitemapDirectives.length !== 1 || sitemapDirectives[0] !== `${publicOrigin}/sitemap.xml`) fail('robots.txt는 공개 도메인의 단일 sitemap.xml만 안내해야 합니다.');
 const sitemapSource = read('sitemap.xml');
-/** SOFTM-SEO-LASTMOD-CHECK START 날짜:20260907 : 주요 페이지의 선언 수정일과 사이트맵 수정일이 달라져 검색엔진의 갱신 신호가 약해지지 않도록 검사 */
-for (const [htmlFile, publicUrl] of [['index.html', `${publicOrigin}/`], ['nursing-home-map.html', `${publicOrigin}/nursing-home-map.html`]]) {
+/** SOFTM-LTC-KEYWORD START 날짜:20260911 : 실제 변경한 9개 대표 URL의 수정일과 사이트맵 신호를 함께 검증 */
+for (const [htmlFile, publicUrl] of [['index.html', `${publicOrigin}/`], ...longTermCareLandingPages.map(htmlFile => [htmlFile, `${publicOrigin}/${htmlFile}`])]) {
   const declared = read(htmlFile).match(/<meta name="dcterms\.modified" content="(\d{4}-\d{2}-\d{2})">/)?.[1];
   const entry = [...sitemapSource.matchAll(/<url>[\s\S]*?<\/url>/g)].map(match => match[0]).find(value => value.includes(`<loc>${publicUrl}</loc>`));
   if (!declared || !entry?.includes(`<lastmod>${declared}</lastmod>`)) fail(`${htmlFile}: 선언 수정일과 사이트맵 lastmod가 다릅니다.`);
 }
-/** SOFTM-SEO-LASTMOD-CHECK END */
+/** SOFTM-LTC-KEYWORD END */
 const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
 const expectedSitemapUrls = [
   `${publicOrigin}/`,

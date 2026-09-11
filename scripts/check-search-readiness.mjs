@@ -24,20 +24,24 @@ export function inspectPage({ url, status, headers, html, expectedCanonical, exp
   if (!headers.get('content-type')?.includes('text/html')) issues.push('HTML 응답 형식이 아님');
   if (/(?:^|[\s,:])(noindex|none)(?:[\s,;]|$)/.test(directives)) issues.push('검색 등록 차단: noindex 또는 none');
   if (!robots.some(meta => meta.name?.toLowerCase() === 'robots' && /(?:^|,)\s*index\s*(?:,|$)/i.test(meta.content || ''))) issues.push('명시적인 index 메타 누락');
+  if (metas.some(meta => meta.name?.toLowerCase() === 'keywords')) issues.push('검색효과 없는 meta keywords 사용'); // SOFTM-LTC-KEYWORD 날짜:20260911 : 키워드 나열 대신 실제 제목·설명·본문으로 주제를 전달
   if (!title.includes('돌봄한눈')) issues.push('제목에 사이트명 누락');
   if (canonical !== expectedCanonical) issues.push(`대표 주소 불일치: ${canonical || '없음'}`);
   if (!source.match(/<h1\b[^>]*>[\s\S]*?\S[\s\S]*?<\/h1>/i)) issues.push('대표 제목 h1 누락');
   if (url === `${publicOrigin}/`) {
-    if (!source.match(/<h1\b[^>]*>[\s\S]*?돌봄한눈[\s\S]*?<\/h1>/i)) issues.push('홈페이지 대표 제목에 브랜드 누락');
-    /** SOFTM-SEARCH-NAVER START 날짜:20260910 : 네이버 권장 길이를 넘겨 브랜드 설명이 잘리거나 분산되지 않도록 배포 전에 차단 */
+    /** SOFTM-LTC-KEYWORD START 날짜:20260911 : 홈페이지의 브랜드·장기요양기관 주제·요양병원 구분을 배포 전에 함께 확인 */
+    if (!title.includes('장기요양기관') || !title.includes('요양병원')) issues.push('홈페이지 제목에 장기요양기관·요양병원 주제 누락');
+    if (!source.match(/<h1\b[^>]*>[\s\S]*?장기요양기관[\s\S]*?돌봄한눈[\s\S]*?<\/h1>/i)) issues.push('홈페이지 대표 제목에 장기요양기관·브랜드 누락');
     const description = metas.find(meta => meta.name?.toLowerCase() === 'description')?.content || '';
     if (!description.startsWith('돌봄한눈')) issues.push('홈페이지 설명이 사이트명으로 시작하지 않음');
+    if (!description.includes('장기요양기관') || !description.includes('요양병원')) issues.push('홈페이지 설명에 장기요양기관·요양병원 주제 누락');
     if ([...description].length > 80) issues.push('홈페이지 설명이 네이버 권장 80자를 초과');
-    /** SOFTM-SEARCH-NAVER END */
     try {
       const structured = [...source.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].flatMap(match => JSON.parse(match[1]));
       if (!structured.some(item => item['@type'] === 'WebSite' && item.name === '돌봄한눈' && item.url === `${publicOrigin}/`)) issues.push('홈페이지 WebSite 이름·주소 불일치');
+      if (!structured.some(item => item['@type'] === 'WebSite' && item.alternateName === '돌봄한눈 장기요양기관 찾기')) issues.push('홈페이지 WebSite 장기요양기관 별칭 누락');
     } catch { issues.push('구조화 데이터 해석 실패'); }
+    /** SOFTM-LTC-KEYWORD END */
   }
   return { url, status, title, canonical, issues };
 }

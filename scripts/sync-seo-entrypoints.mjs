@@ -1,4 +1,4 @@
-/** SOFTM-SEO-ENTRYPOINTS START 날짜:20260904 : 지역별 실제 목록이 홈·유형 안내와 단일 사이트맵에서 함께 발견되도록 생성 결과를 연결 */
+/** SOFTM-LTC-KEYWORD START 날짜:20260911 : 장기요양기관 검색 주제를 생성형 홈·유형 안내와 사이트맵에서 일관되게 유지 */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,9 +7,9 @@ import { getRegionalSeoPages } from './build-regional-seo.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGIN = 'https://homecare.designboard.net';
 const CONFIG = {
-  daycare: { file: 'daycare-map.html', label: '주간보호센터', intro: '주간보호센터는 공단 자료에서 주야간보호로 분류됩니다. 지역별 기관 목록에서 주소와 공개 평가연도를 확인하고, 지도로 이동해 위치·정원·인력을 비교하세요.', compare: '송영 가능 지역과 이용 시간을 확인하세요', detail: '지역 목록에는 공개자료의 기관 주소가 표시됩니다. 실제 송영 범위·이용 시간·현재 이용 가능 여부는 센터에 확인하세요.' },
-  facility: { file: 'nursing-home-map.html', label: '요양원', intro: '지역별 요양원 목록에서 기관 주소와 공단 공개 평가연도를 확인하세요. 해당 시설 자료에 포함된 노인요양공동생활가정도 함께 안내하며 기관별 실제 유형을 표시합니다.', compare: '평가연도와 실제 시설 유형을 함께 확인하세요', detail: '공단 평가등급은 공개된 평가의 결과입니다. 기관마다 평가연도가 다르므로 주소·정원·인력과 함께 비교하고, 입소 가능 여부는 기관에 확인하세요.' },
-  'home-care': { file: 'home-care-map.html', label: '방문요양센터', intro: '방문요양센터·방문요양기관을 시도와 시군구별로 찾아보세요. 지역 목록에서 기관 주소와 공단 공개 평가를 확인한 뒤 지도에서 위치와 기관정보를 비교할 수 있습니다.', compare: '기관 소재지와 방문 가능 지역을 구분하세요', detail: '목록의 지역은 기관 주소 기준입니다. 실제 방문 서비스 제공 지역·시간·현재 이용 가능 여부는 해당 방문요양센터에 확인하세요.' }
+  daycare: { file: 'daycare-map.html', label: '주간보호센터', intro: '주간보호센터는 장기요양기관 중 공단 자료에서 주야간보호로 분류됩니다. 지역별 기관 목록에서 주소와 공개 평가연도를 확인하고, 지도로 이동해 위치·정원·인력을 비교하세요.', compare: '송영 가능 지역과 이용 시간을 확인하세요', detail: '지역 목록에는 공개자료의 기관 주소가 표시됩니다. 실제 송영 범위·이용 시간·현재 이용 가능 여부는 센터에 확인하세요.' },
+  facility: { file: 'nursing-home-map.html', label: '요양원', intro: '장기요양기관 중 지역별 요양원 목록에서 기관 주소와 공단 공개 평가연도를 확인하세요. 해당 시설 자료에 포함된 노인요양공동생활가정도 함께 안내하며 기관별 실제 유형을 표시합니다.', compare: '평가연도와 실제 시설 유형을 함께 확인하세요', detail: '공단 평가등급은 공개된 평가의 결과입니다. 기관마다 평가연도가 다르므로 주소·정원·인력과 함께 비교하고, 입소 가능 여부는 기관에 확인하세요.' },
+  'home-care': { file: 'home-care-map.html', label: '방문요양센터', intro: '장기요양기관 중 방문요양센터·방문요양기관을 시도와 시군구별로 찾아보세요. 지역 목록에서 기관 주소와 공단 공개 평가를 확인한 뒤 지도에서 위치와 기관정보를 비교할 수 있습니다.', compare: '기관 소재지와 방문 가능 지역을 구분하세요', detail: '목록의 지역은 기관 주소 기준입니다. 실제 방문 서비스 제공 지역·시간·현재 이용 가능 여부는 해당 방문요양센터에 확인하세요.' }
 };
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const count = value => Number(value).toLocaleString('ko-KR');
@@ -44,9 +44,9 @@ ${hubs.map(hub => `        <a href="${esc(localUrl(hub.url))}"><strong>${esc(hub
 function homeSection() {
   return `<!-- SOFTM-SEO-HOME START 날짜:20260904 : 기관 유형 선택 다음에 지역별 실제 목록을 탐색할 수 있는 경로를 제공 -->
     <section class="seo-home-content" aria-labelledby="regional-title">
-      <h2 id="regional-title">우리 동네 돌봄기관을 찾으세요</h2>
-      <p>요양원·주간보호센터·방문요양센터를 지역별 목록에서 살펴보세요. 기관 주소와 공단 평가연도를 확인한 뒤 지도에서 비교할 수 있습니다.</p>
-      <nav class="seo-region-grid" aria-label="지역별 기관 목록 바로가기">
+      <h2 id="regional-title">우리 동네 장기요양기관을 찾으세요</h2>
+      <p>요양원·주간보호센터·방문요양센터 등 장기요양기관을 지역별 목록에서 살펴보세요. 기관 주소와 공단 평가연도를 확인한 뒤 지도에서 비교할 수 있습니다.</p>
+      <nav class="seo-region-grid" aria-label="지역별 장기요양기관 목록 바로가기">
         <a href="daycare-map.html#regions"><strong>지역별 주간보호센터</strong><span>주야간보호센터 주소·평가 확인</span></a>
         <a href="nursing-home-map.html#regions"><strong>지역별 요양원</strong><span>공개 평가·정원·시설 유형 확인</span></a>
         <a href="home-care-map.html#regions"><strong>지역별 방문요양센터</strong><span>기관 소재지·공개 평가 확인</span></a>
@@ -94,4 +94,4 @@ export function syncSeoEntrypoints({ rootDir = ROOT, check = false } = {}) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   console.log(JSON.stringify(syncSeoEntrypoints({ check: process.argv.includes('--check') })));
 }
-/** SOFTM-SEO-ENTRYPOINTS END */
+/** SOFTM-LTC-KEYWORD END */
