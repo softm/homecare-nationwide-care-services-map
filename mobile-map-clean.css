@@ -1,0 +1,38 @@
+/** SOFTM-MOBILE-CLEAN START 날짜:20260911 : 흰 바탕과 얇은 구분선으로 지도·기관 정보의 위계를 드러내고 파란색은 주요 동작에 집중 */
+@media(max-width:1000px){
+ .care-map-page{--navy:#2369df;--ink:#20252b;--muted:#777e86;--line:#e8eaed;background:#fff}
+ .care-map-page .card,.care-map-page .filters,.care-map-page .care-workspace-tabs{box-shadow:none}
+ .care-map-page .care-type-header{background:#fff;border-bottom:1px solid #eee}
+ .care-map-page .care-type-menu-item{color:#60666e;font-weight:700;box-shadow:none}
+ .care-map-page .care-type-menu-item[aria-current="true"]{color:#2369df;background:#edf4ff;box-shadow:none}
+ .care-map-page .care-type-header .care-type-toggle{border-color:#e5e7eb;color:#626b76;background:#fff}
+ .care-map-page[data-care-workspace="search"] .filters{border:0;border-bottom:1px solid #eceef1;background:#fff}
+ .care-map-page .care-voice-input{border-color:#dadde2;box-shadow:none;background:#fff}
+ .care-map-page .filter-grid input{color:#272c33;background:#fff}
+ .care-map-page .filter-grid .search-btn{background:#2369df;box-shadow:none;border-radius:12px}
+ .care-map-page[data-care-workspace="search"] .care-mobile-filter-toggle{background:#fff;color:#4b5563;border-color:#e0e3e8;border-radius:12px}
+ .care-map-page[data-care-workspace="search"] .map-head{border-color:#eee;background:#fff}
+ .care-map-page[data-care-workspace="search"] .map-title #areaBadge{font-size:13px;color:#555d67}
+ .care-map-page[data-care-workspace="search"] .layout>.results{background:#fff;box-shadow:0 -2px 8px #00000008}
+ .care-map-page[data-care-workspace="search"] .care-sheet-handle{background:#fff;border-bottom-color:#eee;color:#555d67}
+ .care-map-page[data-care-workspace="search"] .care-sheet-grip{width:34px;height:3px;background:#999}
+ .care-map-page .care-sheet-action,.care-map-page .care-sheet-count{color:#2369df}
+ .care-map-page .care-sort-trigger{border:1px solid #e0e2e6;border-radius:24px;box-shadow:none;background:#fff;color:#30363d;font-weight:500}
+ .care-map-page[data-care-workspace="search"] .row{padding:18px 16px;border:0;border-bottom:1px solid #eceef1;background:#fff;box-shadow:none;color:#20252b}
+ .care-map-page[data-care-workspace="search"] .row.care-scroll-active{background:#f5f8ff;box-shadow:inset 2px 0 #2878ef}
+ .care-map-page[data-care-workspace="search"] .row h3{font-size:17px;font-weight:750;line-height:1.45;color:#20252b}
+ .care-map-page[data-care-workspace="search"] .row p{font-size:13px;line-height:1.6;color:#757c85;margin:7px 0}
+ .care-map-page .care-result-rank{background:#f3f5f8;color:#717a85;border-radius:8px;font-size:12px}
+ .care-map-page[data-care-workspace="search"] .care-result-photo{border-radius:12px;background:#f2f3f5}
+ .care-map-page .row .care-row-actions{gap:8px;margin-top:14px;padding-top:0}
+ .care-map-page .row .care-row-actions button,.care-map-page .row .care-row-actions a{min-height:44px;border:0;border-radius:12px;background:#edf3ff;color:#2369df;box-shadow:none;font-size:13px;font-weight:650}
+ .care-map-page .row .care-map-display{color:#737d89;font-size:12px}
+ .care-map-page .row input[type="checkbox"]{accent-color:#2369df}
+ .care-map-page .care-search-disclosure{background:#fff;border-bottom:1px solid #eee;padding:6px 12px}
+ .care-map-page .care-search-disclosure>summary,.care-map-page .care-search-disclosure-toggle{background:#fff;border:1px solid #e5e8ed;box-shadow:none;color:#5f6b79;border-radius:12px}
+ .care-map-page .care-workspace-tabs{background:#fff;border:0;border-top:1px solid #e6e9ee}
+ .care-map-page .care-workspace-tab-list>[data-workspace]{border:0;border-radius:0;background:#fff;color:#818994;box-shadow:none;font-size:14px}
+ .care-map-page .care-workspace-tab-list>[aria-selected="true"]{color:#2369df;background:#fff;box-shadow:none}
+ .care-map-page .care-workspace-tab-list>[aria-selected="true"]::after{background:#2369df}
+}
+/** SOFTM-MOBILE-CLEAN END */
