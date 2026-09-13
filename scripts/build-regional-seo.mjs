@@ -257,6 +257,11 @@ ${districtPages.map((district) => `        <li data-region-city="${html(district
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+<!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 64x64">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+<!-- SOFTM-BRAND-ICON END -->
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${html(title)}</title>
   <meta name="description" content="${html(description)}">
@@ -278,7 +283,7 @@ ${districtPages.map((district) => `        <li data-region-city="${html(district
 </head>
 <body data-region-type="${page.type}" data-region-province="${html(page.province)}" data-region-city="${html(page.city)}">
 <a class="skip-link" href="#main">본문으로 바로가기</a>
-<header class="site-head"><div class="container site-head-inner"><a class="brand" href="../index.html">돌봄한눈</a><a class="home-link" href="../${config.landing}">전국 ${config.label} 찾기 →</a></div></header>
+<header class="site-head"><div class="container site-head-inner"><a class="brand" href="../index.html"><img src="../site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0">돌봄한눈</a><!-- SOFTM-BRAND-ICON 날짜:20260913 : 생성되는 지역 화면도 같은 브랜드 아이콘을 유지 --><a class="home-link" href="../${config.landing}">전국 ${config.label} 찾기 →</a></div></header>
 <main id="main">
   <section class="search-intro" aria-labelledby="page-title"><div class="container">
     <nav class="breadcrumb" aria-label="현재 위치">${crumbs.map((item, index) => `${index ? '<span aria-hidden="true">›</span>' : ''}${index === crumbs.length - 1 ? `<span aria-current="page">${html(item.name)}</span>` : `<a href="${item.href}">${html(item.name)}</a>`}`).join('')}</nav>
@@ -301,7 +306,7 @@ ${districtContent}
     </section>
   </div>
 </main>
-<footer><div class="container"><a href="../index.html">돌봄한눈</a><span>우리 부모님 요양·돌봄기관 찾기</span></div></footer>
+<footer><div class="container"><a href="../index.html"><img src="../site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0">돌봄한눈</a><!-- SOFTM-BRAND-ICON 날짜:20260913 : 생성되는 지역 화면도 같은 브랜드 아이콘을 유지 --><span>우리 부모님 요양·돌봄기관 찾기</span></div></footer>
 </body>
 </html>
 <!-- /** SOFTM-REGIONAL-SEO END */ -->
