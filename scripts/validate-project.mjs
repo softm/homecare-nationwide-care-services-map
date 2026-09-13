@@ -8,6 +8,7 @@ import { getRegionalSeoPages } from './build-regional-seo.mjs'; // SOFTM-SEO-REG
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-region-entry.test.mjs')], { stdio: 'inherit' }); // SOFTM-REGION-ENTRY 날짜:20260913 : 최근 지역의 유효기간·기록 의도를 전체 검사에 포함
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-map-focus.test.mjs')], { stdio: 'inherit' }); // SOFTM-MAP-FOCUS 날짜:20260914 : 탭과 드래그 구분을 기본 검사에 포함
 const fail = message => { throw new Error(message); };
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const exists = relative => fs.existsSync(path.join(root, relative));
