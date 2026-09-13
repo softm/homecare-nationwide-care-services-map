@@ -1,0 +1,10 @@
+/** SOFTM-LOCATION-STATE START 날짜:20260914 : 색상과 지속 안내를 함께 사용해 위치 차단이 검색 진행에 묻히지 않도록 표시 */
+body.care-location-unavailable.care-map-page #areaBadge::before,
+body.care-location-unavailable #locateBtn { color:#b42318!important; }
+body.care-location-unavailable #locateBtn { background:#fff1f0!important; }
+.care-location-state { position:absolute;z-index:81;top:12px;left:12px;max-width:calc(100% - 80px);min-height:40px;padding:8px 12px;border:1px solid #efb0aa;border-radius:12px;background:#fff4f2;color:#b42318;font-size:14px;font-weight:700;line-height:1.4;cursor:pointer;box-shadow:0 2px 8px #0001; }
+.care-location-state[hidden] { display:none; }
+body.care-map-focus .care-location-state { top:calc(76px + env(safe-area-inset-top));max-width:calc(100% - 92px); }
+body.care-location-unavailable .map-wrap .loading { top:64px;max-width:calc(100% - 92px); }
+body.care-location-unavailable.care-map-focus .map-wrap .loading { top:calc(128px + env(safe-area-inset-top)); }
+/** SOFTM-LOCATION-STATE END */

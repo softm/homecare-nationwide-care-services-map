@@ -89,6 +89,11 @@
         notice.querySelector('[data-location-retry]').onclick = retry;
     }
     /** SOFTM-LOCATION-DIALOG END */
-    root.CareLocation = Object.freeze({ request: options => requestPosition(root, options), requestPosition, info, permissionHelp, showNotice, hideNotice });
+    root.CareLocation = Object.freeze({ request: async options => {
+        /** SOFTM-LOCATION-STATE START 날짜:20260914 : 조회 메시지와 별개로 위치 사용 가능 상태를 전달 */
+        try { const point = await requestPosition(root, options); root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: { reason: '' } })); return point; }
+        catch (error) { root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: info(error) })); throw error; }
+        /** SOFTM-LOCATION-STATE END */
+    }, requestPosition, info, permissionHelp, showNotice, hideNotice });
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-LOCATION END */
