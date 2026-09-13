@@ -313,7 +313,7 @@ test('통합 초기 위치 거절은 모달·전국 좌표 조회 없이 완료�
  function beginCareQuery(){return{current:()=>true}}
  function hideLoading(){}function showLoading(){}function setStatus(){}function clearTimeout(){}
  function setTimeout(){scheduled++}function applyFilters(){return[]}
- function showDataPreview(){previews++}function refreshFromMap(){searches++}
+ function restoreCareRecentRegion(){previews++}function refreshFromMap(){searches++} // SOFTM-REGION-ENTRY 날짜:20260913 : 권한 실패가 전국 미리보기 대신 최근 지역 복원기로 이어지는지 확인
  `,context);
  for(const name of ['useCurrentLocation','scheduleRefresh']){
   let start=careHtml.indexOf(`function ${name}(`);

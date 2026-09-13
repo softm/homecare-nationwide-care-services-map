@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { getRegionalSeoPages } from './build-regional-seo.mjs'; // SOFTM-SEO-REGIONAL-CHECK 날짜:20260904 : 실제 데이터로 생성한 지역 목록만 검색 대표에 포함하도록 검사
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-region-entry.test.mjs')], { stdio: 'inherit' }); // SOFTM-REGION-ENTRY 날짜:20260913 : 최근 지역의 유효기간·기록 의도를 전체 검사에 포함
 const fail = message => { throw new Error(message); };
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const exists = relative => fs.existsSync(path.join(root, relative));
