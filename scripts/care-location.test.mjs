@@ -46,6 +46,16 @@ test('취소한 검색은 후속 위치 요청을 시작하지 않음', async ()
     await assert.rejects(api.requestPosition(env, { isCurrent: () => false }), error => error.reason === 'timeout');
     assert.equal(env.calls.length, 1);
 });
+/** SOFTM-LOCATION-NO-SCROLL START 날짜:20260914 : 모바일 권한 안내가 모든 기기 카드를 쌓아 내부 스크롤로 돌아가지 않도록 검사 */
+test('위치 권한 안내는 기기별 한 경로만 표시하고 모달 내부 스크롤을 사용하지 않음', () => {
+    const source = readFileSync(new URL('../care-location.js', import.meta.url), 'utf8');
+    const styles = readFileSync(new URL('../map-experience.css', import.meta.url), 'utf8');
+    assert.match(source, /dataset\.locationHelpTab/);
+    assert.match(source, /hidden = !active/);
+    assert.match(styles, /dialog\.care-location-notice \{[^}]*overflow:hidden/);
+    assert.doesNotMatch(styles, /dialog\.care-location-notice \{[^}]*overflow:auto/);
+});
+/** SOFTM-LOCATION-NO-SCROLL END */
 test('방문 출발지 취소와 다시 시도 시 오류·이전 위치를 남기지 않음', async () => {
     let rejectPosition;
     const env = device([(success, error) => { rejectPosition = error; }, point]);
