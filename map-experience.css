@@ -793,3 +793,35 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-location-help p { margin:4px 0 0; line-height:1.55; word-break:keep-all; overflow-wrap:break-word; }
 .care-location-help p:last-child { color:#76644e; font-size:13px; }
 /** SOFTM-LOCATION-HELP END */
+
+/** SOFTM-MAP-STATUS-READABILITY START 날짜:20260914 : 위치 실패와 조회 상태를 PC·모바일 지도에서 작거나 잘린 문구로 놓치지 않도록 확대 */
+.care-map-page .map-wrap > .map-status { padding:13px 16px; font-size:15px; line-height:1.55; }
+.care-map-page .map-wrap > .map-status b { font-size:16px; line-height:1.45; }
+.care-map-page .map-title .area-badge { font-size:14px; line-height:1.45; }
+.care-map-page .map-toolbar .map-status { padding:8px 11px; font-size:14px; line-height:1.45; }
+.care-map-page .map-scope-badge .scope-label { font-size:12px; }
+.care-map-page .map-scope-badge strong { font-size:15px; line-height:1.45; }
+.care-map-page .map-scope-badge .scope-meta,.care-map-page .progress-label { font-size:12px; line-height:1.45; }
+.care-map-page .toast { font-size:15px; line-height:1.55; }
+.care-location-notice strong { font-size:19px; }
+.care-location-notice p,.care-location-notice summary { font-size:16px; }
+.care-location-actions button { font-size:15px; }
+.care-location-help h3 { font-size:16px; }
+.care-location-help p:last-child { font-size:15px; }
+@media(max-width:1000px) {
+ .care-map-page[data-care-workspace="search"] .map-wrap > .map-status { max-width:min(78%,420px); max-height:none; overflow:visible; padding:13px 15px; font-size:15px; line-height:1.5; }
+ .care-map-page[data-care-workspace="search"] .map-wrap > .map-status b { font-size:16px; }
+ .care-map-page[data-care-workspace="search"] .map-title .area-badge { font-size:16px; }
+}
+/** SOFTM-MAP-STATUS-READABILITY END */
+
+/** SOFTM-FILTER-BADGE START 날짜:20260914 : 적용된 조건을 검색조건 버튼 안의 짧은 상태 배지로 즉시 구분 */
+.care-map-page .care-mobile-filter-toggle { align-items:center; justify-content:center; flex-direction:column; gap:3px; line-height:1.1; }
+.care-map-page .care-mobile-filter-toggle .care-filter-toggle-label { display:block; white-space:nowrap; }
+.care-map-page .care-filter-state-badge { display:inline-flex; align-items:center; justify-content:center; min-height:16px; padding:2px 5px; border-radius:999px; background:#1765c1; color:#fff; font-size:10px; font-weight:850; line-height:1; white-space:nowrap; }
+.care-map-page .care-filter-state-badge[hidden] { display:none; }
+.care-map-page .care-mobile-filter-toggle.has-active-filters { border-color:#4387d5; background:#e8f3ff; color:#174f91; box-shadow:inset 0 0 0 1px #8fb9e8; }
+@media(max-width:1000px) {
+ .care-map-page[data-care-workspace="search"] .care-mobile-filter-toggle { display:flex; }
+}
+/** SOFTM-FILTER-BADGE END */

@@ -12,7 +12,7 @@
  .care-map-page .filter-grid .search-btn{background:#2369df;box-shadow:none;border-radius:12px}
  .care-map-page[data-care-workspace="search"] .care-mobile-filter-toggle{background:#fff;color:#4b5563;border-color:#e0e3e8;border-radius:12px}
  .care-map-page[data-care-workspace="search"] .map-head{border-color:#eee;background:#fff}
- .care-map-page[data-care-workspace="search"] .map-title #areaBadge{font-size:13px;color:#555d67}
+ .care-map-page[data-care-workspace="search"] .map-title #areaBadge{font-size:16px;color:#555d67} /* SOFTM-MAP-STATUS-READABILITY 날짜:20260914 : 모바일 현재 위치·검색 기준 라벨을 본문보다 작게 보이지 않도록 확대 */
  .care-map-page[data-care-workspace="search"] .layout>.results{background:#fff;box-shadow:0 -2px 8px #00000008}
  .care-map-page[data-care-workspace="search"] .care-sheet-handle{background:#fff;border-bottom-color:#eee;color:#555d67}
  .care-map-page[data-care-workspace="search"] .care-sheet-grip{width:34px;height:3px;background:#999}

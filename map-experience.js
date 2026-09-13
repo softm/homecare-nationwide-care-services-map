@@ -594,7 +594,10 @@
         /** SOFTM-FILTER-CLOSE START 날짜:20260910 : 닫기를 조회와 같은 실행 버튼으로 오인하지 않도록 패널 상단과 바깥 영역에 닫기 동작을 분리 */
         const toggle = document.createElement('button');
         toggle.type = 'button'; toggle.className = 'care-mobile-filter-toggle';
-        toggle.textContent = '검색조건'; toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-label', '검색조건 열기');
+        /** SOFTM-FILTER-BADGE START 날짜:20260914 : 검색조건 적용 여부를 패널을 다시 열지 않고도 확인하도록 상태 배지를 제공 */
+        const toggleLabel = document.createElement('span'); toggleLabel.className = 'care-filter-toggle-label'; toggleLabel.textContent = '검색조건';
+        const conditionBadge = document.createElement('span'); conditionBadge.className = 'care-filter-state-badge'; conditionBadge.textContent = '설정됨'; conditionBadge.hidden = true;
+        toggle.append(toggleLabel, conditionBadge); toggle.setAttribute('aria-expanded', 'false');
         filters.id ||= 'careMobileFilters'; toggle.setAttribute('aria-controls', filters.id);
         filters.querySelector('.filter-grid').append(toggle);
         const panelHead = document.createElement('div'); panelHead.className = 'care-filter-panel-head';
@@ -604,15 +607,27 @@
         panelHead.after(createContextLinks('care-mobile-context-links')); // SOFTM-MAP-NAVIGATION 날짜:20260911 : 상단 유형 메뉴가 숨는 모바일에서도 안내 링크를 검색조건 안에 제공
         const backdrop = document.createElement('button'); backdrop.type = 'button'; backdrop.className = 'care-filter-backdrop'; backdrop.hidden = true; backdrop.setAttribute('aria-label', '검색조건 닫기');
         document.body.append(backdrop);
+        const hasConfiguredConditions = () => ['province', 'city', 'capacity', 'staff'].some(id => filters.querySelector(`#${id}`)?.value)
+            || !!filters.querySelector('[data-filter]:not([data-value="all"]).active,[data-filter]:not([data-value="all"])[aria-pressed="true"],.advanced-selected [data-remove]');
+        const syncConditionBadge = () => {
+            const configured = hasConfiguredConditions(), open = document.body.classList.contains('care-mobile-filters-open');
+            conditionBadge.hidden = !configured; toggle.classList.toggle('has-active-filters', configured);
+            toggle.setAttribute('aria-label', `${configured ? '검색조건 설정됨, ' : ''}검색조건 ${open ? '열림' : '열기'}`);
+        };
         const setOpen = (open, restoreFocus = false) => {
             document.body.classList.toggle('care-mobile-filters-open', open);
-            toggle.setAttribute('aria-expanded', String(open)); toggle.setAttribute('aria-label', open ? '검색조건 열림' : '검색조건 열기');
+            toggle.setAttribute('aria-expanded', String(open)); syncConditionBadge();
             backdrop.hidden = !open;
             if (!open && restoreFocus) toggle.focus({ preventScroll: true });
         };
         toggle.onclick = () => { const open = document.body.classList.contains('care-mobile-filters-open'); setOpen(!open, open); };
         close.onclick = () => setOpen(false, true);
         backdrop.onclick = () => setOpen(false, true);
+        filters.addEventListener('change', syncConditionBadge);
+        filters.addEventListener('input', syncConditionBadge);
+        filters.addEventListener('click', () => requestAnimationFrame(syncConditionBadge));
+        syncConditionBadge();
+        /** SOFTM-FILTER-BADGE END */
         document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') setOpen(false); });
         document.getElementById('searchBtn')?.addEventListener('click', () => setOpen(false));
         document.addEventListener('keydown', e => {

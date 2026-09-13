@@ -1,0 +1,29 @@
+/** SOFTM-MAP-FOCUS START 날짜:20260914 : 지도 DOM을 유지한 채 화면 전체와 접근 가능한 오버레이 조작을 제공 */
+.care-focus-controls[hidden]{display:none!important}
+.care-focus-controls{position:absolute;inset:0;z-index:80;pointer-events:none}
+.care-focus-controls button{pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d3dfed;background:#fff;color:#173f6b;min-height:48px;padding:10px 14px;border-radius:24px;box-shadow:0 3px 14px #173f6b26;cursor:pointer;font-size:14px;font-weight:700}
+.care-focus-controls svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.care-focus-top{position:absolute;top:calc(12px + env(safe-area-inset-top));left:12px;right:12px;display:flex;gap:8px;justify-content:space-between}
+.care-focus-side{position:absolute;right:12px;top:calc(82px + env(safe-area-inset-top));display:grid;gap:10px}
+.care-focus-side button{width:48px;padding:10px}.care-focus-side span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.care-focus-bottom{position:absolute;bottom:calc(65px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%)}
+.care-focus-entry{border:1px solid #bdcde0;border-radius:10px;background:#fff;color:#173f6b;min-height:36px;padding:7px 10px;font-weight:700}
+body.care-map-focus{overflow:hidden!important}
+body.care-map-focus.care-map-page[data-care-workspace] .layout>.map-card{position:fixed!important;inset:0!important;z-index:160!important;display:block!important;width:100vw!important;height:100dvh!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;visibility:visible!important;pointer-events:auto!important;transform:none!important}
+body.care-map-focus .map-card>.map-head,body.care-map-focus .map-card>.care-map-tools{display:none!important}
+body.care-map-focus .map-card .map-wrap{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;border-radius:0!important}
+body.care-map-focus #naverMap{height:100%!important;min-height:0!important}
+body.care-map-focus .map-wrap .loading{top:calc(78px + env(safe-area-inset-top))}
+body.care-map-focus .map-status{bottom:calc(120px + env(safe-area-inset-bottom));max-width:calc(100% - 90px)}
+body.care-map-focus .map-controls{bottom:calc(20px + env(safe-area-inset-bottom))!important}
+body.care-map-focus .care-region-research{bottom:calc(12px + env(safe-area-inset-bottom))!important}
+.care-focus-dialog{width:min(560px,calc(100vw - 24px));max-height:85dvh;padding:0;border:1px solid #d1ddeb;border-radius:18px;background:white;color:#173f6b;overflow:auto}
+.care-focus-dialog::backdrop{background:#102a4555}.care-focus-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;position:sticky;top:0;background:white;z-index:5;border-bottom:1px solid #e0e7ef}
+.care-focus-dialog h2{font-size:18px;margin:0}.care-focus-dialog header button{width:44px;height:44px;border:0;border-radius:50%;font-size:26px;background:#eef4fb;color:#173f6b}
+.care-focus-search{display:grid;gap:14px;padding:20px}.care-focus-search label{font-size:14px;font-weight:700}.care-focus-search input,.care-focus-search select{display:block;width:100%;box-sizing:border-box;min-height:46px;margin-top:6px;padding:8px;border:1px solid #c4d2e2;border-radius:10px;background:white;font:inherit}.care-focus-search>button{min-height:46px;border:0;border-radius:10px;background:#173f6b;color:white;font-weight:700}
+.care-focus-dialog #careSearchResults,.care-focus-dialog #careSavedPanel{position:static!important;display:block!important;visibility:visible!important;transform:none!important;width:auto!important;height:auto!important;max-height:none!important;margin:0!important;padding:14px!important;overflow:visible!important}
+.care-focus-dialog #list{height:55dvh!important;min-height:200px!important;overflow:auto!important}
+/** SOFTM-MAP-FOCUS END */
+/** SOFTM-MAP-FOCUS-CHROME START 날짜:20260914 : 기존 고정 탭과 검색창이 전체 지도 버튼을 가리지 않도록 숨김 */
+body.care-map-focus .care-context-links,body.care-map-focus .care-type-header,body.care-map-focus .care-sheet-map-button,body.care-map-focus .care-workspace-tabs,body.care-map-focus .category-nav,body.care-map-focus .care-view-switch,body.care-map-focus .filters,body.care-map-focus .care-saved-dock,body.care-map-focus .layout>.results,body.care-map-focus .layout>.care-saved-panel{display:none!important}
+/** SOFTM-MAP-FOCUS-CHROME END */
