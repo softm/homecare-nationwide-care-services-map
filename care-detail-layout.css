@@ -26,9 +26,9 @@
 @media(max-width:640px){.care-map-page .care-detail-group{padding:12px;margin-bottom:12px}.care-detail-address-content{gap:6px;font-size:14px}.care-map-page .care-detail-address-actions>*{width:40px;min-width:40px}.care-map-page .care-detail-group .basic-live-grid{grid-template-columns:1fr}}
 /** SOFTM-DETAIL-LAYOUT END */
 
-/** SOFTM-POPUP-NAVIGATION START 날짜:20260911 : 비교 담기와 길안내를 같은 줄 양끝에 두고 모바일 터치 영역을 확보 */
+/** SOFTM-POPUP-NAVIGATION START 날짜:20260914 : 문구가 있는 길안내를 비교 담기와 같은 줄에 표시하고 터치 영역을 확보 */
 .care-map-page .care-popup-basket-action{width:100%;gap:12px}
-.care-map-page .care-popup-navigation{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;margin-left:auto;border:1px solid #ffffffb8;border-radius:10px;background:#fff;color:#15599b;text-decoration:none;box-sizing:border-box}
+.care-map-page .care-popup-navigation{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:0 0 auto;width:auto;min-width:96px;height:44px;padding:0 13px;font-size:14px;font-weight:750;white-space:nowrap;margin-left:auto;border:1px solid #ffffffb8;border-radius:10px;background:#fff;color:#15599b;text-decoration:none;box-sizing:border-box}
 .care-map-page .care-popup-navigation svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .care-map-page .care-popup-navigation:hover{background:#e7f2ff;color:#134f94}
 .care-map-page .care-popup-navigation:focus-visible{outline:3px solid #fff;outline-offset:3px}
@@ -47,3 +47,9 @@
 .care-map-page .row .care-row-actions > :focus-visible{outline:2px solid #175cb5;outline-offset:2px}
 @media(max-width:360px){.care-map-page .row .care-row-actions{gap:5px}.care-map-page .row .care-row-actions > .care-list-navigation,.care-map-page .row .care-row-actions > .care-basket-button,.care-map-page .row .care-row-actions > .care-map-display{font-size:13px;gap:4px}}
 /** SOFTM-LIST-ACTIONS END */
+
+/** SOFTM-POPUP-ACTION-EDGE START 날짜:20260914 : 닫기 버튼을 위해 비운 제목 여백과 별개로 행동 줄은 팝업 오른쪽 안쪽 끝선까지 사용 */
+.care-map-page .detail-head .care-popup-basket-action{width:calc(100% + 36px)}
+.care-map-page .popup-head .care-popup-basket-action{width:calc(100% + 29px)}
+.care-map-page .mobile-popup-content .popup-head .care-popup-basket-action{width:calc(100% + 38px)}
+/** SOFTM-POPUP-ACTION-EDGE END */

@@ -31,11 +31,11 @@
         return `<a class="care-list-navigation" href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${escape(c.n)} ${route.label}" title="${route.label}" onclick="event.stopPropagation()" ${external}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg><span>길안내</span></a>`;
     }
     /** SOFTM-LIST-NAVIGATION END */
-    /** SOFTM-POPUP-NAVIGATION START 날짜:20260911 : 정보 탭과 무관하게 팝업 헤더에서 해당 기관 길안내에 접근 */
+    /** SOFTM-POPUP-NAVIGATION START 날짜:20260914 : 아이콘과 문구를 함께 표시해 팝업에서도 길안내 행동을 명확히 식별 */
     function popupButton(c, point) {
         const route = links(c, point);
         const external = route.href.startsWith('https:') ? 'target="_blank" rel="noopener"' : '';
-        return `<a class="care-popup-navigation" href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${escape(c.n)} ${route.label}" title="${route.label}" onclick="event.stopPropagation()" ${external}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg></a>`;
+        return `<a class="care-popup-navigation" href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${escape(c.n)} ${route.label}" title="${route.label}" onclick="event.stopPropagation()" ${external}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg><span>길안내</span></a>`;
     }
     /** SOFTM-POPUP-NAVIGATION END */
     document.addEventListener('click', async event => {
