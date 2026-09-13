@@ -103,7 +103,7 @@
 <!-- SOFTM-REGION-ENTRY 날짜:20260913 : 통합 지도에서 권한 없이도 지역 선택과 최근 탐색 복원을 제공 -->
 <link rel="stylesheet" href="care-region-entry.css?v=20260913-1"><script src="care-region-entry.js?v=20260913-1"></script>
 <!-- SOFTM-MAP-FOCUS 날짜:20260914 : 지도 탭 전체 화면과 지도 위 도구를 통합 지도에 연결 -->
-<link rel="stylesheet" href="care-map-focus.css?v=20260914-sheet-only1"><script src="care-map-focus.js?v=20260914-tap-close11"></script> <!-- SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 지도 레이어의 실제 포인터와 보조기술 클릭 모두에서 열기와 재탭 닫기를 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-map-focus.css?v=20260914-sheet-only2"><script src="care-map-focus.js?v=20260914-marker-focus1"></script> <!-- SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 기관 마커는 전체보기로 진입하고 전체보기의 지도 배경은 복귀하는 동작을 이전 캐시 없이 적용 -->
 <!-- SOFTM-LOCATION-STATE START 날짜:20260914 : 권한 상태를 조회 알림에 덮어쓰이지 않는 독립 안내로 제공 -->
 <link rel="stylesheet" href="care-location-state.css?v=20260914-1">
 <script defer src="care-location-state.js?v=20260914-1"></script>
@@ -448,7 +448,7 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
     /** SOFTM-MARKER-PROGRESS START 날짜:20260913 : 전체 좌표 응답을 기다리지 않고 확인된 기관부터 지도에 표시 */
     placed.push(c);fitBounds.extend(pos);
     const marker=new window.naver.maps.Marker({map,position:pos,title:c.n,icon:markerIcon(c,placed.length)});
-    window.naver.maps.Event.addListener(marker,'click',()=>focusCenter(c.i));markers.set(c.i,marker);
+    window.naver.maps.Event.addListener(marker,'click',()=>{careMapFocus?.enter();focusCenter(c.i)});markers.set(c.i,marker); // SOFTM-MAP-FOCUS-MARKER 날짜:20260914 : 기관 마커를 선택하면 상세를 열기 전에 전체 지도 공간을 확보
     /** SOFTM-MARKER-PROGRESS END */
    }
    const current=Math.min(start+8,list.length);
@@ -843,7 +843,7 @@ function careBasketAdapter(){
  clear(){closeDetail();for(const m of markers.values())m.setMap(null);markers.clear();routeLine?.setMap(null);routeLine=null;originMarker?.setMap(null);originMarker=null;routeOrder=[]},
  restore(saved){markers=saved.markers;routeLine=saved.routeLine;routeOrder=saved.routeOrder;skipIdleUntil=Date.now()+1600;map.setCenter(saved.center);map.setZoom(saved.zoom);for(const [id,m] of markers)m.setMap(selected.has(id)?map:null);saved.baseMarker?.setMap(map);routeLine?.setMap(map);$('routeNote').textContent=saved.status;$('areaBadge').textContent=saved.badge;setStatus('검색 결과 지도','조회 조건과 지도 위치를 유지했습니다.')},
  geocode,
- place({row,point,rank}){const marker=new naver.maps.Marker({map,position:new naver.maps.LatLng(point.lat,point.lng),title:`${rank}. ${row.n}`,icon:markerIcon(row,rank,true)});naver.maps.Event.addListener(marker,'click',()=>focusCenter(row.i));markers.set(row.i,marker)},
+ place({row,point,rank}){const marker=new naver.maps.Marker({map,position:new naver.maps.LatLng(point.lat,point.lng),title:`${rank}. ${row.n}`,icon:markerIcon(row,rank,true)});naver.maps.Event.addListener(marker,'click',()=>{careMapFocus?.enter();focusCenter(row.i)});markers.set(row.i,marker)}, // SOFTM-MAP-FOCUS-MARKER 날짜:20260914 : 담은 기관 경로 마커도 같은 전체보기 상세 동선으로 연결
  origin(value){originMarker?.setMap(null);originMarker=value?new naver.maps.Marker({map,position:new naver.maps.LatLng(value.point.lat,value.point.lng),title:`출발: ${value.label}`,zIndex:5000,icon:{content:'<div class="care-origin-marker">출발</div>',anchor:new naver.maps.Point(28,22)}}):null},
  fit(points){skipIdleUntil=Date.now()+1500;const bounds=new naver.maps.LatLngBounds();points.forEach(p=>bounds.extend(new naver.maps.LatLng(p.lat,p.lng)));if(points.length===1){map.setCenter(new naver.maps.LatLng(points[0].lat,points[0].lng));map.setZoom(15)}else map.fitBounds(bounds,{top:60,right:45,bottom:45,left:45})},
  fetch:(body,signal)=>fetch(DIRECTIONS_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal}),

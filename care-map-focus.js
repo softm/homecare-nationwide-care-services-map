@@ -1,8 +1,8 @@
-/** SOFTM-MAP-FOCUS START 날짜:20260914 : 한 번의 지도 탭으로 탐색 공간을 넓히고 기존 검색·목록을 오버레이에서 재사용 */
+/** SOFTM-MAP-FOCUS START 날짜:20260914 : 기관 마커 선택으로 탐색 공간을 넓히고 지도 배경 탭으로 기존 화면에 복귀 */
 (function(root){
  'use strict';
  function isTap(start,end){return !!start&&start.id===end.id&&!start.multi&&!start.moved&&end.inside&&end.time-start.time<600&&Math.hypot(end.x-start.x,end.y-start.y)<10} // SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 지도 이동과 장누름을 전체보기 전환으로 오인하지 않도록 짧은 단일 포인터만 인정
- function focusAction(active,overlayOpen){return overlayOpen?null:(active?'leave':'enter')} // SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 지도 배경 클릭은 열린 상세를 침범하지 않고 전체보기 상태만 전환
+ function focusAction(active){return active?'leave':null} // SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 지도 배경은 전체보기 복귀에만 사용하고 일반 화면의 빈 지도 탭으로 전체보기를 열지 않음
  function mount(config){
   const host=document.getElementById('naverMap'),card=host.closest('.map-card');let active=false,origin,pointer,lastPointerEnd=0,moved;
   const icons={back:'<path d="m15 5-7 7 7 7"/>',search:'<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',layers:'<path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5"/>',saved:'<path d="M6 3h12v18l-6-4-6 4Z"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1"/>'};
@@ -17,8 +17,8 @@
   function enter(){if(active||!config.ready())return;origin={top:root.scrollY,list:document.getElementById('list').scrollTop,focus:document.activeElement};active=true;card.inert=false;document.body.classList.add('care-map-focus');controls.hidden=false;config.resize();controls.querySelector('button').focus({preventScroll:true});}
   function leave(){if(!active)return;closePanel();active=false;controls.hidden=true;document.body.classList.remove('care-map-focus','care-focus-list');card.inert=matchMedia('(max-width:1000px)').matches&&document.body.dataset.careWorkspace==='saved'&&document.body.dataset.careView!=='map';config.resize();root.scrollTo({top:origin.top,behavior:'instant'});document.getElementById('list').scrollTop=origin.list;origin.focus?.focus?.({preventScroll:true});}
   new MutationObserver(()=>{if(active&&card.inert)card.inert=false}).observe(card,{attributes:true,attributeFilter:['inert']});
-  function mapTap(){const action=focusAction(active,config.overlayOpen());if(action==='enter')enter();else if(action==='leave')leave()}
-  /** SOFTM-MAP-FOCUS-TOGGLE START 날짜:20260914 : SDK 레이어가 click을 누락해도 지도 배경의 짧은 포인터 입력으로 전체보기를 열고 다시 닫음 */
+  function mapTap(){if(focusAction(active)==='leave')leave()}
+  /** SOFTM-MAP-FOCUS-TOGGLE START 날짜:20260914 : SDK 레이어가 click을 누락해도 전체보기의 지도 배경을 짧게 누르면 기존 화면으로 복귀 */
   const excluded=target=>target instanceof Element&&!!target.closest('button,a,input,select,textarea,[role="button"],.map-marker,.marker-pin,.base-marker,.current-position-pin,.care-origin-marker');
   document.addEventListener('pointerdown',e=>{if(!host.contains(e.target)||excluded(e.target)){pointer=null;return}if(pointer){pointer.multi=true;return}pointer={id:e.pointerId,x:e.clientX,y:e.clientY,time:Date.now(),multi:e.isPrimary===false,moved:false};},true);
   document.addEventListener('pointermove',e=>{if(pointer&&e.pointerId===pointer.id&&Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>=10)pointer.moved=true},{passive:true,capture:true});
