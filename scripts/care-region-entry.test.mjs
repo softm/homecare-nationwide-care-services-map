@@ -28,20 +28,21 @@ test('직접 지역 선택·지도 이동과 GPS·최근 기록 복원을 구분
 /** SOFTM-REGION-ENTRY END */
 
 /** SOFTM-DEFAULT-MAP START 날짜:20260914 : 기본 지도의 중심·배율·안내·취소 처리를 실제 함수로 검증 */
-test('기본 지도는 서울시청 줌 13과 기본 위치 표기를 유지하고 직접 탐색으로 저장하지 않는다', async()=>{
+test('기본 지도는 PC 줌 14·모바일 줌 13과 기본 위치 표기를 유지하고 직접 탐색으로 저장하지 않는다', async()=>{
  const {readFileSync}=await import('node:fs'),vm=await import('node:vm');
  const html=readFileSync(new URL('../nationwide-care-services-map.html',import.meta.url),'utf8');
  const start=html.indexOf('async function showCareDefaultMap('),source=html.slice(start,html.indexOf('\n}',start)+2);
  const nodes=new Map(),calls=[];
  const context={areaLocationRequest:0,CareRegionEntry:{hide(){},restoreLabel(label){calls.push(label)},label:()=> '기본 위치 · 서울시청'},
  $:id=>{if(!nodes.has(id))nodes.set(id,{value:'이전지역'});return nodes.get(id)},updateCities(){},skipIdleUntil:0,initialLocationViewport:null,
- window:{naver:{maps:{LatLng:class{constructor(lat,lng){this.lat=lat;this.lng=lng}}}}},
+ window:{innerWidth:1440,naver:{maps:{LatLng:class{constructor(lat,lng){this.lat=lat;this.lng=lng}}}}},
  map:{setCenter(p){calls.push(p)},setZoom(z){calls.push(z)}},setBase(p,label,pan){calls.push({label,pan})},careViewportKey:()=> '서울시청',updateAreaLocation(){},setStatus(...args){calls.push(args)},refreshFromMap:async()=>({count:10})};
  vm.createContext(context);vm.runInContext(source,context);
  assert.equal((await context.showCareDefaultMap({current:()=>true})).count,10);
- assert.ok(calls.includes(13));assert.ok(calls.some(v=>v?.lat===37.5663&&v?.lng===126.9779)); // SOFTM-DEFAULT-MAP 날짜:20260914 : 마커 밀집 완화용 기본 배율을 회귀검사
+ assert.ok(calls.includes(14));assert.ok(calls.some(v=>v?.lat===37.5663&&v?.lng===126.9779)); // SOFTM-DEFAULT-MAP 날짜:20260914 : PC 500m 수준의 기본 배율을 회귀검사
  assert.match(calls.at(-1)[1],/현재 위치를 확인하지 못했습니다/);
  assert.equal(nodes.get('province').value,'');assert.equal(nodes.get('city').value,'');
+ calls.length=0;context.window.innerWidth=390;assert.equal((await context.showCareDefaultMap({current:()=>true})).count,10);assert.ok(calls.includes(13)); // SOFTM-DEFAULT-MAP 날짜:20260914 : 모바일은 기존 화면 범위를 유지하는지 함께 검증
  const count=calls.length;assert.equal((await context.showCareDefaultMap({current:()=>false})).cancelled,true);assert.equal(calls.length,count);
 });
 /** SOFTM-DEFAULT-MAP END */
