@@ -54,7 +54,7 @@ const categoryLandingPages = {
 };
 const indexCategories = Object.keys(categoryLandingPages);
 const landingPages = [...new Set(Object.values(categoryLandingPages))];
-const longTermCareLandingPages = landingPages.filter(page => page !== categoryLandingPages['nursing-hospital']); // SOFTM-LTC-KEYWORD 날짜:20260911 : 요양병원을 장기요양기관 키워드 검사 대상에서 제외
+const longTermCareLandingPages = landingPages.filter(page => page !== categoryLandingPages['nursing-hospital']); // SOFTM-LTC-KEYWORD 날짜:20260914 : 요양병원을 장기요양기관 찾기 구문 검사 대상에서 제외
 /** SOFTM-SEO-LANDING END */
 
 for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html); // SOFTM-DAYCARE-LANDING 날짜:20260904 : 안내와 분리된 기존 전용 지도의 스크립트 검사도 유지
@@ -102,11 +102,11 @@ for (const required of ['요양원 찾기에서 먼저 비교할 네 가지', '�
   if (!facilityLanding.includes(required)) fail(`nursing-home-map.html: 검색 의도 안내 누락 ${required}`);
 }
 /** SOFTM-SEO-FACILITY-CHECK END */
-/** SOFTM-LTC-KEYWORD START 날짜:20260911 : 홈페이지와 8개 유형의 장기요양기관 주제를 강화하되 요양병원 오분류를 방지 */
-const homeDescription = '돌봄한눈은 전국 장기요양기관과 요양병원의 위치, 공단·심평원 공개정보를 지역별로 찾고 비교하는 독립 정보 서비스입니다.';
-if (!indexSource.includes('<title>돌봄한눈 | 전국 장기요양기관·요양병원 찾기</title>')) fail('index.html: 장기요양기관 대표 제목 불일치');
-if (!indexSource.includes(`<meta name="description" content="${homeDescription}">`)) fail('index.html: 장기요양기관 대표 설명 불일치');
-if (!indexSource.match(/<h1\b[^>]*>[\s\S]*?장기요양기관[\s\S]*?돌봄한눈[\s\S]*?<\/h1>/)) fail('index.html: 장기요양기관·브랜드 대표 H1 불일치');
+/** SOFTM-LTC-KEYWORD START 날짜:20260914 : 홈페이지와 8개 유형에 장기요양기관 찾기 구문을 강화하되 요양병원 오분류를 방지 */
+const homeDescription = '돌봄한눈은 전국 장기요양기관 찾기와 요양병원 위치 확인, 공단·심평원 공개정보의 지역별 비교를 돕는 독립 정보 서비스입니다.';
+if (!indexSource.includes('<title>돌봄한눈 | 전국 장기요양기관 찾기·요양병원 찾기</title>')) fail('index.html: 장기요양기관 찾기 대표 제목 불일치');
+if (!indexSource.includes(`<meta name="description" content="${homeDescription}">`)) fail('index.html: 장기요양기관 찾기 대표 설명 불일치');
+if (!indexSource.match(/<h1\b[^>]*>[\s\S]*?장기요양기관 찾기[\s\S]*?돌봄한눈[\s\S]*?<\/h1>/)) fail('index.html: 장기요양기관 찾기·브랜드 대표 H1 불일치');
 if (!indexSource.includes('"alternateName":"돌봄한눈 장기요양기관 찾기"')) fail('index.html: 장기요양기관 WebSite 별칭 누락');
 for (const htmlFile of longTermCareLandingPages) {
   const source = read(htmlFile);
@@ -115,8 +115,8 @@ for (const htmlFile of longTermCareLandingPages) {
   const twitterDescription = source.match(/<meta\s+name="twitter:description"\s+content="([^"]*)"/)?.[1] || '';
   const firstEyebrow = source.match(/<p\s+class="eyebrow">([^<]*)<\/p>/)?.[1] || '';
   const structured = [...source.matchAll(/<script\s+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(match => JSON.parse(match[1]));
-  if (![description, ogDescription, twitterDescription, firstEyebrow, JSON.stringify(structured)].every(value => value.includes('장기요양기관'))) fail(`${htmlFile}: 장기요양기관 설명 신호 누락`);
-  if (!source.includes('<meta name="dcterms.modified" content="2026-09-11">')) fail(`${htmlFile}: 장기요양기관 변경일 누락`);
+  if (![description, ogDescription, twitterDescription, firstEyebrow, JSON.stringify(structured)].every(value => value.includes('장기요양기관 찾기'))) fail(`${htmlFile}: 장기요양기관 찾기 설명 신호 누락`);
+  if (!source.includes('<meta name="dcterms.modified" content="2026-09-14">')) fail(`${htmlFile}: 장기요양기관 찾기 변경일 누락`);
 }
 for (const htmlFile of ['index.html', ...landingPages]) {
   if (/<meta\s+name=["']keywords["']/i.test(read(htmlFile))) fail(`${htmlFile}: 검색효과 없는 meta keywords 사용`);
@@ -152,7 +152,7 @@ const robotsSource = read('robots.txt');
 const sitemapDirectives = [...robotsSource.matchAll(/^Sitemap:\s*(\S+)/gim)].map(match => match[1]);
 if (sitemapDirectives.length !== 1 || sitemapDirectives[0] !== `${publicOrigin}/sitemap.xml`) fail('robots.txt는 공개 도메인의 단일 sitemap.xml만 안내해야 합니다.');
 const sitemapSource = read('sitemap.xml');
-/** SOFTM-LTC-KEYWORD START 날짜:20260911 : 실제 변경한 9개 대표 URL의 수정일과 사이트맵 신호를 함께 검증 */
+/** SOFTM-LTC-KEYWORD START 날짜:20260914 : 장기요양기관 찾기 구문을 변경한 9개 대표 URL의 수정일과 사이트맵 신호를 함께 검증 */
 for (const [htmlFile, publicUrl] of [['index.html', `${publicOrigin}/`], ...longTermCareLandingPages.map(htmlFile => [htmlFile, `${publicOrigin}/${htmlFile}`])]) {
   const declared = read(htmlFile).match(/<meta name="dcterms\.modified" content="(\d{4}-\d{2}-\d{2})">/)?.[1];
   const entry = [...sitemapSource.matchAll(/<url>[\s\S]*?<\/url>/g)].map(match => match[0]).find(value => value.includes(`<loc>${publicUrl}</loc>`));

@@ -23,20 +23,21 @@ test('제목 브랜드 및 대표 URL 오류', () => {
 });
 test('오류 페이지를 정상 배포로 판정하지 않음', () => assert(inspect({ status: 404 }).issues.includes('HTTP 404')));
 test('작은따옴표 및 속성 순서 지원', () => assert.deepEqual(attributes("<meta content='index,follow' NAME='robots'>"), { content: 'index,follow', name: 'robots' }));
-/** SOFTM-LTC-KEYWORD START 날짜:20260911 : 홈페이지 표본에서 브랜드와 장기요양기관 주제를 함께 검증 */
-test('홈페이지 브랜드·장기요양기관 주제와 구조화 데이터 확인', () => {
+/** SOFTM-LTC-KEYWORD START 날짜:20260914 : 홈페이지 표본에서 브랜드와 장기요양기관 찾기 구문을 함께 검증 */
+test('홈페이지 브랜드·장기요양기관 찾기 주제와 구조화 데이터 확인', () => {
   const home = `${publicOrigin}/`;
-  const valid = html.replace(url, home).replace('<title>주야간보호센터 | 돌봄한눈</title>', '<title>돌봄한눈 | 전국 장기요양기관·요양병원 찾기</title>').replace('<h1>주야간보호센터</h1>', '<h1>전국 장기요양기관·요양병원, 돌봄한눈에서 찾아보세요</h1>') + `<meta name="description" content="돌봄한눈은 전국 장기요양기관과 요양병원을 찾고 비교하는 서비스입니다."><script type="application/ld+json">{"@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"${home}"}</script>`;
+  const valid = html.replace(url, home).replace('<title>주야간보호센터 | 돌봄한눈</title>', '<title>돌봄한눈 | 전국 장기요양기관 찾기·요양병원 찾기</title>').replace('<h1>주야간보호센터</h1>', '<h1>전국 장기요양기관 찾기부터 요양병원 비교까지, 돌봄한눈에서 시작하세요</h1>') + `<meta name="description" content="돌봄한눈은 전국 장기요양기관 찾기와 요양병원 비교를 돕는 서비스입니다."><script type="application/ld+json">{"@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"${home}"}</script>`;
   assert.deepEqual(inspect({ url: home, expectedCanonical: home, html: valid }).issues, []);
+  assert(inspect({ url: home, expectedCanonical: home, html: valid.replaceAll('장기요양기관 찾기', '장기요양기관 안내') }).issues.some(issue => issue.includes('장기요양기관 찾기')));
   assert(inspect({ url: home, expectedCanonical: home, html: valid.replace('"name":"돌봄한눈"', '"name":"다른 이름"') }).issues.some(issue => issue.includes('WebSite')));
   assert(inspect({ url: home, expectedCanonical: home, html: valid.replace('"alternateName":"돌봄한눈 장기요양기관 찾기"', '"alternateName":"돌봄한눈"') }).issues.some(issue => issue.includes('별칭')));
 });
 /** SOFTM-LTC-KEYWORD END */
-/** SOFTM-LTC-KEYWORD START 날짜:20260911 : 장기요양기관 설명도 네이버 권장 길이 안에서 유지되는지 경계값을 검증 */
+/** SOFTM-LTC-KEYWORD START 날짜:20260914 : 장기요양기관 찾기 설명도 네이버 권장 길이 안에서 유지되는지 경계값을 검증 */
 test('홈페이지 설명은 브랜드로 시작하고 80자를 넘지 않음', () => {
   const home = `${publicOrigin}/`;
-  const prefix = '돌봄한눈 장기요양기관 요양병원 ';
-  const valid = html.replace(url, home).replace('<title>주야간보호센터 | 돌봄한눈</title>', '<title>돌봄한눈 | 전국 장기요양기관·요양병원 찾기</title>').replace('<h1>주야간보호센터</h1>', '<h1>전국 장기요양기관·요양병원, 돌봄한눈에서 찾아보세요</h1>') + `<meta name="description" content="${prefix}${'가'.repeat(80 - [...prefix].length)}"><script type="application/ld+json">{"@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"${home}"}</script>`;
+  const prefix = '돌봄한눈 장기요양기관 찾기 요양병원 ';
+  const valid = html.replace(url, home).replace('<title>주야간보호센터 | 돌봄한눈</title>', '<title>돌봄한눈 | 전국 장기요양기관 찾기·요양병원 찾기</title>').replace('<h1>주야간보호센터</h1>', '<h1>전국 장기요양기관 찾기부터 요양병원 비교까지, 돌봄한눈에서 시작하세요</h1>') + `<meta name="description" content="${prefix}${'가'.repeat(80 - [...prefix].length)}"><script type="application/ld+json">{"@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"${home}"}</script>`;
   assert.deepEqual(inspect({ url: home, expectedCanonical: home, html: valid }).issues, []);
   assert(inspect({ url: home, expectedCanonical: home, html: valid.replace('content="돌봄한눈', 'content="전국돌봄') }).issues.some(issue => issue.includes('사이트명으로 시작')));
   assert(inspect({ url: home, expectedCanonical: home, html: valid.replace('가'.repeat(80 - [...prefix].length), '가'.repeat(81 - [...prefix].length)) }).issues.some(issue => issue.includes('80자')));
