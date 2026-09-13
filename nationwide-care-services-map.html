@@ -103,7 +103,7 @@
 <!-- SOFTM-REGION-ENTRY 날짜:20260913 : 통합 지도에서 권한 없이도 지역 선택과 최근 탐색 복원을 제공 -->
 <link rel="stylesheet" href="care-region-entry.css?v=20260913-1"><script src="care-region-entry.js?v=20260913-1"></script>
 <!-- SOFTM-MAP-FOCUS 날짜:20260914 : 지도 탭 전체 화면과 지도 위 도구를 통합 지도에 연결 -->
-<link rel="stylesheet" href="care-map-focus.css?v=20260914-1"><script src="care-map-focus.js?v=20260914-share-order1"></script>
+<link rel="stylesheet" href="care-map-focus.css?v=20260914-1"><script src="care-map-focus.js?v=20260914-list-sheet1"></script>
 <!-- SOFTM-LOCATION-STATE START 날짜:20260914 : 권한 상태를 조회 알림에 덮어쓰이지 않는 독립 안내로 제공 -->
 <link rel="stylesheet" href="care-location-state.css?v=20260914-1">
 <script defer src="care-location-state.js?v=20260914-1"></script>
@@ -174,7 +174,7 @@
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
 <link rel="stylesheet" href="care-basket-share.css?v=20260911"> <!-- SOFTM-BASKET-SHARE 날짜:20260911 : 모바일에서도 공유 링크와 확인 조작을 제공 -->
 <script src="care-basket-share.js?v=20260911-query1"></script> <!-- SOFTM-BASKET-SHARE-QUERY 날짜:20260911 : 공유 앱이 보존하는 주소 형식과 기존 링크 복원을 즉시 적용 -->
-<script src="map-experience.js?v=20260914-filter-badge1"></script> <!-- SOFTM-FILTER-BADGE 날짜:20260914 : 조건 설정 상태 배지 동작을 이전 캐시 없이 적용 -->
+<script src="map-experience.js?v=20260914-list-sheet1"></script> <!-- SOFTM-FILTER-BADGE 날짜:20260914 : 조건 설정 상태 배지 동작을 이전 캐시 없이 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -819,7 +819,7 @@ function initCareMapFocus(){
  overlayOpen:()=>!!activeDetail||!$('compareLayer').hidden||!!document.querySelector('dialog[open]'),
  cities:province=>['',...[...new Set(DATA.filter(c=>!province||c.p===province).map(c=>c.c).filter(Boolean))].sort()],
  search:(q,p,c)=>{$('q').value=q;$('province').value=p;updateCities();$('city').value=c;void searchByControls(true)},
- results:()=>{$('careSearchTab').click()},saved:()=>{$('careSavedTab').click()},
+ results:()=>{CareMapExperience.showResultsSheet()},saved:()=>{$('careSavedTab').click()}, // SOFTM-FOCUS-LIST 날짜:20260914 : 검색 목록은 공용 하단 시트 복귀 동작으로 연결
  layers:()=>{const types=window.naver.maps.MapTypeId,satellite=map.getMapTypeId()!==types.HYBRID;map.setMapTypeId(satellite?types.HYBRID:types.NORMAL);return satellite}});
 }
 /** SOFTM-MAP-FOCUS END */

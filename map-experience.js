@@ -1094,12 +1094,19 @@
         document.getElementById('compareLayer').querySelector('[aria-label="비교표 닫기"]')?.focus();
     }
     /** SOFTM-WORKSPACE START 날짜:20260905 : 기존 검색·상세 진입점은 유지하면서 담은 기관 상태를 검색 선택과 분리 */
+    /** SOFTM-FOCUS-LIST START 날짜:20260914 : 전체 지도에서 돌아올 때 기존 손잡이·스크롤을 가진 하단 목록을 그대로 재사용 */
+    function showResultsSheet() {
+        setWorkspace('search', false);
+        mobileSheet?.set('split');
+        document.querySelector('.care-sheet-handle')?.focus({ preventScroll: true });
+    }
+    /** SOFTM-FOCUS-LIST END */
     function isBasketMap() { return workspace === 'saved'; }
     function exitBasketMap() { if (basketMap?.active()) setWorkspace('search', false); }
     function contains(id) { return basket?.has(id) || false; }
     function refreshMatch() { matchController?.refresh(); } // SOFTM-CARE-MATCH 날짜:20260910 : 전체 조회 완료와 진행 상태를 공용 설명에 전달
     /** SOFTM-RESULT-SHEET START 날짜:20260911 : 결과 헤더 문구와 펼침 상태를 DOM 없이 회귀검사하도록 공개 */
-    root.CareMapExperience = Object.freeze({ refreshMatch, init, createSheetState, createSheetSummary, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
+    root.CareMapExperience = Object.freeze({ showResultsSheet, refreshMatch, init, createSheetState, createSheetSummary, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
     /** SOFTM-RESULT-SHEET END */
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);
