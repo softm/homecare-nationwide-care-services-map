@@ -41,3 +41,34 @@ test('좌표 미확인은 주소, 주소 누락은 기관명 하나만 검색한
  assert.equal(decodeURIComponent(new URL(result.kakao).pathname),'/link/search/센터 & 분원');
 });
 /** SOFTM-MAP-LINK END */
+
+/** SOFTM-INSTITUTION-SHARE START 날짜:20260914 : 공유가 사용자 위치·검색조건을 유출하지 않고 기관을 정확히 지정하는지 확인 */
+test('기관 공유 링크는 공개 도메인의 유형과 기관기호만 포함한다',()=>{
+ const layout=context.window.CareDetailLayout;
+ const url=new URL(layout.institutionUrl({i:'A&12',n:'기관'},'home-care'));
+ assert.equal(url.origin,'https://homecare.designboard.net');
+ assert.equal(url.pathname,'/nationwide-care-services-map.html');
+ assert.deepEqual([...url.searchParams.keys()],['type','institution']);
+ assert.equal(url.searchParams.get('institution'),'A&12');
+ assert.equal(url.searchParams.get('type'),'home-care');
+ const html=layout.shareButton({i:'1',n:'"><img src=x>',a:'"주소'},'daycare');
+ assert.ok(!html.includes('<img'));assert.match(html,/data-share-name="&quot;&gt;&lt;img/);
+});
+/** SOFTM-INSTITUTION-SHARE END */
+
+/** SOFTM-INSTITUTION-SHARE-FALLBACK START 날짜:20260914 : 공유 취소를 실패로 처리하거나 복사 실패를 성공으로 알리는 회귀 방지 */
+test('기관 공유는 기본 공유창 취소를 존중하고 실패 시 링크 복사를 시도한다',async()=>{
+ for(const mode of ['copy','native-fail','cancel','copy-fail']){
+  let click,copied='';const label={textContent:'공유'};
+  const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'공개 주소',institutionShare:'https://homecare.designboard.net/?institution=1'},querySelector:()=>label};
+  const navigator={clipboard:{writeText:async value=>{if(mode==='copy-fail')throw Error();copied=value;}}};
+  if(mode==='native-fail'||mode==='cancel')navigator.share=async()=>{const error=Error();error.name=mode==='cancel'?'AbortError':'NotAllowedError';throw error;};
+  const sandbox={window:{},navigator,URLSearchParams,setTimeout(){},document:{addEventListener:(_name,fn)=>{click=fn;}}};
+  vm.runInNewContext(readFileSync(new URL('../care-detail-layout.js',import.meta.url),'utf8'),sandbox);
+  await click({target:{closest:()=>button},preventDefault(){},stopPropagation(){}});
+  assert.equal(button.disabled,false);
+  assert.equal(copied,mode==='cancel'||mode==='copy-fail'?'':button.dataset.institutionShare);
+  assert.equal(label.textContent,mode==='cancel'?'공유':mode==='copy-fail'?'재시도':'복사됨');
+ }
+});
+/** SOFTM-INSTITUTION-SHARE-FALLBACK END */
