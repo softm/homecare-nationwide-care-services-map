@@ -38,7 +38,15 @@
         });
     }
     /** SOFTM-LOCATION-DIALOG START 날짜:20260909 : 위치 실패 안내를 설정 방법과 복구 동작이 있는 모달로 제공 */
-    const permissionHelp = '이미 차단된 권한은 사이트에서 강제로 다시 요청할 수 없습니다. iPhone: 설정 → 개인정보 보호 및 보안 → 위치 서비스 및 Safari 웹사이트 권한을 확인하세요. Chrome: 주소창 왼쪽 사이트 설정 → 권한 → 위치를 허용해 주세요. 휴대폰 설정에서도 위치 기능과 사용 중인 브라우저의 위치 권한을 확인해 주세요.';
+    /** SOFTM-LOCATION-HELP START 날짜:20260913 : 기기별 설정 경로가 한 문단에 섞이지 않도록 안내 단위를 분리 */
+    const permissionSections = [
+        ['iPhone', '설정 → 개인정보 보호 및 보안 → 위치 서비스', 'Safari 웹사이트의 위치 권한을 확인해 주세요.'],
+        ['Chrome', '주소창 왼쪽 사이트 설정 → 권한 → 위치', '위치 권한을 허용해 주세요.'],
+        ['휴대폰 공통', '휴대폰 설정에서 위치 기능을 켜 주세요.', '사용 중인 브라우저의 위치 권한도 확인해 주세요.']
+    ];
+    const permissionIntro = '이미 차단된 권한은 사이트에서 강제로 다시 요청할 수 없습니다.';
+    const permissionHelp = [permissionIntro, ...permissionSections.map(section => section.join('\n'))].join('\n\n');
+    /** SOFTM-LOCATION-HELP END */
     let notice, noticeFocus; // SOFTM-LOCATION-DIALOG 날짜:20260909 : 권한 안내를 닫으면 원래 조작 위치로 복귀
     function hideNotice() { if (notice) { notice.close(); notice.hidden = true; noticeFocus?.focus?.({ preventScroll: true }); } } // SOFTM-LOCATION-DIALOG 날짜:20260909 : 차단 안내가 결과 탐색을 계속 가리지 않도록 닫기 지원
     function showNotice(error, retry) {
@@ -51,7 +59,19 @@
             notice.innerHTML = '<div role="status"><strong></strong><p></p></div><details><summary>위치 권한 설정 방법</summary><p></p></details><div class="care-location-actions"><button type="button" data-location-retry>현재 위치 다시 시도</button><button type="button" data-location-search>지역·기관명 검색</button><button type="button" data-location-dismiss aria-label="현재 위치 안내 닫기">닫기</button></div>';
             root.document.body.append(notice); // SOFTM-LOCATION-DIALOG 날짜:20260909 : 지도 아래에 묻히는 권한 안내를 최상단 팝업으로 제공
             notice.addEventListener('cancel', event => { event.preventDefault(); hideNotice(); });
-            notice.querySelector('details p').textContent = permissionHelp;
+            /** SOFTM-LOCATION-HELP START 날짜:20260913 : 해당 기기 제목과 설정 경로를 따로 읽을 수 있도록 구조화 */
+            const help = notice.querySelector('details p');
+            help.textContent = permissionIntro;
+            const sections = root.document.createElement('div'); sections.className = 'care-location-help';
+            for (const [label, path, hint] of permissionSections) {
+                const section = root.document.createElement('section');
+                const heading = root.document.createElement('h3'); heading.textContent = label;
+                const steps = root.document.createElement('p'); steps.textContent = path;
+                const description = root.document.createElement('p'); description.textContent = hint;
+                section.append(heading, steps, description); sections.append(section);
+            }
+            help.after(sections);
+            /** SOFTM-LOCATION-HELP END */
             notice.querySelector('[data-location-dismiss]').onclick = hideNotice;
             notice.querySelector('[data-location-search]').onclick = () => {
                 hideNotice(); root.CareMapExperience?.exitBasketMap();

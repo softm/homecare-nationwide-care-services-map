@@ -785,3 +785,11 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-map-page[data-care-workspace="search"] .map-title #areaBadge{flex:1 1 0;min-width:0;max-width:100%;white-space:nowrap;overflow-x:auto}
 .care-map-page[data-care-workspace="search"] .map-head-actions{flex:none}
 /** SOFTM-LOCATION-FIT END */
+
+/** SOFTM-LOCATION-HELP START 날짜:20260913 : 긴 권한 안내를 기기별로 구분해 모바일에서도 빠르게 찾도록 표시 */
+.care-location-help { display:grid; gap:10px; margin:12px 0; }
+.care-location-help section { padding:12px; border:1px solid #eadfce; border-radius:10px; background:#fff; }
+.care-location-help h3 { margin:0 0 6px; font-size:14px; line-height:1.4; }
+.care-location-help p { margin:4px 0 0; line-height:1.55; word-break:keep-all; overflow-wrap:break-word; }
+.care-location-help p:last-child { color:#76644e; font-size:13px; }
+/** SOFTM-LOCATION-HELP END */
