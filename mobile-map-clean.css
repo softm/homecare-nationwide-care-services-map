@@ -54,3 +54,13 @@
  .care-map-page[data-care-workspace="saved"] .care-workspace-tabs button{min-height:40px;padding:4px;font-size:13px}
 }
 /** SOFTM-MOBILE-TABS END */
+
+/** SOFTM-MOBILE-SHEET-FOCUS START 날짜:20260914 : 큰 지도에서 한 번 더 내리면 검색창과 작업 탭을 접고 유형·위치·복귀 손잡이는 유지 */
+@media(max-width:1000px) and (orientation:portrait){
+ .care-map-page[data-care-workspace="search"][data-care-sheet="focus"] .filters,.care-map-page[data-care-workspace="search"][data-care-sheet="focus"] .care-workspace-tabs{display:none!important}
+ .care-map-page[data-care-workspace="search"][data-care-sheet="focus"] .layout{position:fixed!important;inset:0 0 0!important;grid-template-rows:minmax(0,1fr) calc(56px + env(safe-area-inset-bottom))!important}
+ .care-map-page.care-type-enabled[data-care-workspace="search"][data-care-sheet="focus"] .layout{top:44px!important}
+ .care-map-page[data-care-workspace="search"][data-care-sheet="focus"] .results>:not(.care-sheet-handle){visibility:hidden;pointer-events:none}
+ .care-map-page[data-care-workspace="search"][data-care-sheet="focus"] .care-sheet-handle{height:calc(56px + env(safe-area-inset-bottom));min-height:calc(56px + env(safe-area-inset-bottom));padding-bottom:calc(7px + env(safe-area-inset-bottom))}
+}
+/** SOFTM-MOBILE-SHEET-FOCUS END */

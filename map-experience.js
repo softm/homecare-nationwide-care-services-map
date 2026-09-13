@@ -481,15 +481,16 @@
         return `<details class="care-map-cost" data-cost-service="${escape(service)}" data-cost-institution="${escape(row.i)}"><summary>월 예상 비용 알아보기</summary><div class="care-map-cost-host"></div></details>`;
     }
     /** SOFTM-MOBILE-MAP START 날짜:20260909 : 조건 입력보다 현재 결과를 먼저 보여주고 보이는 기관만 사진·마커와 연결 */
-    /** SOFTM-MOBILE-SHEET START 날짜:20260909 : 지도·목록 DOM을 유지한 채 핸들로 세 단계 전환하고 이전 상태로 복귀 */
+    /** SOFTM-MOBILE-SHEET START 날짜:20260914 : 지도·목록 DOM을 유지하면서 지도 집중 단계를 포함한 네 단계와 이전 상태 복귀를 제공 */
     let mobileSheet;
     function createSheetState() {
-        const states = ['map', 'split', 'list'];
+        const states = ['focus', 'map', 'split', 'list'];
         let state = 'split', previous = 'split';
         return {
             state: () => state,
             set(next, remember = true) { if (states.includes(next) && next !== state) { if (remember) previous = state; state = next; } return state; },
-            drag(delta) { if (Math.abs(delta) < 45) return state; return this.set(states[Math.max(0, Math.min(2, states.indexOf(state) + (delta < 0 ? 1 : -1)))]); },
+            drag(delta) { if (Math.abs(delta) < 45) return state; return this.set(states[Math.max(0, Math.min(states.length - 1, states.indexOf(state) + (delta < 0 ? 1 : -1)))]); },
+            toggle() { return this.set(state === 'list' ? 'split' : state === 'focus' ? 'map' : 'list'); },
             back() { const next = previous; previous = state; state = next; return state; }
         };
     }
@@ -497,8 +498,8 @@
     function createSheetSummary(countText, sheetState = 'split') {
         const rawCount = String(countText ?? '').trim();
         const count = rawCount && rawCount !== '-' ? rawCount : '확인 중';
-        const expanded = sheetState === 'list';
-        const action = expanded ? '지도와 함께 보기' : '전체 목록 보기';
+        const expanded = sheetState === 'list', focused = sheetState === 'focus';
+        const action = expanded ? '지도와 함께 보기' : focused ? '검색 도구 보기' : '전체 목록 보기';
         return { count, action, expanded, label: `검색 결과 ${count}. ${action}` };
     }
     /** SOFTM-RESULT-SHEET END */
@@ -547,11 +548,11 @@
         back.onclick = goBack; mapButton.onclick = goBack;
         handle.onclick = () => {
             if (ignoreClick) { ignoreClick = false; return; }
-            transition(() => state.set(state.state() === 'list' ? 'split' : 'list'));
+            transition(() => state.toggle());
         };
         handle.addEventListener('keydown', event => {
             if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
-            event.preventDefault(); transition(() => event.key === 'Home' ? state.set('list') : event.key === 'End' ? state.set('map') : state.drag(event.key === 'ArrowUp' ? -100 : 100));
+            event.preventDefault(); transition(() => event.key === 'Home' ? state.set('list') : event.key === 'End' ? state.set('focus') : state.drag(event.key === 'ArrowUp' ? -100 : 100));
         });
         handle.addEventListener('pointerdown', event => {
             if (!active() || event.button !== 0) return;
