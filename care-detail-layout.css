@@ -33,3 +33,17 @@
 .care-map-page .care-popup-navigation:hover{background:#e7f2ff;color:#134f94}
 .care-map-page .care-popup-navigation:focus-visible{outline:3px solid #fff;outline-offset:3px}
 /** SOFTM-POPUP-NAVIGATION END */
+
+/** SOFTM-LIST-ACTIONS START 날짜:20260913 : 세 동작의 크기·글자·간격을 통일해 목록의 읽기 흐름과 선택 상태를 명확히 유지 */
+.care-map-page .row .care-row-actions{display:grid;grid-template-columns:1fr 1.2fr 1.2fr;gap:8px;align-items:stretch;margin-top:12px;padding-top:0}
+.care-map-page .row .care-row-actions > .care-list-navigation,
+.care-map-page .row .care-row-actions > .care-basket-button,
+.care-map-page .row .care-row-actions > .care-map-display{display:flex;align-items:center;justify-content:center;gap:5px;box-sizing:border-box;min-width:0;width:100%;height:44px;min-height:44px;margin:0;padding:6px 5px;border:1px solid #c3d3e4;border-radius:9px;background:#fff;color:#254d77;font-family:inherit;font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap;box-shadow:none;cursor:pointer}
+.care-map-page .row .care-row-actions > .care-list-navigation svg{width:17px;height:17px;flex:none}
+.care-map-page .row .care-row-actions > .care-map-display input{width:17px;height:17px;min-width:17px;margin:0;flex:none;accent-color:#175cb5}
+.care-map-page .row .care-row-actions > .care-basket-button[aria-pressed="true"],
+.care-map-page .row .care-row-actions > .care-map-display:has(input:checked){background:#e7f1ff;border-color:#9ebfe7;color:#1459ac}
+.care-map-page .row .care-row-actions > :hover{background:#edf5ff;border-color:#82add9;color:#124f95}
+.care-map-page .row .care-row-actions > :focus-visible{outline:2px solid #175cb5;outline-offset:2px}
+@media(max-width:360px){.care-map-page .row .care-row-actions{gap:5px}.care-map-page .row .care-row-actions > .care-list-navigation,.care-map-page .row .care-row-actions > .care-basket-button,.care-map-page .row .care-row-actions > .care-map-display{font-size:13px;gap:4px}}
+/** SOFTM-LIST-ACTIONS END */
