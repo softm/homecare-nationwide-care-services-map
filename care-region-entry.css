@@ -1,0 +1,17 @@
+/** SOFTM-REGION-ENTRY START 날짜:20260913 : 지역 선택 전에는 임의 전국 지도와 조작 버튼을 노출하지 않음 */
+.care-region-entry{position:absolute;inset:0;z-index:65;display:grid;place-items:center;background:#f3f7fc;padding:24px;overflow:auto;box-sizing:border-box}
+.care-region-entry[hidden]{display:none}
+.care-region-entry>div{width:100%;max-width:400px}
+.care-region-entry h2{font-size:24px;line-height:1.4;margin:0 0 10px;color:#173f6b}
+.care-region-entry p{font-size:15px;line-height:1.6;color:#52657a;margin:0 0 20px;word-break:keep-all}
+.care-region-entry label{display:block;font-size:14px;font-weight:700;margin:12px 0;color:#173f6b}
+.care-region-entry select{display:block;width:100%;min-height:46px;margin-top:6px;border:1px solid #bdcde0;border-radius:10px;background:white;padding:8px 12px;font:inherit;color:#173f6b}
+.care-region-entry button{width:100%;min-height:46px;border:0;border-radius:10px;background:#173f6b;color:white;font:inherit;font-weight:700;cursor:pointer}
+.care-region-entry button:disabled{opacity:.45;cursor:default}
+.care-region-entry .care-region-hint{font-size:13px;margin:16px 0 4px}
+.care-region-entry .care-region-retry{background:transparent;color:#176cca;font-size:14px}
+.care-region-pending #naverMap,.care-region-pending .map-controls,.care-region-pending #mapStatus,.care-region-pending .care-region-research{visibility:hidden}
+.care-region-pending .map-wrap{background:#f3f7fc}
+.care-region-pending #list .row{display:none}
+@media(max-width:600px){.care-region-entry{padding:18px;place-items:start center}.care-region-entry h2{font-size:20px}.care-region-entry p{margin-bottom:10px}.care-region-entry label{margin:8px 0}}
+/** SOFTM-REGION-ENTRY END */
