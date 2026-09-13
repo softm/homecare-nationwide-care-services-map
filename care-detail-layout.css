@@ -53,3 +53,14 @@
 .care-map-page .popup-head .care-popup-basket-action{width:calc(100% + 29px)}
 .care-map-page .mobile-popup-content .popup-head .care-popup-basket-action{width:calc(100% + 38px)}
 /** SOFTM-POPUP-ACTION-EDGE END */
+
+/** SOFTM-INSTITUTION-SHARE START 날짜:20260914 : 기관 공유·길안내를 묶고 지도 공유는 지도 보기 도구 뒤로 분리 */
+.care-popup-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
+.care-map-page .care-popup-share{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid #ffffffb8;border-radius:10px;background:#fff;color:#15599b;font-size:14px;font-weight:750;white-space:nowrap;cursor:pointer}
+.care-popup-share svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}
+.care-map-page .care-popup-share:hover{background:#e7f2ff;color:#134f94}
+.care-map-page .care-popup-share:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.care-map-page .map-head-actions #shareBtn{order:10;display:inline-flex;align-items:center;gap:6px;width:auto;min-height:40px;height:auto;padding:8px 12px;margin-left:8px;border:1px solid #cbd9e5;border-radius:9px;background:#fff;color:#254d77;box-shadow:none;font-size:13px;font-weight:700;white-space:nowrap}
+.care-map-page .map-head-actions #shareBtn svg{width:18px;height:18px}
+@media(max-width:380px){.care-map-page .care-popup-basket-action{gap:6px}.care-popup-tools{gap:6px}.care-map-page .care-popup-share{padding:0 9px}.care-map-page .care-popup-navigation{min-width:86px;padding:0 9px}.care-map-page .care-popup-basket-action .care-basket-button{padding:7px 9px;font-size:13px}}
+/** SOFTM-INSTITUTION-SHARE END */

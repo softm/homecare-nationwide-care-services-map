@@ -83,8 +83,8 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <link rel="stylesheet" href="search-tools.css?v=20260911-disclosure-button1"> <!-- SOFTM-SEARCH-TOOLS 날짜:20260911 : 목록 앞 기능을 압축한 공용 배치 적용 --> <!-- SOFTM-SEARCH-TOOLS-BUTTON 날짜:20260911 : 보조 기능 펼침 버튼과 큰 상태 아이콘을 이전 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
 <!-- SOFTM-LIST-ACTIONS 날짜:20260913 : 목록 동작의 균일한 크기와 선택 상태를 이전 캐시 없이 적용 -->
-<!-- SOFTM-POPUP-ACTION-EDGE 날짜:20260914 : 팝업 길안내 문구와 오른쪽 끝 정렬을 캐시 없이 적용 -->
-<link rel="stylesheet" href="care-detail-layout.css?v=20260914-popup-label1"><script src="care-detail-layout.js?v=20260914-popup-label1"></script> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 전국 주간 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
+<!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20260914-share1"><script src="care-detail-layout.js?v=20260914-share1"></script> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 전국 주간 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT END -->
 <link rel="stylesheet" href="mobile-map-clean.css?v=20260914-status-size1-tabs1"> <!-- SOFTM-MAP-STATUS-READABILITY 날짜:20260914 : 확대된 모바일 위치 라벨을 이전 캐시 없이 적용 -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
@@ -456,7 +456,7 @@ function popup(c){
    <h3>${esc(c.n)}</h3>
    <div class="popup-score-row"><span class="popup-score">${score}</span><span class="popup-grade-pill">${esc(grade)}</span><span class="popup-score-label">공단 평가총점</span></div>
    <!-- SOFTM-POPUP-COMPOSITION 날짜:20260911 : 비교 행동을 기관 제목·평가와 묶어 정보 탭 앞의 큰 중간 띠를 제거 -->
-   <div class="care-popup-basket-action">${CareMapExperience.button(c)}${CareDetailLayout.popupButton(c,coordFor(c))}</div> <!-- SOFTM-POPUP-NAVIGATION 날짜:20260911 : 비교 담기와 같은 줄 오른쪽에서 기관 길안내에 접근 -->
+   <div class="care-popup-basket-action">${CareMapExperience.button(c)}<div class="care-popup-tools">${CareDetailLayout.shareButton(c,'daycare')}${CareDetailLayout.popupButton(c,coordFor(c))}</div></div> <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공 -->
   </div>
   <div class="popup-body" data-daycare-detail="${esc(c.i)}">
    <div class="popup-static-tabs" role="tablist" aria-label="기관 정보 구분"><button class="popup-static-tab active" type="button" data-daycare-tab="basic" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','basic')">기본정보</button><button class="popup-static-tab" type="button" data-daycare-tab="detail" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','detail')">상세정보</button><button class="popup-static-tab" type="button" data-daycare-tab="photos" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','photos')">사진</button></div>

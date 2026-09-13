@@ -38,7 +38,34 @@
         return `<a class="care-popup-navigation" href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${escape(c.n)} ${route.label}" title="${route.label}" onclick="event.stopPropagation()" ${external}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg><span>길안내</span></a>`;
     }
     /** SOFTM-POPUP-NAVIGATION END */
+    /** SOFTM-INSTITUTION-SHARE START 날짜:20260914 : 검색조건이나 사용자 위치 없이 선택한 기관 상세를 바로 여는 공개 링크만 공유 */
+    function institutionUrl(c, type) {
+        return `https://homecare.designboard.net/nationwide-care-services-map.html?${new URLSearchParams({type, institution:String(c.i)})}`;
+    }
+    function shareButton(c, type) {
+        return `<button type="button" class="care-popup-share" data-institution-share="${escape(institutionUrl(c,type))}" data-share-name="${escape(c.n)}" data-share-address="${escape(c.a || '')}" aria-label="${escape(c.n)} 기관 정보 공유"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.2M8.7 13.3l6.6 4.2"/></svg><span aria-live="polite">공유</span></button>`;
+    }
+    async function shareInstitution(button) {
+        if (button.disabled) return;
+        button.disabled = true;
+        const label=button.querySelector('span');
+        const data={title:button.dataset.shareName, text:[button.dataset.shareName,button.dataset.shareAddress].filter(Boolean).join(' · '),url:button.dataset.institutionShare};
+        try {
+            if (navigator.share) {
+                try { await navigator.share(data); label.textContent='공유 완료'; return; }
+                catch(error) { if(error?.name==='AbortError') return; }
+            }
+            await navigator.clipboard.writeText(data.url);
+            label.textContent='복사됨';
+        } catch { label.textContent='재시도'; }
+        finally { button.disabled=false; setTimeout(()=>{if(button.isConnected)label.textContent='공유';},2500); }
+    }
+    /** SOFTM-INSTITUTION-SHARE END */
     document.addEventListener('click', async event => {
+        /** SOFTM-INSTITUTION-SHARE START 날짜:20260914 : 공유 조작이 기관 선택이나 팝업 닫기로 전파되지 않도록 처리 */
+        const share = event.target.closest('[data-institution-share]');
+        if (share) { event.preventDefault(); event.stopPropagation(); await shareInstitution(share); return; }
+        /** SOFTM-INSTITUTION-SHARE END */
         const button = event.target.closest('[data-care-address]');
         if (button) {
             event.stopPropagation();
@@ -56,6 +83,6 @@
             }
         }
     });
-    window.CareDetailLayout = {address, listButton, popupButton, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
+    window.CareDetailLayout = {address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
 })();
 /** SOFTM-DETAIL-LAYOUT END */
