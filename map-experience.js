@@ -525,7 +525,7 @@
         const mapButton = document.createElement('button'); mapButton.type = 'button'; mapButton.className = 'care-sheet-map-button'; mapButton.textContent = '지도보기'; document.body.append(mapButton);
         let drag = null, ignoreClick = false, storedScroll = 0, revision = 0;
         const landscape = root.matchMedia('(max-width:1000px) and (orientation:landscape)'); // SOFTM-LANDSCAPE 날짜:20260909 : 가로 화면에서는 세로 핸들 대신 좌우 탐색을 사용
-        const active = () => media.matches && !landscape.matches && workspace === 'search';
+        const active = () => workspace === 'search' && ((media.matches && !landscape.matches) || document.body.classList.contains('care-map-focus')); // SOFTM-FOCUS-LIST 날짜:20260914 : 전체보기 하단 목록은 PC에서도 같은 손잡이로 높이를 조절
         const sync = () => {
             document.body.dataset.careSheet = landscape.matches ? 'split' : state.state(); // SOFTM-LANDSCAPE 날짜:20260909 : 세로에서 선택한 목록 단계를 보존한 채 가로에서는 지도와 목록을 함께 표시
             back.hidden = !active() || state.state() !== 'list'; mapButton.hidden = !active() || state.state() !== 'list';

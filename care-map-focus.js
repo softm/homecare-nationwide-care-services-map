@@ -14,13 +14,13 @@
   dialog.querySelector('header button').onclick=closePanel;dialog.addEventListener('cancel',e=>{e.preventDefault();closePanel()});
   function panel(title,node){closePanel();dialog.querySelector('h2').textContent=title;const placeholder=document.createComment('지도 도구 복귀 위치');node.before(placeholder);moved={node,placeholder};dialog.querySelector('.care-focus-content').append(node);dialog.showModal();}
   function enter(){if(active||!config.ready())return;origin={top:root.scrollY,list:document.getElementById('list').scrollTop,focus:document.activeElement};active=true;card.inert=false;document.body.classList.add('care-map-focus');controls.hidden=false;config.resize();controls.querySelector('button').focus({preventScroll:true});}
-  function leave(){if(!active)return;closePanel();active=false;controls.hidden=true;document.body.classList.remove('care-map-focus');card.inert=matchMedia('(max-width:1000px)').matches&&document.body.dataset.careWorkspace==='saved'&&document.body.dataset.careView!=='map';config.resize();root.scrollTo({top:origin.top,behavior:'instant'});document.getElementById('list').scrollTop=origin.list;origin.focus?.focus?.({preventScroll:true});}
+  function leave(){if(!active)return;closePanel();active=false;controls.hidden=true;document.body.classList.remove('care-map-focus','care-focus-list');card.inert=matchMedia('(max-width:1000px)').matches&&document.body.dataset.careWorkspace==='saved'&&document.body.dataset.careView!=='map';config.resize();root.scrollTo({top:origin.top,behavior:'instant'});document.getElementById('list').scrollTop=origin.list;origin.focus?.focus?.({preventScroll:true});}
   new MutationObserver(()=>{if(active&&card.inert)card.inert=false}).observe(card,{attributes:true,attributeFilter:['inert']});
   host.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,input,.map-marker,.base-marker,.current-position-pin')){pointer=null;return}if(pointer){pointer.multi=true;return}pointer={id:e.pointerId,x:e.clientX,y:e.clientY,time:Date.now(),multi:!e.isPrimary};},{passive:true});
   host.addEventListener('pointermove',e=>{if(pointer&&Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>=10)pointer.moved=true},{passive:true});
   host.addEventListener('pointercancel',()=>pointer=null);
   host.addEventListener('pointerup',e=>{const start=pointer;pointer=null;if(isTap(start,{id:e.pointerId,x:e.clientX,y:e.clientY,time:Date.now()}))enter();},{passive:true});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&active&&!dialog.open&&!config.overlayOpen()){e.preventDefault();e.stopImmediatePropagation();leave()}},true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&active&&!dialog.open&&!config.overlayOpen()){e.preventDefault();e.stopImmediatePropagation();if(document.body.classList.contains('care-focus-list'))document.body.classList.remove('care-focus-list');else leave()}},true);
   const search=document.createElement('form');search.className='care-focus-search';search.hidden=true;
   search.innerHTML='<label>지역·기관명<input aria-label="전체 지도 검색어" placeholder="기관명 또는 주소"></label><label>시도<select aria-label="전체 지도 시도"></select></label><label>시군구<select aria-label="전체 지도 시군구"></select></label><button type="submit">조회</button>';
   document.body.append(search);
@@ -33,7 +33,7 @@
    else if(b.dataset.focus==='search'){search.hidden=false;selects[0].innerHTML=document.getElementById('province').innerHTML;selects[0].value=document.getElementById('province').value;syncCities();selects[1].value=document.getElementById('city').value;search.querySelector('input').value=document.getElementById('q').value;panel('지역·기관 검색',search)}
    else if(b.dataset.focus==='layers'){const satellite=config.layers();b.setAttribute('aria-pressed',String(satellite));b.setAttribute('aria-label',satellite?'일반지도 보기':'위성지도 보기');b.title=b.getAttribute('aria-label');b.querySelector('span').textContent=b.title;}
    else if(b.dataset.focus==='saved'){config.saved();panel('담은 기관',document.getElementById('careSavedPanel'))}
-   else {leave();config.results();} // SOFTM-FOCUS-LIST 날짜:20260914 : 목록은 별도 팝업으로 옮기지 않고 원래 하단 시트로 복귀
+   else {closePanel();config.results();document.body.classList.toggle('care-focus-list');} // SOFTM-FOCUS-LIST 날짜:20260914 : 전체 지도와 숨긴 검색 영역을 유지한 채 기존 하단 목록만 열고 닫음
   });
   dialog.addEventListener('click',e=>{if(e.target.closest('.row')&&!e.target.closest('button,a,input,label')||e.target.closest('[data-saved-detail]'))closePanel()});
   const entry=document.createElement('button');entry.type='button';entry.className='care-focus-entry';entry.textContent='전체 지도';entry.setAttribute('aria-label','전체 지도 열기');entry.onclick=enter;card.querySelector('.map-head-actions').insertBefore(entry,card.querySelector('#shareBtn')); // SOFTM-MAP-SHARE-ORDER 날짜:20260914 : 키보드 이동도 전체 위치·전체 지도·공유의 화면 순서를 따르도록 배치
