@@ -557,7 +557,8 @@ async function showCareDefaultMap(query){
  ++areaLocationRequest;CareRegionEntry.hide();CareRegionEntry.restoreLabel('기본 위치 · 서울시청');
  $('province').value='';updateCities();$('city').value='';
  skipIdleUntil=Date.now()+1200;
- map.setCenter(new window.naver.maps.LatLng(37.5663,126.9779));map.setZoom(13); // SOFTM-DEFAULT-MAP 날짜:20260914 : 기본 화면의 과도한 마커 밀집을 줄이도록 서울시청 지도를 한 단계 확대
+ const defaultZoom=window.innerWidth>1000?14:13; // SOFTM-DEFAULT-MAP 날짜:20260914 : PC는 500m 수준으로 확대하고 모바일은 기존 탐색 범위를 유지
+ map.setCenter(new window.naver.maps.LatLng(37.5663,126.9779));map.setZoom(defaultZoom);
  setBase({lat:37.5663,lng:126.9779},'기본 위치 · 서울시청',false);
  initialLocationViewport=careViewportKey();updateAreaLocation(CareRegionEntry.label());
  const message='현재 위치를 확인하지 못했습니다. 지도를 이동하거나 지역을 검색해 주세요.';
