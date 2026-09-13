@@ -433,8 +433,9 @@
  .care-map-page[data-care-workspace="search"] .care-row-actions { clear:both; margin-top:8px; }
 }
 /** SOFTM-MOBILE-MAP END */
-/** SOFTM-LOCATION-DIALOG START 날짜:20260909 : 위치 설정 안내는 화면 크기에 맞는 모달로 보여주고 지도 영역을 축소하지 않음 */
-dialog.care-location-notice { position:fixed; inset:0; margin:auto; width:min(440px,calc(100vw - 24px)); max-height:80dvh; overflow:auto; box-sizing:border-box; padding:22px; border-radius:18px; }
+/** SOFTM-LOCATION-DIALOG START 날짜:20260914 : 위치 설정 안내를 화면 안에 압축해 모달 내부 세로 스크롤 없이 제공 */
+dialog.care-location-notice { position:fixed; inset:0; margin:auto; width:min(440px,calc(100vw - 24px)); max-height:calc(100dvh - 24px); overflow:hidden; box-sizing:border-box; padding:22px; border-radius:18px; }
+dialog.care-location-notice[open] { display:flex; flex-direction:column; }
 dialog.care-location-notice::backdrop { background:#132b4570; }
 /** SOFTM-LOCATION-DIALOG END */
 /** SOFTM-MOBILE-MAP START 날짜:20260909 : PC의 두 번째 그리드 열 지정과 버튼 여백이 모바일 지도를 밀어내지 않도록 초기화 */
@@ -786,12 +787,37 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-map-page[data-care-workspace="search"] .map-head-actions{flex:none}
 /** SOFTM-LOCATION-FIT END */
 
-/** SOFTM-LOCATION-HELP START 날짜:20260913 : 긴 권한 안내를 기기별로 구분해 모바일에서도 빠르게 찾도록 표시 */
-.care-location-help { display:grid; gap:10px; margin:12px 0; }
-.care-location-help section { padding:12px; border:1px solid #eadfce; border-radius:10px; background:#fff; }
-.care-location-help h3 { margin:0 0 6px; font-size:14px; line-height:1.4; }
-.care-location-help p { margin:4px 0 0; line-height:1.55; word-break:keep-all; overflow-wrap:break-word; }
+/** SOFTM-LOCATION-HELP START 날짜:20260914 : 기기 선택과 단일 설정 경로로 안내 높이를 줄여 모바일 내부 스크롤을 제거 */
+dialog.care-location-notice > [role="status"] { padding-right:58px; }
+.care-location-dismiss { position:absolute; top:14px; right:14px; min-width:48px; min-height:40px; border:1px solid #d9c8af; border-radius:999px; background:#fff; color:#654b2c; font-size:13px; font-weight:750; cursor:pointer; }
+.care-location-help { display:grid; gap:8px; margin:9px 0; }
+.care-location-help-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.care-location-help-options button { min-width:0; min-height:40px; padding:6px 4px; border:1px solid #d9c8af; border-radius:8px; background:#fff; color:#654b2c; font-size:13px; font-weight:750; line-height:1.25; cursor:pointer; }
+.care-location-help-options button[aria-pressed="true"] { border-color:#9d7547; background:#f4e7d5; box-shadow:inset 0 0 0 1px #9d7547; }
+.care-location-help section { padding:10px 12px; border:1px solid #eadfce; border-radius:10px; background:#fff; }
+.care-location-help section[hidden] { display:none; }
+.care-location-help h3 { margin:0 0 4px; font-size:14px; line-height:1.35; }
+.care-location-help p { margin:2px 0 0; line-height:1.45; word-break:keep-all; overflow-wrap:break-word; }
 .care-location-help p:last-child { color:#76644e; font-size:13px; }
+dialog.care-location-notice .care-location-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:8px; }
+dialog.care-location-notice .care-location-actions button { width:100%; }
+@media(max-width:600px), (max-height:700px) {
+ dialog.care-location-notice { width:calc(100vw - 16px); max-height:calc(100dvh - 16px); padding:16px; border-radius:16px; }
+ dialog.care-location-notice > [role="status"] { padding-right:52px; }
+ dialog.care-location-notice strong { font-size:17px; line-height:1.4; }
+ dialog.care-location-notice > [role="status"] p { margin:4px 0 7px; font-size:14px; line-height:1.45; }
+ dialog.care-location-notice summary { padding:4px 0; font-size:14px; line-height:1.4; }
+ dialog.care-location-notice details > p { margin:4px 0 7px; font-size:13px; line-height:1.45; }
+ .care-location-dismiss { top:10px; right:10px; min-width:44px; min-height:36px; }
+ .care-location-help { gap:6px; margin:7px 0; }
+ .care-location-help-options { gap:4px; }
+ .care-location-help-options button { min-height:36px; font-size:12px; }
+ .care-location-help section { padding:8px 10px; }
+ .care-location-help h3 { font-size:14px; }
+ .care-location-help p { font-size:13px; line-height:1.4; }
+ .care-location-help p:last-child { font-size:13px; }
+ dialog.care-location-notice .care-location-actions button { min-height:44px; padding:6px; font-size:13px; line-height:1.3; }
+}
 /** SOFTM-LOCATION-HELP END */
 
 /** SOFTM-MAP-STATUS-READABILITY START 날짜:20260914 : 위치 실패와 조회 상태를 PC·모바일 지도에서 작거나 잘린 문구로 놓치지 않도록 확대 */

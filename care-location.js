@@ -38,7 +38,7 @@
         });
     }
     /** SOFTM-LOCATION-DIALOG START 날짜:20260909 : 위치 실패 안내를 설정 방법과 복구 동작이 있는 모달로 제공 */
-    /** SOFTM-LOCATION-HELP START 날짜:20260913 : 기기별 설정 경로가 한 문단에 섞이지 않도록 안내 단위를 분리 */
+    /** SOFTM-LOCATION-HELP START 날짜:20260914 : 기기별 설정 경로를 한 개씩 전환해 작은 화면에서도 안내창 내부 스크롤이 생기지 않도록 구성 */
     const permissionSections = [
         ['iPhone', '설정 → 개인정보 보호 및 보안 → 위치 서비스', 'Safari 웹사이트의 위치 권한을 확인해 주세요.'],
         ['Chrome', '주소창 왼쪽 사이트 설정 → 권한 → 위치', '위치 권한을 허용해 주세요.'],
@@ -46,6 +46,19 @@
     ];
     const permissionIntro = '이미 차단된 권한은 사이트에서 강제로 다시 요청할 수 없습니다.';
     const permissionHelp = [permissionIntro, ...permissionSections.map(section => section.join('\n'))].join('\n\n');
+    function preferredPermissionSection() {
+        const userAgent = root.navigator?.userAgent || '';
+        if (/iPhone|iPad|iPod/i.test(userAgent)) return 0;
+        if (/Chrome|CriOS|EdgA|SamsungBrowser/i.test(userAgent)) return 1;
+        return 2;
+    }
+    function selectPermissionSection(container, selectedIndex) {
+        container.querySelectorAll('[data-location-help-tab]').forEach((button, index) => {
+            const active = index === selectedIndex;
+            button.setAttribute('aria-pressed', String(active));
+            container.querySelector(`#${button.getAttribute('aria-controls')}`).hidden = !active;
+        });
+    }
     /** SOFTM-LOCATION-HELP END */
     let notice, noticeFocus; // SOFTM-LOCATION-DIALOG 날짜:20260909 : 권한 안내를 닫으면 원래 조작 위치로 복귀
     function hideNotice() { if (notice) { notice.close(); notice.hidden = true; noticeFocus?.focus?.({ preventScroll: true }); } } // SOFTM-LOCATION-DIALOG 날짜:20260909 : 차단 안내가 결과 탐색을 계속 가리지 않도록 닫기 지원
@@ -56,21 +69,26 @@
         if (!notice) {
             notice = root.document.createElement('dialog'); notice.className = 'care-location-notice';
             notice.setAttribute('aria-label', '현재 위치 안내');
-            notice.innerHTML = '<div role="status"><strong></strong><p></p></div><details><summary>위치 권한 설정 방법</summary><p></p></details><div class="care-location-actions"><button type="button" data-location-retry>현재 위치 다시 시도</button><button type="button" data-location-search>지역·기관명 검색</button><button type="button" data-location-dismiss aria-label="현재 위치 안내 닫기">닫기</button></div>';
+            notice.innerHTML = '<button type="button" class="care-location-dismiss" data-location-dismiss aria-label="현재 위치 안내 닫기">닫기</button><div role="status"><strong></strong><p></p></div><details><summary>위치 권한 설정 방법</summary><p></p></details><div class="care-location-actions"><button type="button" data-location-retry>현재 위치 다시 시도</button><button type="button" data-location-search>지역·기관명 검색</button></div>';
             root.document.body.append(notice); // SOFTM-LOCATION-DIALOG 날짜:20260909 : 지도 아래에 묻히는 권한 안내를 최상단 팝업으로 제공
             notice.addEventListener('cancel', event => { event.preventDefault(); hideNotice(); });
-            /** SOFTM-LOCATION-HELP START 날짜:20260913 : 해당 기기 제목과 설정 경로를 따로 읽을 수 있도록 구조화 */
+            /** SOFTM-LOCATION-HELP START 날짜:20260914 : 필요한 기기의 설정 경로만 표시해 작은 화면에서 세로 길이를 줄임 */
             const help = notice.querySelector('details p');
             help.textContent = permissionIntro;
             const sections = root.document.createElement('div'); sections.className = 'care-location-help';
-            for (const [label, path, hint] of permissionSections) {
+            const options = root.document.createElement('div'); options.className = 'care-location-help-options'; options.setAttribute('aria-label', '기기별 위치 권한 설정');
+            permissionSections.forEach(([label, path, hint], index) => {
+                const button = root.document.createElement('button'); button.type = 'button'; button.textContent = label;
+                button.dataset.locationHelpTab = String(index); button.setAttribute('aria-controls', `careLocationHelp${index}`);
                 const section = root.document.createElement('section');
+                section.id = `careLocationHelp${index}`; section.dataset.locationHelpPanel = String(index);
                 const heading = root.document.createElement('h3'); heading.textContent = label;
                 const steps = root.document.createElement('p'); steps.textContent = path;
                 const description = root.document.createElement('p'); description.textContent = hint;
-                section.append(heading, steps, description); sections.append(section);
-            }
-            help.after(sections);
+                button.onclick = () => selectPermissionSection(sections, index);
+                section.append(heading, steps, description); options.append(button); sections.append(section);
+            });
+            sections.prepend(options); help.after(sections); selectPermissionSection(sections, preferredPermissionSection());
             /** SOFTM-LOCATION-HELP END */
             notice.querySelector('[data-location-dismiss]').onclick = hideNotice;
             notice.querySelector('[data-location-search]').onclick = () => {
