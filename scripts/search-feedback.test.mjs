@@ -180,7 +180,7 @@ function makeCareHarness(rows) {
         const advancedSearch={cancel(){},report};
         class LatLng {constructor(lat,lng){this.lat=()=>lat;this.lng=()=>lng}}
         class LatLngBounds {extend(){}hasLatLng(pos){return pos.lat()<50}}
-        class Marker {constructor(options){this.options=options}}
+        class Marker {constructor(options){this.options=options}setIcon(icon){this.options.icon=icon}} // SOFTM-MARKER-PROGRESS 날짜:20260913 : 점진 표시한 마커의 최종 순번 갱신을 검증
         const window={naver:{maps:{LatLng,LatLngBounds,Marker,Event:{addListener(){}}}}};
         const map={getBounds:()=>new LatLngBounds(),getCenter:()=>new LatLng(10,10),fitBounds(){}};
         function clearMarkers(){markers.clear()}
@@ -284,3 +284,50 @@ test('주간 공유 복원: 모두 해제한 공유 선택은 결과를 숨기�
     assert.deepEqual(harness.snapshot().markers, []);
 });
 /** SOFTM-SHARE-RESTORE END */
+
+/** SOFTM-MARKER-PROGRESS START 날짜:20260913 : 느린 후속 좌표가 앞선 기관 표시를 막지 않고 취소된 응답도 추가되지 않는지 검사 */
+test('통합 지도는 후속 좌표 대기 중에도 앞선 마커를 표시하고 새 검색 이후 이전 마커를 추가하지 않는다', async () => {
+ const rows=Array.from({length:9},(_,i)=>center(String(i)));
+ const harness=makeCareHarness(rows),resolve=harness.defer('8');
+ const pending=harness.run('loadMarkers(filtered,{query:beginCareQuery(feedback)})');
+ await new Promise(done=>setImmediate(done));
+ assert.equal(harness.snapshot().markers.length,8);
+ assert.equal(harness.reports.length,0);
+ harness.run('beginCareQuery();clearMarkers()');
+ resolve({lat:10,lng:10});
+ assert.equal((await pending).cancelled,true);
+ assert.equal(harness.snapshot().markers.length,0);
+});
+/** SOFTM-MARKER-PROGRESS END */
+
+/** SOFTM-LOCATION-PREVIEW START 날짜:20260913 : 권한 거절과 초기 idle이 전국 조회를 유발하지 않고 지도 이동은 자동 조회를 재개하는지 검증 */
+test('통합 초기 위치 거절은 모달·전국 좌표 조회 없이 완료하고 지도 이동 후 검색을 재개한다', async () => {
+ const button={disabled:false,setAttribute(){},removeAttribute(){}};
+ const context=vm.createContext({Promise,Date,Set,Map,$:()=>button});
+ vm.runInContext(`
+ let mapReady=true,initialLocationViewport=null,refreshTimer=null,skipIdleUntil=0,careViewportResearch=null;
+ let viewport='national',searches=0,previews=0,notices=0,scheduled=0;
+ const CareMapExperience={isBasketMap:()=>false};
+ const CareLocation={hideNotice(){},request:async()=>{throw new Error('denied')},showNotice(){notices++},info:()=>({title:'denied'})};
+ function careViewportKey(){return viewport}
+ function beginCareQuery(){return{current:()=>true}}
+ function hideLoading(){}function showLoading(){}function setStatus(){}function clearTimeout(){}
+ function setTimeout(){scheduled++}function applyFilters(){return[]}
+ function showDataPreview(){previews++}function refreshFromMap(){searches++}
+ `,context);
+ for(const name of ['useCurrentLocation','scheduleRefresh']){
+  let start=careHtml.indexOf(`function ${name}(`);
+  if(careHtml.slice(start-6,start)==='async ')start-=6;
+  const lineEnd=careHtml.indexOf('\n',start);
+  const end=careHtml.slice(start,lineEnd).endsWith('}')?lineEnd:careHtml.indexOf('\n}',start)+2;
+  vm.runInContext(careHtml.slice(start,end),context);
+ }
+ await vm.runInContext('useCurrentLocation(true)',context);
+ vm.runInContext('scheduleRefresh()',context);
+ assert.equal(vm.runInContext('searches+notices+scheduled',context),0);
+ assert.equal(vm.runInContext('previews',context),1);
+ assert.equal(button.disabled,false);
+ vm.runInContext("viewport='local';scheduleRefresh()",context);
+ assert.equal(vm.runInContext('scheduled',context),1);
+});
+/** SOFTM-LOCATION-PREVIEW END */

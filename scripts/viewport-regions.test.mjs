@@ -89,7 +89,7 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
     const rows = Array.from({ length: 351 }, (_, i) => ({ i: String(i), n: String(i), _coord: { lat: 37.45, lng: 126.8 } }));
     class LatLng { constructor(lat, lng) { this.lat = () => lat; this.lng = () => lng; } }
     class LatLngBounds { extend() {} }
-    class Marker { constructor(options) { this.options = options; } }
+    class Marker {setIcon(icon){this.icon=icon} /* SOFTM-MARKER-PROGRESS 날짜:20260913 : 점진 표시 후 순번 갱신도 실제 지도 API처럼 지원 */ constructor(options) { this.options = options; } }
     const sandbox = vm.createContext({
         window: { naver: { maps: { LatLng, LatLngBounds, Marker, Event: { addListener() {} } } } },
         mapReady: true, refreshToken: 0, clearMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },

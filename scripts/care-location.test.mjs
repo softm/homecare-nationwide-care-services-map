@@ -86,6 +86,7 @@ test('전국 주간 현재 위치 성공 후 내부 기준점 갱신이 주변 �
     let generation = 0, searched = 0;
     const button = { disabled: false, classList: { add() {}, remove() {} }, setAttribute() {}, removeAttribute() {} };
     const context = { mapReady: true, DATA: [], baseMarker: null, skipIdleUntil: 0, $: () => button,
+        initialLocationViewport: null, refreshTimer: null, careViewportKey: () => 'national', clearTimeout() {}, // SOFTM-LOCATION-PREVIEW 날짜:20260913 : 첫 화면 조회 보류를 포함해 위치 성공 경로를 회귀검사
         CareMapExperience: { isBasketMap: () => false }, CareLocation: { request: async () => point, hideNotice() {} },
         naver: { maps: { LatLng: class { constructor(lat, lng) { this.lat = lat; this.lng = lng; } }, Marker: class {}, Point: class {} } },
         naverMap: { setCenter() {}, panTo() {} }, setMapStatus() {}, showMapProgress() {},
@@ -105,6 +106,7 @@ test('통합 지도 현재 위치 성공은 해당 좌표와 주변 조회를 �
     const button = { disabled: false, setAttribute() {}, removeAttribute() {} };
     class LatLng { constructor(lat, lng) { this.lat = lat; this.lng = lng; } }
     const context = { mapReady: true, DATA: [], baseMarker: null, skipIdleUntil: 0, $: () => button,
+        initialLocationViewport: null, refreshTimer: null, careViewportKey: () => 'national', clearTimeout() {}, // SOFTM-LOCATION-PREVIEW 날짜:20260913 : 첫 화면 조회 보류를 포함해 위치 성공 경로를 회귀검사
         CareLocation: { request: async options => { requested++; assert.equal(options.isCurrent(), true); return point; }, hideNotice() {} },
         beginCareQuery: () => ({ current: () => true }), hideLoading() {}, showLoading() {}, setStatus() {}, cachedCoord() {}, hav() {},
         window: { naver: { maps: { LatLng, Point: class {}, Marker: class {} } } },
