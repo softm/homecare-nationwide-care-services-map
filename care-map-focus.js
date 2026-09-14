@@ -39,7 +39,7 @@
    else if(b.dataset.focus==='search'){search.hidden=false;selects[0].innerHTML=document.getElementById('province').innerHTML;selects[0].value=document.getElementById('province').value;syncCities();selects[1].value=document.getElementById('city').value;search.querySelector('input').value=document.getElementById('q').value;panel('지역·기관 검색',search)}
    else if(b.dataset.focus==='layers'){const satellite=config.layers();b.setAttribute('aria-pressed',String(satellite));b.setAttribute('aria-label',satellite?'일반지도 보기':'위성지도 보기');b.title=b.getAttribute('aria-label');b.querySelector('span').textContent=b.title;}
    else if(b.dataset.focus==='saved'){config.saved();panel('담은 기관',document.getElementById('careSavedPanel'))}
-   else {closePanel();config.results();document.body.classList.toggle('care-focus-list');} // SOFTM-FOCUS-LIST 날짜:20260914 : 전체 지도와 숨긴 검색 영역을 유지한 채 기존 하단 목록만 열고 닫음
+   else {closePanel();config.results();document.body.classList.add('care-focus-list');} // SOFTM-FOCUS-LIST 날짜:20260914 : 목록 보기를 반복해도 전체보기와 상단 숨김을 유지하며 하단 목록만 표시
   });
   dialog.addEventListener('click',e=>{if(e.target.closest('.row')&&!e.target.closest('button,a,input,label')||e.target.closest('[data-saved-detail]'))closePanel()});
   const entry=document.createElement('button');entry.type='button';entry.className='care-focus-entry';entry.textContent='전체 지도';entry.setAttribute('aria-label','전체 지도 열기');entry.onclick=enter;card.querySelector('.map-head-actions').insertBefore(entry,card.querySelector('#shareBtn')); // SOFTM-MAP-SHARE-ORDER 날짜:20260914 : 키보드 이동도 전체 위치·전체 지도·공유의 화면 순서를 따르도록 배치
