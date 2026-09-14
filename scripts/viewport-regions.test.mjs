@@ -1,4 +1,4 @@
-/** SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 실제 경계·기관자료와 두 지도 호출 경로로 수도권 누락 및 후보 절단의 재발을 검증 */
+/** SOFTM-VIEWPORT-CANDIDATES START 날짜:20260914 : 실제 시군구·읍면동 경계와 완료순 좌표 처리로 누락 없는 후보 축소를 검증 */
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -60,6 +60,52 @@ test('바다만 보이는 화면은 빈 결과이며 역주소 API가 필요하�
     assert.equal(api.select(data.daycare, bounds(120, 30, 121, 31)).candidates.length, 0);
 });
 
+/** SOFTM-VIEWPORT-CANDIDATES START 날짜:20260914 : 연결되는 읍면동만 줄이고 모르는 주소는 시군구 후보에 보존 */
+test('좁은 화면은 읍면동 경계로 좌표 후보를 줄이고 미연결 주소는 제외하지 않음', () => {
+    const box = context.window.NATIONAL_REGION_BOUNDS.neighborhoods['서울특별시|종로구|사직동'];
+    assert.ok(box);
+    const view = bounds((box[0] + box[2]) / 2 - .001, (box[1] + box[3]) / 2 - .001, (box[0] + box[2]) / 2 + .001, (box[1] + box[3]) / 2 + .001);
+    const rows = [
+        { i: 'inside', p: '서울특별시', c: '종로구', a: '서울특별시 종로구 사직로 1 (사직동, 건물 101동)' },
+        { i: 'outside', p: '서울특별시', c: '종로구', a: '서울특별시 종로구 평창길 1 (평창동)' },
+        { i: 'unmatched', p: '서울특별시', c: '종로구', a: '주소 확인 필요' }
+    ];
+    assert.deepEqual(Array.from(api.select(rows, view).candidates, row => row.i), ['inside', 'unmatched']);
+    assert.equal(api.rowNeighborhood(rows[0]), '사직동');
+});
+
+test('공식 관할 관계로 이름이 다른 행정동을 합치고 저장 좌표 주변 기관을 누락하지 않음', () => {
+    assert.ok(context.window.NATIONAL_REGION_BOUNDS.neighborhoods['서울특별시|관악구|신림동']);
+    assert.equal(context.window.NATIONAL_REGION_BOUNDS.neighborhoods['서울특별시|관악구|서원동'], undefined);
+    const rowsById = new Map(Object.values(data).flat().map(row => [row.i, row]));
+    for (const file of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+        const html = read(file), start = html.indexOf('const PRESET_COORDS='), end = html.indexOf('\n};', start) + 3;
+        const presetContext = vm.createContext({});
+        vm.runInContext(`${html.slice(start, end)};globalThis.presets=PRESET_COORDS`, presetContext);
+        for (const [id, [lat, lng]] of Object.entries(presetContext.presets)) {
+            const row = rowsById.get(id);
+            if (!row || !context.window.NATIONAL_REGION_BOUNDS.neighborhoods[`${api.regionKey(row.p, row.c)}|${api.rowNeighborhood(row)}`]) continue;
+            assert.equal(api.select([row], bounds(lng - .00001, lat - .00001, lng + .00001, lat + .00001)).candidates.length, 1, `${file} ${id} 누락`);
+        }
+    }
+});
+/** SOFTM-VIEWPORT-CANDIDATES END */
+
+/** SOFTM-VIEWPORT-RESOLVE START 날짜:20260914 : 먼저 끝난 주소가 다음 후보 처리를 즉시 이어가는지 검증 */
+test('좌표 확인은 느린 고정 묶음을 기다리지 않고 제한된 동시성으로 다음 후보를 처리', async () => {
+    let active = 0, maximum = 0;
+    const events = [];
+    const result = await api.resolve([0, 1, 2, 3], async value => {
+        active += 1; maximum = Math.max(maximum, active); events.push(`start-${value}`);
+        await new Promise(resolve => setTimeout(resolve, value === 0 ? 25 : 2));
+        events.push(`end-${value}`); active -= 1; return value * 10;
+    }, { concurrency: 2, onResult: row => events.push(`result-${row}`) });
+    assert.equal(maximum, 2);
+    assert.ok(events.indexOf('start-2') < events.indexOf('end-0'), '빠른 작업 완료 후 다음 후보가 즉시 시작됨');
+    assert.deepEqual(Array.from(result.results, item => item.value), [0, 10, 20, 30]);
+});
+/** SOFTM-VIEWPORT-RESOLVE END */
+
 test('두 지도에서 기존 필터를 유지한 후보 함수가 공통 경계를 사용', () => {
     for (const file of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
         const html = read(file);
@@ -91,7 +137,7 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
     class LatLngBounds { extend() {} }
     class Marker {setIcon(icon){this.icon=icon} /* SOFTM-MARKER-PROGRESS 날짜:20260913 : 점진 표시 후 순번 갱신도 실제 지도 API처럼 지원 */ constructor(options) { this.options = options; } }
     const sandbox = vm.createContext({
-        window: { naver: { maps: { LatLng, LatLngBounds, Marker, Event: { addListener() {} } } } },
+        window: { naver: { maps: { LatLng, LatLngBounds, Marker, Event: { addListener() {} } } } }, MapViewportSearch: api,
         mapReady: true, refreshToken: 0, clearMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },
         cachedCoord: row => row._coord, hav: () => 0, PAGE_LIMIT: 90, MAP_CANDIDATE_LIMIT: 300,
         geocode: async row => row._coord, basePoint: null, showLoading() {}, hideLoading() {},
@@ -138,4 +184,4 @@ test('전용 지도도 축소 화면에서 800번째 이후 기관까지 최종 
     assert.equal(receivedLimit, 1001);
     assert.equal(sandbox.mapSearchIds.size, 1001);
 });
-/** SOFTM-VIEWPORT-REGIONS END */
+/** SOFTM-VIEWPORT-CANDIDATES END */

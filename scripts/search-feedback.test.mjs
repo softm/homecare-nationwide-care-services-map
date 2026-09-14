@@ -5,6 +5,9 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const daycareHtml = readFileSync(new URL('../nationwide-daycare-map.html', import.meta.url), 'utf8');
+const viewportContext = vm.createContext({ window: {} });
+vm.runInContext(readFileSync(new URL('../viewport-regions.js', import.meta.url), 'utf8'), viewportContext);
+const mapViewportSearch = viewportContext.window.MapViewportSearch; // SOFTM-VIEWPORT-RESOLVE 날짜:20260914 : 실제 완료순 처리기를 두 지도 조회 회귀검사에서 함께 실행
 function daycareFunction(name) {
     let start = daycareHtml.indexOf(`function ${name}(`);
     assert.notEqual(start, -1, `${name} 함수 존재`);
@@ -23,7 +26,7 @@ function makeDaycareHarness(rows = []) {
         return elements.get(id);
     }
     const context = vm.createContext({
-        console, Promise, Set, Map,
+        console, Promise, Set, Map, MapViewportSearch: mapViewportSearch,
         $: element,
         setTimeout: callback => { const id = ++nextTimer; timers.set(id, callback); return id; },
         clearTimeout: () => {},
@@ -167,7 +170,7 @@ function makeCareHarness(rows) {
         return elements.get(id);
     };
     const context = vm.createContext({
-        Promise, Set, Map, externalRows: rows, $: element,
+        Promise, Set, Map, MapViewportSearch: mapViewportSearch, externalRows: rows, $: element,
         report: result => reports.push(JSON.parse(JSON.stringify(result))),
         recordProgress: result => progress.push(result),
         externalGeocode: row => deferred.get(row.i) || Promise.resolve(row.coord || null),
