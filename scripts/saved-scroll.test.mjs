@@ -23,14 +23,15 @@ function harness(ownScroll = true) {
     };
     const ctx = { bar, workspace: 'saved', tabs: { getBoundingClientRect: () => ({ bottom: 100 }) },
         root: { innerWidth: 1200, innerHeight: 800, scrollY: 0, addEventListener: (type, fn) => { rootEvents[type] = fn; } },
-        document: { documentElement: { scrollHeight: 1600 }, createElement: () => tail, body: { classList: { contains: () => dragging } }, querySelector: () => ({}) },
+        document: { addEventListener: (type, fn) => { events[type] = fn; }, documentElement: { scrollHeight: 1600 }, createElement: () => tail, body: { classList: { contains: () => dragging } }, querySelector: () => ({}) },
         getComputedStyle: () => ({ overflowY: ownScroll ? 'auto' : 'visible', visibility: 'visible' }),
         requestAnimationFrame: fn => { frames.push(fn); return frames.length; }, MutationObserver: class { observe() {} },
         options: { mobileFocus: (...args) => focused.push(args), scrollDetail: id => details.push(id) }
     };
     const flush = () => { while (frames.length) frames.shift()(); };
     vm.runInNewContext(code + '\ninstallSavedScroll();', ctx); flush();
-    return { ctx, cards, focused, details, tail, setDragging: value => { dragging = value; },
+    return { ctx, cards, focused, details, tail, click(index) { events.click({target:{closest: selector => selector === '[data-basket-id]' ? cards[index] : null}}); flush(); }, redraw() { rootEvents.resize(); flush(); }, wheel() { events.wheel(); }, // SOFTM-SAVED-SELECTION 날짜:20260914 : 클릭·레이아웃 갱신·사용자 스크롤을 분리해 우선순위 검사
+         setDragging: value => { dragging = value; },
         scroll(value, end = false) { offset = value; ctx.root.scrollY = end ? 800 : value; bar.scrollTop = end ? 500 : value; (ownScroll ? events : rootEvents).scroll(); flush(); }
     };
 }
@@ -74,3 +75,10 @@ test('검색 작업과 손잡이 드래그 중에는 담은 목록의 선택을 
     h.ctx.workspace = 'saved'; h.setDragging(true); h.scroll(400); assert.equal(h.focused.length, count);
 });
 /** SOFTM-SAVED-SCROLL END */
+
+/** SOFTM-SAVED-SELECTION START 날짜:20260914 : 자동 갱신이 명시 선택을 덮지 않고 사용자 스크롤만 선택을 재개 */
+test('담은 기관 클릭은 갱신 후에도 유지되고 사용자 스크롤로 해제된다', () => {
+ const h=harness();h.click(2);h.redraw();assert.equal(h.focused.at(-1)[0],'c');
+ h.wheel();h.scroll(0);assert.equal(h.focused.at(-1)[0],'a');
+});
+/** SOFTM-SAVED-SELECTION END */
