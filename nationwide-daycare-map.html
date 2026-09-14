@@ -139,8 +139,8 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="partner-inquiry.js?v=20260904-3"></script><!-- SOFTM-PARTNER-SUCCESS 날짜:20260904 : 접수 후 자동 닫기와 큰 토스트가 이전 캐시 없이 함께 적용되도록 갱신 -->
 <!-- SOFTM-PARTNER-ASSETS END -->
 <!-- SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 두 지도의 화면영역 검색이 같은 경계 자료로 빠짐없이 지역을 판별 -->
-<script src="region-bounds.js?v=20260904-1"></script>
-<script src="viewport-regions.js?v=20260904-1"></script>
+<script src="region-bounds.js?v=20260914-neighborhood1"></script>
+<script src="viewport-regions.js?v=20260914-neighborhood1"></script> <!-- SOFTM-VIEWPORT-CANDIDATES 날짜:20260914 : 동 단위 후보 축소와 지연 없는 좌표 처리를 이전 캐시 없이 적용 -->
 <!-- SOFTM-VIEWPORT-REGIONS END -->
 <!-- SOFTM-LOCATION-HELP 날짜:20260913 : 읽기 쉽게 나눈 권한 안내를 캐시 갱신으로 적용 -->
 <script src="care-location.js?v=20260914-no-scroll1"></script> <!-- SOFTM-LOCATION-NO-SCROLL 날짜:20260914 : 기기별 한 경로만 표시하는 권한 안내를 이전 캐시 없이 적용 -->
@@ -538,19 +538,17 @@ async function displayCenters(rows,openFirst=false,routeMode=false,fitMap=true,c
  setMapStatus(`주소 좌표 확인 중 · 0/${list.length}`);progress('지도 위치를 확인하고 있습니다',0,list.length);
  const bounds=new naver.maps.LatLngBounds();
  try{
-  for(let start=0;start<list.length;start+=6){
-   const batch=list.slice(start,start+6),results=await Promise.allSettled(batch.map(geocodeCenter));
-   if(!current())return{cancelled:true};
-   batch.forEach((c,j)=>{
-    const v=results[j].status==='fulfilled'?results[j].value:null;
-    if(!v){unresolvedRows.push(c);return}
+  /** SOFTM-VIEWPORT-RESOLVE START 날짜:20260914 : 지연된 주소 하나가 다음 기관 좌표 확인을 멈추지 않도록 완료 즉시 다음 후보를 처리 */
+  const resolution=await MapViewportSearch.resolve(list,geocodeCenter,{concurrency:8,current,onResult(c,result,index){
+    const v=result.status==='fulfilled'?result.value:null;
+    if(!v){unresolvedRows.push({c,index});return}
     if(basePoint)c._distance=hav(basePoint,v);
     const pos=new naver.maps.LatLng(v.lat,v.lng);if(clipBounds&&!clipBounds.hasLatLng(pos))return;
-    placements.push({c,v,label:listRank(c)||start+j+1});bounds.extend(pos);
-   });
-   const done=Math.min(start+6,list.length);setMapStatus(`주소 좌표 확인 중 · ${done}/${list.length}`);progress('지도 위치를 반영하고 있습니다',done,list.length);
-  }
-  if(!current())return{cancelled:true};
+    placements.push({c,v,label:listRank(c)||index+1,index});bounds.extend(pos);
+   },onProgress(done,total){if(done===total||done%4===0){setMapStatus(`주소 좌표 확인 중 · ${done}/${list.length}`);progress('지도 위치를 반영하고 있습니다',done,list.length)}}});
+  if(resolution.cancelled||!current())return{cancelled:true};
+  placements.sort((a,b)=>a.index-b.index);unresolvedRows.sort((a,b)=>a.index-b.index).forEach((item,index)=>{unresolvedRows[index]=item.c});
+  /** SOFTM-VIEWPORT-RESOLVE END */
   placements.forEach(({c,v,label})=>createCenterMarker(c,v,label));
   const success=placements.length,unresolved=unresolvedRows.length,count=clipBounds?success+unresolved:rows.length;
   if(success){

@@ -150,8 +150,8 @@
 <!-- SOFTM-PARTNER-ASSETS END -->
 <script src="care-data.js?v=20260904-data"></script> <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 수집 JSON 공용 로더로 교체 -->
 <!-- SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 두 지도의 화면영역 검색이 같은 경계 자료로 빠짐없이 지역을 판별 -->
-<script src="region-bounds.js?v=20260904-1"></script>
-<script src="viewport-regions.js?v=20260904-1"></script>
+<script src="region-bounds.js?v=20260914-neighborhood1"></script>
+<script src="viewport-regions.js?v=20260914-neighborhood1"></script> <!-- SOFTM-VIEWPORT-CANDIDATES 날짜:20260914 : 동 단위 후보 축소와 지연 없는 좌표 처리를 이전 캐시 없이 적용 -->
 <!-- SOFTM-VIEWPORT-REGIONS END -->
 <!-- SOFTM-LOCATION-HELP 날짜:20260913 : 읽기 쉽게 나눈 권한 안내를 캐시 갱신으로 적용 -->
 <script src="care-location.js?v=20260914-state1-no-scroll1"></script> <!-- SOFTM-LOCATION-NO-SCROLL 날짜:20260914 : 권한 상태 전달과 기기별 한 경로 안내를 이전 캐시 없이 함께 적용 -->
@@ -437,25 +437,25 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
  if(!query.feedback)showLoading('기관 위치를 표시하는 중',`위치 확인 · 0 / ${list.length}`);
  query.feedback?.progress({current:0,total:list.length,message:'지도 위치 확인 중'});
  try{
-  for(let start=0;start<list.length;start+=8){
-   const batch=list.slice(start,start+8),coords=await Promise.allSettled(batch.map(geocode));
-   if(!query.current())return {cancelled:true};
-   for(let i=0;i<batch.length;i++){
-    const c=batch[i],v=coords[i].status==='fulfilled'?coords[i].value:null;
-    if(!v){unresolvedRows.push(c);continue}
+  /** SOFTM-VIEWPORT-RESOLVE START 날짜:20260914 : 느린 주소가 포함된 고정 묶음을 기다리지 않고 완료된 순서대로 마커를 표시 */
+  const resolution=await MapViewportSearch.resolve(list,geocode,{concurrency:8,current:query.current,onResult(c,result,index){
+    const v=result.status==='fulfilled'?result.value:null;
+    if(!v){unresolvedRows.push({c,index});return}
     resolvedCount++;c._mapCenterDistance=hav(center,v);if(basePoint)c._distance=hav(basePoint,v);
-    const pos=new window.naver.maps.LatLng(v.lat,v.lng);if(!fit&&!bounds.hasLatLng(pos))continue;
+    const pos=new window.naver.maps.LatLng(v.lat,v.lng);if(!fit&&!bounds.hasLatLng(pos))return;
     /** SOFTM-MARKER-PROGRESS START 날짜:20260913 : 전체 좌표 응답을 기다리지 않고 확인된 기관부터 지도에 표시 */
     placed.push(c);fitBounds.extend(pos);
     const marker=new window.naver.maps.Marker({map,position:pos,title:c.n,icon:markerIcon(c,placed.length)});
     window.naver.maps.Event.addListener(marker,'click',()=>{careMapFocus?.enter();focusCenter(c.i)});markers.set(c.i,marker); // SOFTM-MAP-FOCUS-MARKER 날짜:20260914 : 기관 마커를 선택하면 상세를 열기 전에 전체 지도 공간을 확보
     /** SOFTM-MARKER-PROGRESS END */
-   }
-   const current=Math.min(start+8,list.length);
+   },onProgress(current,total){
+   if(current!==total&&current%4)return;
    if(!query.feedback)$('loadingText').textContent=`위치 확인 · ${current} / ${list.length}`;
    query.feedback?.progress({current,total:list.length,message:'지도 위치 확인 중'});
-  }
-  if(!query.current())return {cancelled:true};
+   }});
+  if(resolution.cancelled||!query.current())return {cancelled:true};
+  unresolvedRows.sort((a,b)=>a.index-b.index).forEach((item,index)=>{unresolvedRows[index]=item.c});
+  /** SOFTM-VIEWPORT-RESOLVE END */
   placed.sort((a,b)=>(a._mapCenterDistance??Infinity)-(b._mapCenterDistance??Infinity));
   const results=fit?candidates:[...placed,...unresolvedRows];
   careMatchRows=results; // SOFTM-CARE-MATCH 날짜:20260910 : 마커·목록 제한과 무관하게 위치 미확인 포함 전체 후보를 유지
