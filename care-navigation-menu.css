@@ -1,0 +1,19 @@
+/** SOFTM-NAV-MENU START 날짜:20260914 : PC·모바일의 핵심 검색 공간을 확보하고 전체 지도에서도 같은 메뉴를 제공 */
+.care-menu-trigger{position:fixed;top:4px;left:6px;z-index:190;width:44px;height:44px;display:grid;place-items:center;border:1px solid #c6d6e6;border-radius:10px;background:#fff;color:#173f6b;cursor:pointer}
+.care-menu-trigger svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+body.care-has-navigation .care-type-header{padding-left:56px}
+body.care-has-navigation .category-nav{padding-left:56px}
+body.care-has-navigation .care-search-disclosure,body.care-has-navigation>.care-context-links{display:none!important}
+.care-navigation-menu{position:fixed;inset:0 auto 0 0;margin:0;width:min(360px,90vw);max-width:none;height:100dvh;max-height:100dvh;padding:0;border:0;border-radius:0 20px 20px 0;background:#fff;color:#173f6b;overflow:auto;box-shadow:8px 0 32px #13283e30}
+.care-navigation-menu::backdrop{background:#122c4966}
+.care-navigation-menu header{display:flex;align-items:center;justify-content:space-between;padding:20px 18px;border-bottom:1px solid #e2e9f0}
+.care-navigation-menu h2{margin:0;font-size:20px}.care-navigation-menu header button{width:44px;height:44px;border:0;border-radius:50%;background:#edf4fb;color:#173f6b;font-size:28px;cursor:pointer}
+.care-navigation-menu nav{padding:18px 12px}.care-navigation-menu h3{margin:0 10px 12px;font-size:13px;color:#66788a}
+.care-navigation-menu nav button{width:100%;display:grid;grid-template-columns:40px 1fr 12px;gap:10px;align-items:center;text-align:left;padding:16px 10px;border:0;border-radius:12px;background:#fff;color:inherit;cursor:pointer}
+.care-navigation-menu nav button:hover{background:#edf4fb}.care-navigation-menu nav button:disabled{opacity:.45;cursor:wait}
+.care-menu-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#edf4fb;font-size:25px}
+.care-navigation-menu strong{display:block;font-size:17px}.care-navigation-menu small{display:block;margin-top:5px;font-size:13px;color:#60748a;line-height:1.5}
+body.care-map-focus .care-menu-trigger{top:calc(12px + env(safe-area-inset-top));left:12px;border-radius:50%}
+body.care-map-focus .care-focus-top{padding-left:56px}
+@media(max-width:600px){body.care-map-focus .care-focus-top button{padding:8px 10px;font-size:12px}}
+/** SOFTM-NAV-MENU END */
