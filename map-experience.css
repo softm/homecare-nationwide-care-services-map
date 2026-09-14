@@ -491,12 +491,13 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 /** SOFTM-MOBILE-CATEGORY-FONT START 날짜:20260911 : 전국 주간 단독 지도의 모바일 카테고리도 통합 지도와 같은 읽기 크기로 표시 */
 @media(max-width:1000px){.care-map-page .category-nav a{font-size:17px}}
 /** SOFTM-MOBILE-CATEGORY-FONT END */
-/** SOFTM-MARKER-SIZE START 날짜:20260909 : 밀집 기관과 지도 지명을 덜 가리도록 기본 핀과 선택 강조 크기를 함께 축소 */
+/** SOFTM-MARKER-SIZE START 날짜:20260914 : 기본 핀은 밀집도를 유지하고 선택 핀만 충분히 확대해 현재 기관을 바로 구분 */
 .care-map-page .map-marker { width:32px; height:32px; border-width:2px; border-radius:11px 11px 11px 3px; box-shadow:0 2px 5px #14283e40; }
 .care-map-page .map-marker span { font-size:10px; }
 .care-map-page .map-marker .marker-rank { width:16px; height:16px; right:-6px; top:-7px; border-width:1px; font-size:8px; font-style:normal; }
-.care-map-page .care-mobile-active-marker { transform:scale(1.08); filter:drop-shadow(0 0 2px #175cb5); }
-.care-map-page .care-mobile-active-marker .map-marker,.care-map-page .care-mobile-active-marker .marker-pin { outline:2px solid #fff; }
+.care-map-page .care-mobile-active-marker { transform:scale(1.5); filter:drop-shadow(0 4px 7px #0b315f8c) drop-shadow(0 0 8px #2679df); }
+.care-map-page .care-mobile-active-marker .map-marker,.care-map-page .care-mobile-active-marker .marker-pin { outline:4px solid #fff; box-shadow:0 0 0 4px #175cb5,0 8px 18px #0b315f73!important; }
+.care-map-page .care-mobile-active-marker .marker-rank { border-width:2px; box-shadow:0 2px 7px #0b315f73; }
 /** SOFTM-MARKER-SIZE END */
 /** SOFTM-MOBILE-SHEET START 날짜:20260909 : 핸들 위로는 전체 목록, 아래로는 큰 지도, 뒤로가기는 이전 단계로 복귀 */
 .care-sheet-handle,.care-sheet-back,.care-sheet-map-button { display:none; }
