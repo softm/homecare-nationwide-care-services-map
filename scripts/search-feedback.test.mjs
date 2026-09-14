@@ -177,7 +177,8 @@ function makeCareHarness(rows) {
     });
     vm.runInContext(`
         let careMatchRows=[],careMatchScope='',careMatchPending=false,careMatchError=false;const CareMapExperience={refreshMatch(){},exitBasketMap(){}}; // SOFTM-CARE-MATCH 날짜:20260910 : 실제 전체 후보·조회 경쟁 검증에 설명 상태를 연결
-        let refreshToken=0,resultCount=0,activeCareQuery=null,mapReady=true;
+        let refreshToken=0,resultCount=0,activeCareQuery=null,mapReady=true,careUnresolvedCount=0; // SOFTM-COMPACT-STATUS 날짜:20260914 : 목록의 위치 미확인 집계 상태를 실제 조회와 일치
+        function requestAnimationFrame(){}function updateCareResultSummary(){} // SOFTM-COMPACT-STATUS 날짜:20260914 : 데이터 경합 검사는 브라우저의 요약 렌더링 예약과 분리
         let filtered=externalRows,areaRows=[],selected=new Set(),markers=new Map(),basePoint=null,skipIdleUntil=0;
         const PAGE_LIMIT=90,MAP_CANDIDATE_LIMIT=300;
         const advancedSearch={cancel(){},report};
