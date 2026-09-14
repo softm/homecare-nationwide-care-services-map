@@ -103,13 +103,22 @@
 <!-- SOFTM-REGION-ENTRY 날짜:20260913 : 통합 지도에서 권한 없이도 지역 선택과 최근 탐색 복원을 제공 -->
 <link rel="stylesheet" href="care-region-entry.css?v=20260913-1"><script src="care-region-entry.js?v=20260913-1"></script>
 <!-- SOFTM-MAP-FOCUS 날짜:20260914 : 지도 탭 전체 화면과 지도 위 도구를 통합 지도에 연결 -->
-<link rel="stylesheet" href="care-map-focus.css?v=20260914-sheet-only2"><script src="care-map-focus.js?v=20260914-list-open1"></script> <!-- SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 기관 마커는 전체보기로 진입하고 전체보기의 지도 배경은 복귀하는 동작을 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-map-focus.css?v=20260914-sheet-only2"><script src="care-map-focus.js?v=20260914-status-list-open1"></script> <!-- SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 기관 마커는 전체보기로 진입하고 전체보기의 지도 배경은 복귀하는 동작을 이전 캐시 없이 적용 -->
 <!-- SOFTM-LOCATION-STATE START 날짜:20260914 : 권한 상태를 조회 알림에 덮어쓰이지 않는 독립 안내로 제공 -->
 <link rel="stylesheet" href="care-location-state.css?v=20260914-1">
 <script defer src="care-location-state.js?v=20260914-1"></script>
 <!-- SOFTM-LOCATION-STATE END -->
 <!-- SOFTM-NAV-MENU 날짜:20260914 : 보조 기능을 PC·모바일 공통 서랍 메뉴로 제공 -->
 <link rel="stylesheet" href="care-navigation-menu.css?v=20260914-1"><script defer src="care-navigation-menu.js?v=20260914-1"></script>
+<!-- SOFTM-COMPACT-STATUS START 날짜:20260914 : 지도 진행 표시와 목록 결과 요약의 공간을 최소화 -->
+<style>
+#mapStatus[hidden]{display:none!important}
+#mapLoading small{display:none}#mapLoading>div{display:flex;gap:8px}#mapLoading .spinner{width:16px;height:16px}
+#mapLoading{padding:7px 10px}#mapLoading b{font-size:12px;line-height:1.4}
+.results .list-head{flex-wrap:wrap}.care-result-status{font-size:12px;color:#586e83;line-height:1.5}.list-head>.care-result-status{flex-basis:100%}
+.care-sheet-summary{flex-wrap:wrap}.care-sheet-summary>.care-result-status{flex-basis:100%;font-weight:400}
+</style>
+<!-- SOFTM-COMPACT-STATUS END -->
 </head>
 <body class="care-map-page care-region-pending" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-REGION-ENTRY 날짜:20260913 : 자료 로딩 중에도 임의 전국 지도를 노출하지 않고 지역 진입 화면을 준비 -->
 <header class="page-head"><div class="head-row"><div><h1 id="pageTitle">전국 주야간보호센터 지도</h1><p>돌봄한눈에서 현재 위치를 기준으로 공개 기관정보·평가·인력을 조회합니다.</p></div><a class="legacy-link" href="index.html"><img src="site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0">돌봄한눈 홈</a><!-- SOFTM-BRAND-ICON 날짜:20260913 : 지도에서 브랜드와 홈 복귀 경로를 함께 식별 --></div></header>
@@ -132,7 +141,7 @@
 <div class="map-head-actions"><button type="button" class="small-btn" onclick="showAllMarkerLocations()" aria-label="선택한 기관의 전체 위치 보기">전체 위치</button><button class="icon-btn" id="shareBtn" aria-label="현재 조회상태 공유" title="지도 공유"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.2M8.7 13.3l6.6 4.2"></path></svg><span>지도 공유</span></button></div>
 <!-- SOFTM-REGION-SPACING END -->
 </div>
-   <div class="map-wrap"><div class="map-shell" id="naverMap"></div><div class="map-controls" aria-label="지도 조작"><button class="map-control" id="locateBtn" aria-label="내 주변 기관 찾기" title="내 주변"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v4m0 12v4M2 12h4m12 0h4"></path></svg></button><button class="map-control" id="zoomInBtn" aria-label="지도 확대">+</button><button class="map-control" id="zoomOutBtn" aria-label="지도 축소">−</button></div><div class="map-status" id="mapStatus"><b>현재 위치 모드</b><br>위치 권한을 확인하고 있습니다.</div><div class="loading" id="mapLoading"><div><div class="spinner"></div><b id="loadingTitle">기관을 조회하고 있습니다</b><small id="loadingText"></small></div></div></div>
+   <div class="map-wrap"><div class="map-shell" id="naverMap"></div><div class="map-controls" aria-label="지도 조작"><button class="map-control" id="locateBtn" aria-label="내 주변 기관 찾기" title="내 주변"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v4m0 12v4M2 12h4m12 0h4"></path></svg></button><button class="map-control" id="zoomInBtn" aria-label="지도 확대">+</button><button class="map-control" id="zoomOutBtn" aria-label="지도 축소">−</button></div><div class="map-status" id="mapStatus" hidden><b>현재 위치 모드</b><br>위치 권한을 확인하고 있습니다.</div><div class="loading" id="mapLoading"><div><div class="spinner"></div><b id="loadingTitle">기관을 조회하고 있습니다</b><small id="loadingText"></small></div></div></div>
    <p class="route-note">지역 선택 시 기관이 모인 곳을 확대합니다. ‘전체 위치’에서 외곽까지 확인할 수 있습니다. 지도를 움직이면 현재 화면을 자동 조회합니다.</p> <!-- SOFTM-REGION-SPACING 날짜:20260904 : 확대 화면 밖 기관도 전체 위치 버튼으로 확인할 수 있음을 안내 -->
   </div>
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급·비교 선택을 혼동하지 않도록 표현 -->
@@ -217,7 +226,7 @@ function showLoading(title,text=''){$('loadingTitle').textContent=title;$('loadi
 function hideLoading(){$('mapLoading').classList.remove('show')}
 let toastTimer;function toast(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,3200)}
 NaverGeocoder.setErrorHandler(message=>{setStatus('주소 변환 모듈 확인 필요',message);if(!activeCareQuery?.feedback)toast(message)}); // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 상세조회 위치 오류는 최종 결과 알림에서 한 번만 안내
-function setStatus(title,text=''){$('mapStatus').innerHTML=`<b>${esc(title)}</b>${text?`<br>${esc(text)}`:''}`}
+function setStatus(title,text=''){$('mapStatus').hidden=!/오류|실패/.test(title);/* SOFTM-COMPACT-STATUS 날짜:20260914 : 정상 조회와 선택 안내는 마커를 가리지 않고 오류만 지도에서 표시 */$('mapStatus').innerHTML=`<b>${esc(title)}</b>${text?`<br>${esc(text)}`:''}`}
 function careAdConfig(){return window.CARE_AD_CONFIG||{enabled:false,mode:'off',placements:{}}}
 function careAdMode(){const config=careAdConfig();return config.enabled&&config.mode!=='off'?config.mode:'off'}
 function safeAdUrl(value){try{const url=new URL(value,location.href);return ['https:','http:','mailto:'].includes(url.protocol)?url.href:'#'}catch{return'#'}}
@@ -347,12 +356,22 @@ function beginCareQuery(feedback){
 }
 function publishCareResult(query,outcome){
  if(!query.current())return {cancelled:true};
- resultCount=outcome.count;updateStats();advancedSearch?.report(outcome);
+ resultCount=outcome.count;careUnresolvedCount=outcome.unresolved||0;updateStats();advancedSearch?.report(outcome);
  if(globalThis.CareRegionEntry?.manual()&&outcome.mapReady&&!outcome.partial)saveCareRecentRegion(); // SOFTM-REGION-ENTRY 날짜:20260913 : 완료한 직접 탐색만 최근 지역으로 보관
  careMatchPending=false;careMatchScope=outcome.scope==='조회조건'?[$('province').value,$('city').value].filter(Boolean).join(' '):outcome.scope;CareMapExperience.refreshMatch(); // SOFTM-CARE-MATCH 날짜:20260910 : 완료된 조회 범위를 실제 전체 후보와 함께 표시
  return outcome;
 }
-function updateStats(){$('areaCount').textContent=resultCount.toLocaleString()+'곳';$('selectedCount').textContent=selected.size.toLocaleString()+'곳';$('selectAll').checked=areaRows.length>0&&selected.size===areaRows.length;$('selectAll').indeterminate=selected.size>0&&selected.size<areaRows.length}
+/** SOFTM-COMPACT-STATUS START 날짜:20260914 : 결과 수는 목록에 모으고 실제 지도 표시 차이와 위치 누락만 추가 안내 */
+let careUnresolvedCount=0;
+function updateCareResultSummary(){
+ const count=resultCount.toLocaleString(),shown=[...markers].filter(([id,marker])=>selected.has(id)&&marker.getMap()).length;
+ const parts=[];if(shown!==resultCount)parts.push(`지도 표시 ${shown.toLocaleString()}곳`);if(careUnresolvedCount)parts.push(`위치 미확인 ${careUnresolvedCount.toLocaleString()}곳 포함`);
+ const heading=document.querySelector('.results .list-head h2');if(heading)heading.textContent=`검색 결과 ${count}곳`;
+ for(const host of [document.querySelector('.results .list-head'),document.querySelector('.care-sheet-summary')]){if(!host)continue;let note=host.querySelector('.care-result-status');if(!note){note=document.createElement('small');note.className='care-result-status';host.append(note)}note.textContent=parts.join(' · ');note.hidden=!parts.length;}
+ const button=document.querySelector('[data-focus="list"]');if(button){button.querySelector('span').textContent=`목록 보기 · ${count}곳`;button.setAttribute('aria-label',`목록 보기 · ${count}곳`);}
+}
+/** SOFTM-COMPACT-STATUS END */
+function updateStats(){requestAnimationFrame(updateCareResultSummary);/* SOFTM-COMPACT-STATUS 날짜:20260914 : 목록 생성·지도 표시 체크 변경에도 결과 요약을 동기화 */$('areaCount').textContent=resultCount.toLocaleString()+'곳';$('selectedCount').textContent=selected.size.toLocaleString()+'곳';$('selectAll').checked=areaRows.length>0&&selected.size===areaRows.length;$('selectAll').indeterminate=selected.size>0&&selected.size<areaRows.length}
 /** SOFTM-SEARCH-FEEDBACK END */
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 지도 표시 선택과 비교함 담기를 분리해 필터를 바꿔도 관심기관을 유지 */
 /** SOFTM-LIST-CONTROLS START 날짜:20260905 : 독립 체크박스를 설명 있는 지도 표시로 묶고 번호·기관명·담기 위치를 일치 */
