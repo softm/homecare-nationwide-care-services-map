@@ -127,3 +127,42 @@ body.stitch-desktop .detail-head { background:#004541; }
 body.stitch-desktop .detail-main-tab.active,body.stitch-desktop .official-tab.active { background:#004541; border-color:#004541; color:#fff; }
 body.stitch-desktop .care-basket-actions .primary { background:#004541; border-color:#004541; }
 /** SOFTM-STITCH-DETAIL END */
+/** SOFTM-STITCH-HIERARCHY START 날짜:20260914 : 비교 행동과 지도 체크를 구분하고 사진·주소 및 지도 안내가 서로 가리지 않도록 정리 */
+body.stitch-desktop.care-map-page .row .care-row-actions { grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); gap:8px 12px; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-basket-button { background:#004541; border-color:#004541; color:#fff; font-size:13px; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-basket-button[aria-pressed="true"] { background:#dff2ee; border-color:#85b8ad; color:#004541; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-list-navigation { background:#f3f8f7; border-color:#d2e3de; color:#28584f; font-size:13px; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-map-display,
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-map-display:has(input:checked) { grid-column:1/-1; justify-content:flex-start; width:fit-content; min-height:32px; height:auto; padding:4px 0; border:0; border-radius:0; background:transparent; color:#50645f; font-size:12px; font-weight:500; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-map-display input { accent-color:#004541; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-basket-button:hover { background:#115e59; border-color:#115e59; color:#fff; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-list-navigation:hover { background:#e3f0eb; border-color:#85b8ad; color:#004541; }
+body.stitch-desktop.care-map-page .row .care-row-actions > :focus-visible { outline:2px solid #004541; outline-offset:3px; }
+@media (min-width:1001px) {
+ body.stitch-desktop:not(.care-map-focus) .care-type-header { height:152px; padding:8px 20px; }
+ body.stitch-desktop:not(.care-map-focus) .care-type-menu { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; width:100%; max-height:none; overflow:visible; }
+ body.stitch-desktop:not(.care-map-focus) .care-type-menu-item { width:100%; min-width:0; min-height:40px; padding:5px 6px; font-size:12px; line-height:1.35; white-space:normal; word-break:keep-all; }
+ body.stitch-desktop:not(.care-map-focus) .care-type-toggle { display:none; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout > .results { top:278px!important; height:calc(100% - 278px)!important; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row { display:grid; grid-template-columns:minmax(0,1fr) 76px; column-gap:12px; row-gap:5px; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row > * { grid-column:1/-1; min-width:0; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row > .care-result-photo { grid-column:2; grid-row:1/3; float:none; margin:0; align-self:start; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row > .care-result-heading { grid-column:1; grid-row:1; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row > .care-result-evaluation { grid-column:1; grid-row:2; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row > p { margin:0; overflow-wrap:anywhere; }
+ body.stitch-desktop:not(.care-map-focus) .map-head { padding:0; background:transparent; box-shadow:none; border-radius:0; align-items:flex-start; justify-content:space-between; pointer-events:none; }
+ body.stitch-desktop.care-map-page:not(.care-map-focus) .map-head .map-title { display:flex; flex:0 1 auto; width:fit-content; flex-direction:column; align-items:flex-start; gap:4px; max-width:calc(100% - 300px); min-width:0; padding:10px 14px; border-radius:12px; background:#fffffff5; box-shadow:0 3px 12px #0c1c2e12; pointer-events:auto; }
+ body.stitch-desktop.care-map-page:not(.care-map-focus) .map-head .map-title h2 { max-width:100%; white-space:normal; margin:0; font-size:14px; line-height:1.5; }
+ body.stitch-desktop.care-map-page:not(.care-map-focus) .map-head .map-title #areaBadge { flex:none; max-width:100%; white-space:normal; font-size:12px; overflow-wrap:anywhere; }
+ body.stitch-desktop:not(.care-map-focus) .map-head-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; max-width:285px; padding:6px; border-radius:12px; background:#fffffff5; box-shadow:0 3px 12px #0c1c2e12; pointer-events:auto; }
+ body.stitch-desktop.care-map-page .map-head-actions #shareBtn { margin-left:0; border-color:#d2e3de; color:#28584f; background:#f3f8f7; }
+ body.stitch-desktop .map-head-actions .small-btn { color:#28584f; border-color:#d2e3de; background:#fff; }
+}
+@media (min-width:1001px) and (max-width:1250px) {
+ body.stitch-desktop.care-map-page:not(.care-map-focus) .map-head .map-title { max-width:100%; }
+ body.stitch-desktop:not(.care-map-focus) .map-head { flex-direction:column; align-items:flex-start; gap:8px; right:76px; }
+ body.stitch-desktop:not(.care-map-focus) .map-head-actions { max-width:100%; }
+ body.stitch-desktop:not(.care-map-focus) .care-location-state { top:168px; }
+ body.stitch-desktop.care-location-unavailable:not(.care-map-focus) .map-wrap .loading { top:218px; }
+}
+/** SOFTM-STITCH-HIERARCHY END */
