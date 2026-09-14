@@ -393,7 +393,7 @@
 /** SOFTM-MOBILE-MAP START 날짜:20260909 : 첫 화면을 검색창·지도·스크롤 목록으로 고정해 조건 영역에 목적 화면이 밀리지 않도록 구성 */
 .care-mobile-filter-toggle,.care-result-photo { display:none; }
 .care-mobile-active-marker { filter:drop-shadow(0 0 4px #175cb5); transform:scale(1.25); transform-origin:bottom center; }
-.care-mobile-active-marker .map-marker,.care-mobile-active-marker .marker-pin { background:#175cb5!important; outline:3px solid #fff; }
+.care-mobile-active-marker .map-marker,.care-mobile-active-marker .marker-pin { outline:3px solid #fff; /* SOFTM-SELECTED-MARKER 날짜:20260914 : 선택해도 공단 등급의 원래 마커 색상을 보존 */ }
 @media(max-width:1000px) {
  .care-map-page[data-care-workspace="search"] { overflow:hidden; }
  .care-map-page[data-care-workspace="search"] .page-head,.care-map-page[data-care-workspace="search"] .category-nav,.care-map-page[data-care-workspace="search"] .stats,.care-map-page[data-care-workspace="search"] .care-data-note,.care-map-page[data-care-workspace="search"] .ad-zone,.care-map-page[data-care-workspace="search"] .care-view-switch,.care-map-page[data-care-workspace="search"] .care-saved-dock { display:none!important; }
@@ -852,3 +852,8 @@ dialog.care-location-notice .care-location-actions button { width:100%; }
  .care-map-page[data-care-workspace="search"] .care-mobile-filter-toggle { display:flex; }
 }
 /** SOFTM-FILTER-BADGE END */
+
+/** SOFTM-SELECTED-PRESERVE START 날짜:20260914 : 마커의 원래 형태를 유지하고 확대와 외곽선만으로 선택 구분 */
+.care-map-page .care-mobile-active-marker{transform:scale(1.5);filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 3px #175cb5)}
+.care-map-page .care-mobile-active-marker .map-marker,.care-map-page .care-mobile-active-marker .marker-pin{outline:2px solid #fff;box-shadow:0 0 0 2px #175cb5!important}
+/** SOFTM-SELECTED-PRESERVE END */

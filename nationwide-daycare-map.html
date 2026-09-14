@@ -67,7 +67,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <link rel="stylesheet" href="result-sort.css?v=20260910-1"> <!-- SOFTM-SORT-ORIGIN 날짜:20260910 : 거리 기준 위치의 적용 여부와 차이를 이전 캐시 없이 표시 -->
 <link rel="stylesheet" href="voice-search.css?v=20260911-clear1"> <!-- SOFTM-SEARCH-CLEAR 날짜:20260911 : 검색어 지우기 버튼을 이전 캐시 없이 적용 -->
 <link rel="stylesheet" href="care-match.css?v=20260911-match-clear1"> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문과 기관별 선택 근거의 공용 화면을 연결 --> <!-- SOFTM-MATCH-PANEL-ACTION 날짜:20260911 : 조건 패널의 축약 배치와 명확한 설정 버튼을 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-CLEAR 날짜:20260911 : 맞춤 조건 지우기 화면을 이전 캐시 없이 적용 -->
-<link rel="stylesheet" href="map-experience.css?v=20260914-selected-marker1"> <!-- SOFTM-SELECTED-MARKER 날짜:20260914 : 확대된 선택 마커 스타일을 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="map-experience.css?v=20260914-selected-preserve2"> <!-- SOFTM-SELECTED-MARKER 날짜:20260914 : 확대된 선택 마커 스타일을 이전 캐시 없이 적용 -->
 <!-- SOFTM-MOBILE-PULL-REFRESH START 날짜:20260910 : 내부 목록 스크롤에서도 당겨서 최신 화면을 다시 불러오도록 공용 화면을 연결 -->
 <link rel="stylesheet" href="mobile-pull-refresh.css?v=20260910-1">
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
@@ -517,6 +517,7 @@ function openCenter(c,m,previousView=null,instant=false){ // SOFTM-SCROLL-DETAIL
  function reveal(){
   if(generation!==daycareDetailGeneration)return;
   if(daycareEmphasizedMarker&&daycareOriginalIcon){daycareEmphasizedMarker.setIcon(daycareOriginalIcon);daycareEmphasizedMarker=null;daycareOriginalIcon=null}
+  focusMobileRow(c.i,false,true); // SOFTM-SELECTED-MARKER 날짜:20260914 : 마커 클릭도 목록과 같은 선택 확대를 유지
   document.querySelector('.map-wrap')?.classList.add('popup-active');
   if(window.matchMedia('(max-width:1000px)').matches||!m){$('mobilePopupContent').innerHTML=popup(c);void loadDaycareContact(c);$('mobilePopupLayer').hidden=false;document.body.classList.add('mobile-popup-open');if(!instant)requestAnimationFrame(()=>$('mobilePopupDismiss')?.focus());return} // SOFTM-SCROLL-DETAIL 날짜:20260909 : 자동 전환은 목록의 조작 포커스를 빼앗지 않음
   infoWindow=new naver.maps.InfoWindow({content:popup(c),maxWidth:440,backgroundColor:'#fff',borderColor:'#cbd5e1',borderWidth:1,anchorSize:new naver.maps.Size(10,10),pixelOffset:new naver.maps.Point(0,-12),anchorSkew:false,disableAutoPan:false,zIndex:10000});infoWindow.open(naverMap,m);requestAnimationFrame(()=>void loadDaycareContact(c));
