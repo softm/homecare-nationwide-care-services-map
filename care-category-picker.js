@@ -51,7 +51,7 @@
    const url=destination(location.href,id,{...snapshot(),center:center?{lat:center.lat(),lng:center.lng()}:null,zoom:map?.getZoom()});
    if(type)location.assign(url.href);else location.replace(url.href);
   }
-  const header=document.createElement('div');header.className='care-type-header';
+  const header=document.querySelector('.care-type-header')||document.createElement('div');header.className='care-type-header';header.replaceChildren(); // SOFTM-CATEGORY-TOP 날짜:20260915 : 초기 정적 메뉴를 같은 DOM에서 활성화해 로딩 중 상단 메뉴가 사라지지 않도록 유지
   const menu=document.createElement('nav');menu.className='care-type-menu';menu.setAttribute('aria-label','돌봄기관 유형');
   for(const id of menuOrder){
    const [,,official,description]=categories.find(row=>row[0]===id);

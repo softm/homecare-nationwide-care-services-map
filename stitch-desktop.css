@@ -166,3 +166,31 @@ body.stitch-desktop.care-map-page .row .care-row-actions > :focus-visible { outl
  body.stitch-desktop.care-location-unavailable:not(.care-map-focus) .map-wrap .loading { top:218px; }
 }
 /** SOFTM-STITCH-HIERARCHY END */
+/** SOFTM-CATEGORY-TOP START 날짜:20260915 : 초기 로딩·전체 지도 전환에도 같은 상단 카테고리를 유지하고 지도 조작부의 세로 늘어남을 방지 */
+body.stitch-desktop { --stitch-category-height:48px; }
+body.stitch-desktop .category-nav { display:none!important; }
+body.stitch-desktop.care-map-page .care-type-header { display:flex!important; position:fixed; left:0; right:0; top:64px; width:100%; height:var(--stitch-category-height); padding:4px 20px; align-items:center; gap:8px; border-bottom:1px solid #dce7e3; background:#fff; z-index:181; }
+body.stitch-desktop.care-map-page .care-type-header .care-type-menu { display:flex; flex:1; flex-wrap:nowrap; gap:6px; width:auto; min-width:0; max-height:none; overflow-x:auto; scrollbar-width:thin; }
+body.stitch-desktop.care-map-page .care-type-header .care-type-menu-item { flex:0 0 auto; width:auto; min-height:36px; padding:8px 12px; font-size:13px; line-height:1.4; white-space:nowrap; text-decoration:none; }
+body.stitch-desktop.care-map-page .care-type-header .care-workspace-back { display:none; }
+body.stitch-desktop.care-map-page .care-type-header .care-type-toggle { display:none; }
+body.stitch-desktop.care-map-focus .care-type-header { top:0; }
+body.stitch-desktop.care-map-focus.care-map-page[data-care-workspace] .layout>.map-card { top:var(--stitch-category-height)!important; height:calc(100dvh - var(--stitch-category-height))!important; }
+body.stitch-desktop.care-map-focus .care-menu-trigger { top:calc(var(--stitch-category-height) + 12px + env(safe-area-inset-top)); }
+body.stitch-desktop.care-map-focus .map-controls { top:auto!important; height:auto!important; bottom:calc(20px + env(safe-area-inset-bottom))!important; }
+@media (min-width:1001px) {
+ body.stitch-desktop:not(.care-map-focus) .filters { top:112px; }
+ body.stitch-desktop:not(.care-map-focus) .layout { top:112px!important; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:126px!important; height:calc(100% - 126px)!important; }
+}
+@media (max-width:1000px) {
+ body.stitch-desktop { --stitch-category-height:44px; }
+ body.stitch-desktop.care-map-page:not(.care-map-focus) .care-type-header { top:56px; padding:4px 12px; }
+ body.stitch-desktop.care-map-page .care-type-header .care-type-menu-item { min-height:32px; padding:6px 10px; font-size:12px; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .filters { top:100px!important; }
+}
+@media (max-width:1000px) and (orientation:landscape) {
+ body.stitch-desktop.care-map-page:not(.care-map-focus) .care-type-header { top:0; padding-right:60px; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .filters { top:44px!important; }
+}
+/** SOFTM-CATEGORY-TOP END */
