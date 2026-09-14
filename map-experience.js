@@ -705,6 +705,17 @@
         const tail = document.createElement('li');
         tail.className = 'care-saved-scroll-tail'; tail.setAttribute('aria-hidden', 'true');
         let active = null, frame = 0, follow = false;
+        /** SOFTM-SAVED-SELECTION START 날짜:20260914 : 클릭한 기관을 마커 갱신의 자동 스크롤 선택이 덮지 않도록 유지 */
+        let explicitId = null;
+        document.addEventListener('click', event => {
+            const card = event.target.closest('[data-basket-id]');
+            if (workspace !== 'saved' || !card || event.target.closest('[data-care-basket],.care-drag-handle')) return;
+            explicitId = card.dataset.basketId; schedule();
+        }, true);
+        const resumeScrollSelection = () => { explicitId = null; };
+        for (const name of ['wheel', 'touchmove']) bar.addEventListener(name, resumeScrollSelection, { passive: true });
+        bar.addEventListener('keydown', event => { if (['ArrowDown','ArrowUp','PageDown','PageUp','Home','End'].includes(event.key)) resumeScrollSelection(); });
+        /** SOFTM-SAVED-SELECTION END */
         function sync() {
             frame = 0;
             const requested = follow; follow = false;
@@ -732,7 +743,7 @@
             const atEnd = ownScroll
                 ? bar.scrollHeight > bar.clientHeight && bar.scrollTop + bar.clientHeight >= bar.scrollHeight - 2
                 : document.documentElement.scrollHeight > root.innerHeight && root.scrollY + root.innerHeight >= document.documentElement.scrollHeight - 2;
-            const card = atEnd ? visible.at(-1) : atStart ? visible[0] : visible.find(node => node.getBoundingClientRect().bottom > selectionLine) || visible.at(-1);
+            const card = cards.find(node => node.dataset.basketId === explicitId) || (atEnd ? visible.at(-1) : atStart ? visible[0] : visible.find(node => node.getBoundingClientRect().bottom > selectionLine) || visible.at(-1)); // SOFTM-SAVED-SELECTION 날짜:20260914 : 직접 선택한 담은 기관을 자동 가시 카드보다 우선
             /** SOFTM-SAVED-SCROLL-EARLY END */
             if (!card) return;
             if (active !== card) {
