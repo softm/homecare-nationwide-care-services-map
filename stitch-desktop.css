@@ -194,12 +194,12 @@ body.stitch-desktop.care-map-focus .map-controls { top:auto!important; height:au
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .filters { top:44px!important; }
 }
 /** SOFTM-CATEGORY-TOP END */
-/** SOFTM-CATEGORY-BRAND START 날짜:20260915 : 홈 링크와 카테고리를 최상단 한 줄에 고정하고 작업 탭과 검색창의 겹침을 방지 */
+/** SOFTM-CATEGORY-BRAND START 날짜:20260915 : 햄버거·홈 링크·카테고리 순서로 최상단을 배치하고 화면 크기와 전체보기에 관계없이 유지 */
 body.stitch-desktop { --stitch-category-height:64px; }
-body.stitch-desktop.care-map-page .stitch-app-header { display:flex; position:fixed; inset:0 0 auto; height:64px; padding:0 20px; align-items:center; background:#fff; border-bottom:1px solid #dce7e3; z-index:180; }
+body.stitch-desktop.care-map-page .stitch-app-header { display:flex; position:fixed; inset:0 0 auto; height:64px; padding:0 20px 0 72px; align-items:center; background:#fff; border-bottom:1px solid #dce7e3; z-index:180; }
 body.stitch-desktop .stitch-brand span,body.stitch-desktop .stitch-guide { display:none; }
-body.stitch-desktop.care-map-page .care-type-header { top:0!important; left:150px; right:68px; width:auto; height:64px; padding:6px 12px; border:0; background:transparent; }
-body.stitch-desktop.care-map-page .care-menu-trigger { top:10px; left:auto; right:12px; }
+body.stitch-desktop.care-map-page .care-type-header { top:0!important; left:194px; right:12px; width:auto; height:64px; padding:6px 12px; border:0; background:transparent; }
+body.stitch-desktop.care-map-page .care-menu-trigger { top:10px; left:12px; right:auto; }
 body.stitch-desktop.care-map-focus .care-focus-top { padding-left:0; }
 @media (min-width:1001px) {
  body.stitch-desktop:not(.care-map-focus) .care-workspace-tabs { top:64px; left:0; width:var(--care-desktop-sidebar); height:56px; padding:6px 12px; background:#fff; border-bottom:1px solid #e5eeff; }
@@ -210,9 +210,9 @@ body.stitch-desktop.care-map-focus .care-focus-top { padding-left:0; }
 }
 @media (max-width:1000px) {
  body.stitch-desktop { --stitch-category-height:56px; }
- body.stitch-desktop.care-map-page .stitch-app-header { height:56px; padding:0 12px; }
- body.stitch-desktop.care-map-page .care-type-header { left:110px; right:54px; height:56px; padding:6px 4px; }
- body.stitch-desktop.care-map-page .care-menu-trigger { top:8px; right:8px; }
+ body.stitch-desktop.care-map-page .stitch-app-header { height:56px; padding:0 12px 0 60px; }
+ body.stitch-desktop.care-map-page .care-type-header { left:150px; right:8px; height:56px; padding:6px 4px; }
+ body.stitch-desktop.care-map-page .care-menu-trigger { top:8px; left:8px; right:auto; }
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .filters { top:56px!important; }
 }
 @media (max-width:1000px) and (orientation:portrait) {
@@ -221,3 +221,50 @@ body.stitch-desktop.care-map-focus .care-focus-top { padding-left:0; }
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="saved"] .layout { top:56px!important; }
 }
 /** SOFTM-CATEGORY-BRAND END */
+/** SOFTM-STITCH-SURFACES START 날짜:20260915 : 검색 이후 열리는 정렬·공유·담은 기관·상세 화면에도 같은 색상과 행동 위계를 유지 */
+body.stitch-desktop { --care-blue:#004541; --stitch-accent:#004541; --stitch-mint:#abefe8; --stitch-line:#dce7e3; }
+body.stitch-desktop :is(.care-sort-dialog,.care-basket-share-dialog,.care-location-notice) { color:#0c1c2e; border:1px solid var(--stitch-line); border-radius:20px; box-shadow:0 20px 64px #123d3430; }
+body.stitch-desktop :is(.care-sort-dialog,.care-basket-share-dialog,.care-location-notice)::backdrop { background:#122f3866; }
+body.stitch-desktop .care-sort-dialog { inset:0; margin:auto; width:min(540px,calc(100% - 32px)); max-width:none; max-height:calc(100dvh - 40px); height:fit-content; padding-top:24px; }
+body.stitch-desktop .care-sort-dialog h2 { text-align:left; margin:0 64px 18px 24px; font-size:22px; line-height:1.4; letter-spacing:-.5px; }
+body.stitch-desktop :is(.care-sort-close,.care-share-close) { display:grid; place-items:center; border-radius:10px; color:#28584f; background:#eff4ff; font-size:24px; width:40px; height:40px; }
+body.stitch-desktop .care-sort-body { padding:0 24px; }
+body.stitch-desktop .care-sort-dialog fieldset { gap:8px; padding:12px 0 20px; }
+body.stitch-desktop .care-sort-dialog legend { font-size:14px; color:#3f4947; }
+body.stitch-desktop .care-sort-dialog label { min-height:44px; height:48px; box-sizing:border-box; padding:10px 14px; border-radius:10px; border-color:var(--stitch-line); font-size:14px; gap:8px; }
+body.stitch-desktop .care-sort-dialog label:has(input:checked) { background:#d8f7f2; color:#004541; border-color:#43877b; }
+body.stitch-desktop .care-sort-dialog input { accent-color:#004541; }
+body.stitch-desktop .care-sort-dialog .care-sort-origins.is-disabled { opacity:.6; }
+body.stitch-desktop :is(.care-sort-origin-help,.care-sort-help,.care-share-description) { color:#61716c; font-size:13px; }
+body.stitch-desktop .care-sort-footer { padding:16px 24px; border-color:var(--stitch-line); box-shadow:none; }
+body.stitch-desktop .care-sort-apply { background:#004541; border-radius:10px; font:inherit; font-size:15px; font-weight:700; }
+body.stitch-desktop .care-share-actions button { color:#004541; background:#eff4ff; border-color:var(--stitch-line); border-radius:10px; }
+body.stitch-desktop .care-share-actions button:last-child { background:#004541; color:#fff; border-color:#004541; }
+body.stitch-desktop :is(.care-sort-dialog,.care-basket-share-dialog) :focus-visible { outline:3px solid #43877b; outline-offset:3px; }
+body.stitch-desktop .care-sort-dialog:focus { outline:none; }
+body.stitch-desktop .care-share-content input { border-color:var(--stitch-line); background:#f8f9ff; color:#0c1c2e; }
+body.stitch-desktop :is(.care-basket-count,.care-order-status,.care-saved-title b,.care-route-summary strong) { color:#004541; }
+body.stitch-desktop .care-saved-empty > span { color:#43877b; }
+body.stitch-desktop.care-map-page .care-basket button { color:#28584f; border-color:var(--stitch-line); border-radius:10px; }
+body.stitch-desktop.care-map-page .care-basket .care-primary { color:#fff; background:#004541; border-color:#004541; }
+body.stitch-desktop.care-map-page .care-basket .care-drag-handle { color:#43877b; background:#eff4ff; }
+body.stitch-desktop.care-map-page .care-basket button:disabled { color:#899892; background:#f0f3f2; border-color:#e0e7e3; }
+body.stitch-desktop .advanced-search { background:#f8f9ff; border-color:var(--stitch-line); color:#0c1c2e; }
+body.stitch-desktop :is(.advanced-count,.advanced-group legend,.advanced-status,.advanced-source a) { color:#004541; }
+body.stitch-desktop .advanced-selected button { color:#004541; background:#d8f7f2; border-color:#b7e5db; }
+body.stitch-desktop .advanced-group { border-color:var(--stitch-line); }
+body.stitch-desktop .advanced-search input { accent-color:#004541; }
+body.stitch-desktop .detail-sheet { border-color:var(--stitch-line); box-shadow:0 20px 64px #123d3430; }
+body.stitch-desktop .detail-head { background:#004541; }
+body.stitch-desktop.care-map-page .care-detail-group { background:#f8f9ff; border-color:var(--stitch-line); }
+body.stitch-desktop.care-map-page .care-detail-group>h3 { color:#004541; }
+body.stitch-desktop.care-map-page :is(.care-detail-address-actions>*,.care-popup-navigation,.care-popup-basket-action .care-basket-button) { color:#004541; }
+body.stitch-desktop.care-map-page .care-popup-basket-action .care-basket-button[aria-pressed="true"] { background:#abefe8; color:#004541; }
+@media (max-width:640px) {
+ body.stitch-desktop .care-sort-dialog { inset:auto 0 0; width:100%; max-height:calc(100dvh - 24px); margin:0; border-radius:20px 20px 0 0; }
+ body.stitch-desktop .care-sort-dialog h2 { margin-left:20px; font-size:20px; }
+ body.stitch-desktop .care-sort-body { padding:0 20px; }
+ body.stitch-desktop .care-sort-dialog label { flex:1 0 calc(50% - 8px); padding:10px; }
+ body.stitch-desktop .care-sort-footer { padding:12px 20px calc(16px + env(safe-area-inset-bottom)); }
+}
+/** SOFTM-STITCH-SURFACES END */
