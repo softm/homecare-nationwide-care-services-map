@@ -88,18 +88,19 @@
         button.setAttribute('aria-label', '현재 지도 영역에서 이 지역 재검색');
         button.onclick = () => controller.research();
         /** SOFTM-VIEWPORT-RESIZE START 날짜:20260910 : 목록을 접거나 회전해 늘어난 지도 영역도 수동 재검색과 같은 범위로 조회 */
+        /* SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 기관 선택에 따른 지도 크기 변경은 명시 조회와 구분 */
         let resizeTimer, width = host.clientWidth, height = host.clientHeight;
         const resizeObserver = new ResizeObserver(() => {
             const nextWidth = host.clientWidth, nextHeight = host.clientHeight;
             if (nextWidth === width && nextHeight === height) return;
             width = nextWidth; height = nextHeight;
             clearTimeout(resizeTimer);
-            if (!width || !height || workspace !== 'search' || detailOrigin) return;
+            if (!width || !height || workspace !== 'search' || detailOrigin || config.preserveResults?.()) return;
             resizeTimer = setTimeout(() => {
-                if (!host.clientWidth || !host.clientHeight || workspace !== 'search' || detailOrigin || !config.enabled()) return;
+                if (!host.clientWidth || !host.clientHeight || workspace !== 'search' || detailOrigin || config.preserveResults?.() || !config.enabled()) return;
                 options.resizeMap?.();
                 requestAnimationFrame(() => {
-                    if (workspace === 'search' && !detailOrigin && host.clientWidth && host.clientHeight && config.enabled()) void controller.research();
+                    if (workspace === 'search' && !detailOrigin && !config.preserveResults?.() && host.clientWidth && host.clientHeight && config.enabled()) void controller.research();
                 });
             }, 400);
         });
