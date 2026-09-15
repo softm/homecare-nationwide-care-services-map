@@ -194,12 +194,12 @@ body.stitch-desktop.care-map-focus .map-controls { top:auto!important; height:au
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .filters { top:44px!important; }
 }
 /** SOFTM-CATEGORY-TOP END */
-/** SOFTM-CATEGORY-BRAND START 날짜:20260915 : 홈 링크와 카테고리를 최상단 한 줄에 고정하고 작업 탭과 검색창의 겹침을 방지 */
+/** SOFTM-CATEGORY-BRAND START 날짜:20260915 : 햄버거·홈 링크·카테고리 순서로 최상단을 배치하고 화면 크기와 전체보기에 관계없이 유지 */
 body.stitch-desktop { --stitch-category-height:64px; }
-body.stitch-desktop.care-map-page .stitch-app-header { display:flex; position:fixed; inset:0 0 auto; height:64px; padding:0 20px; align-items:center; background:#fff; border-bottom:1px solid #dce7e3; z-index:180; }
+body.stitch-desktop.care-map-page .stitch-app-header { display:flex; position:fixed; inset:0 0 auto; height:64px; padding:0 20px 0 72px; align-items:center; background:#fff; border-bottom:1px solid #dce7e3; z-index:180; }
 body.stitch-desktop .stitch-brand span,body.stitch-desktop .stitch-guide { display:none; }
-body.stitch-desktop.care-map-page .care-type-header { top:0!important; left:150px; right:68px; width:auto; height:64px; padding:6px 12px; border:0; background:transparent; }
-body.stitch-desktop.care-map-page .care-menu-trigger { top:10px; left:auto; right:12px; }
+body.stitch-desktop.care-map-page .care-type-header { top:0!important; left:194px; right:12px; width:auto; height:64px; padding:6px 12px; border:0; background:transparent; }
+body.stitch-desktop.care-map-page .care-menu-trigger { top:10px; left:12px; right:auto; }
 body.stitch-desktop.care-map-focus .care-focus-top { padding-left:0; }
 @media (min-width:1001px) {
  body.stitch-desktop:not(.care-map-focus) .care-workspace-tabs { top:64px; left:0; width:var(--care-desktop-sidebar); height:56px; padding:6px 12px; background:#fff; border-bottom:1px solid #e5eeff; }
@@ -210,9 +210,9 @@ body.stitch-desktop.care-map-focus .care-focus-top { padding-left:0; }
 }
 @media (max-width:1000px) {
  body.stitch-desktop { --stitch-category-height:56px; }
- body.stitch-desktop.care-map-page .stitch-app-header { height:56px; padding:0 12px; }
- body.stitch-desktop.care-map-page .care-type-header { left:110px; right:54px; height:56px; padding:6px 4px; }
- body.stitch-desktop.care-map-page .care-menu-trigger { top:8px; right:8px; }
+ body.stitch-desktop.care-map-page .stitch-app-header { height:56px; padding:0 12px 0 60px; }
+ body.stitch-desktop.care-map-page .care-type-header { left:150px; right:8px; height:56px; padding:6px 4px; }
+ body.stitch-desktop.care-map-page .care-menu-trigger { top:8px; left:8px; right:auto; }
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .filters { top:56px!important; }
 }
 @media (max-width:1000px) and (orientation:portrait) {

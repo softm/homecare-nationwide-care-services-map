@@ -33,6 +33,10 @@
     new MutationObserver(() => { if (menu.open) for (const button of menu.querySelectorAll('[data-menu-target]')) button.disabled = !document.querySelector(button.dataset.menuTarget); }).observe(document.body, { childList: true, subtree: true });
     menu.addEventListener('keydown', event => { if (event.key === 'Escape') event.stopPropagation(); });
     const status = document.createElement('p'); status.setAttribute('role', 'status'); menu.append(status);
-    document.body.append(trigger, menu); document.body.classList.add('care-has-navigation');
+    /** SOFTM-MENU-LEFT START 날짜:20260915 : 키보드 탐색도 화면의 햄버거·로고 순서와 일치 */
+    const header = document.querySelector('.stitch-app-header');
+    if (header) header.prepend(trigger); else document.body.append(trigger);
+    document.body.append(menu); document.body.classList.add('care-has-navigation');
+    /** SOFTM-MENU-LEFT END */
 })();
 /** SOFTM-NAV-MENU END */
