@@ -19,3 +19,22 @@
 @media(max-width:520px){.analysis-origin-row{align-items:flex-start}.analysis-origin-row button{padding:8px 10px}}
 /** SOFTM-ANALYSIS-ORIGIN END */
 .analysis-page .analysis-primary:hover{background:#124a91;color:#fff;border-color:#124a91} /* SOFTM-ANALYSIS-HOVER 날짜:20260911 : 일반 버튼의 밝은 hover 배경이 흰 글자를 가리지 않도록 주요 행동의 대비를 유지 */
+/** SOFTM-ANALYSIS-STITCH START 날짜:20260915 : 지도에서 분석으로 이동해도 서체·청록색 행동·민트색 선택 상태가 이어지도록 페이지 디자인을 통일 */
+.analysis-page{--care-blue:#004541;--care-ink:#0c1c2e;--care-muted:#61716c;--care-bg:#f8f9ff;--care-line:#dce7e3;--care-radius:16px;--care-font:'Work Sans','Noto Sans KR',sans-serif;font-family:var(--care-font)}
+.analysis-page :is(h1,h2,h3,.analysis-brand){font-family:'Manrope','Noto Sans KR',sans-serif}
+.analysis-top{max-width:none;padding:20px max(24px,calc((100vw - 1072px)/2));background:#fff}
+.analysis-brand{color:#004541;letter-spacing:-.7px}.analysis-top nav a{font-weight:650;text-decoration:none}.analysis-top nav a:hover{text-decoration:underline}
+.analysis-main{padding-top:40px}.analysis-intro{margin-bottom:28px}.analysis-intro h1{font-size:32px;letter-spacing:-1px;line-height:1.45}.analysis-intro>p:first-child{display:inline-block;background:#d8f7f2;padding:4px 10px;border-radius:6px;margin-bottom:6px}
+.analysis-form{border-top:1px solid var(--care-line);padding:28px;box-shadow:0 4px 20px #123d3406}
+.analysis-page :is(input,select){border-color:var(--care-line);background:#eff4ff;border-radius:10px}
+.analysis-page :is(button,.analysis-action){border-color:var(--care-line);border-radius:10px;font-weight:650}
+.analysis-page :is(button,.analysis-action):hover{background:#e6f3ef;color:#004541}
+.analysis-page .analysis-primary,.analysis-page .analysis-primary:hover{background:#004541;color:#fff;border-color:#004541}
+.analysis-page :focus-visible{outline:3px solid #43877b;outline-offset:3px}
+.analysis-page #analysisCriteria label:has(input:checked){background:#d8f7f2;border-color:#43877b;color:#004541}
+.analysis-summary{background:#004541;padding:28px;border-radius:16px}.analysis-stats>div{border-color:#72b9ac}.analysis-stats strong{font-family:'Manrope','Noto Sans KR',sans-serif}.analysis-stats span{color:#d8f7f2}
+.analysis-bar{border-radius:14px;padding:18px}.analysis-bar meter{height:10px;appearance:none;border:0;border-radius:8px;background:#e9efec;overflow:hidden}.analysis-bar meter::-webkit-meter-bar{background:#e9efec;border:0;border-radius:8px}.analysis-bar meter::-webkit-meter-optimum-value{background:#43877b;border-radius:8px}.analysis-bar meter::-moz-meter-bar{background:#43877b}
+.analysis-picks button[aria-pressed=true]{background:#004541;color:#fff;border-color:#004541}
+.analysis-card{border-radius:16px;box-shadow:0 3px 14px #123d3405}.analysis-card h3{font-size:18px;line-height:1.55}.analysis-card .care-photo-image{height:180px}.analysis-card-body{padding:20px;gap:12px}.analysis-badges span{background:#d8f7f2;color:#004541;border-radius:6px;padding:4px 9px}.analysis-card details{color:#28584f}.analysis-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.analysis-card-actions>*{min-width:0}.analysis-card-actions>button:first-child{grid-column:1/-1;background:#004541;color:#fff;border-color:#004541}.analysis-card-actions>button:first-child[aria-pressed=true]{background:#abefe8;color:#004541;border-color:#abefe8}
+@media(max-width:520px){.analysis-top{padding:16px}.analysis-main{padding-top:26px}.analysis-intro h1{font-size:27px;letter-spacing:-.8px}.analysis-form,.analysis-summary{padding:20px}.analysis-card .care-photo-image{height:200px}.analysis-stats strong{font-size:24px}.analysis-top nav{font-size:13px}}
+/** SOFTM-ANALYSIS-STITCH END */
