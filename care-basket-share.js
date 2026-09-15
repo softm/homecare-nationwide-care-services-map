@@ -19,7 +19,10 @@
         const url = new URL(value), raw = basketValue(url);
         if (raw === null) return null;
         if (!types.has(type) || (url.searchParams.get('type') || 'daycare') !== type || !raw.startsWith('v1.') || raw.length > 24000) return { error: '올바르지 않은 담은 기관 공유 링크입니다.' };
-        const ids = raw.slice(3).split(',');
+        /** SOFTM-SHARE-TRAILING-TEXT START 날짜:20260915 : 공유 앱이 주소 뒤에 합친 기존 안내 문구만 분리해 정상 기관 목록을 복원 */
+        const payload = raw.replace(/\s+담은 기관과 방문 순서를 확인해 보세요\.\s*$/, '');
+        const ids = payload.slice(3).split(',');
+        /** SOFTM-SHARE-TRAILING-TEXT END */
         if (!ids.length || !ids.every(validId)) return { error: '공유 링크의 기관 목록을 읽을 수 없습니다.' };
         const unique = [...new Set(ids)], found = unique.filter(id => valid.has(id));
         return { ids: found, missing: unique.length - found.length, total: unique.length };
@@ -66,7 +69,7 @@
             let url;
             try { url = createUrl(root.location.href, type, selected); } catch (error) { status.textContent = error.message; return; }
             if (root.navigator.share) {
-                const result = await shareLink({ title: `돌봄한눈 · 담은 기관 ${selected.length}곳`, text: '담은 기관과 방문 순서를 확인해 보세요.', url });
+                const result = await shareLink({ title: `돌봄한눈 · 담은 기관 ${selected.length}곳`, url }); // SOFTM-SHARE-URL 날짜:20260915 : 공유 앱이 안내 문구를 URL에 합치지 않도록 링크만 전달
                 if (result === 'cancelled') return;
                 if (result === 'shared') { status.textContent = '공유를 완료했습니다.'; return; }
             }
