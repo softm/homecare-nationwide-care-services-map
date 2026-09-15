@@ -53,3 +53,16 @@ test('기기 공유 취소와 실패를 성공으로 표시하지 않음', async
  assert.equal(await shareLink({}, { share: async () => { throw Error(); } }), 'failed');
 });
 /** SOFTM-BASKET-SHARE END */
+
+/** SOFTM-SHARE-TRAILING-TEXT START 날짜:20260915 : 실제 공유 앱에서 안내 문구가 기관 번호 뒤에 인코딩된 오류와 엄격한 번호 검증을 함께 검사 */
+test('안내 문구가 URL에 붙은 기존 공유 링크는 기관과 순서를 복원한다', () => {
+ const url = createUrl(base, 'facility', ids);
+ for (const separator of [' ', '\n']) {
+  const combined = url + encodeURIComponent(separator + '담은 기관과 방문 순서를 확인해 보세요.');
+  assert.deepEqual(plain(readLink(combined, 'facility', new Set(ids))), { ids: ids.slice(0, 2), missing: 0, total: 2 });
+ }
+ const broken = url + encodeURIComponent(' 임의 문구');
+ assert.ok(readLink(broken, 'facility', new Set(ids)).error);
+ assert.ok(readLink(url.replace('v1.', 'v1.%3Cscript%3E') + encodeURIComponent(' 담은 기관과 방문 순서를 확인해 보세요.'), 'facility', new Set(ids)).error);
+});
+/** SOFTM-SHARE-TRAILING-TEXT END */
