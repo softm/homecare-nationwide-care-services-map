@@ -336,7 +336,18 @@
         if (restoreScroll && workspacePositions[next]) restore(workspacePositions[next]);
         else if (restoreScroll) document.querySelector(next === 'search' ? '.care-workspace-tabs' : media.matches ? '.care-view-switch' : '.layout')?.scrollIntoView({ behavior: 'instant', block: 'start' });
     }
-    function beginDetail(showMap = true) {
+    /** SOFTM-MARKER-PERSIST START 날짜:20260915 : 상세 복귀의 DOM·크기·스크롤 복원이 클릭한 기관을 첫 카드로 덮지 않도록 선택을 보존 */
+    let detailSelection = null;
+    function releaseDetailSelection() { detailSelection = null; }
+    function bindSelectionIntent(host) {
+        for (const name of ['wheel', 'touchmove', 'pointerdown']) host.addEventListener(name, releaseDetailSelection, { passive: true });
+        host.addEventListener('keydown', event => {
+            if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) releaseDetailSelection();
+        });
+    }
+    /** SOFTM-MARKER-PERSIST END */
+    function beginDetail(showMap = true, id = null) {
+        detailSelection = id == null ? null : { id: String(id), workspace }; // SOFTM-MARKER-PERSIST 날짜:20260915 : 마커와 목록의 명시적인 선택을 같은 기관기호로 보존
         restoreGeneration++;
         if (!detailOrigin) detailOrigin = { workspace, view, position: remember(), focus: document.activeElement, sheet: mobileSheet?.state() };
         if (showMap && media?.matches && workspace === 'search' && mobileSheet?.state() === 'list') mobileSheet.set('split', false); // SOFTM-MOBILE-SHEET 날짜:20260909 : 전체 목록에서 상세를 열 때 지도를 함께 보여주고 이전 단계를 기억
@@ -356,7 +367,7 @@
         restore(previous.position);
         if (previous.focus?.isConnected) previous.focus.focus({ preventScroll: true });
     }
-    function cancelDetail() { detailOrigin = null; restoreGeneration++; }
+    function cancelDetail() { detailOrigin = null; releaseDetailSelection(); restoreGeneration++; } // SOFTM-MARKER-PERSIST 날짜:20260915 : 새 지도 탐색에는 이전 상세 선택 고정을 해제
     /** SOFTM-CARE-INSIGHTS START 날짜:20260910 : 설명을 요청한 경우에만 자료를 읽고 변경된 비교함에 이전 결과가 남지 않게 갱신 */
     let insightRevision = 0, insightAttempt = 0, insightTask;
     function loadInsights() {
@@ -636,6 +647,7 @@
             e.preventDefault(); e.stopImmediatePropagation(); setOpen(false, true);
         }, true);
         /** SOFTM-FILTER-CLOSE END */
+        bindSelectionIntent(list); // SOFTM-MARKER-PERSIST 날짜:20260915 : 실제 목록 조작부터 스크롤 위치에 따른 선택을 재개
         let active = null, frame = 0, scrollRequested = false; // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 실제 목록 스크롤만 지도 이동을 허용
         /** SOFTM-LIST-SCROLL-END START 날짜:20260910 : 마지막 기관도 상단 선택 기준선까지 올려 자동 선택할 수 있도록 목록 끝 여유를 계산 */
         const scrollTail = document.createElement('div');
@@ -679,7 +691,10 @@
             scrollRequested = false;
             const listRect = list.getBoundingClientRect();
             const rows = [...list.querySelectorAll('.row')];
-            const row = pickSearchScrollRow(rows, listRect, list);
+            /** SOFTM-MARKER-PERSIST START 날짜:20260915 : 선택 기관이 현재 목록 페이지 밖에 있어도 복귀 시 첫 기관으로 교체하지 않음 */
+            const pinned = detailSelection?.workspace === workspace ? detailSelection : null;
+            const row = pinned ? rows.find(node => String(node.dataset.id || node.querySelector('[data-care-basket]')?.dataset.careBasket) === pinned.id) : pickSearchScrollRow(rows, listRect, list);
+            /** SOFTM-MARKER-PERSIST END */
             /** SOFTM-SEARCH-LIST-SCROLL END */
             if (!row) return;
             const id = row.dataset.id || row.querySelector('[data-care-basket]')?.dataset.careBasket;
@@ -687,8 +702,8 @@
                 active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
                 active = row; row.classList.add('care-scroll-active'); row.setAttribute('aria-current', 'true');
             }
-            if (requested) options.scrollDetail?.(id); // SOFTM-SCROLL-DETAIL 날짜:20260909 : 사용자가 목록을 스크롤할 때만 열린 상세를 현재 기관으로 갱신
-            options.mobileFocus?.(id, requested && (!media.matches || root.matchMedia('(orientation:landscape)').matches || mobileSheet?.state() !== 'list')); // SOFTM-SEARCH-LIST-SCROLL 날짜:20260910 : 기관이 없는 광고 구간에서도 지난 스크롤 의도를 다음 화면 갱신에 남기지 않음
+            if (requested && !pinned) options.scrollDetail?.(id); // SOFTM-MARKER-PERSIST 날짜:20260915 : 복귀 스크롤로 상세 기관이 바뀌지 않도록 명시 선택을 우선
+            options.mobileFocus?.(id, !pinned && requested && (!media.matches || root.matchMedia('(orientation:landscape)').matches || mobileSheet?.state() !== 'list')); // SOFTM-MARKER-PERSIST 날짜:20260915 : 선택 복원은 지도 이동 없이 적용하고 사용자 목록 조작만 따라감
         };
         const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
         const observe = () => { photoObserver.disconnect(); updateScrollTail(); list.querySelectorAll('.row:not(:has(.care-result-photo))').forEach(row => photoObserver.observe(row)); schedule(); }; // SOFTM-LIST-SCROLL-END 날짜:20260910 : 목록이 다시 그려질 때 끝 스크롤 여유도 새 높이로 갱신
@@ -707,6 +722,7 @@
         tail.className = 'care-saved-scroll-tail'; tail.setAttribute('aria-hidden', 'true');
         let active = null, frame = 0, follow = false;
         /** SOFTM-SAVED-SELECTION START 날짜:20260914 : 클릭한 기관을 마커 갱신의 자동 스크롤 선택이 덮지 않도록 유지 */
+        bindSelectionIntent(bar); // SOFTM-MARKER-PERSIST 날짜:20260915 : 담은 기관의 마커 선택도 실제 목록 조작 전까지 유지
         let explicitId = null;
         document.addEventListener('click', event => {
             const card = event.target.closest('[data-basket-id]');
@@ -744,6 +760,7 @@
             const atEnd = ownScroll
                 ? bar.scrollHeight > bar.clientHeight && bar.scrollTop + bar.clientHeight >= bar.scrollHeight - 2
                 : document.documentElement.scrollHeight > root.innerHeight && root.scrollY + root.innerHeight >= document.documentElement.scrollHeight - 2;
+            if (detailSelection?.workspace === workspace) { options.mobileFocus?.(detailSelection.id, false, true); return; } // SOFTM-MARKER-PERSIST 날짜:20260915 : 지도에서 선택한 담은 기관을 화면 복원의 자동 카드 선택보다 우선
             const card = cards.find(node => node.dataset.basketId === explicitId) || (atEnd ? visible.at(-1) : atStart ? visible[0] : visible.find(node => node.getBoundingClientRect().bottom > selectionLine) || visible.at(-1)); // SOFTM-SAVED-SELECTION 날짜:20260914 : 직접 선택한 담은 기관을 자동 가시 카드보다 우선
             /** SOFTM-SAVED-SCROLL-EARLY END */
             if (!card) return;
@@ -1118,7 +1135,8 @@
     function contains(id) { return basket?.has(id) || false; }
     function refreshMatch() { matchController?.refresh(); } // SOFTM-CARE-MATCH 날짜:20260910 : 전체 조회 완료와 진행 상태를 공용 설명에 전달
     /** SOFTM-RESULT-SHEET START 날짜:20260911 : 결과 헤더 문구와 펼침 상태를 DOM 없이 회귀검사하도록 공개 */
-    root.CareMapExperience = Object.freeze({ showResultsSheet, refreshMatch, init, createSheetState, createSheetSummary, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
+    // SOFTM-MARKER-PERSIST 날짜:20260915 : 새 검색에서 선택 고정을 해제할 수 있도록 공용 진입점을 제공
+    root.CareMapExperience = Object.freeze({ showResultsSheet, refreshMatch, init, createSheetState, createSheetSummary, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, releaseDetailSelection, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-SEARCH-MAP-SCROLL 날짜:20260907 : 조회 화면에서 공용 지도 이동 효과를 호출할 수 있도록 공개
     /** SOFTM-RESULT-SHEET END */
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);

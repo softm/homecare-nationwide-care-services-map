@@ -164,13 +164,14 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
 <link rel="stylesheet" href="care-basket-share.css?v=20260911"> <!-- SOFTM-BASKET-SHARE 날짜:20260911 : 모바일에서도 공유 링크와 확인 조작을 제공 -->
 <script src="care-basket-share.js?v=20260915-text1"></script> <!-- SOFTM-SHARE-URL 날짜:20260915 : 안내 문구가 섞인 기존 공유 링크 복원을 즉시 적용 -->
-<script src="map-experience.js?v=20260914-saved-selection1"></script> <!-- SOFTM-DETAIL-MAP-PERSIST 날짜:20260914 : 팝업 종료 후 지도 위치 유지 동작을 이전 캐시 없이 적용 -->
+<script src="map-experience.js?v=20260915-marker-persist1"></script> <!-- SOFTM-MARKER-PERSIST 날짜:20260915 : 팝업 종료 후 선택 유지 동작을 이전 캐시 없이 적용 -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 최신 조회만 완료 처리해 연속 조건 변경과 지도 이동 결과가 뒤섞이지 않도록 유지 */
 let advancedSearch=null,daycareSearchGeneration=0,activeDaycareSearch=null,mapProgressGeneration=0;
 function beginDaycareSearch(feedback=null){
+ globalThis.CareMapExperience?.releaseDetailSelection(); // SOFTM-MARKER-PERSIST 날짜:20260915 : 새 검색 결과에는 이전 기관의 선택 고정을 이어가지 않음
  globalThis.CareMapExperience?.exitBasketMap(); // SOFTM-BASKET-MAP 날짜:20260904 : 새 검색은 보존한 지도와 기본 조회 조건으로 복귀한 뒤 실행
  if(!feedback)advancedSearch?.cancel();
  daycareMatchPending=true;globalThis.CareMapExperience?.refreshMatch(); // SOFTM-CARE-MATCH 날짜:20260910 : 새 조회 중에는 이전 집계의 조건 설명을 감춤
@@ -512,7 +513,7 @@ function createCenterMarker(c,v,label=listRank(c)||1){const pos=new naver.maps.L
 let daycareDetailTimer=null,daycareDetailGeneration=0,daycareEmphasizedMarker=null,daycareOriginalIcon=null;
 function openCenter(c,m,previousView=null,instant=false){ // SOFTM-SCROLL-DETAIL 날짜:20260909 : 목록 스크롤 전환은 강조 대기 없이 내용을 즉시 표시
  const viewBefore=previousView||popupViewState||(mapReady?{lat:naverMap.getCenter().lat(),lng:naverMap.getCenter().lng(),zoom:naverMap.getZoom()}:null);
- closeMapPopup(false);CareMapExperience.beginDetail(Boolean(m));popupViewState=viewBefore;
+ closeMapPopup(false);CareMapExperience.beginDetail(Boolean(m),c.i);/* SOFTM-MARKER-PERSIST 날짜:20260915 : 지도 선택을 공용 목록에 보존 */popupViewState=viewBefore;
  const generation=daycareDetailGeneration;skipIdleUntil=Date.now()+7000;
  function reveal(){
   if(generation!==daycareDetailGeneration)return;
@@ -597,7 +598,7 @@ async function showOnMap(id){
  if(CareMapExperience.isBasketMap()&&!CareMapExperience.contains(id))CareMapExperience.exitBasketMap(); // SOFTM-BASKET-MAP 날짜:20260904 : 담지 않은 검색 기관을 열 때는 원래 검색 지도에서 표시
  const c=DATA.find(x=>x.i===id);if(!c)return;
  const viewBefore=popupViewState||(mapReady?{lat:naverMap.getCenter().lat(),lng:naverMap.getCenter().lng(),zoom:naverMap.getZoom()}:null);
- closeMapPopup(false);CareMapExperience.beginDetail(mapReady);const generation=daycareDetailGeneration;
+ closeMapPopup(false);CareMapExperience.beginDetail(mapReady,c.i);/* SOFTM-MARKER-PERSIST 날짜:20260915 : 목록 선택을 공용 목록에 보존 */const generation=daycareDetailGeneration;
  if(!mapReady){openCenter(c,null,viewBefore);return}
  if(!CareMapExperience.isBasketMap()&&!selected.has(c.i)){selected.add(c.i);render()} // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결
  showMapProgress(`목록 ${listRank(c)||'-'}번 기관 확인 중`);let found=mapMarkers.find(m=>m.centerId===id);
