@@ -309,7 +309,7 @@ test('통합 초기 위치 거절은 모달·전국 좌표 조회 없이 완료�
  const button={disabled:false,setAttribute(){},removeAttribute(){}};
  const context=vm.createContext({Promise,Date,Set,Map,$:()=>button});
  vm.runInContext(`
- let mapReady=true,initialLocationViewport=null,refreshTimer=null,skipIdleUntil=0,careViewportResearch=null;
+ let mapReady=true,initialLocationViewport=null,refreshTimer=null,skipIdleUntil=0,careViewportResearch=null,careSelectionViewport=false; // SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 내부 이동 보존 상태를 조회 테스트에도 반영
  let viewport='national',searches=0,previews=0,notices=0,scheduled=0;
  const CareMapExperience={isBasketMap:()=>false};
  const CareLocation={hideNotice(){},request:async()=>{throw new Error('denied')},showNotice(){notices++},info:()=>({title:'denied'})};
@@ -331,7 +331,11 @@ test('통합 초기 위치 거절은 모달·전국 좌표 조회 없이 완료�
  assert.equal(vm.runInContext('searches+notices+scheduled',context),0);
  assert.equal(vm.runInContext('previews',context),1);
  assert.equal(button.disabled,false);
- vm.runInContext("viewport='local';scheduleRefresh()",context);
+ /** SOFTM-SELECTION-VIEWPORT START 날짜:20260915 : 내부 이동 뒤 idle은 막고 사용자 탐색 해제 뒤에는 다시 조회 */
+ vm.runInContext("viewport='local';careSelectionViewport=true;scheduleRefresh()",context);
+ assert.equal(vm.runInContext('scheduled',context),0);
+ vm.runInContext("careSelectionViewport=false;scheduleRefresh()",context);
+ /** SOFTM-SELECTION-VIEWPORT END */
  assert.equal(vm.runInContext('scheduled',context),1);
 });
 /** SOFTM-LOCATION-PREVIEW END */
