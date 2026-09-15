@@ -48,3 +48,26 @@ test('기관 상세를 닫아도 두 지도의 현재 중심과 배율을 변경
 });
 /** SOFTM-DETAIL-MAP-PERSIST END */
 /** SOFTM-MAP-FOCUS END */
+
+/** SOFTM-MARKER-PERSIST START 날짜:20260915 : 검색 목록의 레이아웃·사진 갱신과 복귀 스크롤이 명시 선택을 덮는 회귀를 방지 */
+test('검색 목록은 직접 선택한 마커를 복귀 후 유지하고 사용자 입력 후 스크롤 선택을 재개한다', async () => {
+ const {runInNewContext} = await import('node:vm');
+ const source = readFileSync(new URL('../map-experience.js', import.meta.url), 'utf8');
+ const selection = source.slice(source.indexOf('    let detailSelection = null;'), source.indexOf('    function beginDetail('));
+ const start = source.indexOf('        const sync = () => {', source.indexOf('let active = null, frame = 0, scrollRequested = false'));
+ const sync = source.slice(start, source.indexOf('        const schedule =', start));
+ const focused = [], details = [], events = {};
+ const rows = ['a','b','c'].map(id => ({dataset:{id},classList:{add(){},remove(){}},setAttribute(){},removeAttribute(){}}));
+ const context = {workspace:'search',frame:0,scrollRequested:false,active:null,media:{matches:false},
+  list:{getBoundingClientRect:()=>({}),querySelectorAll:()=>rows,addEventListener:(name,fn)=>{events[name]=fn;}},
+  pickSearchScrollRow:()=>rows[0], options:{mobileFocus:(...args)=>focused.push(args),scrollDetail:id=>details.push(id)}};
+ runInNewContext(selection + sync + "bindSelectionIntent(list); detailSelection={id:'c',workspace:'search'}; sync();",context);
+ context.scrollRequested=true;
+ runInNewContext('sync()',context);
+ assert.deepEqual(focused.at(-1),['c',false]); assert.equal(details.length,0);
+ runInNewContext("detailSelection.id='off-page'; sync()",context);
+ assert.equal(focused.length,2);
+ events.wheel(); context.scrollRequested=true; runInNewContext('sync()',context);
+ assert.deepEqual(focused.at(-1),['a',true]); assert.equal(details.at(-1),'a');
+});
+/** SOFTM-MARKER-PERSIST END */

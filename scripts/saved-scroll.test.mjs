@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 const source = fs.readFileSync(new URL('../map-experience.js', import.meta.url), 'utf8');
+const selectionCode = source.slice(source.indexOf('    let detailSelection = null;'), source.indexOf('    function beginDetail(')); // SOFTM-MARKER-PERSIST 날짜:20260915 : 실제 선택 고정과 입력 해제 코드를 함께 실행
 const code = source.slice(source.indexOf('    function installSavedScroll()'), source.indexOf('    /** SOFTM-SAVED-SCROLL END */'));
 function harness(ownScroll = true) {
     const events = {}, rootEvents = {}, frames = [], focused = [], details = [];
@@ -19,17 +20,17 @@ function harness(ownScroll = true) {
     const bar = { scrollTop: 0, scrollHeight: 1100, clientHeight: 600,
         getBoundingClientRect: () => ({ top: ownScroll ? 100 : 0, bottom: ownScroll ? 700 : 1600, left: 0, right: 400 }),
         querySelector: selector => selector === '.care-basket-items' ? list : { getBoundingClientRect: () => ({ height: 60 }) },
-        addEventListener: (type, fn) => { events[type] = fn; }
+        addEventListener: (type, fn) => { const previous = events[type]; events[type] = event => { previous?.(event); fn(event); }; }
     };
     const ctx = { bar, workspace: 'saved', tabs: { getBoundingClientRect: () => ({ bottom: 100 }) },
         root: { innerWidth: 1200, innerHeight: 800, scrollY: 0, addEventListener: (type, fn) => { rootEvents[type] = fn; } },
-        document: { addEventListener: (type, fn) => { events[type] = fn; }, documentElement: { scrollHeight: 1600 }, createElement: () => tail, body: { classList: { contains: () => dragging } }, querySelector: () => ({}) },
+        document: { addEventListener: (type, fn) => { const previous = events[type]; events[type] = event => { previous?.(event); fn(event); }; }, documentElement: { scrollHeight: 1600 }, createElement: () => tail, body: { classList: { contains: () => dragging } }, querySelector: () => ({}) },
         getComputedStyle: () => ({ overflowY: ownScroll ? 'auto' : 'visible', visibility: 'visible' }),
         requestAnimationFrame: fn => { frames.push(fn); return frames.length; }, MutationObserver: class { observe() {} },
         options: { mobileFocus: (...args) => focused.push(args), scrollDetail: id => details.push(id) }
     };
     const flush = () => { while (frames.length) frames.shift()(); };
-    vm.runInNewContext(code + '\ninstallSavedScroll();', ctx); flush();
+    vm.runInNewContext(selectionCode + code + '\ninstallSavedScroll();', ctx); flush();
     return { ctx, cards, focused, details, tail, click(index) { events.click({target:{closest: selector => selector === '[data-basket-id]' ? cards[index] : null}}); flush(); }, redraw() { rootEvents.resize(); flush(); }, wheel() { events.wheel(); }, // SOFTM-SAVED-SELECTION 날짜:20260914 : 클릭·레이아웃 갱신·사용자 스크롤을 분리해 우선순위 검사
          setDragging: value => { dragging = value; },
         scroll(value, end = false) { offset = value; ctx.root.scrollY = end ? 800 : value; bar.scrollTop = end ? 500 : value; (ownScroll ? events : rootEvents).scroll(); flush(); }
@@ -82,3 +83,15 @@ test('담은 기관 클릭은 갱신 후에도 유지되고 사용자 스크롤�
  h.wheel();h.scroll(0);assert.equal(h.focused.at(-1)[0],'a');
 });
 /** SOFTM-SAVED-SELECTION END */
+
+/** SOFTM-MARKER-PERSIST START 날짜:20260915 : 마커 선택 후 자동 복귀 스크롤과 실제 사용자 입력을 구분 */
+test('담은 기관의 마커를 선택하면 화면 복원 후에도 유지되고 휠 조작으로 전환된다', () => {
+ const h = harness();
+ vm.runInNewContext("detailSelection = {id:'c',workspace:'saved'}", h.ctx);
+ h.redraw(); h.scroll(0);
+ assert.deepEqual(h.focused.at(-1), ['c', false, true]);
+ assert.equal(h.details.length, 0);
+ h.wheel(); h.scroll(0);
+ assert.equal(h.focused.at(-1)[0], 'a');
+});
+/** SOFTM-MARKER-PERSIST END */
