@@ -122,7 +122,7 @@
 <!-- SOFTM-STITCH-FONT START 날짜:20260914 : 외부 폰트 연결 없이 한글·영문 서체를 동일하게 제공 -->
 <link rel="stylesheet" href="stitch-fonts.css?v=20260914-1">
 <!-- SOFTM-STITCH-FONT END -->
-<link rel="stylesheet" href="stitch-desktop.css?v=20260915-menu-left1"> <!-- SOFTM-MENU-LEFT 날짜:20260915 : PC·모바일·전체 지도에서 메뉴를 최상단 왼쪽에 고정 -->
+<link rel="stylesheet" href="stitch-desktop.css?v=20260915-controls1"> <!-- SOFTM-MENU-LEFT 날짜:20260915 : PC·모바일·전체 지도에서 메뉴를 최상단 왼쪽에 고정 -->
 </head>
 <body class="stitch-desktop care-map-page care-region-pending" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-REGION-ENTRY 날짜:20260913 : 자료 로딩 중에도 임의 전국 지도를 노출하지 않고 지역 진입 화면을 준비 -->
 <!-- SOFTM-STITCH-DESKTOP START 날짜:20260914 : 지도 탐색 중 브랜드와 이용 안내에 바로 접근하도록 원본 헤더를 연결 -->
@@ -205,6 +205,7 @@
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
 <link rel="stylesheet" href="care-basket-share.css?v=20260911"> <!-- SOFTM-BASKET-SHARE 날짜:20260911 : 모바일에서도 공유 링크와 확인 조작을 제공 -->
 <script src="care-basket-share.js?v=20260915-text1"></script> <!-- SOFTM-SHARE-URL 날짜:20260915 : 안내 문구가 섞인 기존 공유 링크 복원을 즉시 적용 -->
+<script src="stitch-controls.js?v=20260915-1"></script> <!-- SOFTM-STITCH-CONTROLS 날짜:20260915 : 원본 디자인의 바로가기와 기존 검색·비교 상태를 연결 -->
 <script src="map-experience.js?v=20260915-marker-persist1"></script> <!-- SOFTM-MARKER-PERSIST 날짜:20260915 : 팝업 종료 후 선택 유지 동작을 이전 캐시 없이 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
@@ -404,10 +405,14 @@ function updateStats(){requestAnimationFrame(updateCareResultSummary);/* SOFTM-C
 function renderList(){
  destroyRenderedListAds();sortRows(areaRows);
  $('list').innerHTML=areaRows.length?areaRows.map((c,i)=>`<article class="row" data-id="${esc(c.i)}" role="button" tabindex="0" aria-label="${esc(c.n)} 상세 보기">
+  <!-- SOFTM-STITCH-CARD START 날짜:20260915 : 평가·주소·기관 현황을 분리하고 주요 행동을 직접 제공해 탐색 단계를 줄임 -->
   <div class="care-result-heading"><span class="care-result-rank">${i+1}</span><h3>${esc(c.n)}</h3></div>
-  <p class="care-result-evaluation"><b class="row-score">${esc(gradeText(c))} · ${Number.isFinite(c.es)?scoreText(c)+'점':'총점 미공개'}</b> · ${esc(c.p+' '+c.c)}</p>
-  <p>${esc(c.a||'주소 확인 필요')}</p><p class="care-result-summary">${c.z?`정원 ${c.z}명 · `:''}${esc(c.tn||CONFIG.label)}</p>
-  <div class="care-row-actions">${CareDetailLayout.listButton(c,cachedCoord(c))}${CareMapExperience.button(c)}<label class="care-map-display"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 지도 표시"><span>지도에 표시</span></label></div> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 목록에서 상세를 열지 않고 해당 기관 길안내를 바로 시작 -->
+  <p class="care-result-evaluation"><b class="row-score">${esc(gradeText(c))} · ${Number.isFinite(c.es)?scoreText(c)+'점':'총점 미공개'}</b></p>
+  <p class="stitch-card-address">${esc(c.a||'주소 확인 필요')}${Number.isFinite(c._distance)?` · ${c._distance.toFixed(1)}km`:''}</p>
+  <div class="care-result-summary"><span>${c.z?`정원 <b>${c.z}명</b> · `:''}${esc(c.tn||CONFIG.label)}</span><span>${CONFIG.source==='nhis'?`공단 평가: ${c.ey?`${esc(c.ey)}년 · ${esc(gradeText(c))}`:'평가연도 미확인'}`:'심평원 의료기관 개설현황'}</span></div>
+  <div class="care-row-actions">${CareMapExperience.button(c)}${CONFIG.source==='nhis'?`<button type="button" class="stitch-phone" data-stitch-phone="${esc(c.i)}" aria-label="${esc(c.n)} 전화번호 확인">☎ 전화</button>`:''}<button type="button" class="stitch-detail" data-saved-detail="${esc(c.i)}">ⓘ 상세정보</button>${CareDetailLayout.listButton(c,cachedCoord(c))}<label class="care-map-display"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 지도 표시"><span>지도에 표시</span></label></div>
+  <p class="stitch-phone-result" data-phone-result hidden role="status"></p>
+  <!-- SOFTM-STITCH-CARD END -->
  </article>${listAdHtml(i,areaRows.length)}`).join(''):'<div class="empty">현재 지도 화면에 조건과 일치하는 기관이 없습니다.</div>';
  for(const row of $('list').querySelectorAll('.row')){
   row.addEventListener('click',e=>{if(e.target.closest('input,button,a,label'))return;focusCenter(row.dataset.id)});
@@ -945,7 +950,7 @@ function bootUnselected(){
 }
 /** SOFTM-TYPE-ENTRY END */
 /** SOFTM-TYPE-BOOT START 날짜:20260911 : 선택한 유형이 있을 때만 기관 데이터를 불러오고 재방문 유형을 URL에 반영 */
-async function boot(){if(!TYPE){bootUnselected();return;}if(!CATEGORY_ORDER.includes(requested)){params.set('type',TYPE);const url=new URL(location.href);url.search=params.toString();history.replaceState(null,'',url);}MANIFEST=await CareData.manifest();CONFIG=MANIFEST[TYPE];renderNav();initMeta();updateSeo();bindEvents();await loadCategoryData();initFilters();restoreState();preparePhotoInstitution();advancedSearch=await CareAdvancedSearch.mount({host:$('advancedSearch'),type:TYPE,rows:DATA,resultTarget:document.querySelector('.layout'),onChange:refreshAfterFilterClick,region:()=>({province:$('province').value,city:$('city').value})});CareResultSort.mount({select:$('sort'),center:()=>mapReady?{lat:map.getCenter().lat(),lng:map.getCenter().lng()}:null,coord:cachedCoord,apply:applySort});CareMapExperience.init({type:TYPE,match:careMatchAdapter(),rows:()=>DATA,compare:compareSelected,basketMap:careBasketAdapter(),mobileFocus:focusMobileRow,scrollDetail:updateDetailFromScroll,detail:focusCenter,closeDetail,resizeMap:()=>{if(!mapReady)return;const center=map.getCenter();clearTimeout(refreshTimer);skipIdleUntil=Math.max(skipIdleUntil,Date.now()+1200);window.naver.maps.Event.trigger(map,"resize");map.setCenter(center)}});applyFilters();initCareRegionEntry();showInitialPhotoPreview();initCareAds();loadNaver();mountCategoryPicker()} // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 공용 상세검색이 실제 조회 완료와 결과 영역을 안내하도록 연결 // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결 // SOFTM-MOBILE-MAP 날짜:20260909 : 공용 목록 스크롤을 각 지도의 마커 강조와 연결 // SOFTM-MOBILE-SHEET 날짜:20260909 : 높이 변경이 상세 이동의 재검색 차단 시간을 줄이지 않도록 보존 // SOFTM-RESULT-SORT 날짜:20260909 : 정렬 시 검색 범위와 지도 이동을 보존하고 공용 기준을 적용 // SOFTM-CARE-MATCH 날짜:20260910 : 질문·조건별 근거를 기존 지도 부팅과 연결 // SOFTM-PHOTO-SELECT 날짜:20260910 : 사진에서 선택한 기관기호를 초기 목록·상세·지도에 동일하게 적용
+async function boot(){if(!TYPE){bootUnselected();return;}if(!CATEGORY_ORDER.includes(requested)){params.set('type',TYPE);const url=new URL(location.href);url.search=params.toString();history.replaceState(null,'',url);}MANIFEST=await CareData.manifest();CONFIG=MANIFEST[TYPE];renderNav();initMeta();updateSeo();bindEvents();await loadCategoryData();initFilters();restoreState();preparePhotoInstitution();advancedSearch=await CareAdvancedSearch.mount({host:$('advancedSearch'),type:TYPE,rows:DATA,resultTarget:document.querySelector('.layout'),onChange:refreshAfterFilterClick,region:()=>({province:$('province').value,city:$('city').value})});CareResultSort.mount({select:$('sort'),center:()=>mapReady?{lat:map.getCenter().lat(),lng:map.getCenter().lng()}:null,coord:cachedCoord,apply:applySort});CareMapExperience.init({type:TYPE,match:careMatchAdapter(),rows:()=>DATA,compare:compareSelected,basketMap:careBasketAdapter(),mobileFocus:focusMobileRow,scrollDetail:updateDetailFromScroll,detail:focusCenter,closeDetail,resizeMap:()=>{if(!mapReady)return;const center=map.getCenter();clearTimeout(refreshTimer);skipIdleUntil=Math.max(skipIdleUntil,Date.now()+1200);window.naver.maps.Event.trigger(map,"resize");map.setCenter(center)}});StitchControls.mount({phone:async id=>{const row=DATA.find(item=>item.i===id);return row?basicField((await fetchOfficialTab(row,11)).fields,['전화']):''}});applyFilters();initCareRegionEntry();showInitialPhotoPreview();initCareAds();loadNaver();mountCategoryPicker()} // SOFTM-STITCH-CONTROLS 날짜:20260915 : 카드 전화 확인과 필터·비교 요약을 기존 초기화 이후 연결 // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 공용 상세검색이 실제 조회 완료와 결과 영역을 안내하도록 연결 // SOFTM-WORKSPACE 날짜:20260905 : 담은 기관의 상세 선택과 검색 체크를 분리하고 새 작업 화면을 연결 // SOFTM-MOBILE-MAP 날짜:20260909 : 공용 목록 스크롤을 각 지도의 마커 강조와 연결 // SOFTM-MOBILE-SHEET 날짜:20260909 : 높이 변경이 상세 이동의 재검색 차단 시간을 줄이지 않도록 보존 // SOFTM-RESULT-SORT 날짜:20260909 : 정렬 시 검색 범위와 지도 이동을 보존하고 공용 기준을 적용 // SOFTM-CARE-MATCH 날짜:20260910 : 질문·조건별 근거를 기존 지도 부팅과 연결 // SOFTM-PHOTO-SELECT 날짜:20260910 : 사진에서 선택한 기관기호를 초기 목록·상세·지도에 동일하게 적용
 /** SOFTM-MAP-EXPERIENCE END */
 boot().catch(error=>{hideLoading();$('list').innerHTML=`<div class="empty">${esc(error.message)}</div>`;setStatus('데이터 로드 실패',error.message)});
 </script>

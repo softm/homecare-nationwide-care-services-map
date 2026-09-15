@@ -268,3 +268,65 @@ body.stitch-desktop.care-map-page .care-popup-basket-action .care-basket-button[
  body.stitch-desktop .care-sort-footer { padding:12px 20px calc(16px + env(safe-area-inset-bottom)); }
 }
 /** SOFTM-STITCH-SURFACES END */
+/** SOFTM-STITCH-REFERENCE START 날짜:20260915 : 첨부 시안의 넓은 카드·민트 평가표·지도 하단 비교함을 실제 기능을 유지하며 적용 */
+.stitch-compare-tray,.stitch-filter-summary { display:none; }
+body.stitch-desktop .stitch-saved-shortcut { margin-left:auto; border:0; border-radius:20px; padding:5px 10px; background:#e2ecff; color:#1744ba; font:inherit; font-size:12px; cursor:pointer; }
+body.stitch-desktop .care-result-summary { display:flex; flex-direction:column; gap:10px; padding:12px 14px; border-radius:10px; background:#eff3ff; font-size:14px; line-height:1.7; color:#233731; }
+body.stitch-desktop .stitch-phone-result { padding:10px; border-radius:8px; background:#e8f6f2; }
+body.stitch-desktop .stitch-phone-result[hidden] { display:none; }
+body.stitch-desktop .stitch-phone-result a { color:#004541; font-weight:700; }
+body.stitch-desktop.care-map-page .row .care-row-actions { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(65px,.7fr) minmax(90px,.9fr); gap:8px; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-basket-button { grid-column:1; grid-row:1; background:#e6eeff; border:0; color:#004541; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-basket-button[aria-pressed="true"] { background:#004541; color:#fff; }
+body.stitch-desktop .row .care-row-actions > :is(.stitch-phone,.stitch-detail) { min-height:40px; padding:8px; border:0; border-radius:8px; background:#e6eeff; color:#0c1c2e; cursor:pointer; }
+body.stitch-desktop .row .care-row-actions > .stitch-detail { grid-column:3; grid-row:1; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-list-navigation { grid-column:2/4; grid-row:2; justify-self:end; min-height:30px; padding:4px 10px; border:0; background:transparent; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-map-display { grid-column:1; grid-row:2; }
+body.stitch-desktop .row .care-row-actions > :focus-visible,body.stitch-desktop .stitch-compare-tray button:focus-visible { outline:3px solid #43877b; outline-offset:3px; }
+@media (min-width:1001px) {
+ body.stitch-desktop.care-map-page { --care-desktop-sidebar:clamp(430px,33.5vw,537px); --stitch-filter-summary-height:0px; }
+ body.stitch-desktop:not(.care-map-focus) .filters { height:146px; padding:16px 24px; overflow:visible; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filters .filter-grid { grid-template-columns:1fr 1fr 100px; gap:12px 8px; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid .care-voice-input { grid-column:1/3; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid .search-btn { grid-column:3; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid #province { grid-column:1; width:100%; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid #city { grid-column:2; width:100%; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid .care-mobile-filter-toggle { grid-column:3; background:#abefe8; color:#004541; border-radius:22px; }
+ body.stitch-desktop .filter-grid :is(input,select,button) { min-height:46px; font-size:14px; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filters > .stitch-filter-summary:not([hidden]) { display:flex; position:absolute; top:146px; left:0; width:100%; padding:0 24px 14px; box-sizing:border-box; background:#fff; gap:6px; flex-wrap:wrap; }
+ .stitch-filter-summary button { border:0; padding:5px 10px; border-radius:18px; font:inherit; font-size:12px; background:#e6eeff; color:#17332f; cursor:pointer; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:calc(202px + var(--stitch-filter-summary-height))!important; height:calc(100% - 202px - var(--stitch-filter-summary-height))!important; }
+ body.stitch-desktop.care-mobile-filters-open .filters { height:auto; overflow:auto; }
+ body.stitch-desktop .list-head { padding:16px 24px 8px; }
+ body.stitch-desktop .list-head h2 { font-size:21px; }
+ body.stitch-desktop .select-tools { padding:0 24px 14px; gap:8px; }
+ body.stitch-desktop .layout #list { padding:24px; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row { padding:20px; gap:10px 12px; margin-bottom:20px; border-radius:16px; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row > .care-result-evaluation { grid-column:1; grid-row:1; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row > .care-result-heading { grid-column:1; grid-row:2; align-items:flex-start; }
+ body.stitch-desktop .row h3 { font-size:20px; line-height:1.45; }
+ body.stitch-desktop .row .row-score { display:inline-block; border-radius:20px; padding:3px 10px; background:#abefe8; color:#004541; font-size:12px; font-weight:700; }
+ body.stitch-desktop .care-result-rank { background:#004541; color:#fff; border:0; flex-shrink:0; }
+ body.stitch-desktop .row .stitch-card-address { color:#60706b; font-size:14px; }
+ body.stitch-desktop .row.care-scroll-active { border-color:#004541; box-shadow:0 0 0 1px #004541,0 2px 4px #00454118; }
+ body.stitch-desktop .stitch-compare-tray:not([hidden]) { position:fixed; display:flex; align-items:center; gap:16px; bottom:24px; left:calc(var(--care-desktop-sidebar) + 24px); right:84px; z-index:175; padding:16px 20px; border:1px solid #e5eeff; border-radius:18px; background:#fff; box-shadow:0 10px 20px #0c1c2e26; }
+ body.stitch-desktop.care-map-focus .stitch-compare-tray { display:none; }
+ .stitch-tray-icon { display:grid; place-items:center; width:48px; height:48px; flex-shrink:0; background:#abefe8; color:#004541; border-radius:12px; font-size:25px; }
+ .stitch-tray-copy { flex:1; min-width:0; }
+ .stitch-tray-copy strong { font-size:15px; }
+ .stitch-tray-copy p { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:#50645f; margin:4px 0 0; }
+ .stitch-compare-tray button { min-height:46px; padding:10px 16px; border:0; border-radius:9px; font:inherit; font-size:14px; cursor:pointer; white-space:nowrap; background:#004541; color:#fff; }
+ .stitch-compare-tray [data-basket-clear] { background:transparent; color:#687873; padding:8px; font-size:12px; }
+}
+@media (min-width:1001px) and (max-width:1250px) {
+ body.stitch-desktop .stitch-compare-tray:not([hidden]) { right:20px; gap:10px; padding:12px; flex-wrap:wrap; }
+ .stitch-tray-copy { flex-basis:calc(100% - 60px); }
+ .stitch-compare-tray [data-basket-open] { flex:1; }
+}
+/** SOFTM-STITCH-REFERENCE END */
+/** SOFTM-STITCH-TRAY-COLOR START 날짜:20260915 : 기존 비교표 버튼의 파란색 기본값보다 시안의 청록색 행동을 우선 */
+body.stitch-desktop .stitch-compare-tray [data-basket-open] { background:#004541; border-color:#004541; color:#fff; }
+/** SOFTM-STITCH-TRAY-COLOR END */
+/** SOFTM-STITCH-RESET START 날짜:20260915 : 개별 필터와 전체 조건 초기화의 행동 위계를 구분 */
+body.stitch-desktop .stitch-filter-summary .stitch-reset { background:transparent; color:#61716c; margin-left:auto; }
+/** SOFTM-STITCH-RESET END */
