@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const daycareHtml = readFileSync(new URL('../nationwide-daycare-map.html', import.meta.url), 'utf8');
-const viewportContext = vm.createContext({ window: {} });
+const viewportContext = vm.createContext({ window: {}, setTimeout }); // SOFTM-QUERY-YIELD 날짜:20260916 : 입력 처리 양보를 실제 타이머로 검증
 vm.runInContext(readFileSync(new URL('../viewport-regions.js', import.meta.url), 'utf8'), viewportContext);
 const mapViewportSearch = viewportContext.window.MapViewportSearch; // SOFTM-VIEWPORT-RESOLVE 날짜:20260914 : 실제 완료순 처리기를 두 지도 조회 회귀검사에서 함께 실행
 function daycareFunction(name) {
@@ -177,7 +177,7 @@ function makeCareHarness(rows) {
     });
     vm.runInContext(`
         let careMatchRows=[],careMatchScope='',careMatchPending=false,careMatchError=false;const CareMapExperience={refreshMatch(){},exitBasketMap(){}}; // SOFTM-CARE-MATCH 날짜:20260910 : 실제 전체 후보·조회 경쟁 검증에 설명 상태를 연결
-        let refreshToken=0,resultCount=0,activeCareQuery=null,mapReady=true,careUnresolvedCount=0; // SOFTM-COMPACT-STATUS 날짜:20260914 : 목록의 위치 미확인 집계 상태를 실제 조회와 일치
+        let careListVersion=0,refreshToken=0,resultCount=0,activeCareQuery=null,mapReady=true,careUnresolvedCount=0; // SOFTM-COMPACT-STATUS 날짜:20260914 : 목록의 위치 미확인 집계 상태를 실제 조회와 일치
         function requestAnimationFrame(){}function updateCareResultSummary(){} // SOFTM-COMPACT-STATUS 날짜:20260914 : 데이터 경합 검사는 브라우저의 요약 렌더링 예약과 분리
         let filtered=externalRows,areaRows=[],selected=new Set(),markers=new Map(),basePoint=null,skipIdleUntil=0;
         const PAGE_LIMIT=90,MAP_CANDIDATE_LIMIT=300;
@@ -187,7 +187,7 @@ function makeCareHarness(rows) {
         class Marker {constructor(options){this.options=options}setIcon(icon){this.options.icon=icon}} // SOFTM-MARKER-PROGRESS 날짜:20260913 : 점진 표시한 마커의 최종 순번 갱신을 검증
         const window={naver:{maps:{LatLng,LatLngBounds,Marker,Event:{addListener(){}}}}};
         const map={getBounds:()=>new LatLngBounds(),getCenter:()=>new LatLng(10,10),fitBounds(){}};
-        function clearMarkers(){markers.clear()}
+        async function clearQueryMarkers(){clearMarkers()} function clearMarkers(){markers.clear()} // SOFTM-QUERY-YIELD 날짜:20260916 : 비동기 마커 정리 계약을 조회 회귀검사에 반영
         function cachedCoord(row){return row.coord}
         function hav(){return 0}function sortRows(){}function markerIcon(){}
         function geocode(row){return externalGeocode(row)}

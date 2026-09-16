@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
-const context = vm.createContext({ window: {} });
+const context = vm.createContext({ window: {}, setTimeout }); // SOFTM-QUERY-YIELD 날짜:20260916 : 입력 처리 양보를 실제 타이머로 검증
 /** SOFTM-DATA-UNIFIED START 날짜:20260904 : 폐기한 JS 대신 실제 지도와 같은 data/care 자료를 사용 */
 for (const file of ['region-bounds.js', 'viewport-regions.js']) vm.runInContext(read(file), context);
 const api = context.window.MapViewportSearch;
@@ -138,7 +138,7 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
     class Marker {setIcon(icon){this.icon=icon} /* SOFTM-MARKER-PROGRESS 날짜:20260913 : 점진 표시 후 순번 갱신도 실제 지도 API처럼 지원 */ constructor(options) { this.options = options; } }
     const sandbox = vm.createContext({
         window: { naver: { maps: { LatLng, LatLngBounds, Marker, Event: { addListener() {} } } } }, MapViewportSearch: api,
-        mapReady: true, refreshToken: 0, clearMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },
+        mapReady: true, refreshToken: 0, clearMarkers() {}, clearQueryMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },
         cachedCoord: row => row._coord, hav: () => 0, PAGE_LIMIT: 90, MAP_CANDIDATE_LIMIT: 300,
         geocode: async row => row._coord, basePoint: null, showLoading() {}, hideLoading() {},
         careMatchPending: false, careMatchRows: [], CareMapExperience: { refreshMatch() {} }, // SOFTM-CARE-MATCH 날짜:20260910 : 실제 조회 전체 결과를 설명에도 전달하는 계약을 제공
@@ -185,3 +185,24 @@ test('전용 지도도 축소 화면에서 800번째 이후 기관까지 최종 
     assert.equal(sandbox.mapSearchIds.size, 1001);
 });
 /** SOFTM-VIEWPORT-CANDIDATES END */
+
+/** SOFTM-QUERY-YIELD START 날짜:20260916 : 대량 캐시 조회 도중 실제 이벤트 루프의 필터 변경이 처리되고 이전 결과가 멈추는지 검증 */
+test('캐시 좌표 5000개를 처리하는 중 입력 이벤트가 실행되고 이전 조회를 취소함', async () => {
+    let current = true, drawn = 0, inputAt = -1;
+    const input = new Promise(resolve => setTimeout(() => { inputAt = drawn; current = false; resolve(); }, 0));
+    const result = await api.resolve(Array.from({length:5000}, (_, i) => i), value => Promise.resolve(value), {
+        current: () => current, onResult: () => drawn++
+    });
+    await input;
+    assert.ok(inputAt > 0 && inputAt < 5000);
+    assert.equal(result.cancelled, true);
+    assert.equal(drawn, inputAt, '조건 변경 뒤 이전 조회의 마커가 추가되면 안 됨');
+});
+test('입력 처리 시간을 양보해도 전체 후보의 결과·진행 건수를 빠짐없이 유지함', async () => {
+    const seen = [], rows = Array.from({length:257}, (_, i) => i);
+    const result = await api.resolve(rows, value => value, {onResult: value => seen.push(value)});
+    assert.equal(result.cancelled, false);
+    assert.equal(result.done, rows.length);
+    assert.deepEqual(seen.sort((a,b) => a-b), rows);
+});
+/** SOFTM-QUERY-YIELD END */
