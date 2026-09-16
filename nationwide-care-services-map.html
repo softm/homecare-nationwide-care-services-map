@@ -505,18 +505,26 @@ function focusCenter(id){preserveCareSelectionResults();/* SOFTM-SELECTION-VIEWP
 /** SOFTM-MAP-EXPERIENCE END */
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 위치 확인부터 화면 반영까지 같은 요청으로 묶어 진행과 완료 건수를 전달 */
 /** SOFTM-MARKER-CLEAR-YIELD START 날짜:20260916 : 조건 변경 때 기존 수천 마커 제거도 분할하며 이전 마커 정리가 새 조회의 마커를 건드리지 않도록 분리 */
-async function clearQueryMarkers(){
- clearTimeout(markerBlinkTimer);clearTimeout(detailMoveTimer);markerBlinkTimer=null;detailMoveTimer=null;blinkedMarkerId=null;
- const previous=[...markers.values()];markers.clear();closeDetail();
+/** SOFTM-MARKER-DIFF START 날짜:20260917 : 조건이 유지된 기관의 지도 DOM을 재사용하고 제외된 기관만 분할 제거 */
+async function clearQueryMarkers(keep=new Set(),current=()=>true){
+ clearTimeout(markerBlinkTimer);clearTimeout(detailMoveTimer);markerBlinkTimer=null;detailMoveTimer=null;restoreBlinkedMarker();closeDetail();
  if(routeLine){routeLine.setMap(null);routeLine=null}routeOrder=[];
- await MapViewportSearch.resolve(previous,marker=>{marker.setMap(null)});
+ const previous=[...markers.entries()].filter(([id])=>!keep.has(id));
+ await MapViewportSearch.resolve(previous,entry=>entry,{current,onResult([id,marker]){
+  if(markers.get(id)!==marker)return;
+  marker.setMap(null);markers.delete(id);
+  if(mobileActiveMarker===marker){mobileActiveMarker=null;mobileActiveIcon=null}
+ }});
 }
+/** SOFTM-MARKER-DIFF END */
 /** SOFTM-MARKER-CLEAR-YIELD END */
 async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQuery(),partial=false}={}){
  if(!query.current())return {cancelled:true};
  if(globalThis.CareRegionEntry?.waiting())return publishCareResult(query,{count:0,markerCount:0,mapReady:false,scope:'지역 선택 전'}); // SOFTM-REGION-ENTRY 날짜:20260913 : 지역 미선택 상태의 상세조건 변경은 전국 좌표 조회를 시작하지 않음
  if(!mapReady)return showDataPreview(candidates,regionText||'검색결과',query);
- await clearQueryMarkers();if(!query.current())return {cancelled:true};
+ /** SOFTM-MARKER-DIFF START 날짜:20260917 : 새 조건에 남는 마커는 전체 삭제와 재생성을 건너뜀 */
+ await clearQueryMarkers(new Set(candidates.map(c=>c.i)),query.current);if(!query.current())return {cancelled:true};
+ /** SOFTM-MARKER-DIFF END */
  const bounds=map.getBounds(),center={lat:map.getCenter().lat(),lng:map.getCenter().lng()},known=[],unknown=[];
  for(const c of candidates){const p=cachedCoord(c);if(p){c._mapCenterDistance=hav(center,p);known.push(c)}else unknown.push(c)}
  known.sort((a,b)=>a._mapCenterDistance-b._mapCenterDistance);
@@ -534,8 +542,14 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
     const pos=new window.naver.maps.LatLng(v.lat,v.lng);if(!fit&&!bounds.hasLatLng(pos))return;
     /** SOFTM-MARKER-PROGRESS START 날짜:20260913 : 전체 좌표 응답을 기다리지 않고 확인된 기관부터 지도에 표시 */
     placed.push(c);fitBounds.extend(pos);
-    const marker=new window.naver.maps.Marker({map,position:pos,title:c.n,icon:markerIcon(c,placed.length)});
-    window.naver.maps.Event.addListener(marker,'click',()=>{careMapFocus?.enter();focusCenter(c.i)});markers.set(c.i,marker); // SOFTM-MAP-FOCUS-MARKER 날짜:20260914 : 기관 마커를 선택하면 상세를 열기 전에 전체 지도 공간을 확보
+    /** SOFTM-MARKER-DIFF START 날짜:20260917 : 남아 있는 기관은 좌표와 마커를 재사용하고 새 기관만 생성 */
+    let marker=markers.get(c.i);
+    if(marker){if(marker.getMap()!==map)marker.setMap(map)}
+    else{
+     marker=new window.naver.maps.Marker({map,position:pos,title:c.n,icon:markerIcon(c,placed.length)});
+     window.naver.maps.Event.addListener(marker,'click',()=>{careMapFocus?.enter();focusCenter(c.i)});markers.set(c.i,marker);
+    }
+    /** SOFTM-MARKER-DIFF END */ // SOFTM-MAP-FOCUS-MARKER 날짜:20260914 : 기관 마커를 선택하면 상세를 열기 전에 전체 지도 공간을 확보
     /** SOFTM-MARKER-PROGRESS END */
    },onProgress(current,total){
    if(current!==total&&current%4)return;
@@ -543,6 +557,10 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
    query.feedback?.progress({current,total:list.length,message:'지도 위치 확인 중'});
    }});
   if(resolution.cancelled||!query.current())return {cancelled:true};
+  /** SOFTM-MARKER-DIFF START 날짜:20260917 : 화면 밖으로 이동하거나 좌표를 확인하지 못한 기존 기관만 제거 */
+  await clearQueryMarkers(new Set(placed.map(c=>c.i)),query.current);
+  if(!query.current())return {cancelled:true};
+  /** SOFTM-MARKER-DIFF END */
   unresolvedRows.sort((a,b)=>a.index-b.index).forEach((item,index)=>{unresolvedRows[index]=item.c});
   /** SOFTM-VIEWPORT-RESOLVE END */
   placed.sort((a,b)=>(a._mapCenterDistance??Infinity)-(b._mapCenterDistance??Infinity));
@@ -552,7 +570,13 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
   const ranks=new Map(areaRows.map((c,i)=>[c.i,i+1]));
   query.feedback?.progress({message:'조회 결과를 반영하고 있습니다'});
   /** SOFTM-QUERY-YIELD START 날짜:20260916 : 최종 마커 순번 갱신도 입력을 독점하지 않고 조건 변경 즉시 이전 조회를 종료 */
-  const ranked=await MapViewportSearch.resolve(placed,c=>c,{current:query.current,onResult(c){markers.get(c.i)?.setIcon(markerIcon(c,ranks.get(c.i)||1))}});
+  const ranked=await MapViewportSearch.resolve(placed,c=>c,{current:query.current,onResult(c){
+   /** SOFTM-MARKER-DIFF START 날짜:20260917 : 순번이 동일한 마커 DOM은 교체하지 않아 대규모 조건 변경의 재배치를 줄임 */
+   const marker=markers.get(c.i),icon=markerIcon(c,ranks.get(c.i)||1);
+   if(marker&&mobileActiveMarker===marker){mobileActiveIcon={...icon};icon.content='<div class="care-mobile-active-marker">'+icon.content+'</div>'}
+   if(marker&&marker.getIcon()?.content!==icon?.content)marker.setIcon(icon);
+   /** SOFTM-MARKER-DIFF END */
+  }});
   if(ranked.cancelled||!query.current())return {cancelled:true};
   /** SOFTM-QUERY-YIELD END */
   /** SOFTM-REGION-SPACING START 날짜:20260904 : 시군구 선택 시 도심을 읽기 쉽게 확대하면서 조회 목록과 모든 마커는 유지 */
