@@ -48,6 +48,11 @@
 
     function compactUrl(value) {
         const url = new URL(value);
+        /** SOFTM-SHARE-VIEW START 날짜:20260916 : 공유 앱이 확대값 뒤에 붙인 기존 고정 안내만 제거해 현재 위치로 잘못 진입하지 않도록 복원 */
+        const zoom = url.searchParams.get('z') || '';
+        const legacyZoom = zoom.match(/^(\d+(?:\.\d+)?)\s*현재 조회조건과 지도\s*(?:위치를|영역을) 공유합니다\.\s*$/);
+        if (legacyZoom) url.searchParams.set('z', legacyZoom[1]);
+        /** SOFTM-SHARE-VIEW END */
         const selection = url.searchParams.get('sel');
         if (url.searchParams.get('share') !== '1' || !selection || selection.startsWith(prefix)) return url;
         const ids = decodeSelection(selection);
