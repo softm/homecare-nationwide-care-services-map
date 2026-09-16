@@ -49,7 +49,7 @@
         if (button.disabled) return;
         button.disabled = true;
         const label=button.querySelector('span');
-        const data={title:button.dataset.shareName, text:[button.dataset.shareName,button.dataset.shareAddress].filter(Boolean).join(' · '),url:button.dataset.institutionShare};
+        const data={title:button.dataset.shareName,url:button.dataset.institutionShare}; // SOFTM-POPUP-SHARE 날짜:20260916 : 공유 앱이 기관명·주소를 URL 뒤에 합쳐 기관기호를 손상하지 않도록 본문 제외
         try {
             if (navigator.share) {
                 try { await navigator.share(data); label.textContent='공유 완료'; return; }
@@ -61,6 +61,15 @@
         finally { button.disabled=false; setTimeout(()=>{if(button.isConnected)label.textContent='공유';},2500); }
     }
     /** SOFTM-INSTITUTION-SHARE END */
+    /** SOFTM-POPUP-SHARE START 날짜:20260916 : 팝업을 보는 중 지도 공유를 눌러도 현재 기관의 직접 링크를 전달 */
+    document.addEventListener('click', event => {
+        if (!event.target.closest('#shareBtn,.map-share-icon')) return;
+        const share = [...document.querySelectorAll('[data-institution-share]')].find(button => button.getClientRects().length && getComputedStyle(button).visibility !== 'hidden');
+        if (!share) return;
+        event.preventDefault(); event.stopImmediatePropagation();
+        void shareInstitution(share);
+    }, true);
+    /** SOFTM-POPUP-SHARE END */
     document.addEventListener('click', async event => {
         /** SOFTM-INSTITUTION-SHARE START 날짜:20260914 : 공유 조작이 기관 선택이나 팝업 닫기로 전파되지 않도록 처리 */
         const share = event.target.closest('[data-institution-share]');
