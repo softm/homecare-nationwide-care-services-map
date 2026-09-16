@@ -184,18 +184,18 @@ function makeCareHarness(rows) {
         const advancedSearch={cancel(){},report};
         class LatLng {constructor(lat,lng){this.lat=()=>lat;this.lng=()=>lng}}
         class LatLngBounds {extend(){}hasLatLng(pos){return pos.lat()<50}}
-        class Marker {constructor(options){this.options=options}setIcon(icon){this.options.icon=icon}} // SOFTM-MARKER-PROGRESS 날짜:20260913 : 점진 표시한 마커의 최종 순번 갱신을 검증
+        class Marker {constructor(options){this.options=options;this.updates=0}setIcon(icon){this.updates++;this.options.icon=icon}getIcon(){return this.options.icon}getMap(){return this.options.map}setMap(map){this.options.map=map}} // SOFTM-MARKER-DIFF 날짜:20260917 : 객체 재사용과 아이콘 변경 횟수를 실제 API 계약으로 검증
         const window={naver:{maps:{LatLng,LatLngBounds,Marker,Event:{addListener(){}}}}};
         const map={getBounds:()=>new LatLngBounds(),getCenter:()=>new LatLng(10,10),fitBounds(){}};
-        async function clearQueryMarkers(){clearMarkers()} function clearMarkers(){markers.clear()} // SOFTM-QUERY-YIELD 날짜:20260916 : 비동기 마커 정리 계약을 조회 회귀검사에 반영
+        let markerBlinkTimer=null,detailMoveTimer=null,routeLine=null,routeOrder=[],mobileActiveMarker=null,mobileActiveIcon=null;function clearTimeout(){}function restoreBlinkedMarker(){}function closeDetail(){} function clearMarkers(){markers.clear()} // SOFTM-MARKER-DIFF 날짜:20260917 : 실제 차등 제거 함수의 상태와 취소 계약을 제공
         function cachedCoord(row){return row.coord}
-        function hav(){return 0}function sortRows(){}function markerIcon(){}
+        function hav(){return 0}function sortRows(){}function markerIcon(row,rank){return {content:row.i+":"+rank}}
         function geocode(row){return externalGeocode(row)}
         function updateAreaLocation(){} // SOFTM-LOCATION-ROW 날짜:20260909 : 조회 건수 검사는 비동기 주소 표시를 모의 처리
         function showLoading(){}function hideLoading(){}function setStatus(){}function renderList(){updateStats()}
         const feedback={isCurrent:()=>true,progress:recordProgress};
     `, context);
-    for (const name of ['beginCareQuery', 'publishCareResult', 'updateStats', 'showDataPreview', 'loadMarkers']) {
+    for (const name of ['beginCareQuery', 'publishCareResult', 'updateStats', 'showDataPreview', 'clearQueryMarkers', 'loadMarkers']) {
         let start = careHtml.indexOf(`function ${name}(`);
         if (careHtml.slice(start - 6, start) === 'async ') start -= 6;
         const lineEnd = careHtml.indexOf('\n', start);
@@ -339,3 +339,21 @@ test('통합 초기 위치 거절은 모달·전국 좌표 조회 없이 완료�
  assert.equal(vm.runInContext('scheduled',context),1);
 });
 /** SOFTM-LOCATION-PREVIEW END */
+
+/** SOFTM-MARKER-DIFF START 날짜:20260917 : 수천 개 기관 조건 축소·확장에서 공통 마커 객체와 불변 아이콘을 재사용하는지 검증 */
+test('넓은 지도 필터 변경은 공통 마커를 재생성하지 않고 제외·추가 기관만 반영', async () => {
+ const rows=Array.from({length:1200},(_,i)=>({i:String(i),coord:{lat:10,lng:10}}));
+ const h=makeCareHarness(rows);
+ await h.run('loadMarkers(filtered,{query:beginCareQuery(feedback)})');
+ h.run('globalThis.original=new Map(markers);globalThis.initialUpdates=markers.get("0").updates');
+ await h.run('loadMarkers(filtered.slice(0,600),{query:beginCareQuery(feedback)})');
+ assert.equal(h.run('markers.size'),600);
+ assert.equal(h.run('[...markers].every(([id,m])=>original.get(id)===m)'),true);
+ assert.equal(h.run('markers.get("0").updates===initialUpdates'),true);
+ assert.equal(h.run('original.get("900").getMap()'),null);
+ await h.run('loadMarkers(filtered,{query:beginCareQuery(feedback)})');
+ assert.equal(h.run('markers.size'),1200);
+ assert.equal(h.run('markers.get("0")===original.get("0")'),true);
+ assert.equal(h.run('markers.get("900")===original.get("900")'),false);
+});
+/** SOFTM-MARKER-DIFF END */

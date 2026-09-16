@@ -135,10 +135,10 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
     const rows = Array.from({ length: 351 }, (_, i) => ({ i: String(i), n: String(i), _coord: { lat: 37.45, lng: 126.8 } }));
     class LatLng { constructor(lat, lng) { this.lat = () => lat; this.lng = () => lng; } }
     class LatLngBounds { extend() {} }
-    class Marker {setIcon(icon){this.icon=icon} /* SOFTM-MARKER-PROGRESS 날짜:20260913 : 점진 표시 후 순번 갱신도 실제 지도 API처럼 지원 */ constructor(options) { this.options = options; } }
+    class Marker {getIcon(){return this.icon}getMap(){return this.options.map}setMap(map){this.options.map=map}setIcon(icon){this.icon=icon} /* SOFTM-MARKER-DIFF 날짜:20260917 : 마커 재사용에 필요한 실제 지도 API 계약을 제공 */ constructor(options) { this.options = options; } }
     const sandbox = vm.createContext({
         window: { naver: { maps: { LatLng, LatLngBounds, Marker, Event: { addListener() {} } } } }, MapViewportSearch: api,
-        mapReady: true, refreshToken: 0, clearMarkers() {}, clearQueryMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },
+        mobileActiveMarker: null, mobileActiveIcon: null, mapReady: true, refreshToken: 0, clearMarkers() {}, clearQueryMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },
         cachedCoord: row => row._coord, hav: () => 0, PAGE_LIMIT: 90, MAP_CANDIDATE_LIMIT: 300,
         geocode: async row => row._coord, basePoint: null, showLoading() {}, hideLoading() {},
         careMatchPending: false, careMatchRows: [], CareMapExperience: { refreshMatch() {} }, // SOFTM-CARE-MATCH 날짜:20260910 : 실제 조회 전체 결과를 설명에도 전달하는 계약을 제공
