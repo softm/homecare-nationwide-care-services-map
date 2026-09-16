@@ -622,10 +622,15 @@
         const hasConfiguredConditions = () => ['province', 'city', 'capacity', 'staff'].some(id => filters.querySelector(`#${id}`)?.value)
             || !!filters.querySelector('[data-filter]:not([data-value="all"]).active,[data-filter]:not([data-value="all"])[aria-pressed="true"],.advanced-selected [data-remove]');
         const syncConditionBadge = () => {
-            const configured = hasConfiguredConditions(), open = document.body.classList.contains('care-mobile-filters-open');
+            /** SOFTM-FILTER-DESIGN START 날짜:20260916 : 통합 지도는 지역 선택 여부 대신 실제 상세조건 묶음 수를 배지와 접근성 이름에 반영 */
+            const count = toggle.dataset.filterCount, counted = count !== undefined;
+            const configured = counted ? Number(count) > 0 : hasConfiguredConditions(), open = document.body.classList.contains('care-mobile-filters-open');
+            conditionBadge.textContent = counted ? count : '설정됨';
             conditionBadge.hidden = !configured; toggle.classList.toggle('has-active-filters', configured);
-            toggle.setAttribute('aria-label', `${configured ? '상세필터 설정됨, ' : ''}상세필터 ${open ? '열림' : '열기'}`);
+            toggle.setAttribute('aria-label', `${configured ? `상세필터 ${counted ? count + '개 적용됨' : '설정됨'}, ` : ''}상세필터 ${open ? '열림' : '열기'}`);
+            /** SOFTM-FILTER-DESIGN END */
         };
+        toggle.addEventListener('care-filter-count', syncConditionBadge); // SOFTM-FILTER-DESIGN 날짜:20260916 : 태그 해제와 초기화도 같은 배지 갱신을 사용
         const setOpen = (open, restoreFocus = false) => {
             document.body.classList.toggle('care-mobile-filters-open', open);
             toggle.setAttribute('aria-expanded', String(open)); syncConditionBadge();

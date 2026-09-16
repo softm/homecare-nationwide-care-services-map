@@ -8,25 +8,47 @@
         summary.className = 'stitch-filter-summary';
         summary.setAttribute('aria-label', '적용 중인 검색조건');
         filters.append(summary);
+        /** SOFTM-FILTER-DESIGN START 날짜:20260916 : 기본 검색과 상세조건을 분리하고 실제 조건 묶음 수·태그·초기화를 같은 상태에서 표시 */
+        const toggle = filters.querySelector('.care-mobile-filter-toggle');
+        const grid = filters.querySelector('.filter-grid');
+        const toolbar = document.createElement('div'); toolbar.className = 'stitch-filter-toolbar';
+        const reset = document.createElement('button'); reset.type = 'button'; reset.className = 'stitch-reset'; reset.textContent = '↻ 조건 초기화';
+        toolbar.append(reset); summary.before(toolbar);
+        const icon = document.createElement('span'); icon.className = 'stitch-filter-icon'; icon.setAttribute('aria-hidden', 'true');
+        icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6"/></svg>';
+        toggle.prepend(icon);
+        const desktop = matchMedia('(min-width:1001px)');
+        const placeToggle = () => { if (desktop.matches) toolbar.prepend(toggle); else grid.append(toggle); };
+        desktop.addEventListener('change', placeToggle); placeToggle();
+        reset.onclick = () => {
+            const groups = new Set([...filters.querySelectorAll('[data-filter].active:not([data-value="all"])')].map(node => node.dataset.filter));
+            for (const key of groups) filters.querySelector(`[data-filter="${key}"][data-value="all"]`)?.click();
+            if (filters.querySelector('.advanced-selected [data-remove]')) filters.querySelector('.advanced-reset')?.click();
+        };
         const syncFilters = () => {
             summary.replaceChildren();
-            const active = [...filters.querySelectorAll('[data-filter].active:not([data-value="all"])')];
-            const advanced = [...filters.querySelectorAll('.advanced-selected [data-remove]')];
-            for (const source of [...active, ...advanced]) {
-                const chip = document.createElement('button');
-                chip.type = 'button'; chip.textContent = source.textContent.trim().replace(/×$/, '') + ' ×';
-                chip.setAttribute('aria-label', source.textContent.trim() + ' 조건 해제');
-                chip.onclick = () => source.click(); summary.append(chip);
+            const groups = new Map();
+            for (const source of filters.querySelectorAll('[data-filter].active:not([data-value="all"])')) {
+                const key = source.dataset.filter;
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key).push(source);
             }
-            if (summary.childElementCount) {
-                const reset = document.createElement('button'); reset.type = 'button'; reset.textContent = '↻ 조건 초기화'; reset.className = 'stitch-reset';
-                reset.onclick = () => {
-                    for (const group of new Set(active.map(node => node.dataset.filter))) filters.querySelector(`[data-filter="${group}"][data-value="all"]`).click();
-                    if (advanced.length) filters.querySelector('.advanced-reset').click();
-                };
-                summary.append(reset);
+            const conditions = [...groups].map(([key, sources]) => ({
+                label: sources.map(node => node.textContent.trim()).join(' / '),
+                remove: () => filters.querySelector(`[data-filter="${key}"][data-value="all"]`)?.click()
+            }));
+            for (const source of filters.querySelectorAll('.advanced-selected [data-remove]')) {
+                conditions.push({label: source.textContent.trim().replace(/×$/, '').trim(), remove: () => source.click()});
             }
-            summary.hidden = !summary.childElementCount;
+            for (const condition of conditions) {
+                const chip = document.createElement('button'); chip.type = 'button';
+                chip.textContent = condition.label + ' ×'; chip.setAttribute('aria-label', condition.label + ' 조건 해제');
+                chip.onclick = condition.remove; summary.append(chip);
+            }
+            toggle.dataset.filterCount = String(conditions.length);
+            toggle.dispatchEvent(new Event('care-filter-count'));
+            reset.disabled = !conditions.length;
+            summary.hidden = !conditions.length;
             document.body.style.setProperty('--stitch-filter-summary-height', `${summary.hidden ? 0 : summary.getBoundingClientRect().height}px`);
         };
         const resize = new ResizeObserver(() => document.body.style.setProperty('--stitch-filter-summary-height', `${summary.hidden ? 0 : summary.getBoundingClientRect().height}px`));
@@ -34,6 +56,7 @@
         new MutationObserver(syncFilters).observe(document.getElementById('filterLines'), {subtree:true, attributes:true, attributeFilter:['class']});
         new MutationObserver(syncFilters).observe(document.getElementById('advancedSearch'), {subtree:true, childList:true});
         syncFilters();
+        /** SOFTM-FILTER-DESIGN END */
         const tray = document.createElement('section'); tray.className = 'stitch-compare-tray'; tray.setAttribute('aria-label', '비교함 요약');
         tray.innerHTML = '<span class="stitch-tray-icon" aria-hidden="true">⚖</span><div class="stitch-tray-copy"><strong></strong><p></p></div><button type="button" data-basket-open>선택기관 비교표 보기</button><button type="button" data-basket-clear>비우기</button>';
         document.body.append(tray);
