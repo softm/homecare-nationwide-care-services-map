@@ -33,3 +33,21 @@ test('저장소 차단과 손상된 JSON도 기본 정렬을 방해하지 않는
  const broken=globalThis.CareResultSort.createPreference({getItem:()=>'{bad'});assert.equal(broken.read(['rating'],null).mode,'rating');
 });
 /** SOFTM-SORT-PERSIST END */
+
+/** SOFTM-SORT-KEYS START 날짜:20260917 : 큰 목록에서도 좌표 조회가 비교 횟수에 비례해 늘지 않고 기존 정렬과 같은지 검사 */
+test('거리·정확도 정렬은 기관당 좌표를 한 번만 읽으며 기존 순서를 유지한다',async()=>{
+ const {readFile}=await import('node:fs/promises'),{runInNewContext}=await import('node:vm');
+ const source=await readFile(new URL('../result-sort.js',import.meta.url),'utf8');
+ const begin=source.indexOf(' function sort(rows)'),end=source.indexOf('\n }',begin)+3;
+ for(const mode of ['accuracy','distance']){
+  const rows=Array.from({length:1500},(_,i)=>({i:String(i),n:i%3?'기관'+i:'행복센터',a:'서울',point:i%7?{lat:37+i/10000,lng:127}:null})).reverse();
+  let calls=0;
+  const config={select:{value:mode},center:()=>near.point,coord:row=>{calls++;return row.point}};
+  const expected=rows.slice().sort((a,b)=>compare(a,b,{mode,point:near.point,query:'행복센터',coord:row=>row.point}));
+  const optimized=runInNewContext(source.slice(begin,end)+';sort',{config,origin:'map',currentPoint:null,document:{getElementById:()=>({value:'행복센터'})},distance,relevance:globalThis.CareResultSort.relevance,score:()=>0});
+  optimized(rows);
+  assert.equal(calls,rows.length);
+  assert.deepEqual(rows.map(row=>row.i),expected.map(row=>row.i));
+ }
+});
+/** SOFTM-SORT-KEYS END */

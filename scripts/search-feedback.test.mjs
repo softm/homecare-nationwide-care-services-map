@@ -184,7 +184,7 @@ function makeCareHarness(rows) {
         const advancedSearch={cancel(){},report};
         class LatLng {constructor(lat,lng){this.lat=()=>lat;this.lng=()=>lng}}
         class LatLngBounds {extend(){}hasLatLng(pos){return pos.lat()<50}}
-        class Marker {constructor(options){this.options=options;this.updates=0}setIcon(icon){this.updates++;this.options.icon=icon}getIcon(){return this.options.icon}getMap(){return this.options.map}setMap(map){this.options.map=map}} // SOFTM-MARKER-DIFF 날짜:20260917 : 객체 재사용과 아이콘 변경 횟수를 실제 API 계약으로 검증
+        class Marker {constructor(options){this.options=options;this.updates=0}setIcon(icon){this.updates++;this.options.icon=icon}getIcon(){return this.options.icon}setVisible(value){this.visible=value}getVisible(){return this.visible!==false}getMap(){return this.options.map}setMap(map){this.options.map=map}} // SOFTM-MARKER-DIFF 날짜:20260917 : 객체 재사용과 아이콘 변경 횟수를 실제 API 계약으로 검증
         const window={naver:{maps:{LatLng,LatLngBounds,Marker,Event:{addListener(){}}}}};
         const map={getBounds:()=>new LatLngBounds(),getCenter:()=>new LatLng(10,10),fitBounds(){}};
         let markerBlinkTimer=null,detailMoveTimer=null,routeLine=null,routeOrder=[],mobileActiveMarker=null,mobileActiveIcon=null;function clearTimeout(){}function restoreBlinkedMarker(){}function closeDetail(){} function clearMarkers(){markers.clear()} // SOFTM-MARKER-DIFF 날짜:20260917 : 실제 차등 제거 함수의 상태와 취소 계약을 제공
@@ -350,10 +350,11 @@ test('넓은 지도 필터 변경은 공통 마커를 재생성하지 않고 제
  assert.equal(h.run('markers.size'),600);
  assert.equal(h.run('[...markers].every(([id,m])=>original.get(id)===m)'),true);
  assert.equal(h.run('markers.get("0").updates===initialUpdates'),true);
- assert.equal(h.run('original.get("900").getMap()'),null);
+ assert.equal(h.run('original.get("900").getVisible()'),false); // SOFTM-MARKER-POOL 날짜:20260917 : 제외 마커는 지도에서 숨겨 재확장에 재사용
  await h.run('loadMarkers(filtered,{query:beginCareQuery(feedback)})');
  assert.equal(h.run('markers.size'),1200);
  assert.equal(h.run('markers.get("0")===original.get("0")'),true);
- assert.equal(h.run('markers.get("900")===original.get("900")'),false);
+ assert.equal(h.run('markers.get("900")===original.get("900")'),true); // SOFTM-MARKER-POOL 날짜:20260917 : 재확장에서도 SDK 객체 재생성 금지
+ assert.equal(h.run('markers.get("900").getVisible()'),true);
 });
 /** SOFTM-MARKER-DIFF END */
