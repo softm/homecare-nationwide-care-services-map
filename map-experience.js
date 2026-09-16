@@ -44,10 +44,15 @@
     /** SOFTM-SEARCH-LIST-SCROLL START 날짜:20260910 : 목록 끝 광고까지 빠르게 이동해도 강조가 이전 기관에 남지 않도록 가시 기관과 스크롤 끝을 함께 판정 */
     function pickSearchScrollRow(rows, listRect, scrollState) {
         if (!rows.length) return null;
-        const visible = rows.filter(node => {
+        /** SOFTM-LIST-YIELD START 날짜:20260916 : 지도 마커가 추가될 때마다 수천 카드의 레이아웃을 읽지 않고 보이는 구간에서 탐색을 끝냄 */
+        if (scrollState.scrollTop <= 2) return rows[0];
+        const visible = [];
+        for (const node of rows) {
             const rect = node.getBoundingClientRect();
-            return rect.bottom > listRect.top && rect.top < listRect.bottom;
-        });
+            if (rect.top >= listRect.bottom) break;
+            if (rect.bottom > listRect.top) visible.push(node);
+        }
+        /** SOFTM-LIST-YIELD END */
         const atStart = scrollState.scrollTop <= 2;
         const atEnd = scrollState.scrollHeight > scrollState.clientHeight
             && scrollState.scrollTop + scrollState.clientHeight >= scrollState.scrollHeight - 2;

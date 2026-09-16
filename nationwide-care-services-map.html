@@ -122,7 +122,7 @@
 <!-- SOFTM-STITCH-FONT START 날짜:20260914 : 외부 폰트 연결 없이 한글·영문 서체를 동일하게 제공 -->
 <link rel="stylesheet" href="stitch-fonts.css?v=20260914-1">
 <!-- SOFTM-STITCH-FONT END -->
-<link rel="stylesheet" href="stitch-desktop.css?v=20260916-filter-pill1"> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세필터 버튼·태그 행 배치를 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="stitch-desktop.css?v=20260916-input-yield1"> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세필터 버튼·태그 행 배치를 이전 캐시 없이 적용 -->
 <!-- SOFTM-UI-TYPOGRAPHY 날짜:20260916 : 화면별 기존 규칙 뒤에 한글 가독성 기준을 일관되게 적용 -->
 <!-- SOFTM-PRETENDARD 날짜:20260916 : 로컬 가변 서체를 타이포그래피 규칙보다 먼저 연결 -->
 <link rel="stylesheet" href="pretendard-fonts.css?v=1.3.9">
@@ -186,7 +186,7 @@
 <script src="care-data.js?v=20260904-data"></script> <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 수집 JSON 공용 로더로 교체 -->
 <!-- SOFTM-VIEWPORT-REGIONS START 날짜:20260904 : 두 지도의 화면영역 검색이 같은 경계 자료로 빠짐없이 지역을 판별 -->
 <script src="region-bounds.js?v=20260914-neighborhood1"></script>
-<script src="viewport-regions.js?v=20260914-neighborhood1"></script> <!-- SOFTM-VIEWPORT-CANDIDATES 날짜:20260914 : 동 단위 후보 축소와 지연 없는 좌표 처리를 이전 캐시 없이 적용 -->
+<script src="viewport-regions.js?v=20260916-input-yield1"></script> <!-- SOFTM-QUERY-YIELD 날짜:20260916 : 대량 마커 처리 중 필터 입력을 허용하는 공용 처리기를 적용 -->
 <!-- SOFTM-VIEWPORT-REGIONS END -->
 <!-- SOFTM-LOCATION-HELP 날짜:20260913 : 읽기 쉽게 나눈 권한 안내를 캐시 갱신으로 적용 -->
 <script src="care-location.js?v=20260914-state1-no-scroll1"></script> <!-- SOFTM-LOCATION-NO-SCROLL 날짜:20260914 : 권한 상태 전달과 기기별 한 경로 안내를 이전 캐시 없이 함께 적용 -->
@@ -210,7 +210,7 @@
 <link rel="stylesheet" href="care-basket-share.css?v=20260911"> <!-- SOFTM-BASKET-SHARE 날짜:20260911 : 모바일에서도 공유 링크와 확인 조작을 제공 -->
 <script src="care-basket-share.js?v=20260915-text1"></script> <!-- SOFTM-SHARE-URL 날짜:20260915 : 안내 문구가 섞인 기존 공유 링크 복원을 즉시 적용 -->
 <script src="stitch-controls.js?v=20260916-filter-design1"></script> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세필터 시안과 실제 적용조건 상태를 함께 갱신 -->
-<script src="map-experience.js?v=20260916-filter-pill1"></script> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세조건 배지와 접근성 이름의 공용 갱신을 적용 -->
+<script src="map-experience.js?v=20260916-input-yield1"></script> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세조건 배지와 접근성 이름의 공용 갱신을 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -374,6 +374,7 @@ let careSelectionViewport=false;
 function preserveCareSelectionResults(){careSelectionViewport=true;clearTimeout(refreshTimer);careViewportResearch?.cancel();}
 /** SOFTM-SELECTION-VIEWPORT END */
 function beginCareQuery(feedback){
+ ++careListVersion; // SOFTM-LIST-YIELD 날짜:20260916 : 진행 중인 이전 목록 생성도 새 조건과 함께 취소
  careSelectionViewport=false; // SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 명시 검색과 실제 지도 탐색이 시작되면 선택 보존을 해제
  globalThis.CareMapExperience?.releaseDetailSelection(); // SOFTM-MARKER-PERSIST 날짜:20260915 : 새 검색 결과에는 이전 기관의 선택 고정을 이어가지 않음
  globalThis.CareMapExperience?.exitBasketMap(); // SOFTM-BASKET-MAP 날짜:20260904 : 새 검색은 보존한 검색 지도로 복귀한 뒤 실행
@@ -406,9 +407,18 @@ function updateStats(){requestAnimationFrame(updateCareResultSummary);/* SOFTM-C
 /** SOFTM-SEARCH-FEEDBACK END */
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 지도 표시 선택과 비교함 담기를 분리해 필터를 바꿔도 관심기관을 유지 */
 /** SOFTM-LIST-CONTROLS START 날짜:20260905 : 독립 체크박스를 설명 있는 지도 표시로 묶고 번호·기관명·담기 위치를 일치 */
-function renderList(){
+/** SOFTM-LIST-YIELD START 날짜:20260916 : 넓은 화면의 수천 개 카드 생성도 나눠 처리하고 새 조회가 시작되면 이전 목록 추가를 중단 */
+let careListVersion=0;
+async function renderList(query=null,visibleLimit=PAGE_LIMIT){
+ const version=++careListVersion,current=()=>version===careListVersion&&(!query||query.current());
  destroyRenderedListAds();sortRows(areaRows);
- $('list').innerHTML=areaRows.length?areaRows.map((c,i)=>`<article class="row" data-id="${esc(c.i)}" role="button" tabindex="0" aria-label="${esc(c.n)} 상세 보기">
+ const totalRows=areaRows.length,rows=areaRows.slice(0,visibleLimit);
+ $('list').replaceChildren();
+ for(let offset=0;offset<rows.length;offset+=24){
+ if(!current())return;
+ const chunk=rows.slice(offset,offset+24);
+
+ const html=chunk.map((c,index)=>{const i=offset+index;return `<article class="row" data-id="${esc(c.i)}" role="button" tabindex="0" aria-label="${esc(c.n)} 상세 보기">
   <!-- SOFTM-STITCH-CARD START 날짜:20260915 : 평가·주소·기관 현황을 분리하고 주요 행동을 직접 제공해 탐색 단계를 줄임 -->
   <div class="care-result-heading"><span class="care-result-rank">${i+1}</span><h3>${esc(c.n)}</h3></div>
   <p class="care-result-evaluation"><b class="row-score">${esc(gradeText(c))} · ${Number.isFinite(c.es)?scoreText(c)+'점':'총점 미공개'}</b></p>
@@ -417,15 +427,29 @@ function renderList(){
   <div class="care-row-actions">${CareMapExperience.button(c)}${CONFIG.source==='nhis'?`<button type="button" class="stitch-phone" data-stitch-phone="${esc(c.i)}" aria-label="${esc(c.n)} 전화번호 확인">☎ 전화</button>`:''}<button type="button" class="stitch-detail" data-saved-detail="${esc(c.i)}">ⓘ 상세정보</button>${CareDetailLayout.listButton(c,cachedCoord(c))}<label class="care-map-display"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 지도 표시"><span>지도에 표시</span></label></div>
   <p class="stitch-phone-result" data-phone-result hidden role="status"></p>
   <!-- SOFTM-STITCH-CARD END -->
- </article>${listAdHtml(i,areaRows.length)}`).join(''):'<div class="empty">현재 지도 화면에 조건과 일치하는 기관이 없습니다.</div>';
- for(const row of $('list').querySelectorAll('.row')){
+ </article>${listAdHtml(i,rows.length)}`}).join('');
+ const template=document.createElement('template');template.innerHTML=html;
+ for(const row of template.content.querySelectorAll('.row')){
   row.addEventListener('click',e=>{if(e.target.closest('input,button,a,label'))return;focusCenter(row.dataset.id)});
   row.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('input,button,a,label')){e.preventDefault();focusCenter(row.dataset.id)}});
   row.querySelector('input').addEventListener('change',e=>toggleCenter(row.dataset.id,e.target.checked));
  }
+ $('list').append(template.content);
+ await new Promise(resolve=>setTimeout(resolve,0));
+ }
+ if(!current())return;
+ if(!rows.length)$('list').innerHTML='<div class="empty">현재 지도 화면에 조건과 일치하는 기관이 없습니다.</div>';
+ if(rows.length<totalRows){
+  const more=document.createElement('button');more.type='button';more.className='care-results-more';
+  more.textContent=`기관 더 보기 (${rows.length.toLocaleString()} / ${totalRows.toLocaleString()}곳)`;
+  more.onclick=()=>{const top=$('list').scrollTop;void renderList(query,visibleLimit+PAGE_LIMIT).then(finished=>{if(finished===careListVersion)$('list').scrollTop=top})};
+  $('list').append(more);
+ }
  updateStats();queueCareAdFit();CareMapExperience.refresh();
  if(careAdMode()==='hybrid'&&careAdConfig().fallbackToDirect)CareMapExperience.ensureListAdFallback($('list'),()=>{const item=activeDirectAd();return item?directAdHtml(item,false):''}); // SOFTM-SHORT-LIST-AD 날짜:20260909 : 광고 미노출 때 빈 공간 대신 기존 제휴 배너를 표시
+ return version;
 }
+/** SOFTM-LIST-YIELD END */
 /** SOFTM-LIST-CONTROLS END */
 /** SOFTM-MAP-EXPERIENCE END */
 /** SOFTM-LOCATION-ROW START 날짜:20260909 : 조회 건수·중복 지역 대신 지도 중심의 읍면동을 읽기 쉽게 표시 */
@@ -479,11 +503,19 @@ function focusMapCenter(marker){const pos=marker.getPosition(),bounds=map.getBou
 function focusCenter(id){preserveCareSelectionResults();/* SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 기관 확인 이동은 현재 결과와 순번 유지 */if(CareMapExperience.isBasketMap()&&!CareMapExperience.contains(id))CareMapExperience.exitBasketMap();/* SOFTM-BASKET-MAP 날짜:20260904 : 검색 목록의 다른 기관을 열면 원래 검색 지도로 복귀 */const c=DATA.find(x=>x.i===id);if(!c)return;CareMapExperience.beginDetail(mapReady&&markers.has(id),id);/* SOFTM-MARKER-PERSIST 날짜:20260915 : 상세 복귀에도 클릭한 기관 선택을 유지 */clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);restoreBlinkedMarker();$('detailSheet').hidden=true;$('detailSheet').style.visibility='';activeDetail=null;/* SOFTM-SELECTED-MARKER 날짜:20260914 : 목록과 마커 클릭에 동일한 선택 확대 적용 */focusMobileRow(id,false,true);if(!mapReady){openDetail(c);return}const marker=markers.get(id);if(!marker){toast('현재 지도영역에 표시된 마커가 없어 상세정보만 표시했습니다.');openDetail(c);return}if(!CareMapExperience.isBasketMap()&&!selected.has(id)){selected.add(id);marker.setMap(map);renderList()}clearTimeout(refreshTimer);skipIdleUntil=Date.now()+7000;if(window.innerWidth<=1000)document.querySelector('.map-card')?.scrollIntoView({behavior:'instant',block:'start'});openDetail(c,false);setStatus('선택 기관으로 이동 중',`${c.n} · 팝업에 가리지 않는 위치로 이동합니다.`);detailMoveTimer=setTimeout(()=>{if(markers.get(id)!==marker)return;map.panTo(focusMapCenter(marker));detailMoveTimer=setTimeout(()=>{detailMoveTimer=null;if(markers.get(id)!==marker)return;setStatus('선택 기관 확인 중',`${c.n} · 마커 강조 후 상세정보를 엽니다.`);blinkMarker(c,marker,()=>{if(markers.get(id)!==marker)return;$('detailSheet').style.visibility='';setStatus('선택 기관 상세',`${c.n} · 팝업을 닫아도 현재 지도 위치를 유지합니다.`)})},160)},0)} // SOFTM-MARKER-QUICK 날짜:20260916 : 모바일 스크롤 대기를 없애고 이동·강조 뒤 약 0.42초에 상세를 표시하며 위치 유지
 /** SOFTM-MAP-EXPERIENCE END */
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 위치 확인부터 화면 반영까지 같은 요청으로 묶어 진행과 완료 건수를 전달 */
+/** SOFTM-MARKER-CLEAR-YIELD START 날짜:20260916 : 조건 변경 때 기존 수천 마커 제거도 분할하며 이전 마커 정리가 새 조회의 마커를 건드리지 않도록 분리 */
+async function clearQueryMarkers(){
+ clearTimeout(markerBlinkTimer);clearTimeout(detailMoveTimer);markerBlinkTimer=null;detailMoveTimer=null;blinkedMarkerId=null;
+ const previous=[...markers.values()];markers.clear();closeDetail();
+ if(routeLine){routeLine.setMap(null);routeLine=null}routeOrder=[];
+ await MapViewportSearch.resolve(previous,marker=>{marker.setMap(null)});
+}
+/** SOFTM-MARKER-CLEAR-YIELD END */
 async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQuery(),partial=false}={}){
  if(!query.current())return {cancelled:true};
  if(globalThis.CareRegionEntry?.waiting())return publishCareResult(query,{count:0,markerCount:0,mapReady:false,scope:'지역 선택 전'}); // SOFTM-REGION-ENTRY 날짜:20260913 : 지역 미선택 상태의 상세조건 변경은 전국 좌표 조회를 시작하지 않음
  if(!mapReady)return showDataPreview(candidates,regionText||'검색결과',query);
- clearMarkers();
+ await clearQueryMarkers();if(!query.current())return {cancelled:true};
  const bounds=map.getBounds(),center={lat:map.getCenter().lat(),lng:map.getCenter().lng()},known=[],unknown=[];
  for(const c of candidates){const p=cachedCoord(c);if(p){c._mapCenterDistance=hav(center,p);known.push(c)}else unknown.push(c)}
  known.sort((a,b)=>a._mapCenterDistance-b._mapCenterDistance);
@@ -518,7 +550,10 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
   resultCount=results.length;areaRows=fit?list:results;sortRows(areaRows);selected=new Set(areaRows.map(c=>c.i));
   const ranks=new Map(areaRows.map((c,i)=>[c.i,i+1]));
   query.feedback?.progress({message:'조회 결과를 반영하고 있습니다'});
-  placed.forEach(c=>markers.get(c.i).setIcon(markerIcon(c,ranks.get(c.i)||1))); // SOFTM-MARKER-PROGRESS 날짜:20260913 : 먼저 표시한 마커를 재생성하지 않고 최종 목록 순번만 반영
+  /** SOFTM-QUERY-YIELD START 날짜:20260916 : 최종 마커 순번 갱신도 입력을 독점하지 않고 조건 변경 즉시 이전 조회를 종료 */
+  const ranked=await MapViewportSearch.resolve(placed,c=>c,{current:query.current,onResult(c){markers.get(c.i)?.setIcon(markerIcon(c,ranks.get(c.i)||1))}});
+  if(ranked.cancelled||!query.current())return {cancelled:true};
+  /** SOFTM-QUERY-YIELD END */
   /** SOFTM-REGION-SPACING START 날짜:20260904 : 시군구 선택 시 도심을 읽기 쉽게 확대하면서 조회 목록과 모든 마커는 유지 */
   if(fit&&placed.length){
    skipIdleUntil=Date.now()+1500;
@@ -526,7 +561,7 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
    else map.fitBounds(fitBounds,{top:70,right:70,bottom:70,left:70});
   }
   /** SOFTM-REGION-SPACING END */
-  renderList();updateAreaLocation(regionText||'현재 지도 화면'); // SOFTM-LOCATION-ROW 날짜:20260909 : 지도 조회 완료 시 중심 주소를 갱신
+  await renderList(query);if(!query.current())return {cancelled:true};updateAreaLocation(regionText||'현재 지도 화면'); // SOFTM-LIST-YIELD 날짜:20260916 : 최신 목록의 분할 표시가 완료된 후에만 조회 완료를 알림
   const limited=results.length>areaRows.length;
   setStatus(`조회 ${resultCount.toLocaleString()}곳 · 지도 표시 ${placed.length.toLocaleString()}곳`,`${unresolvedRows.length?`위치 미확인 ${unresolvedRows.length.toLocaleString()}곳 포함 · `:''}좌표 확인 ${resolvedCount.toLocaleString()}곳${limited?` · 목록 ${areaRows.length.toLocaleString()}곳 우선 표시`:''}`);
   $('routeNote').textContent=`${limited?`전체 ${resultCount.toLocaleString()}곳 중 목록 ${areaRows.length.toLocaleString()}곳을 우선 표시합니다. `:''}${unresolvedRows.length?'위치 미확인 기관은 목록에 포함되며 지도에는 표시되지 않습니다. ':''}체크를 끄면 해당 기관이 지도에서 숨겨집니다.`;
@@ -807,7 +842,12 @@ function syncMultiFilterButtons(type){const set=multiFilterSet(type);document.qu
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 상세조건 변경의 실제 목록·지도 완료를 공용 알림으로 반환 */
 async function refreshAfterFilterClick(feedback){
  const query=beginCareQuery(feedback);
- clearTimeout(refreshTimer);skipIdleUntil=0;applyFilters();
+ /** SOFTM-QUERY-YIELD START 날짜:20260916 : 선택 버튼의 상태를 먼저 그린 뒤 최신 조건만 조회하여 연속 클릭의 중간 요청을 버림 */
+ clearTimeout(refreshTimer);skipIdleUntil=0;
+ await new Promise(resolve=>setTimeout(resolve,0));
+ if(!query.current())return {cancelled:true};
+ applyFilters();
+ /** SOFTM-QUERY-YIELD END */
  if(!mapReady)return showDataPreview(filtered,'필터 결과',query);
  if($('q').value.trim()||$('province').value||$('city').value)return loadMarkers(filtered,{fit:false,regionText:'현재 지도 · 필터 결과',query});
  return refreshFromMap(query);

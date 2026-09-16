@@ -76,9 +76,22 @@
     /** SOFTM-VIEWPORT-RESOLVE START 날짜:20260914 : 느린 주소 하나가 다음 묶음을 막지 않도록 완료 즉시 다음 후보를 처리 */
     async function resolve(rows, resolver, options = {}) {
         const total = rows.length, results = Array(total), current = options.current || (() => true);
-        let cursor = 0, done = 0;
+        /** SOFTM-QUERY-YIELD START 날짜:20260916 : 캐시 좌표의 연속 microtask가 필터 입력과 화면 갱신을 독점하지 않도록 모든 작업자가 같은 양보 시간을 공유 */
+        let cursor = 0, done = 0, sliceCount = 0, sliceStart = Date.now(), pause = null;
+        const yieldToInput = () => {
+            if (!pause) pause = new Promise(resolve => setTimeout(resolve, 0)).then(() => {
+                sliceCount = 0; sliceStart = Date.now(); pause = null;
+            });
+            return pause;
+        };
+        /** SOFTM-QUERY-YIELD END */
         async function worker() {
             while (current()) {
+                /** SOFTM-QUERY-YIELD START 날짜:20260916 : 빠른 캐시도 최대 24건 또는 8ms마다 입력 처리를 허용하고 재개 전 취소 여부를 다시 확인 */
+                if (pause || sliceCount >= 24 || Date.now() - sliceStart >= 8) await yieldToInput();
+                if (!current()) return;
+                sliceCount += 1;
+                /** SOFTM-QUERY-YIELD END */
                 const index = cursor++;
                 if (index >= total) return;
                 let result;
