@@ -607,7 +607,7 @@
         const toggle = document.createElement('button');
         toggle.type = 'button'; toggle.className = 'care-mobile-filter-toggle';
         /** SOFTM-FILTER-BADGE START 날짜:20260916 : 상세필터 적용 여부를 패널을 다시 열지 않고도 확인하도록 상태 배지를 제공 */
-        const toggleLabel = document.createElement('span'); toggleLabel.className = 'care-filter-toggle-label'; toggleLabel.textContent = '상세필터';
+        const toggleLabel = document.createElement('span'); toggleLabel.className = 'care-filter-toggle-label'; toggleLabel.textContent = '상세 필터'; // SOFTM-FILTER-PILL 날짜:20260916 : 첨부 시안의 띄어쓰기로 버튼 가독성을 일치
         const conditionBadge = document.createElement('span'); conditionBadge.className = 'care-filter-state-badge'; conditionBadge.textContent = '설정됨'; conditionBadge.hidden = true;
         toggle.append(toggleLabel, conditionBadge); toggle.setAttribute('aria-expanded', 'false');
         filters.id ||= 'careMobileFilters'; toggle.setAttribute('aria-controls', filters.id);

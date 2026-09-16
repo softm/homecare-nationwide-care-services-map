@@ -378,3 +378,11 @@ body.stitch-desktop .care-filter-state-badge { min-width:20px; min-height:20px; 
  body.stitch-desktop.care-mobile-filters-open .stitch-filter-toolbar { display:none!important; }
 }
 /** SOFTM-FILTER-DESIGN END */
+
+/** SOFTM-FILTER-PILL START 날짜:20260916 : 첨부한 민트색 알약 버튼의 글자·아이콘·원형 배지 비율을 맞추고 적용 시 파란 테두리를 제거 */
+@media (min-width:1001px) {
+ body.stitch-desktop .stitch-filter-toolbar .care-mobile-filter-toggle { gap:8px; height:36px; padding:8px 12px; border-radius:999px; background:#a5eee7; font-size:14px; font-weight:600; line-height:20px; box-shadow:none; }
+ body.stitch-desktop .stitch-filter-toolbar .care-filter-state-badge { box-sizing:border-box; min-width:20px; height:20px; padding:0 5px; border-radius:999px; font-size:12px; line-height:20px; }
+ body.stitch-desktop .stitch-filter-toolbar .stitch-filter-icon svg { width:18px; height:18px; }
+}
+/** SOFTM-FILTER-PILL END */
