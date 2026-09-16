@@ -102,3 +102,26 @@ test('공유 지도 초기화는 한 번만 검색하며 먼저 시작한 사용
     }
 });
 /** SOFTM-SHARE-COMPACT END */
+
+/** SOFTM-SHARE-VIEW START 날짜:20260916 : 넓은 지도 공유의 확대값과 필터 유지 및 오염 링크 복원을 검증 */
+test('지도 공유 안내가 확대값에 붙어도 원래 중심·확대·필터를 복원한다', () => {
+    for (const text of ['', '현재 조회조건과 지도 위치를 공유합니다.', '\n현재 조회조건과 지도영역을 공유합니다.']) {
+        const url = new URL('https://example.test/?type=home-care&grades=A&lat=37.28&lng=127.43&z=10');
+        url.searchParams.set('z', '10' + text);
+        const restored = share.compactUrl(url.href);
+        assert.equal(restored.searchParams.get('z'), '10');
+        assert.equal(restored.searchParams.get('lat'), '37.28');
+        assert.equal(restored.searchParams.get('lng'), '127.43');
+        assert.equal(restored.searchParams.get('grades'), 'A');
+    }
+    assert.equal(share.compactUrl('https://example.test/?z=10garbage').searchParams.get('z'), '10garbage');
+});
+test('두 지도의 기본 공유는 안내 본문 없이 실제 지도 위치를 전달한다', () => {
+    for (const [file, name] of [['nationwide-care-services-map.html', 'shareState'], ['nationwide-daycare-map.html', 'shareCurrentState']]) {
+        const html = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
+        const fn = html.split('\n').find(line => line.includes('function ' + name + '('));
+        assert.ok(!fn.includes('text:'));
+        assert.ok(html.indexOf('map-share-state.js') < html.indexOf('function ' + name + '('));
+    }
+});
+/** SOFTM-SHARE-VIEW END */
