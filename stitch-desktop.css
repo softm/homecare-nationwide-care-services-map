@@ -108,10 +108,10 @@
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .filters { top:44px!important; }
 }
 /** SOFTM-STITCH-MOBILE END */
-/** SOFTM-STITCH-FONT START 날짜:20260914 : 한글 기관명과 숫자 정보를 원본의 차분한 서체 위계로 읽도록 통일 */
-body.stitch-desktop { --care-font:'Work Sans','Noto Sans KR',sans-serif; font-family:var(--care-font); font-weight:400; letter-spacing:-.025em; -webkit-font-smoothing:antialiased; }
-body.stitch-desktop :is(button,input,select,textarea) { font-family:inherit; letter-spacing:-.025em; }
-body.stitch-desktop :is(h1,h2,h3,.stitch-brand strong) { font-family:'Manrope','Noto Sans KR',sans-serif; font-weight:700; letter-spacing:-.045em; }
+/** SOFTM-STITCH-FONT START 날짜:20260916 : 한글·영문·숫자의 형태를 통일하고 좁은 자간과 과도한 굵기로 인한 밀집감을 줄임 */
+body.stitch-desktop { --care-font:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif; font-family:var(--care-font); font-weight:400; letter-spacing:-.015em; -webkit-font-smoothing:antialiased; }
+body.stitch-desktop :is(button,input,select,textarea) { font-family:inherit; letter-spacing:-.015em; }
+body.stitch-desktop :is(h1,h2,h3,.stitch-brand strong) { font-family:var(--care-font); font-weight:700; letter-spacing:-.025em; }
 body.stitch-desktop .stitch-brand strong { font-weight:800; }
 body.stitch-desktop :is(.row-score,.care-result-rank,.care-sheet-count) { font-variant-numeric:tabular-nums; }
 @media (min-width:1001px) {
@@ -330,3 +330,25 @@ body.stitch-desktop .stitch-compare-tray [data-basket-open] { background:#004541
 /** SOFTM-STITCH-RESET START 날짜:20260915 : 개별 필터와 전체 조건 초기화의 행동 위계를 구분 */
 body.stitch-desktop .stitch-filter-summary .stitch-reset { background:transparent; color:#61716c; margin-left:auto; }
 /** SOFTM-STITCH-RESET END */
+
+/** SOFTM-TYPE-RHYTHM START 날짜:20260916 : 청록색 화면에서 제목·행동·설명 위계를 굵기와 행간으로 구분해 편안하게 읽도록 정리 */
+body.stitch-desktop.care-map-page :is(button,.care-type-menu-item,.care-workspace-tab-list>button) { font-weight:600; }
+body.stitch-desktop.care-map-page .stitch-brand strong { font-size:22px; font-weight:750; letter-spacing:-.04em; line-height:1.3; }
+body.stitch-desktop.care-map-page .care-type-header .care-type-menu-item { font-size:13px; font-weight:500; letter-spacing:-.02em; }
+body.stitch-desktop.care-map-page .care-type-menu-item[aria-current="true"],body.stitch-desktop.care-map-page .care-workspace-tab-list>[aria-selected="true"] { font-weight:700; }
+body.stitch-desktop.care-map-page .row h3 { font-weight:650; letter-spacing:-.025em; line-height:1.5; }
+body.stitch-desktop.care-map-page .row p { line-height:1.65; letter-spacing:-.01em; }
+body.stitch-desktop.care-map-page :is(.row-score,.care-result-rank,.care-sheet-count) { font-weight:650; }
+body.stitch-desktop.care-map-page .row .care-row-actions > :is(button,a,label) { font-weight:600; letter-spacing:-.015em; }
+body.stitch-desktop.care-map-page :is(.detail-body,.care-navigation-menu small) { font-weight:400; line-height:1.7; letter-spacing:-.01em; }
+body.stitch-desktop.care-map-page :is(.detail-line>span,.care-detail-fact-label,.care-navigation-menu strong) { font-weight:600; }
+@media (min-width:1001px) {
+ body.stitch-desktop.care-map-page .row h3 { font-size:18px; }
+ body.stitch-desktop.care-map-page .list-head h2 { font-size:19px; }
+}
+@media (max-width:1000px) {
+ body.stitch-desktop.care-map-page .stitch-brand strong { font-size:19px; }
+ body.stitch-desktop.care-map-page .care-type-header .care-type-menu-item { font-size:12px; }
+ body.stitch-desktop.care-map-page .row h3 { font-size:16px; }
+}
+/** SOFTM-TYPE-RHYTHM END */
