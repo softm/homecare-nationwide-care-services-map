@@ -603,28 +603,28 @@
             search.className = 'search-btn care-mobile-search'; search.textContent = '조회';
             search.onclick = () => options.mobileSearch?.(); filters.querySelector('.filter-grid').append(search);
         }
-        /** SOFTM-FILTER-CLOSE START 날짜:20260910 : 닫기를 조회와 같은 실행 버튼으로 오인하지 않도록 패널 상단과 바깥 영역에 닫기 동작을 분리 */
+        /** SOFTM-FILTER-CLOSE START 날짜:20260916 : 상세필터의 버튼·제목·접근성 이름을 일치시키고 닫기와 조회 행동을 구분 */
         const toggle = document.createElement('button');
         toggle.type = 'button'; toggle.className = 'care-mobile-filter-toggle';
-        /** SOFTM-FILTER-BADGE START 날짜:20260914 : 검색조건 적용 여부를 패널을 다시 열지 않고도 확인하도록 상태 배지를 제공 */
-        const toggleLabel = document.createElement('span'); toggleLabel.className = 'care-filter-toggle-label'; toggleLabel.textContent = '검색조건';
+        /** SOFTM-FILTER-BADGE START 날짜:20260916 : 상세필터 적용 여부를 패널을 다시 열지 않고도 확인하도록 상태 배지를 제공 */
+        const toggleLabel = document.createElement('span'); toggleLabel.className = 'care-filter-toggle-label'; toggleLabel.textContent = '상세필터';
         const conditionBadge = document.createElement('span'); conditionBadge.className = 'care-filter-state-badge'; conditionBadge.textContent = '설정됨'; conditionBadge.hidden = true;
         toggle.append(toggleLabel, conditionBadge); toggle.setAttribute('aria-expanded', 'false');
         filters.id ||= 'careMobileFilters'; toggle.setAttribute('aria-controls', filters.id);
         filters.querySelector('.filter-grid').append(toggle);
         const panelHead = document.createElement('div'); panelHead.className = 'care-filter-panel-head';
-        const panelTitle = document.createElement('strong'); panelTitle.textContent = '검색조건';
-        const close = document.createElement('button'); close.type = 'button'; close.className = 'care-filter-panel-close'; close.textContent = '×'; close.setAttribute('aria-label', '검색조건 닫기');
+        const panelTitle = document.createElement('strong'); panelTitle.textContent = '상세필터';
+        const close = document.createElement('button'); close.type = 'button'; close.className = 'care-filter-panel-close'; close.textContent = '×'; close.setAttribute('aria-label', '상세필터 닫기');
         panelHead.append(panelTitle, close); filters.prepend(panelHead);
-        panelHead.after(createContextLinks('care-mobile-context-links')); // SOFTM-MAP-NAVIGATION 날짜:20260911 : 상단 유형 메뉴가 숨는 모바일에서도 안내 링크를 검색조건 안에 제공
-        const backdrop = document.createElement('button'); backdrop.type = 'button'; backdrop.className = 'care-filter-backdrop'; backdrop.hidden = true; backdrop.setAttribute('aria-label', '검색조건 닫기');
+        panelHead.after(createContextLinks('care-mobile-context-links')); // SOFTM-MAP-NAVIGATION 날짜:20260911 : 상단 유형 메뉴가 숨는 모바일에서도 안내 링크를 상세필터 안에 제공
+        const backdrop = document.createElement('button'); backdrop.type = 'button'; backdrop.className = 'care-filter-backdrop'; backdrop.hidden = true; backdrop.setAttribute('aria-label', '상세필터 닫기');
         document.body.append(backdrop);
         const hasConfiguredConditions = () => ['province', 'city', 'capacity', 'staff'].some(id => filters.querySelector(`#${id}`)?.value)
             || !!filters.querySelector('[data-filter]:not([data-value="all"]).active,[data-filter]:not([data-value="all"])[aria-pressed="true"],.advanced-selected [data-remove]');
         const syncConditionBadge = () => {
             const configured = hasConfiguredConditions(), open = document.body.classList.contains('care-mobile-filters-open');
             conditionBadge.hidden = !configured; toggle.classList.toggle('has-active-filters', configured);
-            toggle.setAttribute('aria-label', `${configured ? '검색조건 설정됨, ' : ''}검색조건 ${open ? '열림' : '열기'}`);
+            toggle.setAttribute('aria-label', `${configured ? '상세필터 설정됨, ' : ''}상세필터 ${open ? '열림' : '열기'}`);
         };
         const setOpen = (open, restoreFocus = false) => {
             document.body.classList.toggle('care-mobile-filters-open', open);

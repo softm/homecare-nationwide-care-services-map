@@ -352,3 +352,9 @@ body.stitch-desktop.care-map-page :is(.detail-line>span,.care-detail-fact-label,
  body.stitch-desktop.care-map-page .row h3 { font-size:16px; }
 }
 /** SOFTM-TYPE-RHYTHM END */
+
+/** SOFTM-RESULT-WHITE START 날짜:20260916 : 검색 결과의 회색 바탕을 흰색으로 통일해 기관 카드 사이와 결과 헤더의 답답함을 줄임 */
+body.stitch-desktop.care-map-page[data-care-workspace="search"] .layout > .results,
+body.stitch-desktop.care-map-page[data-care-workspace="search"] .layout #list,
+body.stitch-desktop.care-map-page[data-care-workspace="search"] .results :is(.list-head,.select-tools,.care-sheet-handle) { background:#fff; }
+/** SOFTM-RESULT-WHITE END */
