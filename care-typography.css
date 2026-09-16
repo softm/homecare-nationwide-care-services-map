@@ -1,6 +1,6 @@
-/** SOFTM-UI-TYPOGRAPHY START 날짜:20260916 : 한글 중심 탐색에서 작은 글씨와 혼합 서체를 줄이고 제목·본문·행동의 읽기 위계를 통일 */
+/** SOFTM-UI-TYPOGRAPHY START 날짜:20260916 : Pretendard로 한글·숫자 UI를 통일하고 검증한 글자 크기·행간 위계를 유지 */
 body.stitch-desktop.care-map-page,body.analysis-page {
- --care-font:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+ --care-font:'Pretendard Variable',-apple-system,BlinkMacSystemFont,sans-serif;
  font-family:var(--care-font); font-size:15px; font-weight:400; line-height:1.65; letter-spacing:0;
 }
 body.stitch-desktop.care-map-page :is(button,input,select,textarea),body.analysis-page :is(button,input,select,textarea) { font-family:var(--care-font); letter-spacing:0; }
