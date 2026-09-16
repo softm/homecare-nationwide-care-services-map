@@ -61,6 +61,11 @@
 .loading .spinner{grid-row:1/3;width:20px;height:20px;border-width:3px;margin:0}
 .loading b{font-size:13px}.loading small{font-size:12px}
 /** SOFTM-MAP-PROGRESS END */
+/* SOFTM-DENSE-PAINT START 날짜:20260917 : 수천 마커 갱신 때 전체 지도의 실시간 흐림 합성과 개별 그림자 비용을 제거 */
+.loading{backdrop-filter:none}
+.map-shell.care-dense-map .map-marker{box-shadow:none}
+.map-shell.care-dense-map .care-mobile-active-marker .map-marker{box-shadow:0 0 0 3px #fff,0 0 0 6px #2679df}
+/* SOFTM-DENSE-PAINT END */
 </style>
 <!-- SOFTM-PARTNER-ASSETS START 날짜:20260904 : 두 지도에서 같은 제휴 문의 화면을 사용 -->
 <link rel="stylesheet" href="partner-inquiry.css?v=20260904-3"><!-- SOFTM-PARTNER-SUCCESS 날짜:20260904 : 접수 후 자동 닫기와 큰 토스트가 이전 캐시 없이 함께 적용되도록 갱신 -->
@@ -202,7 +207,7 @@
 <link rel="stylesheet" href="route-simulation.css?v=20260916-bottom1"> <!-- SOFTM-SIMULATION-BOTTOM 날짜:20260916 : 모바일 하단 고정 조작부를 이전 캐시 없이 적용 -->
 <script src="route-simulation.js?v=20260912-compact1"></script> <!-- SOFTM-SIMULATION-COMPACT 날짜:20260912 : 부가 조작을 펼침으로 분리한 모의주행을 이전 캐시 없이 적용 -->
 <script src="care-basket-map.js?v=20260911-route-optimize1"></script> <!-- SOFTM-ROUTE-OPTIMIZE 날짜:20260911 : 선택한 최적 방문 배열과 실제 도로 경로를 연결하는 버전을 적용 -->
-<script src="result-sort.js?v=20260910-2"></script> <!-- SOFTM-SORT-SCORE-FIRST 날짜:20260910 : 공단 평가점수순의 첫 번째 배치가 이전 캐시 없이 적용되도록 갱신 -->
+<script src="result-sort.js?v=20260917-render1"></script> <!-- SOFTM-RENDER-PERF 날짜:20260917 : 거리 정렬의 반복 계산 제거를 캐시 없이 반영 -->
 <script src="voice-search.js?v=20260911-response1"></script> <!-- SOFTM-SEARCH-CLEAR 날짜:20260911 : 두 지도 검색창의 지우기 동작을 즉시 적용 -->
 <!-- SOFTM-MOBILE-PULL-REFRESH START 날짜:20260910 : 목록·지도 시트 제스처와 분리된 당겨서 새로고침을 연결 -->
 <script src="mobile-pull-refresh.js?v=20260910-1"></script>
@@ -211,7 +216,7 @@
 <script src="map-share-state.js?v=20260916-view1"></script> <!-- SOFTM-SHARE-VIEW 날짜:20260916 : 초기 좌표 해석 전에 기존 공유 주소의 안내 문구를 분리 -->
 <script src="care-basket-share.js?v=20260915-text1"></script> <!-- SOFTM-SHARE-URL 날짜:20260915 : 안내 문구가 섞인 기존 공유 링크 복원을 즉시 적용 -->
 <script src="stitch-controls.js?v=20260916-filter-design1"></script> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세필터 시안과 실제 적용조건 상태를 함께 갱신 -->
-<script src="map-experience.js?v=20260916-input-yield1"></script> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세조건 배지와 접근성 이름의 공용 갱신을 적용 -->
+<script src="map-experience.js?v=20260917-render1"></script> <!-- SOFTM-RENDER-PERF 날짜:20260917 : 지도 변경마다 반복하던 목록 배치 계산 제거를 반영 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -512,7 +517,12 @@ async function clearQueryMarkers(keep=new Set(),current=()=>true){
  const previous=[...markers.entries()].filter(([id])=>!keep.has(id));
  await MapViewportSearch.resolve(previous,entry=>entry,{current,onResult([id,marker]){
   if(markers.get(id)!==marker)return;
-  marker.setMap(null);markers.delete(id);
+  /** SOFTM-MARKER-POOL START 날짜:20260917 : 필터 왕복 때 SDK 오버레이 삭제·재부착 대신 표시 상태를 재사용 */
+  const pool=clearQueryMarkers.pool??=new Map();
+  if(marker.setVisible){marker.setVisible(false);pool.set(id,marker)}else marker.setMap(null);
+  markers.delete(id);
+  while(pool.size>8000){const [oldId,oldMarker]=pool.entries().next().value;oldMarker.setMap(null);pool.delete(oldId)}
+  /** SOFTM-MARKER-POOL END */
   if(mobileActiveMarker===marker){mobileActiveMarker=null;mobileActiveIcon=null}
  }});
 }
@@ -525,11 +535,17 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
  /** SOFTM-MARKER-DIFF START 날짜:20260917 : 새 조건에 남는 마커는 전체 삭제와 재생성을 건너뜀 */
  await clearQueryMarkers(new Set(candidates.map(c=>c.i)),query.current);if(!query.current())return {cancelled:true};
  /** SOFTM-MARKER-DIFF END */
+ $('naverMap').classList?.toggle('care-dense-map',candidates.length>500); // SOFTM-DENSE-PAINT 날짜:20260917 : 넓은 지도에서도 선택 대비를 유지하며 일반 마커 그림자만 생략
  const bounds=map.getBounds(),center={lat:map.getCenter().lat(),lng:map.getCenter().lng()},known=[],unknown=[];
  for(const c of candidates){const p=cachedCoord(c);if(p){c._mapCenterDistance=hav(center,p);known.push(c)}else unknown.push(c)}
  known.sort((a,b)=>a._mapCenterDistance-b._mapCenterDistance);
  const limit=fit?Math.min(MAP_CANDIDATE_LIMIT,Math.max(PAGE_LIMIT,candidates.length)):candidates.length;
  const list=[...known,...unknown].slice(0,limit),placed=[],unresolvedRows=[],fitBounds=new window.naver.maps.LatLngBounds();
+ /** SOFTM-MARKER-RANK START 날짜:20260917 : 캐시 좌표의 최종 순번으로 처음부터 그려 아이콘 이중 생성을 방지 */
+ const rankedCandidates=list.filter(c=>{const p=cachedCoord(c);return fit||!p||bounds.hasLatLng(new window.naver.maps.LatLng(p.lat,p.lng))});
+ sortRows(rankedCandidates);
+ const initialRanks=new Map(rankedCandidates.map((c,i)=>[c.i,i+1]));
+ /** SOFTM-MARKER-RANK END */
  let resolvedCount=0;
  if(!query.feedback)showLoading('기관 위치를 표시하는 중',`위치 확인 · 0 / ${list.length}`);
  query.feedback?.progress({current:0,total:list.length,message:'지도 위치 확인 중'});
@@ -543,10 +559,12 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
     /** SOFTM-MARKER-PROGRESS START 날짜:20260913 : 전체 좌표 응답을 기다리지 않고 확인된 기관부터 지도에 표시 */
     placed.push(c);fitBounds.extend(pos);
     /** SOFTM-MARKER-DIFF START 날짜:20260917 : 남아 있는 기관은 좌표와 마커를 재사용하고 새 기관만 생성 */
-    let marker=markers.get(c.i);
-    if(marker){if(marker.getMap()!==map)marker.setMap(map)}
+    /** SOFTM-MARKER-POOL START 날짜:20260917 : 재확장한 조건의 기관은 숨겨둔 마커를 다시 사용 */
+    let marker=markers.get(c.i)||clearQueryMarkers.pool?.get(c.i);
+    if(marker){clearQueryMarkers.pool?.delete(c.i);markers.set(c.i,marker);if(marker.getMap()!==map)marker.setMap(map);marker.setVisible?.(true)}
+    /** SOFTM-MARKER-POOL END */
     else{
-     marker=new window.naver.maps.Marker({map,position:pos,title:c.n,icon:markerIcon(c,placed.length)});
+     marker=new window.naver.maps.Marker({map,position:pos,title:c.n,icon:markerIcon(c,initialRanks.get(c.i)||placed.length)});
      window.naver.maps.Event.addListener(marker,'click',()=>{careMapFocus?.enter();focusCenter(c.i)});markers.set(c.i,marker);
     }
     /** SOFTM-MARKER-DIFF END */ // SOFTM-MAP-FOCUS-MARKER 날짜:20260914 : 기관 마커를 선택하면 상세를 열기 전에 전체 지도 공간을 확보
@@ -871,7 +889,7 @@ async function refreshAfterFilterClick(feedback){
  clearTimeout(refreshTimer);skipIdleUntil=0;
  await new Promise(resolve=>setTimeout(resolve,0));
  if(!query.current())return {cancelled:true};
- applyFilters();
+ if(!mapReady||$('q').value.trim()||$('province').value||$('city').value)applyFilters(); // SOFTM-FILTER-PASS 날짜:20260917 : 화면 검색이 수행할 전국 필터와 정렬을 중복 실행하지 않음
  /** SOFTM-QUERY-YIELD END */
  if(!mapReady)return showDataPreview(filtered,'필터 결과',query);
  if($('q').value.trim()||$('province').value||$('city').value)return loadMarkers(filtered,{fit:false,regionText:'현재 지도 · 필터 결과',query});

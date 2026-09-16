@@ -720,7 +720,7 @@
         new MutationObserver(observe).observe(list, { childList: true });
         if (root.ResizeObserver) new root.ResizeObserver(() => { updateScrollTail(); schedule(); }).observe(list); // SOFTM-LIST-SCROLL-END 날짜:20260910 : 확대·회전으로 목록 높이가 달라져도 마지막 기관 선택 위치를 유지
         list.addEventListener('scroll', () => { scrollRequested = true; schedule(); }, { passive: true }); // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 사용자 스크롤에서만 선택 기관 위치를 따라감
-        new MutationObserver(schedule).observe(document.querySelector('.map-wrap'), { childList: true, subtree: true }); // SOFTM-MOBILE-MAP 날짜:20260909 : 비동기로 생성된 첫 마커에도 현재 목록 선택을 연결
+        // SOFTM-MAP-REFLOW 날짜:20260917 : 마커마다 목록 레이아웃을 읽지 않고 조회 후 목록 변경과 실제 스크롤에서 선택을 연결
         media.addEventListener('change', () => { setOpen(false); if (!media.matches) options.mobileFocus?.(null); observe(); });
         observe();
     }

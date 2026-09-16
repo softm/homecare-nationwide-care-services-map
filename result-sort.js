@@ -28,9 +28,11 @@
  function sort(rows){
   if(config?.select.value==='rating'){rows.sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n,'ko'));return true;} // SOFTM-DEFAULT-SCORE 날짜:20260910 : 평가점수는 좌표 유무와 관계없이 높은 순으로 정렬
   if(!config||!['accuracy','distance'].includes(config.select.value))return false;
-  const point=origin==='current'?currentPoint:config.center();
-  for(const row of rows){const value=distance(point,config.coord(row));row._distance=Number.isFinite(value)?value:undefined;}
-  rows.sort((a,b)=>compare(a,b,{mode:config.select.value,query:document.getElementById('q').value,point,coord:config.coord}));return true;
+  /** SOFTM-SORT-KEYS START 날짜:20260917 : 비교 횟수마다 좌표 조회·삼각함수·문자 정규화를 반복하지 않음 */
+  const point=origin==='current'?currentPoint:config.center(),query=document.getElementById('q').value,accuracy=config.select.value==='accuracy';
+  const keys=new Map(rows.map(row=>{const value=distance(point,config.coord(row));row._distance=Number.isFinite(value)?value:undefined;return [row,{distance:value,relevance:accuracy?relevance(row,query):0}]}));
+  rows.sort((a,b)=>{const x=keys.get(a),y=keys.get(b);return y.relevance-x.relevance||x.distance-y.distance||a.n.localeCompare(b.n,'ko')||String(a.i).localeCompare(String(b.i))});return true;
+  /** SOFTM-SORT-KEYS END */
  }
  /** SOFTM-SORT-PERSIST START 날짜:20260910 : 카테고리별 페이지 이동에도 적용한 정렬과 거리 중심점을 같은 탭에서 이어서 사용 */
  function createPreference(storage){
