@@ -50,3 +50,11 @@
  .care-simulation-playing .care-simulation-active { animation:none; }
 }
 /* SOFTM-SIMULATION-BLINK END */
+
+/** SOFTM-SIMULATION-BOTTOM START 날짜:20260916 : 모바일 지도 위에 떠 있던 조작부를 하단 작업 탭 바로 위에 고정해 경로 시야를 확보 */
+@media (max-width:1000px) {
+ .care-map-page .care-simulation { position:fixed; left:0; right:0; bottom:var(--care-tabs-height,calc(58px + env(safe-area-inset-bottom))); width:auto; padding:10px max(12px,env(safe-area-inset-right)) 10px max(12px,env(safe-area-inset-left)); border-radius:14px 14px 0 0; z-index:159; box-shadow:0 -3px 16px #17324d1a; }
+ .care-map-page .map-wrap:has(.care-simulation:not([hidden])) { margin-bottom:70px; }
+ .care-map-page .map-wrap:has(.care-simulation:not([hidden]) .care-simulation-controls:not([hidden])) { margin-bottom:120px; }
+}
+/** SOFTM-SIMULATION-BOTTOM END */
