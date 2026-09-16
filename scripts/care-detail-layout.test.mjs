@@ -72,3 +72,20 @@ test('기관 공유는 기본 공유창 취소를 존중하고 실패 시 링크
  }
 });
 /** SOFTM-INSTITUTION-SHARE-FALLBACK END */
+
+/** SOFTM-POPUP-SHARE START 날짜:20260916 : 지도 공유가 열린 팝업을 우선하고 닫힌 팝업은 조회 공유를 유지하는지 검사 */
+test('팝업 상태의 지도 공유는 기관 URL만 전달하고 일반 지도 공유는 가로채지 않는다',async()=>{
+ const listeners=[];let payload,stopped=false;
+ const label={textContent:'공유'};
+ const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'주소',institutionShare:'https://homecare.designboard.net/?type=facility&institution=14119001002'},querySelector:()=>label,getClientRects:()=>[{}]};
+ const sandbox={window:{},URLSearchParams,setTimeout(){},getComputedStyle:()=>({visibility:'visible'}),navigator:{share:async data=>{payload=data}},document:{addEventListener:(name,fn,capture)=>listeners.push({fn,capture}),querySelectorAll:()=>[button]}};
+ vm.runInNewContext(readFileSync(new URL('../care-detail-layout.js',import.meta.url),'utf8'),sandbox);
+ const handler=listeners.find(item=>item.capture).fn;
+ handler({target:{closest:()=>true},preventDefault(){},stopImmediatePropagation(){stopped=true}});
+ await Promise.resolve();await Promise.resolve();
+ assert.equal(stopped,true);assert.equal(payload.url,button.dataset.institutionShare);assert.equal('text' in payload,false);
+ stopped=false;button.getClientRects=()=>[];
+ handler({target:{closest:()=>true},preventDefault(){},stopImmediatePropagation(){stopped=true}});
+ assert.equal(stopped,false);
+});
+/** SOFTM-POPUP-SHARE END */
