@@ -1,0 +1,35 @@
+/** SOFTM-UI-TYPOGRAPHY START 날짜:20260916 : 한글 중심 탐색에서 작은 글씨와 혼합 서체를 줄이고 제목·본문·행동의 읽기 위계를 통일 */
+body.stitch-desktop.care-map-page,body.analysis-page {
+ --care-font:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+ font-family:var(--care-font); font-size:15px; font-weight:400; line-height:1.65; letter-spacing:0;
+}
+body.stitch-desktop.care-map-page :is(button,input,select,textarea),body.analysis-page :is(button,input,select,textarea) { font-family:var(--care-font); letter-spacing:0; }
+body.stitch-desktop.care-map-page :is(h1,h2,h3),body.analysis-page :is(h1,h2,h3,.analysis-brand,.analysis-stats strong) { font-family:var(--care-font); font-weight:700; letter-spacing:-.02em; }
+body.stitch-desktop.care-map-page .row h3,body.analysis-page .analysis-card h3 { font-size:18px; font-weight:700; line-height:1.5; letter-spacing:-.02em; word-break:keep-all; overflow-wrap:anywhere; }
+body.stitch-desktop.care-map-page .row p { font-size:14px; font-weight:400; line-height:1.65; letter-spacing:0; }
+body.stitch-desktop.care-map-page .row :is(.stitch-card-address,.details) { font-size:14px; line-height:1.65; }
+body.stitch-desktop.care-map-page .row .row-score { font-size:13px; font-weight:600; }
+body.stitch-desktop.care-map-page .row .care-row-actions > :is(button,a,label) { font-size:14px; font-weight:600; letter-spacing:0; line-height:1.45; }
+body.stitch-desktop.care-map-page .care-type-header .care-type-menu-item { font-size:13px; font-weight:500; line-height:1.5; letter-spacing:0; }
+body.stitch-desktop.care-map-page .care-type-header .care-type-menu-item[aria-pressed="true"] { font-weight:700; }
+body.stitch-desktop.care-map-page :is(.list-head h2,.care-saved-heading h2,.care-sort-dialog h2,.care-basket-share-dialog h2) { font-size:20px; font-weight:700; line-height:1.4; }
+body.stitch-desktop.care-map-page .detail-head h3 { font-size:22px; line-height:1.45; }
+body.stitch-desktop.care-map-page :is(.detail-line,.care-detail-address-content,.care-share-description,.care-sort-help,.care-sort-origin-help) { font-size:14px; line-height:1.65; letter-spacing:0; }
+body.stitch-desktop.care-map-page :is(.care-detail-label,.metric span,.care-saved-heading p) { font-size:13px; line-height:1.55; }
+body.stitch-desktop.care-map-page :is(.care-sort-dialog label,.advanced-option,.advanced-parent,.care-sort-apply) { font-size:15px; line-height:1.5; }
+body.stitch-desktop.care-map-page .advanced-option small { font-size:12px; }
+body.stitch-desktop.care-map-page :is(.advanced-help,.advanced-source,.advanced-summary-help) { font-size:13px; line-height:1.6; }
+body.stitch-desktop.care-map-page .filter-grid :is(input,select) { font-size:14px; font-weight:400; }
+body.stitch-desktop.care-map-page :is(.row-score,.metric b,.care-basket-count),body.analysis-page :is(.analysis-stats strong,.analysis-badges,.analysis-bar header) { font-variant-numeric:tabular-nums; }
+body.analysis-page :is(.analysis-note,.analysis-card figcaption,.analysis-badges,.analysis-footer,.analysis-source) { font-size:13px; line-height:1.6; }
+body.analysis-page :is(.analysis-card-address,.analysis-facts,.analysis-card details,.analysis-card-actions,.analysis-submit span) { font-size:14px; line-height:1.65; }
+body.analysis-page :is(button,.analysis-action) { font-weight:600; }
+body.analysis-page .analysis-section h2 { font-size:20px; line-height:1.5; }
+body.analysis-page .analysis-intro p { font-size:15px; line-height:1.7; }
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page .filter-grid :is(input,select),body.analysis-page :is(input,select) { font-size:16px; }
+ body.stitch-desktop.care-map-page .row h3 { font-size:18px; }
+ body.stitch-desktop.care-map-page .detail-head h3 { font-size:20px; }
+ body.stitch-desktop.care-map-page .care-type-header .care-type-menu-item { font-size:13px; }
+}
+/** SOFTM-UI-TYPOGRAPHY END */
