@@ -39,3 +39,12 @@ body.care-map-focus.care-focus-list .care-focus-bottom{bottom:calc(45dvh + 12px)
 body.care-map-focus.care-focus-list.care-map-page[data-care-workspace][data-care-sheet="list"] .care-focus-bottom{bottom:calc(80dvh + 12px)}
 body.care-map-focus.care-focus-list.care-map-page[data-care-workspace][data-care-sheet="map"] .care-focus-bottom,body.care-map-focus.care-focus-list.care-map-page[data-care-workspace][data-care-sheet="focus"] .care-focus-bottom{bottom:76px}
 /** SOFTM-FOCUS-LIST END */
+
+/** SOFTM-FOCUS-TABS START 날짜:20260917 : 모바일 전체 지도에서도 작업 전환을 유지하고 목록과 지도가 탭을 가리지 않도록 공간 확보 */
+@media(max-width:1000px) {
+ body.care-map-focus.care-map-page[data-care-workspace] .care-workspace-tabs { display:flex!important; position:fixed; inset:auto 0 0; z-index:181; width:100%; height:calc(58px + env(safe-area-inset-bottom)); min-height:58px; box-sizing:border-box; margin:0; padding:4px 8px env(safe-area-inset-bottom); border-radius:0; background:#fff; }
+ body.care-map-focus.care-map-page[data-care-workspace] .care-workspace-tab-list { width:100%; }
+ body.stitch-desktop.care-map-focus.care-map-page[data-care-workspace] .layout>.map-card.card { bottom:var(--care-tabs-height,58px)!important; height:calc(100dvh - var(--stitch-category-height,56px) - var(--care-tabs-height,58px))!important; }
+ body.care-map-focus.care-focus-list.care-map-page[data-care-workspace] .layout>.results { bottom:var(--care-tabs-height,58px)!important; max-height:calc(100dvh - var(--stitch-category-height,56px) - var(--care-tabs-height,58px) - 70px)!important; }
+}
+/** SOFTM-FOCUS-TABS END */

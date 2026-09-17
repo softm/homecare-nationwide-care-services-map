@@ -16,6 +16,13 @@
   function panel(title,node){closePanel();dialog.querySelector('h2').textContent=title;const placeholder=document.createComment('지도 도구 복귀 위치');node.before(placeholder);moved={node,placeholder};dialog.querySelector('.care-focus-content').append(node);dialog.showModal();}
   function enter(){if(active||!config.ready())return;origin={top:root.scrollY,list:document.getElementById('list').scrollTop,focus:document.activeElement};active=true;root.updateCareResultSummary?.();/* SOFTM-COMPACT-STATUS 날짜:20260914 : 전체 지도 진입 시 목록 버튼의 최신 결과 수 표시 */card.inert=false;document.body.classList.add('care-map-focus');controls.hidden=false;config.resize();controls.querySelector('button').focus({preventScroll:true});}
   function leave(){if(!active)return;closePanel();active=false;controls.hidden=true;document.body.classList.remove('care-map-focus','care-focus-list');card.inert=matchMedia('(max-width:1000px)').matches&&document.body.dataset.careWorkspace==='saved'&&document.body.dataset.careView!=='map';config.resize();root.scrollTo({top:origin.top,behavior:'instant'});document.getElementById('list').scrollTop=origin.list;origin.focus?.focus?.({preventScroll:true});}
+  /** SOFTM-FOCUS-TABS START 날짜:20260917 : 복원한 하단 탭은 전체보기를 정리한 뒤 기존 작업 전환을 실행 */
+  document.addEventListener('click',e=>{
+   if(!active||!e.target.closest('.care-workspace-tabs button'))return;
+   leave();
+   if(e.target.closest('.care-workspace-back')){e.preventDefault();e.stopImmediatePropagation()}
+  },true);
+  /** SOFTM-FOCUS-TABS END */
   new MutationObserver(()=>{if(active&&card.inert)card.inert=false}).observe(card,{attributes:true,attributeFilter:['inert']});
   function mapTap(){if(focusAction(active)==='leave')leave()}
   /** SOFTM-MAP-FOCUS-TOGGLE START 날짜:20260914 : SDK 레이어가 click을 누락해도 전체보기의 지도 배경을 짧게 누르면 기존 화면으로 복귀 */
@@ -38,7 +45,7 @@
    if(b.dataset.focus==='exit')leave();
    else if(b.dataset.focus==='search'){search.hidden=false;selects[0].innerHTML=document.getElementById('province').innerHTML;selects[0].value=document.getElementById('province').value;syncCities();selects[1].value=document.getElementById('city').value;search.querySelector('input').value=document.getElementById('q').value;panel('지역·기관 검색',search)}
    else if(b.dataset.focus==='layers'){const satellite=config.layers();b.setAttribute('aria-pressed',String(satellite));b.setAttribute('aria-label',satellite?'일반지도 보기':'위성지도 보기');b.title=b.getAttribute('aria-label');b.querySelector('span').textContent=b.title;}
-   else if(b.dataset.focus==='saved'){config.saved();panel('담은 기관',document.getElementById('careSavedPanel'))}
+   else if(b.dataset.focus==='saved'){leave();config.saved()} // SOFTM-FOCUS-TABS 날짜:20260917 : 측면 담은 기관도 하단 탭과 동일한 작업 화면으로 전환
    else {closePanel();config.results();document.body.classList.add('care-focus-list');} // SOFTM-FOCUS-LIST 날짜:20260914 : 목록 보기를 반복해도 전체보기와 상단 숨김을 유지하며 하단 목록만 표시
   });
   dialog.addEventListener('click',e=>{if(e.target.closest('.row')&&!e.target.closest('button,a,input,label')||e.target.closest('[data-saved-detail]'))closePanel()});
