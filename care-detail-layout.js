@@ -92,6 +92,27 @@
             }
         }
     });
-    window.CareDetailLayout = {address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
+    /** SOFTM-DETAIL-NAV START 날짜:20260917 : 목록 순서를 유지하며 팝업 안에서 이웃 기관을 확인하도록 공용 이동을 제공 */
+    let detailNavigation = null;
+    function navigation(c, rows, open) {
+        const index = rows.findIndex(row => row.i === c.i);
+        detailNavigation = { id: c.i, previous: index > 0 ? rows[index - 1] : null, next: index >= 0 ? rows[index + 1] : null, open };
+        const button = (direction, label) => {
+            const target = detailNavigation[direction];
+            return `<button type="button" data-care-detail-step="${direction}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${label}</button>`;
+        };
+        return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}</span>${button('next', '다음 기관 →')}</nav>`;
+    }
+    document.addEventListener('click', event => {
+        const button = event.target.closest('[data-care-detail-step]');
+        if (!button) return;
+        event.stopPropagation();
+        const state = detailNavigation;
+        if (button.disabled || !state || button.closest('[data-care-detail-current]')?.dataset.careDetailCurrent !== state.id) return;
+        const target = state[button.dataset.careDetailStep];
+        if (target) state.open(target.i);
+    }, true);
+    /** SOFTM-DETAIL-NAV END */
+    window.CareDetailLayout = {navigation, address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
 })();
 /** SOFTM-DETAIL-LAYOUT END */

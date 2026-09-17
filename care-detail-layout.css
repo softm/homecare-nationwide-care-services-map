@@ -64,3 +64,17 @@
 .care-map-page .map-head-actions #shareBtn svg{width:18px;height:18px}
 @media(max-width:380px){.care-map-page .care-popup-basket-action{gap:6px}.care-popup-tools{gap:6px}.care-map-page .care-popup-share{padding:0 9px}.care-map-page .care-popup-navigation{min-width:86px;padding:0 9px}.care-map-page .care-popup-basket-action .care-basket-button{padding:7px 9px;font-size:13px}}
 /** SOFTM-INSTITUTION-SHARE END */
+
+/** SOFTM-DETAIL-NAV START 날짜:20260917 : 좁은 팝업에서도 이전·다음 조작과 현재 순번을 한 줄에 유지 */
+.care-detail-navigation { display:flex; align-items:center; justify-content:space-between; gap:6px; width:100%; margin-top:10px; }
+.care-detail-navigation button { min-height:36px; padding:6px 9px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:#125e58; font:inherit; font-size:13px; font-weight:600; white-space:nowrap; cursor:pointer; }
+.care-detail-navigation button:disabled { opacity:.4; cursor:default; }
+.care-detail-navigation button:focus-visible { outline:2px solid #087f75; outline-offset:2px; }
+.care-detail-navigation span { min-width:0; font-size:12px; color:#64748b; text-align:center; }
+.detail-head .care-detail-navigation span, .popup-head .care-detail-navigation span { color:#e2e8f0; }
+@media (min-width:1001px) {
+    .map-wrap .popup { display:flex; flex-direction:column; max-height:min(600px,calc(100dvh - 180px)); }
+    .map-wrap .popup-head { flex-shrink:0; }
+    .map-wrap .popup-body { min-height:0; overflow-y:auto; }
+}
+/** SOFTM-DETAIL-NAV END */
