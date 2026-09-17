@@ -17,9 +17,9 @@
   <link rel="stylesheet" href="care-cost.css?v=20260904-1">
   <!-- SOFTM-COST-ADS START 날짜:20260904 : 비용 확인을 마친 자리에서 사업자 문의를 접수하도록 광고·문의 공통 자원을 연결 -->
   <link rel="stylesheet" href="partner-banner.css?v=20260904-1">
-  <link rel="stylesheet" href="partner-inquiry.css?v=20260904-3">
+  <link rel="stylesheet" href="partner-inquiry.css?v=20260917-1">
   <script defer src="partner-inquiry-config.js?v=20260904-2"></script>
-  <script defer src="partner-inquiry.js?v=20260904-4"></script>
+  <script defer src="partner-inquiry.js?v=20260917-1"></script>
   <script defer src="care-cost-ad-config.js?v=20260905-1"></script> <!-- SOFTM-AD-UNITS 날짜:20260905 : 빈 ID 설정 캐시 대신 승인된 광고 단위를 즉시 적용 -->
   <script defer src="care-cost-ads.js?v=20260904-1"></script>
   <!-- SOFTM-COST-ADS END -->
@@ -32,6 +32,12 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
 <!-- SOFTM-BRAND-ICON END -->
+<!-- SOFTM-PARTNER-OFFER 날짜:20260917 : 공용 문의 상품과 예산 입력의 최신 버전 적용 -->
+<!-- SOFTM-SPONSOR-SLOT START 날짜:20260917 : 실제 표시되는 비용 페이지에서 계약한 추가 광고를 계산 영역 밖에 제공 -->
+  <link rel="stylesheet" href="sponsor-card.css?v=20260917-1">
+  <script defer src="sponsor-config.js?v=20260917-1"></script>
+  <script defer src="sponsor-card.js?v=20260917-1"></script>
+  <!-- SOFTM-SPONSOR-SLOT END -->
 </head>
 <body class="cost-page">
   <header class="cost-page-header"><a class="cost-page-brand" href="index.html"><img src="site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0"><!-- SOFTM-BRAND-ICON 날짜:20260913 : 서비스 이름 옆에 공용 대표 아이콘을 제공 -->돌봄한눈</a><a href="nationwide-care-services-map.html">가까운 기관 찾기 →</a></header>
@@ -60,6 +66,9 @@
       </div>
     </aside>
     <!-- SOFTM-COST-ADS END -->
+  <!-- SOFTM-SPONSOR-SLOT START 날짜:20260917 : 계약된 유료 광고를 계산 결과와 기존 카카오 광고 뒤에 독립 표시 -->
+    <aside class="sponsor-card" data-sponsor-slot hidden aria-label="유료 광고"></aside>
+    <!-- SOFTM-SPONSOR-SLOT END -->
   </main>
   <footer class="cost-page-footer"><p>돌봄한눈은 공개자료를 바탕으로 한 독립 정보 서비스입니다. 계산 금액은 견적이나 급여 자격 판정이 아닙니다. 요양병원 비용에는 이 계산을 적용하지 않습니다.</p><a href="about.html">서비스 소개와 자료 출처</a> · <a href="index.html">돌봄 유형 살펴보기</a></footer>
 </body>

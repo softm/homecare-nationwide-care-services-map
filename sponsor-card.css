@@ -1,0 +1,11 @@
+/** SOFTM-SPONSOR START 날짜:20260917 : 유료 광고를 기관 정보와 시각적으로 구분하고 작은 화면에서도 읽기 쉽게 제공 */
+.sponsor-card{box-sizing:border-box;max-width:1080px;margin:24px auto;padding:28px;border:1px solid #9cb6d6;border-radius:16px;background:#f0f6ff;color:#17324d;font:16px/1.7 system-ui,sans-serif;overflow-wrap:anywhere}
+.sponsor-card[hidden]{display:none}
+.sponsor-card .sponsor-label{font-size:14px;font-weight:700;color:#365a86;margin:0 0 8px}
+.sponsor-card h2{margin:0;font-size:24px;line-height:1.4}
+.sponsor-card a{display:inline-block;padding:10px 16px;border-radius:8px;background:#175cb5;color:#fff;font-weight:700;text-decoration:none}
+.sponsor-card a:focus-visible{outline:3px solid #17324d;outline-offset:4px}
+.sponsor-card small{display:block;margin-top:14px;font-size:13px}
+.partner-banner-actions>a{color:#174d7e;font-size:15px;line-height:1.6;text-underline-offset:4px;text-align:center}
+@media(max-width:600px){.sponsor-card{padding:20px;margin:20px 12px}.sponsor-card h2{font-size:21px}}
+/** SOFTM-SPONSOR END */

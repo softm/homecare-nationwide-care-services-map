@@ -45,3 +45,8 @@ html.partner-inquiry-open{overflow:hidden}
 .partner-success-toast strong{font-size:32px;font-weight:800;line-height:1.4;overflow-wrap:anywhere}
 @media(max-width:480px){.partner-success-toast{gap:12px;padding:22px 20px;border-radius:16px}.partner-success-toast span{width:38px;height:38px;font-size:26px}.partner-success-toast strong{font-size:24px}}
 /** SOFTM-PARTNER-SUCCESS END */
+
+/** SOFTM-PARTNER-OFFER START 날짜:20260917 : 모바일에서도 상품과 예산을 읽고 선택하도록 폼 서식 유지 */
+.partner-dialog select{display:block;width:100%;min-width:0;min-height:44px;margin-top:6px;padding:10px;border:1px solid #b9cbd5;border-radius:8px;background:#fff;color:#17324d;font:16px/1.5 system-ui,sans-serif}
+.partner-dialog .partner-intro a{color:#126a91;text-underline-offset:3px}
+/** SOFTM-PARTNER-OFFER END */

@@ -47,6 +47,9 @@
             </header>
             <div class="partner-body">
                 <p class="partner-intro" id="partnerInquiryIntro">지역별 광고·제휴를 문의해 주세요. 남겨 주신 이메일로 답변드립니다.</p>
+                <!-- SOFTM-PARTNER-OFFER START 날짜:20260917 : 문의 전에 구매 범위와 비용을 확인하고 견적 조건을 함께 받기 -->
+                <p class="partner-intro"><a href="advertise.html" target="_blank" rel="noopener">소개자료 제작·광고 상품 보기</a></p>
+                <!-- SOFTM-PARTNER-OFFER END -->
                 <form>
                     <input type="checkbox" name="botcheck" hidden tabindex="-1" autocomplete="off" aria-hidden="true">
                     <fieldset class="partner-fields" aria-label="제휴 문의 내용">
@@ -55,6 +58,10 @@
                         <label class="partner-wide">회신 이메일 <span>(필수)</span><input type="email" name="email" autocomplete="email" maxlength="254" required></label>
                         <label>연락처 <span>(선택)</span><input type="tel" name="phone" autocomplete="tel" maxlength="40"></label>
                         <label>광고 희망 지역 <span>(선택)</span><input name="region" placeholder="예: 경기 광명시" maxlength="120"></label>
+                        <!-- SOFTM-PARTNER-OFFER START 날짜:20260917 : 상담에 필요한 상품과 예산을 수신 메일에서 구분 -->
+                        <label>희망 상품<select name="product"><option value="general">일반 제휴 상담</option><option value="profile">기관 소개 페이지 제작 · 제안가 110,000원</option><option value="pilot-30">30일 홍보 카드 · 제안가 55,000원</option></select></label>
+                        <label>예산 <span>(선택)</span><select name="budget"><option value="">상담 후 결정</option><option>10만원 미만</option><option>10만~30만원</option><option>30만원 이상</option></select></label>
+                        <!-- SOFTM-PARTNER-OFFER END -->
                         <label class="partner-wide">문의 내용 <span>(필수)</span><textarea name="message" rows="4" maxlength="5000" placeholder="소개할 서비스와 희망 광고 내용을 알려주세요." required></textarea></label>
                         <label class="partner-wide partner-consent"><input type="checkbox" name="consent" required><span>입력한 정보를 제휴 상담 및 회신을 위해 전송하는 데 동의합니다. (필수)</span></label>
                     </fieldset>
@@ -101,6 +108,10 @@
         hideSuccessToast(); // SOFTM-PARTNER-SUCCESS 날짜:20260904 : 새 문의를 시작할 때 이전 접수 알림이 겹치지 않도록 정리
         opener = trigger || document.activeElement;
         openedFromList = Boolean(opener?.closest('#list'));
+        /** SOFTM-PARTNER-OFFER START 날짜:20260917 : 상품에서 진입한 문의를 구분하고 작성 중인 내용은 보존 */
+        const product = dialog.querySelector('[name="product"]');
+        if (['pilot-30', 'profile'].includes(opener?.dataset.partnerProduct)) product.value = opener.dataset.partnerProduct;
+        /** SOFTM-PARTNER-OFFER END */
         dialog.showModal();
         document.documentElement.classList.add('partner-inquiry-open');
         if (!String(config().accessKey || '').trim()) {
@@ -140,6 +151,10 @@
             phone: String(data.phone || '').trim(),
             region: String(data.region || '').trim(),
             message: data.message.trim(),
+            /** SOFTM-PARTNER-OFFER START 날짜:20260917 : 가격 문의를 실제 견적과 연결할 수 있도록 선택 조건 전달 */
+            product: data.product === 'profile' ? '기관 소개 페이지 제작 · 제안가 110,000원 (총 결제금액, 계약 전 확정)' : data.product === 'pilot-30' ? '30일 홍보 카드 · 제안가 55,000원 (총 결제금액, 계약 전 확정)' : '일반 제휴 상담',
+            budget: String(data.budget || '상담 후 결정'),
+            /** SOFTM-PARTNER-OFFER END */
             consent: '제휴 상담 및 회신을 위한 정보 전송 동의',
             page: `${location.origin}${location.pathname}`,
             /** SOFTM-PARTNER-CONTEXT START 날짜:20260904 : 새 문의 배너의 유입 위치와 실제 선택 유형을 수신자가 구분하도록 전달 */
