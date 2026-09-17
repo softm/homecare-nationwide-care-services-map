@@ -114,6 +114,38 @@
         if (target) state.open(target.i);
     }, true);
     /** SOFTM-DETAIL-NAV END */
+    /** SOFTM-DETAIL-RESIZE START 날짜:20260917 : 지도를 가리지 않는 기본 높이와 정보 집중 보기를 DOM 재생성 없이 전환 */
+    function installDetailResize() {
+        for (const [selector, visibilitySelector, contentId] of [
+            ['#detailSheet', '#detailSheet', 'detailBody'],
+            ['.mobile-popup-sheet', '#mobilePopupLayer', 'mobilePopupContent']
+        ]) {
+            const sheet = document.querySelector(selector);
+            const visibility = document.querySelector(visibilitySelector);
+            if (!sheet || !visibility) continue;
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'care-detail-resize';
+            toggle.setAttribute('aria-controls', contentId);
+            const setExpanded = expanded => {
+                sheet.dataset.detailExpanded = String(expanded);
+                toggle.setAttribute('aria-expanded', String(expanded));
+                toggle.textContent = expanded ? '⌄ 지도 넓게' : '⌃ 상세 크게';
+            };
+            toggle.addEventListener('click', event => {
+                event.stopPropagation();
+                setExpanded(sheet.dataset.detailExpanded !== 'true');
+            });
+            sheet.prepend(toggle);
+            setExpanded(false);
+            new MutationObserver(() => {
+                if (visibility.hidden) setExpanded(false);
+            }).observe(visibility, { attributes: true, attributeFilter: ['hidden'] });
+        }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installDetailResize, { once: true });
+    else installDetailResize();
+    /** SOFTM-DETAIL-RESIZE END */
     window.CareDetailLayout = {navigation, address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
 })();
 /** SOFTM-DETAIL-LAYOUT END */

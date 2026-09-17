@@ -125,3 +125,32 @@ body.care-map-page .popup:has(.care-compact-head) .daycare-contact .popup-row-la
 body.care-map-page .popup:has(.care-compact-head) .daycare-contact :is(.popup-row-value,.care-contact-phone) { color:#263d36; font-size:14px; font-weight:500; line-height:1.6; }
 body.care-map-page .popup:has(.care-compact-head) .daycare-contact .care-contact-phone { color:#176d60; text-decoration:none; }
 /** SOFTM-INFO-SHEET END */
+
+/** SOFTM-DETAIL-RESIZE START 날짜:20260917 : 상세를 열어도 주변 지도를 확인하고 필요할 때만 정보를 넓혀 읽도록 기본 점유율을 제한 */
+.care-detail-resize { display:none; }
+@media(max-width:1000px) {
+ body.care-map-page :is(#detailSheet,.mobile-popup-sheet) { height:54dvh; max-height:54dvh; min-height:0; box-sizing:border-box; border-radius:18px 18px 0 0; padding-bottom:0; }
+ body.care-map-page :is(#detailSheet,.mobile-popup-sheet)[data-detail-expanded="true"] { height:84dvh; max-height:84dvh; }
+ body.care-map-page #detailSheet { bottom:0; }
+ body.care-map-page .care-detail-resize { display:flex; flex:none; align-items:center; justify-content:center; width:100%; min-height:44px; height:44px; padding:0 52px; border:0; border-bottom:1px solid #edf1ed; background:#fff; color:#386457; font:inherit; font-size:13px; font-weight:650; cursor:pointer; touch-action:manipulation; }
+ body.care-map-page .care-detail-resize:focus-visible { outline:3px solid #087f75; outline-offset:-4px; }
+ body.care-map-page .care-compact-head:is(.detail-head,.popup-head) { padding:8px 14px 4px; }
+ body.care-map-page :is(#detailSheet,.mobile-popup-sheet) .care-compact-head h3 { margin:4px 32px 4px 0; font-size:18px; line-height:1.35; overflow-wrap:anywhere; }
+ body.care-map-page .care-compact-head:is(.detail-head,.popup-head) :is(small,.popup-eyebrow) { font-size:12px; line-height:1.4; }
+ body.care-map-page #detailSheet .detail-body { min-height:0; }
+ body.care-map-page .detail-view { padding:12px 14px; }
+ body.care-map-page :is(.detail-sheet,.popup) :is(.detail-body,.popup-body) .care-detail-group>h3 { margin-bottom:10px; }
+ body.care-map-page .mobile-popup-layer:not([hidden]) { padding:0; background:transparent; backdrop-filter:none; }
+ body.care-map-page .mobile-popup-sheet { width:100%; }
+ body.care-map-page .mobile-popup-handle { display:none; }
+ body.care-map-page .mobile-popup-dismiss { top:48px; }
+ body.care-map-page .mobile-popup-content:has(.care-compact-head) { min-height:0; }
+ body.care-map-page .mobile-popup-content .popup:has(.care-compact-head) { height:100%; max-height:100%; min-height:0; border:0; }
+ body.care-map-page .mobile-popup-content .popup:has(.care-compact-head) .popup-static-tabs { margin-bottom:12px; }
+}
+@media(max-width:1000px) and (max-height:500px) {
+ body.care-map-page :is(#detailSheet,.mobile-popup-sheet) { height:84dvh; max-height:84dvh; }
+ body.care-map-page :is(#detailSheet,.mobile-popup-sheet)[data-detail-expanded="true"] { height:94dvh; max-height:94dvh; }
+ body.care-map-page .care-compact-head:is(.detail-head,.popup-head) { max-height:25dvh; overflow-y:auto; flex-shrink:0; }
+}
+/** SOFTM-DETAIL-RESIZE END */
