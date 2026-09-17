@@ -165,6 +165,7 @@ const expectedSitemapUrls = [
   `${publicOrigin}/about.html`, // SOFTM-BRAND-IDENTITY 날짜:20260904 : 유형 안내 외에 독립 서비스의 소개 문서도 검색 대표 목록에 포함
   `${publicOrigin}/data-status.html`, // SOFTM-DATA-STATUS 날짜:20260910 : 공개 수집 현황의 대표 주소가 사이트맵에서 누락되지 않도록 검사
   `${publicOrigin}/care-cost.html`, // SOFTM-CARE-COST-CHECK 날짜:20260904 : 비용 안내는 개인 입력이 없는 단일 대표 주소만 색인
+  `${publicOrigin}/advertise.html`, // SOFTM-B2B-REVENUE 날짜:20260917 : 신규 사업자 상품의 검색 대표 주소를 허용
   ...landingPages.map(page => `${publicOrigin}/${page}`),
   ...getRegionalSeoPages(root).pages.map(page => page.url) // SOFTM-SEO-REGIONAL-CHECK 날짜:20260904 : 지역별 실기관 페이지의 누락과 임의 주소 추가를 함께 차단
 ];
@@ -172,6 +173,7 @@ if (sitemapUrls.length !== expectedSitemapUrls.length || expectedSitemapUrls.som
 const indexablePages = [['index.html', `${publicOrigin}/`], ['about.html', `${publicOrigin}/about.html`], ...landingPages.map(page => [page, `${publicOrigin}/${page}`])]; // SOFTM-BRAND-IDENTITY 날짜:20260904 : 소개 문서의 색인 허용·대표 주소·브랜드 메타도 같은 기준으로 검사
 indexablePages.push(['data-status.html', `${publicOrigin}/data-status.html`]); // SOFTM-DATA-STATUS 날짜:20260910 : 현황 페이지의 공개 대표 주소와 구조화 데이터를 함께 검사
 indexablePages.push(['care-cost.html', `${publicOrigin}/care-cost.html`]); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 비용 안내의 브랜드·대표 주소·구조화 데이터도 함께 검사
+indexablePages.push(['advertise.html', `${publicOrigin}/advertise.html`]); // SOFTM-B2B-REVENUE 날짜:20260917 : 상품 안내도 검색 대표 메타를 검증
 for (const [htmlFile, canonical] of indexablePages) {
   const source = read(htmlFile);
   if (!source.includes('<meta name="robots" content="index,follow')) fail(`${htmlFile}: 검색 허용 robots 메타 누락`);
