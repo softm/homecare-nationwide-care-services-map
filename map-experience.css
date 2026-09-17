@@ -857,3 +857,9 @@ dialog.care-location-notice .care-location-actions button { width:100%; }
 .care-map-page .care-mobile-active-marker{transform:scale(1.5);filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 3px #175cb5)}
 .care-map-page .care-mobile-active-marker .map-marker,.care-map-page .care-mobile-active-marker .marker-pin{outline:2px solid #fff;box-shadow:0 0 0 2px #175cb5!important}
 /** SOFTM-SELECTED-PRESERVE END */
+
+/** SOFTM-POPUP-SAVED START 날짜:20260917 : 좁은 팝업에서도 담기와 담은 목록 이동을 구분하고 충분한 터치 영역을 제공 */
+.care-map-page .care-popup-basket-action { flex-wrap:wrap; }
+.care-map-page .care-popup-basket-action .care-popup-saved { order:3; flex:0 0 100%; width:100%; min-height:44px; margin:0; padding:9px 12px; border:1px solid #b8dcd6; border-radius:10px; background:#e6f5f1; color:#004541; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.care-map-page .care-popup-saved:focus-visible { outline:3px solid #268c80; outline-offset:2px; }
+/** SOFTM-POPUP-SAVED END */

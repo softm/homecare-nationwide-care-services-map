@@ -78,7 +78,7 @@
 <link rel="stylesheet" href="result-sort.css?v=20260910-1"> <!-- SOFTM-SORT-ORIGIN 날짜:20260910 : 거리 기준 위치의 적용 여부와 차이를 이전 캐시 없이 표시 -->
 <link rel="stylesheet" href="voice-search.css?v=20260911-clear1"> <!-- SOFTM-SEARCH-CLEAR 날짜:20260911 : 검색어 지우기 버튼을 이전 캐시 없이 적용 -->
 <link rel="stylesheet" href="care-match.css?v=20260911-match-clear1"> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문과 기관별 선택 근거의 공용 화면을 연결 --> <!-- SOFTM-MATCH-PANEL-ACTION 날짜:20260911 : 조건 패널의 축약 배치와 명확한 설정 버튼을 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-CLEAR 날짜:20260911 : 맞춤 조건 지우기 화면을 이전 캐시 없이 적용 -->
-<link rel="stylesheet" href="map-experience.css?v=20260914-selected-preserve2"> <!-- SOFTM-SELECTED-MARKER 날짜:20260914 : 확대된 선택 마커 스타일을 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="map-experience.css?v=20260917-popup-saved1"> <!-- SOFTM-POPUP-SAVED 날짜:20260917 : 팝업에서 담은 목록으로 이동하는 버튼 스타일을 갱신 -->
 <!-- SOFTM-MOBILE-PULL-REFRESH START 날짜:20260910 : 내부 목록 스크롤에서도 당겨서 최신 화면을 다시 불러오도록 공용 화면을 연결 -->
 <link rel="stylesheet" href="mobile-pull-refresh.css?v=20260910-1">
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
@@ -216,7 +216,7 @@
 <script src="map-share-state.js?v=20260916-view1"></script> <!-- SOFTM-SHARE-VIEW 날짜:20260916 : 초기 좌표 해석 전에 기존 공유 주소의 안내 문구를 분리 -->
 <script src="care-basket-share.js?v=20260915-text1"></script> <!-- SOFTM-SHARE-URL 날짜:20260915 : 안내 문구가 섞인 기존 공유 링크 복원을 즉시 적용 -->
 <script src="stitch-controls.js?v=20260916-filter-design1"></script> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세필터 시안과 실제 적용조건 상태를 함께 갱신 -->
-<script src="map-experience.js?v=20260917-render1"></script> <!-- SOFTM-RENDER-PERF 날짜:20260917 : 지도 변경마다 반복하던 목록 배치 계산 제거를 반영 -->
+<script src="map-experience.js?v=20260917-popup-saved1"></script> <!-- SOFTM-POPUP-SAVED 날짜:20260917 : 팝업에서 담은 목록으로 직접 이동하는 동작을 갱신 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -852,7 +852,7 @@ function openDetail(c,reveal=true){
  basic=basic.slice(metricEnd);
  basic=`<section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c))}${live}</section><section class="care-detail-group"><h3>${CONFIG.source==='hira'?'기관 현황':'공단 평가·기관 현황'}</h3>${metrics}${evaluationBlock}</section><section class="care-detail-group"><h3>이용·기관 정보</h3>${basic}</section>${CareMapExperience.costCard(c,TYPE)}`;
  /** SOFTM-DETAIL-LAYOUT END */
- $('detailBasketAction').innerHTML=CareMapExperience.button(c)+`<div class="care-popup-tools">${CareDetailLayout.shareButton(c,TYPE)}${CareDetailLayout.popupButton(c,cachedCoord(c))}</div>`; // SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공
+ $('detailBasketAction').innerHTML=CareMapExperience.button(c)+`<div class="care-popup-tools">${CareDetailLayout.shareButton(c,TYPE)}${CareDetailLayout.popupButton(c,cachedCoord(c))}</div><button type="button" class="care-popup-saved" data-popup-saved>담은 기관 보기 →</button>`; // SOFTM-POPUP-SAVED 날짜:20260917 : 팝업 안에서 담은 목록으로 바로 이동 // SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공
  /** SOFTM-MAP-EXPERIENCE END */
  $('detailBody').innerHTML=CONFIG.source==='nhis'?`<div class="detail-main-tabs" role="tablist" aria-label="기관 정보 구분"><button type="button" class="detail-main-tab active" data-detail-view="basic" role="tab" aria-selected="true">기본정보</button><button type="button" class="detail-main-tab" data-detail-view="official" role="tab" aria-selected="false">상세정보</button></div><section class="detail-view" id="detailBasic" role="tabpanel">${basic}</section><section class="detail-view detail-view-official" id="detailOfficial" role="tabpanel" hidden>${officialTabsHtml()}</section>`:`<section class="detail-view">${basic}</section>`;
  $('detailSheet').style.visibility=reveal?'':'hidden';$('detailSheet').hidden=false;$('copyName').onclick=()=>copy(c.n,'목적지명을 복사했습니다.');$('copyAddress').onclick=()=>copy(c.a,'주소를 복사했습니다.');document.querySelectorAll('[data-detail-view]').forEach(button=>button.onclick=()=>switchDetailView(c,button.dataset.detailView));document.querySelectorAll('[data-official-tab]').forEach(button=>button.onclick=()=>loadOfficialTab(c,Number(button.dataset.officialTab)));if(CONFIG.source==='nhis')void loadBasicInfo(c)

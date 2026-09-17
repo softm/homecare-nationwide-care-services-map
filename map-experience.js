@@ -1024,6 +1024,17 @@
         cancelBasketDrag = installBasketDrag(bar, move);
         tabs.addEventListener('keydown', event => { if (!event.target.closest('[data-workspace]') || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return; event.preventDefault(); const next = event.key === 'Home' ? 'search' : event.key === 'End' ? 'saved' : workspace === 'search' ? 'saved' : 'search'; setWorkspace(next); tabs.querySelector(`[data-workspace="${next}"]`).focus({ preventScroll: true }); }); // SOFTM-WORKSPACE-EXPAND 날짜:20260907 : 확대 버튼의 방향키가 작업 탭을 바꾸지 않도록 탭 키보드 범위를 제한
         media.addEventListener('change', () => { syncView(); options.resizeMap?.(); if (workspace === 'saved') requestAnimationFrame(() => basketMap.fit()); });
+        /** SOFTM-POPUP-SAVED START 날짜:20260917 : 상세에서 담은 뒤 팝업을 별도로 닫지 않고 담은 목록으로 이동 */
+        document.addEventListener('click', event => {
+            if (!event.target.closest('[data-popup-saved]')) return;
+            event.preventDefault();
+            event.stopPropagation();
+            options.closeDetail?.();
+            tabs.querySelector('#careSavedTab').click();
+            setView('list', false);
+            bar.querySelector('h2')?.focus({ preventScroll: true });
+        }, true);
+        /** SOFTM-POPUP-SAVED END */
         document.addEventListener('click', event => {
             /** SOFTM-SAVED-CARD START 날짜:20260910 : 카드의 주소·평가·여백도 상세로 연결하되 삭제와 순서 조작은 분리 */
             const savedCard = event.target.closest('.care-basket-items [data-basket-id]');
