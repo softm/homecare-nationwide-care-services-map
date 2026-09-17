@@ -84,3 +84,35 @@ test('두 지도 목록·지도 후보·공유 링크가 공통 상세조건을 
     }
 });
 /** SOFTM-ADVANCED-SEARCH END */
+
+/** SOFTM-FILTER-RELOAD START 날짜:20260917 : 초기화 뒤 URL 복원과 연속 해제에서 옛 조건이 되살아나는 경우를 검증 */
+test('필터 해제는 중복 URL값도 지우고 지역·검색어·지도·해시·history 상태를 보존한다', () => {
+    const historyState = { workspace: 'search' };
+    const environment = {
+        location: { href: 'https://example.test/map?type=daycare&p=경기도&q=센터&lat=37.4&lng=126.8&z=14&grades=A&grades=B&owner=3&features=green#view' },
+        history: { state: historyState, replaceState(state, unused, href) { assert.equal(state, historyState); environment.location.href = href; } }
+    };
+    api.updateFilterUrl({ grades: '' }, environment);
+    api.updateFilterUrl({ owner: '', features: '', address: '', addressMode: '', facility: '' }, environment);
+    const restored = new URL(environment.location.href);
+    assert.equal(restored.searchParams.has('grades'), false);
+    assert.deepEqual(api.readState(restored.searchParams, 'daycare'), api.emptyState());
+    for (const [key, value] of Object.entries({type:'daycare',p:'경기도',q:'센터',lat:'37.4',lng:'126.8',z:'14'})) assert.equal(restored.searchParams.get(key), value);
+    assert.equal(restored.hash, '#view');
+    api.updateFilterUrl({ cap: '' }, environment);
+    assert.equal(new URL(environment.location.href).searchParams.has('owner'), false);
+});
+
+test('일부 조건을 해제해도 남긴 조건은 새로고침 입력에 유지한다', () => {
+    const environment = {
+        location: { href: 'https://example.test/map?share=1&grades=A,B&scores=high&owner=4' },
+        history: { state: null, replaceState(state, unused, href) { environment.location.href = href; } }
+    };
+    api.updateFilterUrl({grades:'B', scores:''}, environment);
+    const params = new URL(environment.location.href).searchParams;
+    assert.equal(params.get('grades'), 'B');
+    assert.equal(params.has('scores'), false);
+    assert.equal(params.get('share'), '1');
+    assert.equal(api.readState(params, 'daycare').owner, '4');
+});
+/** SOFTM-FILTER-RELOAD END */
