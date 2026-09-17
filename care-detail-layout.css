@@ -79,20 +79,49 @@
 }
 /** SOFTM-DETAIL-NAV END */
 
-/** SOFTM-POPUP-COMPACT START 날짜:20260917 : 제목·주요 행동·보조 도구의 위계를 나누고 큰 버튼 행으로 본문이 밀리는 문제 방지 */
-body.care-map-page .care-compact-head:is(.detail-head,.popup-head) { padding:14px 16px 6px; background:#fff; color:#173b37; border-bottom:1px solid #e1eae7; }
-body.care-map-page .care-compact-head:is(.detail-head,.popup-head) :is(small,.popup-eyebrow) { color:#657772; font-size:12px; padding-right:38px; }
-body.care-map-page .care-compact-head:is(.detail-head,.popup-head) h3 { color:#143d37; margin:4px 38px 12px 0; font-size:20px; line-height:1.4; }
-body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; margin:0; }
-body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action :is(.care-basket-button,.care-popup-saved) { width:100%; min-width:0; height:44px; min-height:44px; padding:8px; margin:0; border:1px solid #c4dcd6; border-radius:9px; background:#f2f8f5; color:#145c51; box-shadow:none; font-size:14px; font-weight:650; white-space:nowrap; }
-body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action .care-basket-button { background:#00675c; color:#fff; border-color:#00675c; }
-body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action .care-basket-button[aria-pressed="true"] { background:#e0f2eb; border-color:#b7dccc; color:#145c51; }
-body.care-map-page .care-compact-head .care-popup-secondary { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
-body.care-map-page .care-compact-head .care-popup-tools { margin:0; gap:2px; }
-body.care-map-page .care-compact-head :is(.care-popup-share,.care-popup-navigation) { min-width:0; min-height:40px; height:40px; padding:6px; gap:4px; border:0; background:transparent; color:#596f68; font-size:12px; box-shadow:none; }
-body.care-map-page .care-compact-head :is(.care-popup-share,.care-popup-navigation) svg { width:16px; height:16px; }
-body.care-map-page .care-compact-head .care-detail-navigation { width:auto; gap:2px; margin:0; }
-body.care-map-page .care-compact-head .care-detail-navigation button { width:40px; min-height:40px; padding:0; border:0; background:transparent; color:#355d52; font-size:26px; line-height:1; }
-body.care-map-page .care-compact-head .care-detail-navigation span { color:#6c7e77; font-size:12px; }
-body.care-map-page .care-compact-head .detail-close,body.care-map-page .popup:has(.care-compact-head)>.popup-close { width:36px; min-width:36px; height:36px; min-height:36px; padding:0; line-height:1; top:10px; right:10px; background:#f0f5f2; color:#425f55; font-size:25px; }
-/** SOFTM-POPUP-COMPACT END */
+/** SOFTM-INFO-SHEET START 날짜:20260917 : 전문가 검토에 따라 기관 정보 우선·보조 행동의 문맥 배치·평면 본문으로 위계를 정리 */
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) { padding:16px 16px 10px; background:#fff; color:#173b37; border:0; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) :is(small,.popup-eyebrow) { display:block; color:#6b7773; font-size:12px; line-height:1.5; padding-right:36px; margin:0; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) h3 { color:#203c35; margin:6px 36px 10px 0; font-size:20px; line-height:1.35; font-weight:750; letter-spacing:-.4px; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; margin:0; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action .care-basket-button { flex:0 1 auto; width:auto; min-height:44px; padding:7px 12px; border:1px solid #cadcd4; border-radius:8px; background:#fff; color:#245c4e; font-size:14px; font-weight:650; box-shadow:none; white-space:nowrap; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action .care-basket-button[aria-pressed="true"] { background:#eaf5ef; border-color:#b3d4c5; color:#245c4e; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-saved { flex:0 1 auto; display:flex; align-items:center; justify-content:flex-end; gap:4px; width:auto; min-height:44px; padding:6px 0 6px 8px; margin:0; border:0; background:none; color:#386457; font-size:13px; font-weight:600; white-space:nowrap; }
+body.care-map-page .care-popup-saved [data-popup-saved-count] { display:inline-grid; place-items:center; min-width:20px; height:20px; padding:0 3px; border-radius:6px; background:#edf4f0; font-size:12px; }
+body.care-map-page .care-compact-head .detail-close,body.care-map-page .popup:has(.care-compact-head)>.popup-close,body.care-map-page .mobile-popup-dismiss { width:44px; min-width:44px; height:44px; min-height:44px; padding:0; line-height:1; top:8px; right:8px; background:transparent; color:#667970; font-size:27px; }
+body.care-map-page :is(.detail-sheet,.popup) :is(.detail-main-tabs,.popup-static-tabs) { position:sticky; top:0; display:flex; gap:0; padding:0 16px; margin:0; border:0; border-bottom:1px solid #e3eae6; border-radius:0; background:#fff; box-shadow:none; backdrop-filter:none; }
+body.care-map-page :is(.detail-sheet,.popup) :is(.detail-main-tab,.popup-static-tab) { flex:1; min-height:44px; height:44px; padding:8px 10px; border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; color:#75827b; font-size:14px; font-weight:600; box-shadow:none; }
+body.care-map-page :is(.detail-sheet,.popup) :is(.detail-main-tab,.popup-static-tab).active { color:#00675c; border-bottom-color:#00675c; background:transparent; box-shadow:none; }
+body.care-map-page .detail-view { padding:20px 16px; background:#fff; }
+body.care-map-page :is(.detail-sheet,.popup) :is(.detail-body,.popup-body) .care-detail-group { padding:0 0 20px; margin:0 0 20px; border:0; border-bottom:1px solid #e5ece7; border-radius:0; background:transparent; }
+body.care-map-page :is(.detail-sheet,.popup) :is(.detail-body,.popup-body) .care-detail-group>h3 { margin:0 0 16px; color:#233e34; font-size:14px; font-weight:700; }
+body.care-map-page :is(.detail-sheet,.popup) .care-detail-label { color:#64746d; font-size:12px; font-weight:500; margin-bottom:5px; }
+body.care-map-page :is(.detail-sheet,.popup) .care-detail-address-content { font-size:14px; line-height:1.65; color:#34483e; }
+body.care-map-page .care-address-toolbar { display:flex; align-items:center; gap:10px; margin:7px 0 0; }
+body.care-map-page .care-address-toolbar :is(button,a) { display:inline-flex; align-items:center; justify-content:center; gap:5px; flex:none; width:auto; min-width:0; min-height:44px; height:44px; padding:6px 3px; margin:0; border:0; border-radius:6px; background:transparent; color:#476557; font:inherit; font-size:13px; font-weight:600; text-decoration:none; box-shadow:none; }
+body.care-map-page .care-address-toolbar svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; }
+body.care-map-page :is(.detail-sheet,.popup) .basic-live-grid { gap:0 20px; }
+body.care-map-page :is(.detail-sheet,.popup) .basic-live-item { padding:13px 0; border:0; border-top:1px solid #edf1ed; border-radius:0; background:transparent; box-shadow:none; }
+body.care-map-page :is(.detail-sheet,.popup) .basic-live-item span { color:#64746d; font-size:12px; font-weight:500; }
+body.care-map-page :is(.detail-sheet,.popup) .basic-live-item :is(b,a) { color:#263d36; font-size:14px; font-weight:500; line-height:1.6; }
+body.care-map-page :is(.detail-sheet,.popup) .basic-live-item a { color:#176d60; }
+body.care-map-page .care-detail-footer { flex:none; padding:0 12px env(safe-area-inset-bottom); background:#fff; border-top:1px solid #e3eae6; }
+body.care-map-page .care-detail-footer .care-detail-navigation { margin:0; width:100%; gap:8px; }
+body.care-map-page .care-detail-footer .care-detail-navigation button { width:80px; min-height:44px; height:44px; padding:0 8px; border:0; background:none; color:#365b4b; font-size:13px; font-weight:600; }
+body.care-map-page .care-detail-footer .care-detail-navigation span { color:#7e8b82; font-size:12px; }
+body.care-map-page .popup:has(.care-compact-head) { display:flex; flex-direction:column; overflow:hidden; }
+body.care-map-page .popup:has(.care-compact-head) .popup-head { flex:none; }
+body.care-map-page .popup:has(.care-compact-head) .popup-body { flex:1; min-height:0; padding:0 16px 20px; overflow-y:auto; }
+body.care-map-page .popup:has(.care-compact-head) .popup-static-tabs { margin:0 -16px 20px; }
+body.care-map-page .mobile-popup-content:has(.care-compact-head) { display:flex; flex:1; overflow:hidden; }
+body.care-map-page .mobile-popup-content .popup:has(.care-compact-head) { max-height:calc(80dvh - 30px); }
+body.care-map-page .mobile-popup-content .popup:has(.care-compact-head) .popup-body { overflow-y:auto; }
+body.care-map-page .care-compact-head .popup-score-row { margin:0 0 8px; }
+body.care-map-page .care-compact-head .popup-score { color:#536e5d; font-size:18px; }
+body.care-map-page .popup:has(.care-compact-head) .popup-links { position:static; display:flex; flex-wrap:wrap; gap:6px; margin-top:20px; padding:14px 0 0; border-top:1px solid #e3eae6; background:transparent; }
+body.care-map-page .popup:has(.care-compact-head) .popup-links :is(a,button) { flex:1 1 90px; min-height:40px; padding:6px; border:1px solid #e3eae6; border-radius:6px; background:#fff; color:#476557; font-size:12px; font-weight:500; }
+body.care-map-page .popup:has(.care-compact-head) .daycare-contact .popup-row { display:block; padding:13px 0; border-top:1px solid #edf1ed; }
+body.care-map-page .popup:has(.care-compact-head) .daycare-contact .popup-row-label { display:block; margin-bottom:5px; color:#64746d; font-size:12px; font-weight:500; }
+body.care-map-page .popup:has(.care-compact-head) .daycare-contact :is(.popup-row-value,.care-contact-phone) { color:#263d36; font-size:14px; font-weight:500; line-height:1.6; }
+body.care-map-page .popup:has(.care-compact-head) .daycare-contact .care-contact-phone { color:#176d60; text-decoration:none; }
+/** SOFTM-INFO-SHEET END */

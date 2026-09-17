@@ -20,10 +20,11 @@
         if (/iPhone|iPad|iPod/i.test(ua)) return {href:`nmap://navigation?${query}`, web, label:'네이버 내비 길안내'};
         return {href:web, web, label:'길안내'};
     }
-    function address(c, point) {
-        const route = links(c, point);
-        return `<div class="care-detail-address"><span class="care-detail-label">주소</span><div class="care-detail-address-content"><span>${escape(c.a || '주소 미공개')}</span><div class="care-detail-address-actions"><button type="button" data-care-address="${escape(c.a || '')}" aria-label="주소 복사" title="주소 복사" ${c.a?'':'disabled'}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button><a href="${escape(route.href)}" data-care-nav data-web-fallback="${escape(route.web)}" aria-label="${route.label}" title="${route.label}" ${route.href.startsWith('https:')?'target="_blank" rel="noopener"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7 18-3-8-8-3Z"/></svg></a></div></div><span class="care-detail-address-status" role="status"></span></div>`;
+    /** SOFTM-INFO-SHEET START 날짜:20260917 : 주소와 관련된 길안내·복사·공유를 정보 바로 아래에 모아 헤더를 간결하게 유지 */
+    function address(c, point, type = 'daycare') {
+        return `<div class="care-detail-address"><span class="care-detail-label">주소</span><div class="care-detail-address-content"><span>${escape(c.a || '주소 미공개')}</span></div><div class="care-address-toolbar">${popupButton(c,point)}<button type="button" data-care-address="${escape(c.a || '')}" aria-label="주소 복사" ${c.a?'':'disabled'}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg><span>주소 복사</span></button>${shareButton(c,type)}</div><span class="care-detail-address-status" role="status"></span></div>`;
     }
+    /** SOFTM-INFO-SHEET END */
     /** SOFTM-LIST-NAVIGATION START 날짜:20260911 : 목록에서 목적지 행동을 아이콘과 문구가 함께 있는 버튼으로 바로 인식하도록 제공 */
     function listButton(c, point) {
         const route = links(c, point);
@@ -99,7 +100,7 @@
         detailNavigation = { id: c.i, previous: index > 0 ? rows[index - 1] : null, next: index >= 0 ? rows[index + 1] : null, open };
         const button = (direction, label) => {
             const target = detailNavigation[direction];
-            return `<button type="button" data-care-detail-step="${direction}" aria-label="${label}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${direction === 'previous' ? '‹' : '›'}</button>`; // SOFTM-POPUP-COMPACT 날짜:20260917 : 기관 이동은 접근성 이름을 유지한 짧은 화살표로 표시
+            return `<button type="button" data-care-detail-step="${direction}" aria-label="${label}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${direction === 'previous' ? '‹ 이전' : '다음 ›'}</button>`; // SOFTM-POPUP-COMPACT 날짜:20260917 : 기관 이동은 접근성 이름을 유지한 짧은 화살표로 표시
         };
         return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}</span>${button('next', '다음 기관 →')}</nav>`;
     }

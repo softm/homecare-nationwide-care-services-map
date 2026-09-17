@@ -218,6 +218,7 @@
         matchController?.refresh(); // SOFTM-CARE-MATCH 날짜:20260910 : 목록 재렌더와 페이지 변경에도 선택 근거를 다시 연결
         const selected = rows();
         tabs.querySelector('[data-saved-count]').textContent = selected.length;
+        document.querySelectorAll('[data-popup-saved-count]').forEach(node => { node.textContent = selected.length; }); // SOFTM-INFO-SHEET 날짜:20260917 : 팝업에서 담은 결과와 바로가기 기관 수를 즉시 연결
         bar.querySelector('.care-basket-count').textContent = `${selected.length}곳`;
         bar.querySelector('[data-basket-open]').disabled = !selected.length;
         bar.querySelector('[data-route-edit]').disabled = !selected.length;
