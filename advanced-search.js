@@ -63,6 +63,22 @@
         if (state.features.length) params.set('features', [...state.features].sort().join(','));
     }
 
+    /** SOFTM-FILTER-RELOAD START 날짜:20260917 : 화면에서 해제한 조건을 새로고침이 URL에서 다시 복원하지 않도록 즉시 동기화 */
+    function updateFilterUrl(values, environment = root) {
+        const url = new URL(environment.location.href);
+        for (const [key, value] of Object.entries(values)) {
+            url.searchParams.delete(key);
+            if (value !== '') url.searchParams.set(key, value);
+        }
+        if (url.href !== environment.location.href) environment.history.replaceState(environment.history.state, '', url.href);
+    }
+    function persistState(state) {
+        const params = new URLSearchParams();
+        writeState(params, state);
+        updateFilterUrl(Object.fromEntries(['owner', 'facility', 'addressMode', 'address', 'features'].map(key => [key, params.get(key) || ''])));
+    }
+    /** SOFTM-FILTER-RELOAD END */
+
     function createMatcher(index, type) {
         const bits = Object.fromEntries((index?.features || []).map((key, position) => [key, 1 << position]));
         const groups = groupsFor(type);
@@ -254,6 +270,7 @@
         /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 마지막 조건의 실제 완료만 알리고 빠른 조회에서도 진행 표시를 인지하게 함 */
         async function changed() {
             clearTimeout(inputTimer);
+            persistState(state); // SOFTM-FILTER-RELOAD 날짜:20260917 : 조회 완료 전에 새로고침해도 해제한 조건이 복원되지 않도록 저장
             const nextSignature = signature();
             if (nextSignature === lastSignature) return;
             lastSignature = nextSignature;
@@ -346,6 +363,7 @@
             clearTimeout(inputTimer);
             cancel();
             state.address = '';
+            persistState(state); // SOFTM-FILTER-RELOAD 날짜:20260917 : 지역 변경으로 해제한 상세주소도 URL에서 제거
             suggestions();
             sync();
             lastSignature = signature();
@@ -370,7 +388,7 @@
         const newInstitution = row.d && row.d >= '2023-06-10';
         return capacityMatch && (!staff || staff === 'rehab' && row.pt + row.ot > 0 || staff === 'nurse' && row.rn > 0 || staff === 'nursing' && row.rn + row.na > 0 || staff === 'new' && newInstitution);
     }
-    const api = { mount, createMatcher, readState, writeState, sanitize, addressParts, groupsFor, emptyState, loadIndex, describeState, matchesLegacy };
+    const api = { updateFilterUrl, mount, createMatcher, readState, writeState, sanitize, addressParts, groupsFor, emptyState, loadIndex, describeState, matchesLegacy }; // SOFTM-FILTER-RELOAD 날짜:20260917 : 두 지도의 기본 조건도 같은 URL 갱신 경로를 사용
     /** SOFTM-CARE-MATCH END */
     root.CareAdvancedSearch = Object.freeze(api);
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

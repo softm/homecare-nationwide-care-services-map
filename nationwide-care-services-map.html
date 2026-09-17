@@ -200,7 +200,7 @@
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260910-photos1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260910 : 공용 확대창에서 비교 중인 사진의 소속 기관도 표시 -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
-<script src="advanced-search.js?v=20260910-match1"></script><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공단 제공 서비스와 설립주체의 공통 판정을 로드 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 특화 판정 연결을 최신 버전으로 함께 적용 -->
+<script src="advanced-search.js?v=20260917-filter-reload1"></script><!-- SOFTM-FILTER-RELOAD 날짜:20260917 : 조건 초기화 URL 동기화를 이전 캐시 없이 적용 --><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공단 제공 서비스와 설립주체의 공통 판정을 로드 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 특화 판정 연결을 최신 버전으로 함께 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 공식 수가 계산과 세션 비교함을 같은 공용 모듈로 연결 -->
 <script src="care-cost-rates.js?v=20260904-1"></script>
 <script src="care-cost-engine.js?v=20260904-1"></script>
@@ -898,7 +898,7 @@ async function refreshAfterFilterClick(feedback){
  return refreshFromMap(query);
 }
 /** SOFTM-SEARCH-FEEDBACK END */
-function toggleMultiFilter(type,value){const set=multiFilterSet(type);if(value==='all')set.clear();else set.has(value)?set.delete(value):set.add(value);syncMultiFilterButtons(type);void refreshAfterFilterClick()}
+function toggleMultiFilter(type,value){const set=multiFilterSet(type);if(value==='all')set.clear();else set.has(value)?set.delete(value):set.add(value);syncMultiFilterButtons(type);CareAdvancedSearch.updateFilterUrl({[type==='grade'?'grades':type==='score'?'scores':'conf']:[...set].sort().join(',')});void refreshAfterFilterClick()} // SOFTM-FILTER-RELOAD 날짜:20260917 : 전체 선택·개별 해제를 URL에 즉시 반영해 새로고침 복원을 방지
 function restoreState(){for(const [key,id] of [['q','q'],['p','province'],['c','city']]){const v=params.get(key);if(v&&$(id)){if(id==='province'){$(id).value=v;updateCities()}else $(id).value=v}}if(CONFIG.source==='nhis'){gradeFilters=new Set((params.get('grades')||'').split(',').filter(v=>['A','B','C','D','E','new','unknown'].includes(v)));scoreFilters=new Set((params.get('scores')||'').split(',').filter(v=>['high','mid','low','lowest','unknown'].includes(v)));confidenceFilters=new Set((params.get('conf')||'').split(',').filter(v=>['high','medium','low'].includes(v)))}else{gradeFilters.clear();scoreFilters.clear();confidenceFilters.clear()}syncMultiFilterButtons('grade');syncMultiFilterButtons('score');syncMultiFilterButtons('confidence')}
 /** SOFTM-POPUP-ESC START 날짜:20260904 : 사진·문의 확대창의 Esc를 보존하고 현재 열린 팝업 하나만 닫기 */
 function closePopupOnEscape(event){
@@ -1019,7 +1019,7 @@ function updateDetailFromScroll(id){
 function careMatchAdapter(){return {
  snapshot:()=>({rows:careMatchRows,scope:careMatchScope,pending:careMatchPending,error:careMatchError,province:$('province').value,city:$('city').value,filters:{q:$('q').value,grades:[...gradeFilters],scores:[...scoreFilters],confidences:[...confidenceFilters],capacity:params.get('cap')||'',staff:params.get('staff')||'',advanced:advancedSearch?.state()||CareAdvancedSearch.emptyState()}}),
  applyRegion:({province,city})=>{$('province').value=province;updateCities();$('city').value=city;return searchByControls(false)},
- clearLegacy:key=>{params.delete(key==='capacity'?'cap':'staff');const url=new URL(location.href);url.search=params.toString();history.replaceState(null,'',url);void searchByControls(false)}
+ clearLegacy:key=>{const name=key==='capacity'?'cap':'staff';params.delete(name);CareAdvancedSearch.updateFilterUrl({[name]:''});void searchByControls(false)} // SOFTM-FILTER-RELOAD 날짜:20260917 : 예전 URL 복사본으로 다른 해제 조건을 되살리지 않도록 해당 조건만 제거
 }}
 /** SOFTM-CARE-MATCH END */
 
