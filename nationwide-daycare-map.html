@@ -84,7 +84,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
 <!-- SOFTM-LIST-ACTIONS 날짜:20260913 : 목록 동작의 균일한 크기와 선택 상태를 이전 캐시 없이 적용 -->
 <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
-<link rel="stylesheet" href="care-detail-layout.css?v=20260917-nav1"><script src="care-detail-layout.js?v=20260917-nav1"></script><!-- SOFTM-DETAIL-NAV 날짜:20260917 : 기관 이동 버튼과 공용 스타일을 이전 캐시 없이 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 전국 주간 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20260917-compact1"><script src="care-detail-layout.js?v=20260917-compact1"></script><!-- SOFTM-DETAIL-NAV 날짜:20260917 : 기관 이동 버튼과 공용 스타일을 이전 캐시 없이 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 전국 주간 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT END -->
 <link rel="stylesheet" href="mobile-map-clean.css?v=20260914-sheet-focus1"> <!-- SOFTM-MOBILE-SHEET-FOCUS 날짜:20260914 : 검색창과 작업 탭을 접는 지도 집중 화면을 이전 캐시 없이 적용 -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
@@ -450,16 +450,16 @@ function popup(c){
  const ev=c.ev,grade=ev?gradeText(ev.grade):(isNew(c)?'신설·미평가':'등급 미확인'),score=ev&&Number.isFinite(ev.score)?ev.score.toFixed(1):'—',distance=Number.isFinite(c._distance)?c._distance.toFixed(1)+'km':'미산출';
  return `<div class="popup">
   <button class="popup-close" onclick="event.stopPropagation();closeMapPopup()" aria-label="센터 정보 닫기">×</button>
-  <div class="popup-head">
+  <div class="popup-head care-compact-head">
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급을 구분하고 자료 설명을 쉽게 제공 -->
    <div class="popup-eyebrow"><span>목록 ${listRank(c)||'-'}번</span><span>${esc(c.p+' '+c.c)}</span><span>${esc(confidenceText(c))}</span></div>
 <!-- SOFTM-MAP-WORDING END -->
    <h3>${esc(c.n)}</h3>
    <div class="popup-score-row"><span class="popup-score">${score}</span><span class="popup-grade-pill">${esc(grade)}</span><span class="popup-score-label">공단 평가총점</span></div>
    <!-- SOFTM-POPUP-COMPOSITION 날짜:20260911 : 비교 행동을 기관 제목·평가와 묶어 정보 탭 앞의 큰 중간 띠를 제거 -->
-   <div class="care-popup-basket-action">${CareMapExperience.button(c)}<div class="care-popup-tools">${CareDetailLayout.shareButton(c,'daycare')}${CareDetailLayout.popupButton(c,coordFor(c))}</div><button type="button" class="care-popup-saved" data-popup-saved>담은 기관 보기 →</button></div><!-- SOFTM-POPUP-SAVED 날짜:20260917 : 팝업 안에서 담은 목록으로 바로 이동 --> <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공 -->
+   <div class="care-popup-basket-action">${CareMapExperience.button(c)}<button type="button" class="care-popup-saved" data-popup-saved>담은 기관 보기 →</button></div><!-- SOFTM-POPUP-SAVED 날짜:20260917 : 팝업 안에서 담은 목록으로 바로 이동 --> <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공 -->
   <!-- SOFTM-DETAIL-NAV 날짜:20260917 : 전체 검색 결과 또는 담은 순서로 페이지 경계를 넘어 이동 -->
-  ${CareDetailLayout.navigation(c,CareMapExperience.isBasketMap()?CareMapExperience.rows():filtered,showOnMap)}
+  <div class="care-popup-secondary"><div class="care-popup-tools">${CareDetailLayout.shareButton(c,'daycare')}${CareDetailLayout.popupButton(c,coordFor(c))}</div>${CareDetailLayout.navigation(c,CareMapExperience.isBasketMap()?CareMapExperience.rows():filtered,showOnMap)}</div><!-- SOFTM-POPUP-COMPACT 날짜:20260917 : 보조 행동과 기관 이동을 한 줄로 묶어 정보 공간 확보 -->
   </div>
   <div class="popup-body" data-daycare-detail="${esc(c.i)}">
    <div class="popup-static-tabs" role="tablist" aria-label="기관 정보 구분"><button class="popup-static-tab active" type="button" data-daycare-tab="basic" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','basic')">기본정보</button><button class="popup-static-tab" type="button" data-daycare-tab="detail" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','detail')">상세정보</button><button class="popup-static-tab" type="button" data-daycare-tab="photos" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','photos')">사진</button></div>

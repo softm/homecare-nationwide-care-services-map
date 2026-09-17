@@ -78,3 +78,21 @@
     .map-wrap .popup-body { min-height:0; overflow-y:auto; }
 }
 /** SOFTM-DETAIL-NAV END */
+
+/** SOFTM-POPUP-COMPACT START 날짜:20260917 : 제목·주요 행동·보조 도구의 위계를 나누고 큰 버튼 행으로 본문이 밀리는 문제 방지 */
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) { padding:14px 16px 6px; background:#fff; color:#173b37; border-bottom:1px solid #e1eae7; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) :is(small,.popup-eyebrow) { color:#657772; font-size:12px; padding-right:38px; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) h3 { color:#143d37; margin:4px 38px 12px 0; font-size:20px; line-height:1.4; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; margin:0; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action :is(.care-basket-button,.care-popup-saved) { width:100%; min-width:0; height:44px; min-height:44px; padding:8px; margin:0; border:1px solid #c4dcd6; border-radius:9px; background:#f2f8f5; color:#145c51; box-shadow:none; font-size:14px; font-weight:650; white-space:nowrap; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action .care-basket-button { background:#00675c; color:#fff; border-color:#00675c; }
+body.care-map-page .care-compact-head:is(.detail-head,.popup-head) .care-popup-basket-action .care-basket-button[aria-pressed="true"] { background:#e0f2eb; border-color:#b7dccc; color:#145c51; }
+body.care-map-page .care-compact-head .care-popup-secondary { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
+body.care-map-page .care-compact-head .care-popup-tools { margin:0; gap:2px; }
+body.care-map-page .care-compact-head :is(.care-popup-share,.care-popup-navigation) { min-width:0; min-height:40px; height:40px; padding:6px; gap:4px; border:0; background:transparent; color:#596f68; font-size:12px; box-shadow:none; }
+body.care-map-page .care-compact-head :is(.care-popup-share,.care-popup-navigation) svg { width:16px; height:16px; }
+body.care-map-page .care-compact-head .care-detail-navigation { width:auto; gap:2px; margin:0; }
+body.care-map-page .care-compact-head .care-detail-navigation button { width:40px; min-height:40px; padding:0; border:0; background:transparent; color:#355d52; font-size:26px; line-height:1; }
+body.care-map-page .care-compact-head .care-detail-navigation span { color:#6c7e77; font-size:12px; }
+body.care-map-page .care-compact-head .detail-close,body.care-map-page .popup:has(.care-compact-head)>.popup-close { width:36px; min-width:36px; height:36px; min-height:36px; padding:0; line-height:1; top:10px; right:10px; background:#f0f5f2; color:#425f55; font-size:25px; }
+/** SOFTM-POPUP-COMPACT END */

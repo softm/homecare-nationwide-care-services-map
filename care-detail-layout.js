@@ -99,7 +99,7 @@
         detailNavigation = { id: c.i, previous: index > 0 ? rows[index - 1] : null, next: index >= 0 ? rows[index + 1] : null, open };
         const button = (direction, label) => {
             const target = detailNavigation[direction];
-            return `<button type="button" data-care-detail-step="${direction}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${label}</button>`;
+            return `<button type="button" data-care-detail-step="${direction}" aria-label="${label}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${direction === 'previous' ? '‹' : '›'}</button>`; // SOFTM-POPUP-COMPACT 날짜:20260917 : 기관 이동은 접근성 이름을 유지한 짧은 화살표로 표시
         };
         return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}</span>${button('next', '다음 기관 →')}</nav>`;
     }
