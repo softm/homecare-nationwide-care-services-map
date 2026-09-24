@@ -283,7 +283,9 @@ ${districtPages.map((district) => `        <li data-region-city="${html(district
 </head>
 <body data-region-type="${page.type}" data-region-province="${html(page.province)}" data-region-city="${html(page.city)}">
 <a class="skip-link" href="#main">본문으로 바로가기</a>
-<header class="site-head"><div class="container site-head-inner"><a class="brand" href="../index.html"><img src="../site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0">돌봄한눈</a><!-- SOFTM-BRAND-ICON 날짜:20260913 : 생성되는 지역 화면도 같은 브랜드 아이콘을 유지 --><a class="home-link" href="../${config.landing}">전국 ${config.label} 찾기 →</a></div></header>
+<!-- SOFTM-STATIC-HEADER START 날짜:20260924 : 생성 지역 목록에서도 실제 지도와 서비스 설명을 동일한 우측 경로로 제공 -->
+<header class="site-head"><div class="container site-head-inner"><a class="brand" href="../index.html"><img src="../site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0">돌봄한눈</a><!-- SOFTM-BRAND-ICON 날짜:20260913 : 생성되는 지역 화면도 같은 브랜드 아이콘을 유지 --><nav class="site-head-nav" aria-label="주요 메뉴"><a href="${html(mapLink(page))}" rel="${MAP_TOOL_REL}">지도에서 찾기</a><a href="../about.html">서비스 소개</a></nav></div></header>
+<!-- SOFTM-STATIC-HEADER END -->
 <main id="main">
   <section class="search-intro" aria-labelledby="page-title"><div class="container">
     <nav class="breadcrumb" aria-label="현재 위치">${crumbs.map((item, index) => `${index ? '<span aria-hidden="true">›</span>' : ''}${index === crumbs.length - 1 ? `<span aria-current="page">${html(item.name)}</span>` : `<a href="${item.href}">${html(item.name)}</a>`}`).join('')}</nav>
