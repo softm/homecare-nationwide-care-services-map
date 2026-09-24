@@ -30,10 +30,9 @@
 
 ## 명칭
 
-- `전국 주간`: `nationwide-daycare-map.html` 기반 전국 주야간보호센터 프로젝트
 - `전국 요양`: `nationwide-care-services-map.html` 기반 전국 노인돌봄·요양기관 통합 프로젝트
 
-두 프로젝트를 혼동하지 않는다. 전국 요양의 `type=daycare`와 전국 주간은 `data/care/daycare.json.gz`를 공용으로 사용하며 기관기호 집합이 같아야 한다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 두 지도 자료가 별도 생성되어 달라지지 않도록 통일 -->
+전국 주야간보호센터 전용 지도는 운영하지 않는다. 주야간보호는 전국 요양의 `type=daycare`만 사용한다. <!-- SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 별도 지도·광고·검증 경로가 다시 생기지 않도록 통합 지도만 운영 -->
 
 - 별도 Git worktree에서 작업·배포한 경우, 완료 전에 현재 프로젝트 폴더에도 관련 변경을 합치고 기존 미커밋·스테이징 변경 보존과 로컬 파일 존재를 확인한다. 원격 푸시만으로 현재 폴더 반영을 완료 처리하지 않는다. <!-- SOFTM-LOCAL-SYNC 날짜:20260904 : 배포한 파일이 사용자의 로컬 작업 폴더에서 빠지는 일을 방지 -->
 
@@ -84,7 +83,6 @@
 - 원본은 `source-data`에 보존한다.
 - `data/care/*.json.gz`·`manifest.json`은 수집 JSON에서 생성한다. 직접 수정하거나 기존 기관 데이터 JS를 다시 만들지 않는다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 지도 입력을 data로 통일 -->
 - 데이터를 재생성하면 `npm run check`로 개수·중복·참조 누락을 확인한다.
-- 전국 주간과 전국 요양 `daycare`의 기관기호 집합 차이는 0이어야 한다.
 - 공단 상세·사진은 `data/nhis`의 정적 JSON을 단일 기준으로 사용하고 두 지도가 `nhis-static-data.js`를 공유한다. // SOFTM-NHIS-POLICY 날짜:20260902 : 실시간 공단 크롤링 서버가 다시 생기지 않도록 정적 배포 구조를 고정
 - 시설별 상세조회 JSON이 아직 없는 기관은 오류 화면 대신 공단 시설별 현황·평가의 주소·정원·인력·평가 요약을 표시하고, JSON 수집 후 같은 화면에서 상세 항목으로 자동 전환한다. // SOFTM-NHIS-FALLBACK 날짜:20260903 : 장기 순환 수집 기간에도 두 지도의 공단 정보를 중단 없이 제공
 - `details` 수집은 시설별 상세조회 OpenAPI와 공단 공개 상세 페이지의 기본정보(11)·인력/근속(14)·CCTV(19)를 결합한다. 화면 고유 항목도 `data/nhis/details`에 정적으로 저장하고 브라우저 실시간 크롤링으로 되돌리지 않는다. // SOFTM-NHIS-OFFICIAL-PAGE 날짜:20260903 : 공단 원문 링크와 같은 공개 정보 범위를 Vercel 없이 유지
@@ -97,12 +95,12 @@
 
 - API Secret이나 토큰을 코드·문서·Git에 기록하지 않는다.
 - 주소 좌표 변환과 역주소 변환은 `naver-geocoder.js`의 네이버 Maps JavaScript SDK `geocoder` 서브모듈을 사용하며 `/api/geocode`·`/api/reverse-geocode` 서버 프록시를 다시 추가하지 않는다.
-- 전국 주간·전국 요양 SDK는 신규 통합 Maps Application Key ID `etfcybk8vf`를 `ncpKeyId`로 사용한다. 기존 `p4sjps53pa`는 구형 Web Dynamic Map Client ID이므로 두 전국 지도에 다시 사용하지 않는다.
+- 전국 요양 SDK는 신규 통합 Maps Application Key ID `etfcybk8vf`를 `ncpKeyId`로 사용한다. 기존 `p4sjps53pa`는 구형 Web Dynamic Map Client ID이므로 다시 사용하지 않는다.
 - 두 지도는 `naverGeocoder:v1:*` 주소 캐시와 기존 `daycareCoord`·`careCoord` 기관 좌표 캐시 호환성을 유지한다.
 - Vercel API의 허용 Origin을 바꾸면 모든 핸들러를 동일하게 수정한다.
 - 공단 공개 사진 페이지 구조가 바뀌면 `scripts/sync_nhis_static.py`의 사진 매니페스트 파서와 직접 이미지 표시를 함께 회귀검사한다.
 - 공단 상세·사진은 브라우저 실시간 API를 만들지 않고 GitHub Actions에서 정적 JSON으로 수집한다. Client Secret이 필요한 길찾기만 Vercel 서버에 유지한다.
-- 프런트 API 주소를 변경할 때 전국 주간과 전국 요양을 모두 검색해 교체한다.
+- 프런트 API 주소를 변경할 때 전국 요양 통합 지도를 기준으로 연결을 확인한다.
 
 ## 인프라 구조
 

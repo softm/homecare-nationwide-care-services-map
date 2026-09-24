@@ -1,4 +1,4 @@
-# 돌봄한눈 — 전국 주간 + 전국 요양 통합 소스
+# 돌봄한눈 — 전국 요양 통합 소스
 
 로컬 Codex에서 두 지도 프로젝트를 한 번에 이어서 작업할 수 있도록 프런트엔드, 공식 원본 데이터, 정적 공단 스냅샷, 데이터 생성 스크립트, 광고 설정과 길찾기 서버 코드를 한 폴더에 모았습니다.
 
@@ -6,7 +6,6 @@
 
 | 별칭 | 시작 파일 | 역할 |
 |---|---|---|
-| 전국 주간 | `nationwide-daycare-map.html` | 전국 주야간보호센터 전용 검색·비교 지도 |
 | 전국 요양 | `nationwide-care-services-map.html` | 요양시설·주야간보호·방문요양·방문간호·방문목욕·단기보호·복지용구·치매전담형·요양병원 통합 지도 |
 | 통합 시작 | `index.html` | 9개 기관 유형 선택 → 유형 안내 → 통합 지도 | <!-- SOFTM-INDEX-UNIFIED 날짜:20260904 : 실제 공통 진입 순서를 문서와 일치 -->
 
@@ -37,7 +36,6 @@ npm run serve
 그다음 다음 주소를 엽니다.
 
 - `http://localhost:3000/`
-- `http://localhost:3000/nationwide-daycare-map.html`
 - `http://localhost:3000/nationwide-care-services-map.html?type=daycare`
 
 네이버 지도 클라이언트 설정에서 로컬 주소가 허용되지 않으면 지도 인증 오류가 날 수 있습니다. 현재 Maps Application의 Web 서비스 URL에는 배포 Origin과 `http://localhost:3000`을 등록해야 합니다. 로컬 통합 검증은 `python3 -m http.server 3000`으로 실행하며, 등록하지 않은 `127.0.0.1`로 바꾸면 별도 Origin으로 판정됩니다.
@@ -48,8 +46,6 @@ npm run serve
 .
 ├── index.html
 ├── index-ad-config.js              # 인덱스 PC·모바일 전용 광고 단위
-├── nationwide-daycare-map.html
-├── nationwide-daycare-ad-config.js
 ├── nationwide-care-services-map.html
 ├── care-data.js                    # 두 지도의 공용 검색 자료 로더
 ├── data/care/                      # 수집 JSON에서 생성한 압축 검색 인덱스

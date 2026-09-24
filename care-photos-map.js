@@ -5,7 +5,7 @@ import { saveScope, visibleMarkerIds } from './care-photo-scope.js?v=20260910-1'
 function mount() {
     const actions = document.querySelector('.care-saved-actions');
     if (!actions || !window.CareMapExperience) return false;
-    const type = location.pathname.endsWith('nationwide-daycare-map.html') ? 'daycare' : new URLSearchParams(location.search).get('type') || 'daycare';
+    const type = new URLSearchParams(location.search).get('type') || 'daycare'; // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 전용 지도 제거 후 통합 지도 유형을 사진 탐색에 사용
     /** SOFTM-PHOTO-ENTRY-BUTTON START 날짜:20260910 : 텍스트 링크로 놓치던 사진 탐색을 아이콘과 설명을 갖춘 주요 행동으로 표시 */
     const link = document.createElement('a'); link.className = 'care-photo-map-entry';
     link.setAttribute('aria-labelledby', 'carePhotoEntryTitle');
@@ -25,7 +25,6 @@ function mount() {
             source.searchParams.delete('institution');
             const center = current.map.getCenter();
             source.searchParams.set('lat', center.lat()); source.searchParams.set('lng', center.lng()); source.searchParams.set('z', current.map.getZoom());
-            if (source.pathname.endsWith('nationwide-daycare-map.html')) source.searchParams.set('share', '1');
             const token = saveScope(storage, { type: current.type, ids, source: source.pathname.split('/').pop() + source.search });
             link.href = `care-photos.html?${new URLSearchParams({ type: current.type, scope: 'map', view: token })}`;
             status.textContent = '';

@@ -3,7 +3,7 @@ import { searchTools } from './search-tools.js?v=20260911-mapfirst1'; // SOFTM-S
 import { saveOrigin } from './care-analysis-origin.js?v=20260911-binding1';
 const heading = document.querySelector('.results .list-head,.results .result-head');
 if (heading && !document.querySelector('.care-analysis-entry')) {
-    const type = location.pathname.endsWith('nationwide-daycare-map.html') ? 'daycare' : new URLSearchParams(location.search).get('type') || 'daycare';
+    const type = new URLSearchParams(location.search).get('type') || 'daycare'; // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 전용 지도 제거 후 통합 지도 유형만 분석 화면에 전달
     const link = document.createElement('a'); link.className = 'care-analysis-entry';
     link.href = `care-analysis.html?type=${encodeURIComponent(type)}`;
     link.textContent = '주변 분석'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 짧은 기능명으로 탐색 도구를 같은 크기로 표시

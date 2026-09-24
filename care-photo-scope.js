@@ -1,6 +1,6 @@
 /** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 지도에 실제로 보이는 마커의 기관 집합을 별도 전체검색으로 넓히지 않고 사진에 전달 */
 const prefix = 'carePhotoScope:v1:';
-const sources = ['nationwide-care-services-map.html', 'nationwide-daycare-map.html'];
+const sources = ['nationwide-care-services-map.html']; // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 사진 탐색 범위를 통합 지도 공유 주소로만 제한
 export function visibleMarkerIds(map, entries) {
     if (!map) return [];
     const bounds = map.getBounds();
