@@ -30,7 +30,7 @@ test('이 지역 재검색은 사용자 줌 없이 즉시 실행하고 예약된
     const s = setup(); s.controller.research(); assert.equal(s.counts().searches, 1);
     s.controller.gesture(); s.controller.zoom(); s.controller.research(); s.flush(); assert.equal(s.counts().searches, 2);
 });
-for (const name of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+for (const name of ['nationwide-care-services-map.html']) {
     test(`${name}: 1~5건은 끝에 한 광고, 6·12·18건은 기존 슬롯 유지`, () => {
         const html = fs.readFileSync(new URL('../' + name, import.meta.url), 'utf8');
         const start = html.indexOf('function listAdHtml('), end = html.indexOf('/** SOFTM-LIST-AD-RESTORE END */', start);

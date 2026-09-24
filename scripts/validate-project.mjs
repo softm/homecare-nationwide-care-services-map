@@ -57,7 +57,7 @@ const landingPages = [...new Set(Object.values(categoryLandingPages))];
 const longTermCareLandingPages = landingPages.filter(page => page !== categoryLandingPages['nursing-hospital']); // SOFTM-LTC-KEYWORD 날짜:20260914 : 요양병원을 장기요양기관 찾기 구문 검사 대상에서 제외
 /** SOFTM-SEO-LANDING END */
 
-for (const html of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html); // SOFTM-DAYCARE-LANDING 날짜:20260904 : 안내와 분리된 기존 전용 지도의 스크립트 검사도 유지
+for (const html of ['index.html', 'nationwide-care-services-map.html', 'gwangmyeong-daycare-center-map.html', ...landingPages]) localScripts(html); // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 전용 지도 제거 후 통합 지도와 안내 화면만 검사
 localScripts('about.html'); // SOFTM-BRAND-IDENTITY 날짜:20260904 : 신규 소개 문서의 로컬 참조·스크립트 오류도 검사
 localScripts('data-status.html'); // SOFTM-DATA-STATUS 날짜:20260910 : 수집 현황 페이지의 정적 의존성이 배포에서 빠지지 않도록 검사
 localScripts('care-cost.html'); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 공통 비용 화면의 스크립트와 공식 요금 계산 경계도 배포 전에 확인
@@ -137,7 +137,7 @@ if (indexAdConfig?.kakao?.mobile?.unit !== 'DAN-fmQS1GFVu1j2yBow') fail('인덱�
 /** SOFTM-LANDING-ADS START 날짜:20260904 : 안내 광고가 기존 수익 슬롯을 재사용하거나 잘못된 크기로 요청되지 않도록 검증 */
 if (indexSource.includes('href="nationwide-daycare-map.html"')) fail('index.html: 주야간보호는 안내 페이지를 거쳐야 합니다.');
 const landingAdConfig = runFiles(['category-landing-ad-config.js']).CATEGORY_LANDING_AD_CONFIG;
-const existingAdUnits = ['index-ad-config.js', 'nationwide-care-ad-config.js', 'nationwide-daycare-ad-config.js'].flatMap(file => [...read(file).matchAll(/unit:\s*['"]([^'"]+)['"]/g)].map(match => match[1]));
+const existingAdUnits = ['index-ad-config.js', 'nationwide-care-ad-config.js'].flatMap(file => [...read(file).matchAll(/unit:\s*['"]([^'"]+)['"]/g)].map(match => match[1]));
 for (const [device, width, height] of [['desktop', 728, 90], ['mobile', 320, 100]]) {
   const slot = landingAdConfig.kakao[device];
   if (slot.width !== width || slot.height !== height) fail(`안내 ${device} 광고 크기 불일치`);
@@ -196,7 +196,7 @@ if (['index.html', 'nationwide-care-services-map.html', ...landingPages, 'robots
 /** SOFTM-SEO-LANDING-CHECK END */
 
 /** SOFTM-GEOCODER-CHECK START 날짜:20260902 : 서버 주소 API 재유입과 SDK·캐시 응답 형식 회귀를 자동 검증 */
-for (const html of ['nationwide-daycare-map.html', 'nationwide-care-services-map.html']) {
+for (const html of ['nationwide-care-services-map.html']) {
   const source = read(html);
   if (/\/api\/(?:geocode|reverse-geocode)\b/.test(source)) fail(`${html}: 제거한 주소 변환 서버 API 호출이 남아 있습니다.`);
   if (!source.includes('naver-geocoder.js')) fail(`${html}: 공용 주소 변환 모듈 누락`);
@@ -210,11 +210,8 @@ if (exists('services/vercel-api/api/geocode.js') || exists('services/vercel-api/
 
 /** SOFTM-NHIS-DETAIL-FALLBACK-CHECK START 날짜:20260903 : 상세 수집 진행 중에도 두 지도에서 공단 기준자료가 오류 대신 표시되도록 검사 */
 const careSource = read('nationwide-care-services-map.html');
-const daycareSource = read('nationwide-daycare-map.html');
 const nhisLoaderSource = read('nhis-static-data.js');
 if (!careSource.includes('officialSummaryTabData') || !careSource.includes('공단 기준자료 우선 표시')) fail('전국 요양 공단 상세 기준자료 대체 표시 누락');
-if (!daycareSource.includes('daycareSummaryDetailHtml') || !daycareSource.includes('daycareOfficialType(center)')) fail('전국 주간 공단 상세 구현 또는 실제 급여코드 조회 누락');
-if (/NhisStaticData\.detail\(id\s*,\s*['"]B03['"]\)/.test(daycareSource)) fail('전국 주간 공단 상세 급여코드 B03 고정 호출이 남아 있습니다.');
 if (!nhisLoaderSource.includes("collected('detail'") || !nhisLoaderSource.includes('code?(details[code]||null)')) fail('공단 상세 수집목록 검사 또는 급여코드 오조회 방지 누락');
 if (!nhisLoaderSource.includes('.json.gz') || !nhisLoaderSource.includes("new DecompressionStream('gzip')")) fail('공단 상세 gzip 경로 또는 브라우저 압축 해제 로직 누락'); // SOFTM-NHIS-GZIP 날짜:20260903 : 비압축 상세가 다시 배포되어 GitHub Pages 용량을 초과하지 않도록 검사
 /** SOFTM-NHIS-DETAIL-FALLBACK-CHECK END */
@@ -294,7 +291,7 @@ const loaderContext = vm.createContext({ window: {}, document: { baseURI: 'https
 vm.runInContext(read('care-data.js'), loaderContext);
 const daycare = await loaderContext.window.CareData.category('daycare');
 const evaluations = Object.fromEntries(daycare.filter(row => row.ev).map(row => [row.i, row.ev]));
-for (const file of ['index.html', 'nationwide-daycare-map.html', 'nationwide-care-services-map.html']) {
+for (const file of ['index.html', 'nationwide-care-services-map.html']) {
   if (!read(file).includes('care-data.js')) fail(`${file}: 수집 JSON 공용 로더 누락`);
   if (/nationwide-(?:care-data|care-manifest|daycare-data|daycare-evaluations)/.test(read(file))) fail(`${file}: 폐기한 기관 데이터 JS 참조`);
 }
@@ -303,7 +300,7 @@ execFileSync('python3', [path.join(root, 'scripts/test_care_data.py')], { stdio:
 /** SOFTM-ADVANCED-SEARCH START 날짜:20260904 : 공단 검색 인덱스의 누락·조건 조합·공유 복원을 정기 검사에 포함 */
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/advanced-search.test.mjs')], { stdio: 'inherit' });
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-popup-geometry.test.mjs'), path.join(root, 'scripts/care-decision-summary.test.mjs')], { stdio: 'inherit' }); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 화면별 마커 가림과 유형별 판단 근거의 오해 방지를 기본 검증에 포함
-execFileSync(process.execPath, ['--test', path.join(root, 'scripts/search-feedback.test.mjs')], { stdio: 'inherit' }); // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 이전 응답 덮어쓰기와 조회·지도 건수 혼동의 재발을 검사
+// SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 제거한 전용 지도 조회 흐름 전용 회귀검사는 통합 지도 검사로 대체
 execFileSync('python3', ['-m', 'unittest', 'discover', '-s', path.join(root, 'scripts'), '-p', 'test_nhis_search.py'], { stdio: 'inherit' });
 /** SOFTM-ADVANCED-SEARCH END */
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-data.test.mjs')], { stdio: 'inherit' });
@@ -322,18 +319,10 @@ for (const record of categoryRows.dementia) {
 if (!indexSource.includes('요양원·공동생활가정') || !indexSource.includes('치매전담형') || !indexSource.includes('요양병원(의료기관)')) fail('실제 급여 범위를 설명하는 카테고리 명칭 누락');
 /** SOFTM-CARE-CATEGORIES END */
 
-const daycareIds = new Set(daycare.map(row => row.i));
-const careIds = new Set(careDaycare.map(row => row.i));
-const missingInCare = [...daycareIds].filter(id => !careIds.has(id));
-const missingInDaycare = [...careIds].filter(id => !daycareIds.has(id));
-if (missingInCare.length || missingInDaycare.length) fail(`주야간보호 기관 불일치: 전국 요양 누락 ${missingInCare.length}, 전국 주간 누락 ${missingInDaycare.length}`);
-const careDaycareById = new Map(careDaycare.map(row => [row.i, row]));
-if (daycare.some(row => careDaycareById.get(row.i)?.a !== row.a)) fail('전국 주간·전국 요양 주야간보호 주소 불일치'); // SOFTM-GEOCODER-CONSISTENCY 날짜:20260902 : 같은 기관이 같은 SDK 좌표를 얻도록 원본 주소까지 비교
-if (daycare.some(row => ['t', 'z', 's', 'rn', 'na', 'pt', 'ot', 'cw'].some(key => (careDaycareById.get(row.i)?.[key] ?? 0) !== row[key]))) fail('두 주야간보호 지도의 급여·정원·인력 불일치'); // SOFTM-CARE-CATEGORIES 날짜:20260904 : 같은 기관이라도 치매전담실 수치가 한쪽 지도에만 합산되는 오류를 방지
 
-for (const file of ['nationwide-daycare-ad-config.js', 'nationwide-care-ad-config.js', 'partner-inquiry-config.js', 'partner-inquiry.js']) new vm.Script(read(file), { filename: file }); // SOFTM-PARTNER-CHECK 날짜:20260904 : 공용 문의 스크립트의 구문 오류가 두 지도를 함께 중단하지 않도록 검사
+for (const file of ['nationwide-care-ad-config.js', 'partner-inquiry-config.js', 'partner-inquiry.js']) new vm.Script(read(file), { filename: file }); // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 전용 광고 설정 제거 후 통합 지도 광고·문의 설정만 검사
 for (const file of ['naver-geocoder.js', 'nhis-static-data.js', 'services/vercel-api/api/directions.js']) { // SOFTM-NHIS-STATIC-CHECK 날짜:20260902 : 폐기한 공단 프록시 대신 공용 정적 데이터 모듈을 검사
   execFileSync(process.execPath, ['--check', path.join(root, file)], { stdio: 'pipe' });
 }
 
-console.log(`검사 완료: 전국 주간 ${daycare.length.toLocaleString()}곳 · 평가 ${Object.keys(evaluations).length.toLocaleString()}곳 · 전국 요양 ${Object.keys(manifest).length}개 유형 · 주야간보호 기관 차이 0곳`);
+console.log(`검사 완료: 주야간보호 ${daycare.length.toLocaleString()}곳 · 평가 ${Object.keys(evaluations).length.toLocaleString()}곳 · 전국 요양 ${Object.keys(manifest).length}개 유형`);

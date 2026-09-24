@@ -75,7 +75,7 @@ test('공유 링크 왕복·유형 전환·초기화 때 유효한 조건만 남
 });
 
 test('두 지도 목록·지도 후보·공유 링크가 공통 상세조건을 사용', () => {
-    for (const name of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+    for (const name of ['nationwide-care-services-map.html']) {
         const html = readFileSync(new URL(`../${name}`, import.meta.url), 'utf8');
         assert.ok(html.includes('advancedSearch.matches(c)'));
         assert.ok(html.includes('advancedSearch?.write('));

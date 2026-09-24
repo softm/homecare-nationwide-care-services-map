@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import '../care-map-focus.js';
 const mapHtml=readFileSync(new URL('../nationwide-care-services-map.html',import.meta.url),'utf8');
-const daycareHtml=readFileSync(new URL('../nationwide-daycare-map.html',import.meta.url),'utf8'); // SOFTM-DETAIL-MAP-PERSIST 날짜:20260914 : 두 지도 팝업 닫기 동작을 같은 회귀검사로 확인
 const focusCss=readFileSync(new URL('../care-map-focus.css',import.meta.url),'utf8');
 test('지도 배경 클릭은 일반 화면에서 상태를 유지하고 전체보기에서만 닫는다',()=>{
  assert.equal(CareMapFocus.focusAction(false,false),null);
@@ -39,12 +38,10 @@ test('전체보기 목록은 하단 손잡이와 기관 카드만 표시한다',
  assert.match(focusCss,/care-focus-list \.results #list\{flex:1!important/);
 });
 /** SOFTM-DETAIL-MAP-PERSIST START 날짜:20260914 : 팝업 닫기가 선택 전 기준점으로 지도를 되돌리는 회귀를 방지 */
-test('기관 상세를 닫아도 두 지도의 현재 중심과 배율을 변경하지 않는다',()=>{
+test('기관 상세를 닫아도 현재 중심과 배율을 변경하지 않는다',()=>{
  const careClose=mapHtml.match(/function closeDetail\([\s\S]*?\n\}/)?.[0]||'';
- const daycareClose=daycareHtml.match(/^function closeMapPopup.*$/m)?.[0]||'';
  assert.match(careClose,/CareMapExperience\.finishDetail\(\)/);
- assert.match(daycareClose,/CareMapExperience\.finishDetail\(\)/);
- for(const source of [careClose,daycareClose])assert.doesNotMatch(source,/\.(?:setCenter|setZoom|fitBounds|panTo)\(/);
+ assert.doesNotMatch(careClose,/\.(?:setCenter|setZoom|fitBounds|panTo)\(/);
 });
 /** SOFTM-DETAIL-MAP-PERSIST END */
 /** SOFTM-MAP-FOCUS END */

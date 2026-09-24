@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const daycareHtml = readFileSync(new URL('../nationwide-daycare-map.html', import.meta.url), 'utf8');
+const daycareHtml = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
 const viewportContext = vm.createContext({ window: {}, setTimeout }); // SOFTM-QUERY-YIELD 날짜:20260916 : 입력 처리 양보를 실제 타이머로 검증
 vm.runInContext(readFileSync(new URL('../viewport-regions.js', import.meta.url), 'utf8'), viewportContext);
 const mapViewportSearch = viewportContext.window.MapViewportSearch; // SOFTM-VIEWPORT-RESOLVE 날짜:20260914 : 실제 완료순 처리기를 두 지도 조회 회귀검사에서 함께 실행

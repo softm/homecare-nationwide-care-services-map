@@ -81,7 +81,7 @@ test('조건 지우기는 맞춤 조건 세션만 제거한다',()=>{
 });
 test('서비스·지역 전환은 기존 검색어·평가·특화 조건을 전달하고 정렬 중심점을 URL로 덮지 않는다',()=>{
  const filters={q:'행복',grades:['A'],scores:['high'],confidences:['high'],capacity:'21-40',staff:'nurse',advanced:{owner:'3',features:['integrated-daycare']}};
- const url=destinationUrl({type:'home-care',province:'경기도',city:'광명시'},filters,'https://example.com/nationwide-daycare-map.html');
+ const url=destinationUrl({type:'home-care',province:'경기도',city:'광명시'},filters,'https://example.com/nationwide-care-services-map.html?type=daycare');
  assert.equal(url.searchParams.get('q'),'행복');assert.equal(url.searchParams.get('grades'),'A');assert.equal(url.searchParams.get('owner'),'3');assert.equal(url.searchParams.get('features'),'integrated-daycare');assert.equal(url.searchParams.get('sort'),null);
  assert.equal(effectiveFilters(filters,'nursing-hospital').grades.length,0);assert.equal(effectiveFilters(filters,'nursing-hospital').staff,'');
 });

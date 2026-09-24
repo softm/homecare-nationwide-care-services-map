@@ -66,7 +66,7 @@ test('방문 출발지 취소와 다시 시도 시 오류·이전 위치를 남�
     assert.deepEqual(origin.state().origin.point, point); assert.equal(origin.state().reason, '');
 });
 test('두 지도가 공용 위치 요청을 연결하고 실패 후 버튼·지도·재시도를 복구', async () => {
-    for (const filename of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+    for (const filename of ['nationwide-care-services-map.html']) {
         const source = readFileSync(new URL('../' + filename, import.meta.url), 'utf8');
         assert.match(source, /care-location\.js\?v=/); assert.doesNotMatch(source, /navigator\.geolocation\.getCurrentPosition/);
         const start = source.indexOf('async function useCurrentLocation(');
@@ -88,25 +88,6 @@ test('두 지도가 공용 위치 요청을 연결하고 실패 후 버튼·지�
             else { assert.equal(loading, false); assert.equal(notice.error.reason, 'timeout'); assert.equal(typeof notice.retry, 'function'); }
         }
     }
-});
-test('전국 주간 현재 위치 성공 후 내부 기준점 갱신이 주변 조회를 취소하지 않음', async () => {
-    const source = readFileSync(new URL('../nationwide-daycare-map.html', import.meta.url), 'utf8');
-    const start = source.indexOf('async function useCurrentLocation('), baseStart = source.indexOf('function setBasePoint(');
-    const code = source.slice(baseStart, source.indexOf('\n', baseStart)) + '\n' + source.slice(start, source.indexOf('/** SOFTM-LOCATION END */', start));
-    let generation = 0, searched = 0;
-    const button = { disabled: false, classList: { add() {}, remove() {} }, setAttribute() {}, removeAttribute() {} };
-    const context = { mapReady: true, DATA: [], baseMarker: null, skipIdleUntil: 0, $: () => button,
-        initialLocationViewport: null, refreshTimer: null, careViewportKey: () => 'national', clearTimeout() {}, // SOFTM-LOCATION-PREVIEW 날짜:20260913 : 첫 화면 조회 보류를 포함해 위치 성공 경로를 회귀검사
-        CareMapExperience: { isBasketMap: () => false }, CareLocation: { request: async () => point, hideNotice() {} },
-        naver: { maps: { LatLng: class { constructor(lat, lng) { this.lat = lat; this.lng = lng; } }, Marker: class {}, Point: class {} } },
-        naverMap: { setCenter() {}, panTo() {} }, setMapStatus() {}, showMapProgress() {},
-        beginDaycareSearch() { const token = ++generation; return { isCurrent: () => token === generation }; },
-        apply(skip, select, search) { if (!search) generation++; },
-        async searchCurrentMap(notify, query) { assert.equal(query.isCurrent(), true); searched++; },
-        setTimeout(callback) { callback(); }
-    };
-    vm.createContext(context); vm.runInContext(code, context); await context.useCurrentLocation(false);
-    assert.equal(searched, 1); assert.equal(generation, 1); assert.equal(button.disabled, false);
 });
 test('통합 지도 현재 위치 성공은 해당 좌표와 주변 조회를 유지하고 전국 범위로 맞추지 않음', async () => {
     const source = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
@@ -168,7 +149,7 @@ test('권한 조회 미지원도 위치 요청으로 대체하고 거절 후 수
     env.succeed(); await retry;
 });
 test('두 지도 진입 스크립트는 지도 초기화 분기 밖에서 권한 요청', () => {
-    for (const file of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+    for (const file of ['nationwide-care-services-map.html']) {
         const source = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
         assert.match(source, /<script defer src="care-location-startup.js\?v=/);
     }

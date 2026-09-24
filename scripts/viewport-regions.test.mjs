@@ -78,7 +78,7 @@ test('공식 관할 관계로 이름이 다른 행정동을 합치고 저장 좌
     assert.ok(context.window.NATIONAL_REGION_BOUNDS.neighborhoods['서울특별시|관악구|신림동']);
     assert.equal(context.window.NATIONAL_REGION_BOUNDS.neighborhoods['서울특별시|관악구|서원동'], undefined);
     const rowsById = new Map(Object.values(data).flat().map(row => [row.i, row]));
-    for (const file of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+    for (const file of ['nationwide-care-services-map.html']) {
         const html = read(file), start = html.indexOf('const PRESET_COORDS='), end = html.indexOf('\n};', start) + 3;
         const presetContext = vm.createContext({});
         vm.runInContext(`${html.slice(start, end)};globalThis.presets=PRESET_COORDS`, presetContext);
@@ -107,7 +107,7 @@ test('좌표 확인은 느린 고정 묶음을 기다리지 않고 제한된 동
 /** SOFTM-VIEWPORT-RESOLVE END */
 
 test('두 지도에서 기존 필터를 유지한 후보 함수가 공통 경계를 사용', () => {
-    for (const file of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+    for (const file of ['nationwide-care-services-map.html']) {
         const html = read(file);
         assert.ok(html.includes('src="region-bounds.js?'));
         assert.ok(html.includes('src="viewport-regions.js?'));
@@ -155,35 +155,6 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
     assert.equal(sandbox.careMatchRows.length, 351); // SOFTM-CARE-MATCH 날짜:20260910 : 표시 제한을 넘는 후보도 설명 집계에서 누락되지 않게 검증
 });
 
-test('전용 지도도 축소 화면에서 800번째 이후 기관까지 최종 좌표 확인에 전달', async () => {
-    const html = read('nationwide-daycare-map.html');
-    const declaration = html.slice(html.indexOf('async function searchCurrentMap('), html.indexOf('function clearMapSearch('));
-    const rows = Array.from({ length: 1001 }, (_, i) => ({ i: String(i), p: '경기도', c: '광명시' }));
-    let receivedLimit = 0;
-    const sandbox = vm.createContext({
-        mapReady: true, clearTimeout() {}, boundsTimer: null, skipIdleUntil: 0, closeMapPopup() {},
-        naverMap: { getBounds: () => viewport, getZoom: () => 10 }, setMapStatus() {}, showMapProgress() {},
-        viewportCandidates: b => api.select(rows, b), MAP_AREA_LIMIT: 800,
-        async displayCenters(candidates, open, route, fit, b, limit) {
-            assert.equal(b, viewport);
-            assert.equal(fit, false);
-            receivedLimit = limit;
-            sandbox.mapMarkers = candidates.slice(0, limit).map(row => ({ centerId: row.i }));
-            return { count: candidates.length, markerCount: candidates.length, visibleIds: candidates.map(row => row.i), unresolvedIds: [] }; // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 실제 완료된 기관 집합으로 목록 갱신을 검증
-        },
-        mapMarkers: [], mapSearchIds: null, $: () => ({ style: {} }), page: 1,
-        /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 최신 조회 완료 계약을 제공하면서 기존 800개 초과 후보 검증을 유지 */
-        apply() {}, filtered: rows, hideMapProgress() {}, showToast() {},
-        beginDaycareSearch: () => ({ isCurrent: () => true }),
-        finishDaycareSearch: (query, outcome) => outcome,
-        daycareSearchOutcome: extra => ({ count: rows.length, ...extra })
-        /** SOFTM-SEARCH-FEEDBACK END */
-    });
-    vm.runInContext(declaration, sandbox);
-    await vm.runInContext('searchCurrentMap(false)', sandbox);
-    assert.equal(receivedLimit, 1001);
-    assert.equal(sandbox.mapSearchIds.size, 1001);
-});
 /** SOFTM-VIEWPORT-CANDIDATES END */
 
 /** SOFTM-QUERY-YIELD START 날짜:20260916 : 대량 캐시 조회 도중 실제 이벤트 루프의 필터 변경이 처리되고 이전 결과가 멈추는지 검증 */

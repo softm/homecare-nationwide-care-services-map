@@ -76,7 +76,7 @@ export async function auditSite(origin = publicOrigin) {
       results.push({ url: `${publicOrigin}${pathname}`, status: response.status, issues });
     } catch (error) { results.push({ url: `${publicOrigin}${pathname}`, issues: [error.message] }); }
   }
-  const pages = [...urls.map(url => [url, url]), ...['nationwide-care-services-map.html', 'nationwide-daycare-map.html'].map(page => [`${publicOrigin}/${page}`, `${publicOrigin}/daycare-map.html`])]; // SOFTM-DAYCARE-LANDING 날짜:20260904 : 두 지도와 주야간보호 안내의 검색 대표 연결을 같이 검사
+  const pages = [...urls.map(url => [url, url]), ...['nationwide-care-services-map.html'].map(page => [`${publicOrigin}/${page}`, `${publicOrigin}/daycare-map.html`])]; // SOFTM-DAYCARE-LANDING 날짜:20260904 : 두 지도와 주야간보호 안내의 검색 대표 연결을 같이 검사
   /** SOFTM-SEO-AUDIT-QUEUE START 날짜:20260904 : 지역별 목록 전체를 확인하면서 공개 서버의 동시 요청을 네 개로 제한 */
   const pageResults = new Array(pages.length);
   let nextPage = 0;

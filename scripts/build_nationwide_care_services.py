@@ -215,11 +215,6 @@ def update_landing_counts(manifest):
     index = update_index_counts(index, manifest)  # SOFTM-HOME-COUNT 날짜:20260907 : 유형별 실제 카드만 갱신해 홈페이지 수치의 신뢰성을 유지
     if index != index_path.read_text(encoding="utf-8"):
         index_path.write_text(index, encoding="utf-8")
-    daycare_path = ROOT / "nationwide-daycare-map.html"
-    daycare = daycare_path.read_text(encoding="utf-8")
-    updated = re.sub(r"(전국 주야간보호센터 )[\d,]+곳", lambda match: match[1] + f'{manifest["daycare"]["count"]:,}곳', daycare)
-    if updated != daycare:
-        daycare_path.write_text(updated, encoding="utf-8")
 
 
 def main():

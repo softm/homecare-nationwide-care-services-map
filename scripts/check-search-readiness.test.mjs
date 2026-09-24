@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { attributes, inspectPage, publicOrigin } from './check-search-readiness.mjs';
 
-const url = `${publicOrigin}/nationwide-daycare-map.html`;
+const url = `${publicOrigin}/nationwide-care-services-map.html?type=daycare`;
 const html = `<title>주야간보호센터 | 돌봄한눈</title><meta name="robots" content="index,follow"><link rel="canonical" href="${url}"><h1>주야간보호센터</h1>`;
 const inspect = (changes = {}) => inspectPage({ url, status: 200, headers: new Headers({ 'content-type': 'text/html' }), html, expectedCanonical: url, ...changes });
 
