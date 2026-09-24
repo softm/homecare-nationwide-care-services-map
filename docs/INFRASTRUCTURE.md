@@ -1,4 +1,4 @@
-# 전국 주간·전국 요양 인프라 구조
+# 전국 요양 통합 지도 인프라 구조
 
 <!-- SOFTM-INFRA-DOC START 날짜:20260903 : 프런트·수집·서버의 책임을 혼동해 폐기한 실시간 API가 다시 생기지 않도록 실제 운영 경계를 표로 고정 -->
 
@@ -8,7 +8,6 @@
 |---|---|---|---|---:|---|
 | 통합 시작 화면 | GitHub Pages 또는 로컬 정적 서버 | `index.html` | 9개 유형을 한 번씩 선택 → 유형 안내 → 통합 지도 진입 | 예 | 없음 | <!-- SOFTM-INDEX-UNIFIED 날짜:20260904 : 주야간보호도 같은 시작 흐름으로 연결 -->
 | 기관 유형 안내 | GitHub Pages 또는 로컬 정적 서버 | `daycare-map.html` 등 9개 안내, `seo-landing.css` | 유형별 소개 → 통합 지도의 해당 `type` 진입·광고 | 예 | 없음 | <!-- SOFTM-LANDING-ADS 날짜:20260904 : 모든 유형의 2단계 안내와 지도 역할을 구분 -->
-| 전국 주간 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-daycare-map.html` | 주야간보호 5,757곳 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 전국 요양 지도 | GitHub Pages 또는 로컬 정적 서버 | `nationwide-care-services-map.html` | 9개 기관 유형 검색·필터·비교·상세 | 예 | 네이버 Maps 공개 Key ID |
 | 지도·주소 변환 | 사용자 브라우저 | 네이버 Maps JavaScript SDK, `naver-geocoder.js` | 지도 표시, 주소→좌표, 좌표→주소 | 네이버 SDK 직접 호출 | `ncpKeyId=etfcybk8vf`, Maps Application의 Web 서비스 URL 제한 |
 | 지도 화면영역 판별 | GitHub Pages 정적 파일·사용자 브라우저 | `region-bounds.js`, `viewport-regions.js` | 화면과 겹치는 시군구를 모두 후보로 조회한 뒤 실제 기관 좌표로 판별 | 로컬 정적 자료, 역주소 표본 조회 없음 | 없음 | <!-- SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 지도 화면의 검색 누락을 막는 경계 자료의 책임과 호출 경로를 명시 -->
@@ -45,7 +44,7 @@
 
 <!-- SOFTM-PARTNER-SETUP START 날짜:20260904 : 광고 슬롯 복구와 실제 메일 수신 활성화 절차를 함께 인수인계 -->
 
-- 기본 hybrid 모드에서 두 지도 모두 6번째 기관 뒤에 기존 전용 카카오 목록 광고를 표시한다. 12번째부터 6개 간격으로 제휴 문의 카드를 표시한다. 전국 주간은 페이지마다 이 순서를 적용한다.
+- 기본 hybrid 모드에서 통합 지도는 6번째 기관 뒤에 기존 전용 카카오 목록 광고를 표시한다. 12번째부터 6개 간격으로 제휴 문의 카드를 표시한다. <!-- SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 전용 지도 제거 뒤 광고 순서를 통합 지도 하나로 고정 -->
 - `partner-inquiry-config.js`의 `accessKey`에 수신 이메일로 발급한 Web3Forms 공개 Access Key를 설정한다. 현재 수신 안내 주소는 `softm@nate.com`이며, 실제 수신처는 Access Key에 연결된 이메일로 결정된다. 수신처를 바꿀 때 키와 `recipientEmail`을 함께 변경한다.
 - 공개 폼 키 발급 및 클라이언트 사용 근거: [Web3Forms 시작 안내](https://docs.web3forms.com/getting-started), [클라이언트 호출과 공개 키 안내](https://docs.web3forms.com/getting-started/troubleshooting). 서버 Secret은 이 파일에 넣지 않는다.
 - 키가 비어 있으면 접수 준비 안내와 직접 이메일 링크를 제공하고 API를 호출하지 않는다. 키를 등록한 다음 브라우저 제출과 수신 메일함 확인까지 진행해야 실제 수신 연결이 완료된다.
@@ -111,7 +110,7 @@
 | 네이버 Maps Key ID | 두 HTML의 SDK URL, `services/vercel-api` 환경변수, `scripts/validate-project.mjs` |
 | Directions 배포 주소 | 두 HTML의 `DIRECTIONS_PROXY`, Vercel CORS, `/api/directions` 회귀검사 |
 | 공단 정적 스키마 | 수집기, `nhis-static-data.js`, 두 지도 상세 UI, `validate_nhis_static.py` |
-| 기관 원본 데이터 | 수집기·검색 인덱스 생성기, JSON 매니페스트, 전국 주간과 전국 요양 daycare 기관기호 차이 0 |
+| 기관 원본 데이터 | 수집기·검색 인덱스 생성기, JSON 매니페스트, 통합 지도 `daycare` 기관기호 |
 | 사진 페이지 구조 | 사진 파서, 정적 사진 JSON, 두 지도의 사진 탭 |
 | 자동 수집 일정·예산 | 세 cron 합계, 일일 API 한도, 샤드 체크포인트 지속성, `DATA_COLLECTION.md` 동기화 | <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 워크플로 변경 시 운영 문서가 누락되지 않도록 점검 범위를 고정 -->
 
