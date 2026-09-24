@@ -302,6 +302,7 @@ if (exists('nationwide-care-data') || exists('nationwide-care-manifest.js') || e
 execFileSync('python3', [path.join(root, 'scripts/test_care_data.py')], { stdio: 'inherit' });
 /** SOFTM-ADVANCED-SEARCH START 날짜:20260904 : 공단 검색 인덱스의 누락·조건 조합·공유 복원을 정기 검사에 포함 */
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/advanced-search.test.mjs')], { stdio: 'inherit' });
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-popup-geometry.test.mjs'), path.join(root, 'scripts/care-decision-summary.test.mjs')], { stdio: 'inherit' }); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 화면별 마커 가림과 유형별 판단 근거의 오해 방지를 기본 검증에 포함
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/search-feedback.test.mjs')], { stdio: 'inherit' }); // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 이전 응답 덮어쓰기와 조회·지도 건수 혼동의 재발을 검사
 execFileSync('python3', ['-m', 'unittest', 'discover', '-s', path.join(root, 'scripts'), '-p', 'test_nhis_search.py'], { stdio: 'inherit' });
 /** SOFTM-ADVANCED-SEARCH END */

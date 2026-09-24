@@ -257,15 +257,19 @@ test('통합 지도 상세는 제목 아래 공통 행동 영역에서 비교함
     assert.match(openDetail, /detailBasketAction'\)\.innerHTML=CareMapExperience\.button\(c\)/);
     assert.doesNotMatch(openDetail, /care-row-actions[^\n]*CareMapExperience\.button\(c\)/);
 });
-test('전국 주간 상세는 PC 정보창과 모바일 시트가 공유하는 제목 아래에서 비교함 버튼을 한 번 연결', () => {
+/** SOFTM-POPUP-CONTEXT START 날짜:20260924 : 화면별 정보창 분기 대신 공용 패널에서도 비교 버튼과 핵심 정보가 한 번만 표시되는지 확인 */
+test('전국 주간 상세는 PC와 모바일 공용 패널의 제목 아래 비교함 버튼을 한 번 연결', () => {
     const source = readFileSync(new URL('../nationwide-daycare-map.html', import.meta.url), 'utf8');
     const popup = functionSource(source, 'popup', 'setMapStatus');
     const openCenter = functionSource(source, 'openCenter', 'displayCenters');
     assert.match(popup, /popup-head[\s\S]*care-popup-basket-action[\s\S]*popup-body/);
     assert.equal((popup.match(/CareMapExperience\.button\(c\)/g) || []).length, 1);
     assert.doesNotMatch(popup, /care-row-actions[^\n]*CareMapExperience\.button\(c\)/);
-    assert.equal((openCenter.match(/popup\(c\)/g) || []).length, 2);
+    assert.equal((openCenter.match(/popup\(c\)/g) || []).length, 1);
     assert.match(openCenter, /mobilePopupContent'\)\.innerHTML=popup\(c\)/);
-    assert.match(openCenter, /new naver\.maps\.InfoWindow\(\{content:popup\(c\)/);
+    assert.match(openCenter, /CareDetailLayout\.refresh\(sheet\)/);
+    assert.match(popup, /CareDecisionSummary\.render\(c,'daycare'\)/);
+    assert.doesNotMatch(openCenter, /new naver\.maps\.InfoWindow/);
 });
+/** SOFTM-POPUP-CONTEXT END */
 /** SOFTM-POPUP-BASKET-TEST END */

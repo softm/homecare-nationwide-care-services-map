@@ -1,0 +1,31 @@
+/** SOFTM-DECISION-SUMMARY START 날짜:20260924 : 판단 요약에서 급여에 맞지 않는 지표와 미확인 자료의 단정 표시를 방지 */
+import assert from 'node:assert/strict';
+import '../care-decision-summary.js';
+const { render } = globalThis.CareDecisionSummary;
+const base = { g: 'A', ey: 2023, z: 49, cw: 9, rn: 2, na: 1, d: '2019-09-03' };
+const daycare = render(base, 'daycare');
+assert.match(daycare, /A등급/);
+assert.match(daycare, /2023년 평가/);
+assert.match(daycare, /등록 정원/);
+assert.match(daycare, /잔여 자리가 아닙니다/);
+assert.doesNotMatch(render(base, 'home-care'), /등록 정원/);
+assert.match(render({ ...base, staffMissing: true }, 'home-care'), /9명 확인/);
+assert.match(render({ staffMissing: true }, 'daycare'), /미확인/);
+const nursing = render(base, 'home-nursing');
+assert.match(nursing, /3명/);
+assert.match(nursing, /간호사·간호조무사 합계/);
+assert.doesNotMatch(nursing, /요양보호사|등록 정원/);
+assert.doesNotMatch(render(base, 'welfare-equipment'), /정원|요양보호사|근무인원/);
+const hospital = render(base, 'nursing-hospital');
+assert.match(hospital, /심평원 개설현황/);
+assert.match(hospital, /2019.09.03/);
+assert.doesNotMatch(hospital, /공단 평가|정원|요양보호사/);
+assert.doesNotMatch(render({ g: '<img src=x>', ey: '<script>', d: '<img>' }, 'daycare'), /<img|<script>/);
+assert.match(render({ g: 'B', ev: { year: 2024 } }, 'home-care'), /2024년 평가/);
+assert.doesNotMatch(render({ ...base, t: 'C01' }, 'dementia'), /등록 정원/);
+assert.match(render({ ...base, t: 'B03,H31' }, 'dementia'), /등록 정원/);
+assert.equal(globalThis.CareDecisionSummary.staffText({cw:0}, 'cw'), '0명');
+assert.equal(globalThis.CareDecisionSummary.staffText({cw:0,staffMissing:true}, 'cw'), '미확인');
+assert.equal(globalThis.CareDecisionSummary.staffText({}, 'cw'), '미확인');
+console.log('care-decision-summary: 유형별 판단 요약 검증 통과');
+/** SOFTM-DECISION-SUMMARY END */
