@@ -99,7 +99,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-BRAND-ICON END -->
 <!-- SOFTM-PARTNER-OFFER 날짜:20260917 : 공용 문의 상품과 예산 입력의 최신 버전 적용 -->
 <!-- SOFTM-LOCATION-STARTUP START 날짜:20260924 : 공유 좌표·유형 선택·데이터 로딩과 무관하게 페이지 진입 시 미결정 권한을 요청 -->
-<script defer src="care-location-startup.js?v=20260924-1"></script>
+<script defer src="care-location-startup.js?v=20260924-2"></script>
 <!-- SOFTM-LOCATION-STARTUP END -->
 </head>
 <body class="care-map-page" data-care-workspace="search" data-care-view="list"> <!-- SOFTM-MOBILE-INITIAL 날짜:20260909 : 자료 로딩 전부터 모바일 지도 중심 배치를 적용해 긴 조건 화면의 순간 노출을 방지 -->
@@ -152,7 +152,7 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <script src="viewport-regions.js?v=20260916-input-yield1"></script> <!-- SOFTM-QUERY-YIELD 날짜:20260916 : 대량 마커 처리 중 필터 입력을 허용하는 공용 처리기를 적용 -->
 <!-- SOFTM-VIEWPORT-REGIONS END -->
 <!-- SOFTM-LOCATION-HELP 날짜:20260913 : 읽기 쉽게 나눈 권한 안내를 캐시 갱신으로 적용 -->
-<script src="care-location.js?v=20260924-startup1"></script> <!-- SOFTM-LOCATION-STARTUP 날짜:20260924 : 초기 권한 요청과 동시 위치 조회를 최신 공용 코드로 적용 -->
+<script src="care-location.js?v=20260924-follow1"></script> <!-- SOFTM-LOCATION-STARTUP 날짜:20260924 : 초기 권한 요청과 동시 위치 조회를 최신 공용 코드로 적용 -->
 <script src="naver-geocoder.js?v=20260905-3"></script> <!-- SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도에 법정동 상세주소 보완을 함께 적용 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260910-photos1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260910 : 공용 확대창에서 비교 중인 사진의 소속 기관도 표시 -->
@@ -671,13 +671,13 @@ async function searchCurrentMap(notify=true,search=null,preserveSelection=false)
 function clearMapSearch(run=true){mapSearchIds=null;$('mapSearchClear').style.display='none';if(run){page=1;apply(true);setMapStatus('지도영역 검색 해제');showMapProgress('지도영역 검색 해제 · 마커 갱신 중');showToast('지도영역 검색을 해제했습니다.','success');loadMarkersInCurrentBounds()}}
 function setBasePoint(v,label,isCurrent=false,search=null){basePoint=v;if(!isCurrent)skipIdleUntil=0;if(baseMarker)baseMarker.setMap(null);const pos=new naver.maps.LatLng(v.lat,v.lng),icon=isCurrent?'<div class="current-position-pin"><span></span></div>':'<div class="base-pin">기준</div>',anchor=isCurrent?new naver.maps.Point(11,11):new naver.maps.Point(19,19);baseMarker=new naver.maps.Marker({map:naverMap,position:pos,title:label||'기준 위치',zIndex:5000,icon:{content:icon,anchor}});if(isCurrent){skipIdleUntil=Date.now()+1800;naverMap.setCenter(pos)}else naverMap.panTo(pos);setMapStatus(isCurrent?'현재 위치 지정 완료':'지도 중심 기준 위치 지정');DATA.forEach(c=>{const p=coordFor(c);if(p)c._distance=hav(basePoint,p)});apply(true,false,search)} // SOFTM-LOCATION 날짜:20260905 : 현재 위치 반영 중 같은 검색 요청을 유지해 주변 조회가 자체 취소되지 않도록 보호
 /** SOFTM-LOCATION START 날짜:20260905 : 현재 위치 실패 사유를 구분하고 늦은 응답이 검색·담은 기관을 덮지 않도록 보호 */
-async function useCurrentLocation(initial=false){
+async function useCurrentLocation(initial=false,grantedPoint=null){ // SOFTM-LOCATION-FOLLOW 날짜:20260924 : 허용된 좌표로 현위치 조회를 바로 실행
  const button=$('currentLocationBtn');if(!mapReady||button.disabled)return;
  const query=beginDaycareSearch(),current=()=>query.isCurrent()&&!CareMapExperience.isBasketMap();
  button.disabled=true;button.classList.add('locating');button.setAttribute('aria-busy','true');CareLocation.hideNotice();
  setMapStatus('현재 위치 확인 중');showMapProgress('현재 위치 확인 중');
  try{
-  const point=await CareLocation.request({isCurrent:current});if(!current())return;
+  const point=grantedPoint||await CareLocation.request({isCurrent:current});if(!current())return; // SOFTM-LOCATION-FOLLOW 날짜:20260924 : 권한 응답의 좌표를 재사용
   const pos=new naver.maps.LatLng(point.lat,point.lng);
   skipIdleUntil=Date.now()+2400;setBasePoint(point,'현재 위치',true,query);
   setMapStatus('현재 위치 지정 · 주변 기관 조회 중');showMapProgress('현재 위치 주변 기관 조회 준비');
@@ -754,7 +754,14 @@ function bindDaycareViewportResearch(){
  search:()=>searchCurrentMap(false)});
 }
 /** SOFTM-VIEWPORT-RESEARCH END */
-function initNaver(){if(!window.naver?.maps)return;naverMap=new naver.maps.Map('naverMap',{center:new naver.maps.LatLng(37.48145,126.84805),zoom:14,zoomControl:true,zoomControlOptions:{position:naver.maps.Position.RIGHT_BOTTOM,style:naver.maps.ZoomControlStyle.SMALL},scrollWheel:true,pinchZoom:true,disableDoubleTapZoom:false,disableTwoFingerTapZoom:false,minZoom:6,maxZoom:21});mapReady=true;hideMapLoad();setMapStatus('전국 좌표 자동연결');naver.maps.Event.addListener(naverMap,'click',()=>{closeMapPopup()});naver.maps.Event.addListener(naverMap,'dragstart',()=>{closeMapPopup(false);CareMapExperience.cancelDetail();if(CareMapExperience.isBasketMap())return;beginDaycareSearch();showMapProgress('지도 이동 중');setMapStatus('지도 이동 중')});naver.maps.Event.addListener(naverMap,'dragend',()=>{if(CareMapExperience.isBasketMap()||daycareViewportResearch?.pending())return;clearTimeout(dragSearchTimer);const center=naverMap.getCenter();setBasePoint({lat:center.lat(),lng:center.lng()},'지도 중심 기준 위치');skipIdleUntil=Date.now()+1200;setMapStatus('지도 중심 기준 지정 · 자동 검색 대기');showMapProgress('화면 중앙 기준 · 자동 검색 준비');dragSearchTimer=setTimeout(()=>searchCurrentMap(),420)});naver.maps.Event.addListener(naverMap,'idle',scheduleBoundsMarkers);bindDaycareViewportResearch();if(CareBasketShare.hasLink(location.href)||CareMapExperience.isBasketMap()){/* SOFTM-BASKET-SHARE 날짜:20260911 : 공유 목록 진입에 기본지역 검색을 시작하지 않음 */}else if(sharedState){apply(true,false);if(sharedState.lat!==null&&sharedState.lng!==null&&sharedState.zoom!==null){restoreSharedDaycareMap(sharedState)/* SOFTM-SHARE-RESTORE 날짜:20260905 : 공유 조회를 중복 실행해 선택을 덮지 않음 */}else{apply(false,false);showToast('공유된 조회조건을 불러왔습니다.','success')}}else if(daycareMatchRegionChosen){apply(false,true)}else{$('province').value='경기도';updateCities();$('city').value='광명시';apply(true);setBasePoint(PRESET_ADDRESSES['경기도 광명시 오리로 1034-1'],'기본 위치');useCurrentLocation(true)}} // SOFTM-BASKET-MAP 날짜:20260904 : 비교함 지도 이동은 기관 자동검색 없이 담은 기관만 유지 // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 두 지도의 확대·축소와 수동 재검색을 공용 처리에 연결 // SOFTM-CARE-MATCH 날짜:20260910 : 질문에서 확정한 지역은 지도 초기 기본지역보다 우선
+/** SOFTM-LOCATION-FOLLOW START 날짜:20260924 : 초기 권한 허용 후 현재 위치 주변 기관을 기존 검색 흐름으로 조회 */
+function followInitialDaycareLocation(point){
+ if(CareMapExperience.isBasketMap())CareMapExperience.exitBasketMap();
+ clearTimeout(dragSearchTimer);closeMapPopup(false);
+ return useCurrentLocation(false,point);
+}
+/** SOFTM-LOCATION-FOLLOW END */
+function initNaver(){if(!window.naver?.maps)return;naverMap=new naver.maps.Map('naverMap',{center:new naver.maps.LatLng(37.48145,126.84805),zoom:14,zoomControl:true,zoomControlOptions:{position:naver.maps.Position.RIGHT_BOTTOM,style:naver.maps.ZoomControlStyle.SMALL},scrollWheel:true,pinchZoom:true,disableDoubleTapZoom:false,disableTwoFingerTapZoom:false,minZoom:6,maxZoom:21});mapReady=true;CareLocation.connectInitialPosition(followInitialDaycareLocation);hideMapLoad();setMapStatus('전국 좌표 자동연결');naver.maps.Event.addListener(naverMap,'click',()=>{closeMapPopup()});naver.maps.Event.addListener(naverMap,'dragstart',()=>{closeMapPopup(false);CareMapExperience.cancelDetail();if(CareMapExperience.isBasketMap())return;beginDaycareSearch();showMapProgress('지도 이동 중');setMapStatus('지도 이동 중')});naver.maps.Event.addListener(naverMap,'dragend',()=>{if(CareMapExperience.isBasketMap()||daycareViewportResearch?.pending())return;clearTimeout(dragSearchTimer);const center=naverMap.getCenter();setBasePoint({lat:center.lat(),lng:center.lng()},'지도 중심 기준 위치');skipIdleUntil=Date.now()+1200;setMapStatus('지도 중심 기준 지정 · 자동 검색 대기');showMapProgress('화면 중앙 기준 · 자동 검색 준비');dragSearchTimer=setTimeout(()=>searchCurrentMap(),420)});naver.maps.Event.addListener(naverMap,'idle',scheduleBoundsMarkers);bindDaycareViewportResearch();if(CareBasketShare.hasLink(location.href)||CareMapExperience.isBasketMap()){/* SOFTM-BASKET-SHARE 날짜:20260911 : 공유 목록 진입에 기본지역 검색을 시작하지 않음 */}else if(sharedState){apply(true,false);if(sharedState.lat!==null&&sharedState.lng!==null&&sharedState.zoom!==null){restoreSharedDaycareMap(sharedState)/* SOFTM-SHARE-RESTORE 날짜:20260905 : 공유 조회를 중복 실행해 선택을 덮지 않음 */}else{apply(false,false);showToast('공유된 조회조건을 불러왔습니다.','success')}}else if(daycareMatchRegionChosen){apply(false,true)}else{$('province').value='경기도';updateCities();$('city').value='광명시';apply(true);setBasePoint(PRESET_ADDRESSES['경기도 광명시 오리로 1034-1'],'기본 위치');useCurrentLocation(true)}} // SOFTM-BASKET-MAP 날짜:20260904 : 비교함 지도 이동은 기관 자동검색 없이 담은 기관만 유지 // SOFTM-VIEWPORT-RESEARCH 날짜:20260909 : 두 지도의 확대·축소와 수동 재검색을 공용 처리에 연결 // SOFTM-CARE-MATCH 날짜:20260910 : 질문에서 확정한 지역은 지도 초기 기본지역보다 우선
 /** SOFTM-MAP-RESTORE END */
 /** SOFTM-SEARCH-FEEDBACK END */
 function loadNaver(){const s=document.createElement('script');s.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=etfcybk8vf&submodules=geocoder&callback=initNaver';s.onerror=()=>{showMapLoad('네이버지도를 불러오지 못했습니다. Web 서비스 URL과 지도 API 인증을 확인하세요.');setMapStatus('지도 인증 실패')};document.head.appendChild(s)} // SOFTM-MAPS-KEY 날짜:20260902 : Geocoding 권한이 연결된 신규 Maps API Key ID로 SDK 인증을 통일

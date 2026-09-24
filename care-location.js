@@ -120,14 +120,30 @@
         }).finally(() => { inFlight = null; });
         return inFlight;
     }
+    /** SOFTM-LOCATION-FOLLOW START 날짜:20260924 : 권한 획득 좌표를 지도 준비 전에도 보관해 주변 조회에 한 번 전달 */
+    let initialPoint, initialHandler, initialDelivered = false;
+    function deliverInitialPosition() {
+        if (!initialPoint || !initialHandler || initialDelivered) return;
+        initialDelivered = true;
+        const point = initialPoint, handler = initialHandler;
+        Promise.resolve().then(() => handler(point)).catch(() => {});
+    }
+    function connectInitialPosition(handler) {
+        initialHandler = handler;
+        deliverInitialPosition();
+    }
+    /** SOFTM-LOCATION-FOLLOW END */
     async function requestInitialPermission() {
         let state;
         try { state = (await root.navigator?.permissions?.query({ name: 'geolocation' }))?.state; } catch {}
         // 이미 허용·차단된 권한은 건드리지 않고 미결정 또는 권한 조회 미지원일 때 네이티브 요청을 실행합니다.
         if (state === 'granted' || state === 'denied') return null;
-        return request();
+        const point = await request();
+        initialPoint = point;
+        deliverInitialPosition();
+        return point;
     }
-    root.CareLocation = Object.freeze({ request, requestInitialPermission, requestPosition, info, permissionHelp, showNotice, hideNotice });
+    root.CareLocation = Object.freeze({ request, requestInitialPermission, connectInitialPosition, requestPosition, info, permissionHelp, showNotice, hideNotice });
     /** SOFTM-LOCATION-STARTUP END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-LOCATION END */
