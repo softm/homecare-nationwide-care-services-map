@@ -167,7 +167,7 @@ test('권한 조회 미지원도 위치 요청으로 대체하고 거절 후 수
     const retry = env.api.request(); assert.equal(env.calls(), 2);
     env.succeed(); await retry;
 });
-test('두 지도 진입 스크립트는 지도 초기화 분기 밖에서 권한만 요청', () => {
+test('두 지도 진입 스크립트는 지도 초기화 분기 밖에서 권한 요청', () => {
     for (const file of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
         const source = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
         assert.match(source, /<script defer src="care-location-startup.js\?v=/);
@@ -179,3 +179,27 @@ test('두 지도 진입 스크립트는 지도 초기화 분기 밖에서 권한
     assert.doesNotMatch(source, /setCenter|setZoom|useCurrentLocation|location\.search/);
 });
 /** SOFTM-LOCATION-STARTUP END */
+
+/** SOFTM-LOCATION-FOLLOW START 날짜:20260924 : 권한 응답과 지도 준비 순서가 바뀌어도 허용 좌표를 한 번 전달 */
+for (const readyFirst of [true, false]) test(`초기 권한 허용 후 좌표 전달: 지도 준비 우선=${readyFirst}`, async () => {
+    const env = startupDevice('prompt');
+    const points = [];
+    if (readyFirst) env.api.connectInitialPosition(point => points.push(point));
+    const pending = env.api.requestInitialPermission();
+    await new Promise(resolve => setImmediate(resolve));
+    env.succeed(); await pending;
+    if (!readyFirst) env.api.connectInitialPosition(point => points.push(point));
+    await new Promise(resolve => setImmediate(resolve));
+    env.api.connectInitialPosition(point => points.push(point));
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(points.length, 1); assert.equal(points[0].lat, point.lat);
+    assert.equal(env.calls(), 1);
+});
+test('거절은 현재 위치 이동을 실행하지 않음', async () => {
+    const env = startupDevice('prompt'); let moves = 0;
+    env.api.connectInitialPosition(() => { moves++; });
+    const pending = env.api.requestInitialPermission();
+    await new Promise(resolve => setImmediate(resolve)); env.deny();
+    await assert.rejects(pending); assert.equal(moves, 0);
+});
+/** SOFTM-LOCATION-FOLLOW END */
