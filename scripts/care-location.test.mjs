@@ -128,3 +128,54 @@ test('통합 지도 현재 위치 성공은 해당 좌표와 주변 조회를 �
     assert.equal(searched, 1); assert.equal(fitted, 0); assert.equal(button.disabled, false);
 });
 /** SOFTM-LOCATION-TEST END */
+
+/** SOFTM-LOCATION-STARTUP START 날짜:20260924 : 진입 경로와 무관한 권한 요청·중복 방지·재시도 회귀 검사 */
+function startupDevice(state, queryFails = false) {
+    let calls = 0, resolve, reject;
+    const context = { navigator: { permissions: { query: async () => {
+        if (queryFails) throw new Error('unsupported');
+        return { state };
+    } }, geolocation: { getCurrentPosition(success, failure) { calls++; resolve = success; reject = failure; } } }, isSecureContext: true };
+    vm.createContext(context);
+    vm.runInContext(readFileSync(new URL('../care-location.js', import.meta.url), 'utf8'), context);
+    return { api: context.CareLocation, calls: () => calls, succeed: () => resolve({ coords: { latitude: point.lat, longitude: point.lng } }), deny: () => reject({ code: 1 }) };
+}
+test('미결정 권한은 페이지 진입 시 요청하며 동시 지도 요청은 하나로 합침', async () => {
+    const env = startupDevice('prompt');
+    const initial = env.api.requestInitialPermission();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(env.calls(), 1);
+    const map = env.api.request();
+    assert.equal(env.calls(), 1);
+    env.succeed();
+    assert.equal((await initial).lat, point.lat);
+    assert.equal((await map).lng, point.lng);
+});
+test('허용·차단 상태는 초기 권한 요청을 추가하지 않음', async () => {
+    for (const state of ['granted', 'denied']) {
+        const env = startupDevice(state);
+        assert.equal(await env.api.requestInitialPermission(), null);
+        assert.equal(env.calls(), 0);
+    }
+});
+test('권한 조회 미지원도 위치 요청으로 대체하고 거절 후 수동 재시도 가능', async () => {
+    const env = startupDevice(undefined, true);
+    const initial = env.api.requestInitialPermission();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(env.calls(), 1);
+    env.deny(); await assert.rejects(initial, error => error.reason === 'denied');
+    const retry = env.api.request(); assert.equal(env.calls(), 2);
+    env.succeed(); await retry;
+});
+test('두 지도 진입 스크립트는 지도 초기화 분기 밖에서 권한만 요청', () => {
+    for (const file of ['nationwide-care-services-map.html', 'nationwide-daycare-map.html']) {
+        const source = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
+        assert.match(source, /<script defer src="care-location-startup.js\?v=/);
+    }
+    const source = readFileSync(new URL('../care-location-startup.js', import.meta.url), 'utf8');
+    let requests = 0;
+    vm.runInNewContext(source, { window: { CareLocation: { requestInitialPermission() { requests++; return Promise.resolve(point); } } } });
+    assert.equal(requests, 1);
+    assert.doesNotMatch(source, /setCenter|setZoom|useCurrentLocation|location\.search/);
+});
+/** SOFTM-LOCATION-STARTUP END */
