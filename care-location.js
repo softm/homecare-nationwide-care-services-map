@@ -107,11 +107,27 @@
         notice.querySelector('[data-location-retry]').onclick = retry;
     }
     /** SOFTM-LOCATION-DIALOG END */
-    root.CareLocation = Object.freeze({ request: async options => {
-        /** SOFTM-LOCATION-STATE START 날짜:20260914 : 조회 메시지와 별개로 위치 사용 가능 상태를 전달 */
-        try { const point = await requestPosition(root, options); root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: { reason: '' } })); return point; }
-        catch (error) { root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: info(error) })); throw error; }
-        /** SOFTM-LOCATION-STATE END */
-    }, requestPosition, info, permissionHelp, showNotice, hideNotice });
+    /** SOFTM-LOCATION-STARTUP START 날짜:20260924 : 초기 권한 요청과 지도 위치 조회를 공유해 중복 요청 없이 브라우저 권한창을 열기 */
+    let inFlight;
+    function request(options) {
+        if (inFlight) return inFlight;
+        inFlight = requestPosition(root, options).then(point => {
+            root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: { reason: '' } }));
+            return point;
+        }, error => {
+            root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: info(error) }));
+            throw error;
+        }).finally(() => { inFlight = null; });
+        return inFlight;
+    }
+    async function requestInitialPermission() {
+        let state;
+        try { state = (await root.navigator?.permissions?.query({ name: 'geolocation' }))?.state; } catch {}
+        // 이미 허용·차단된 권한은 건드리지 않고 미결정 또는 권한 조회 미지원일 때 네이티브 요청을 실행합니다.
+        if (state === 'granted' || state === 'denied') return null;
+        return request();
+    }
+    root.CareLocation = Object.freeze({ request, requestInitialPermission, requestPosition, info, permissionHelp, showNotice, hideNotice });
+    /** SOFTM-LOCATION-STARTUP END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-LOCATION END */
