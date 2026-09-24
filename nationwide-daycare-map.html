@@ -84,7 +84,12 @@ header{padding:25px clamp(16px,4vw,48px);background:linear-gradient(125deg,#1732
 <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
 <!-- SOFTM-LIST-ACTIONS 날짜:20260913 : 목록 동작의 균일한 크기와 선택 상태를 이전 캐시 없이 적용 -->
 <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
-<link rel="stylesheet" href="care-detail-layout.css?v=20260917-map-space1"><script src="care-detail-layout.js?v=20260917-map-space1"></script><!-- SOFTM-DETAIL-RESIZE 날짜:20260917 : 지도를 넓힌 기본 상세 높이와 크기 전환을 이전 캐시 없이 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 전국 주간 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
+<!-- SOFTM-POPUP-CONTEXT START 날짜:20260924 : 유형별 판단 요약과 팝업 방향에 맞는 마커 위치를 두 지도에 공용 적용 -->
+<link rel="stylesheet" href="care-decision-summary.css?v=20260924-1">
+<script src="care-decision-summary.js?v=20260924-1"></script>
+<script src="care-popup-geometry.js?v=20260924-1"></script>
+<!-- SOFTM-POPUP-CONTEXT END -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20260924-context1"><script src="care-detail-layout.js?v=20260924-context1"></script><!-- SOFTM-DETAIL-RESIZE 날짜:20260917 : 지도를 넓힌 기본 상세 높이와 크기 전환을 이전 캐시 없이 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 전국 주간 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT END -->
 <link rel="stylesheet" href="mobile-map-clean.css?v=20260914-sheet-focus1"> <!-- SOFTM-MOBILE-SHEET-FOCUS 날짜:20260914 : 검색창과 작업 탭을 접는 지도 집중 화면을 이전 캐시 없이 적용 -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
@@ -445,7 +450,7 @@ function daycareStaticPhotosHtml(data){
 }
 /** SOFTM-PHOTO-VIEWER END */
 /** SOFTM-POPUP-TOP START 날짜:20260904 : PC 본문과 모바일 팝업의 실제 스크롤 영역을 함께 초기화해 새 탭을 처음부터 표시 */
-async function setDaycareInfoTab(id,tab){const root=document.querySelector(`[data-daycare-detail="${id}"]`);if(!root)return;root.querySelectorAll('[data-daycare-tab]').forEach(button=>button.classList.toggle('active',button.dataset.daycareTab===tab));const basic=root.querySelector('.popup-basic-panel'),panel=root.querySelector('.popup-static-panel'),center=DATA.find(item=>item.i===id)||{};basic.hidden=tab!=='basic';panel.hidden=tab==='basic';root.scrollTo({top:0,behavior:'instant'});root.closest('.mobile-popup-content')?.scrollTo({top:0,behavior:'instant'});if(tab==='basic')return;panel.innerHTML=`<div class="popup-static-message">${tab==='photos'?'저장된 등록사진':'저장된 상세정보'}을 확인하고 있습니다.</div>`;try{panel.innerHTML=tab==='photos'?daycareStaticPhotosHtml(await NhisStaticData.photos(id)):daycareStaticDetailHtml(await NhisStaticData.detail(id,daycareOfficialType(center)),center)}catch(error){if(tab==='detail'){if(!String(error.message).includes('아직 정적 데이터에 수집되지 않았습니다.'))console.warn(`[공단 상세] ${id} 상세 파일을 읽지 못해 기준자료를 표시합니다.`,error);panel.innerHTML=daycareSummaryDetailHtml(center);return}const missing=String(error.message).includes('아직 정적 데이터에 수집되지 않았습니다.'),label=missing?'사진 정보 미수집':'사진 주소 확인 실패';panel.innerHTML=`<div class="popup-static-message">${esc(label)}<br>나머지 지도 기능은 계속 사용할 수 있습니다.</div>`}}
+async function setDaycareInfoTab(id,tab){const root=document.querySelector(`[data-daycare-detail="${id}"]`);if(!root)return;root.querySelectorAll('[data-daycare-tab]').forEach(button=>{const active=button.dataset.daycareTab===tab;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));});const basic=root.querySelector('.popup-basic-panel'),panel=root.querySelector('.popup-static-panel'),center=DATA.find(item=>item.i===id)||{};basic.hidden=tab!=='basic';panel.hidden=tab==='basic';CareDetailLayout.scroller(root).scrollTo({top:root.offsetTop,behavior:'instant'});if(tab==='basic')return;panel.innerHTML=`<div class="popup-static-message">${tab==='photos'?'저장된 등록사진':'저장된 상세정보'}을 확인하고 있습니다.</div>`;try{panel.innerHTML=tab==='photos'?daycareStaticPhotosHtml(await NhisStaticData.photos(id)):daycareStaticDetailHtml(await NhisStaticData.detail(id,daycareOfficialType(center)),center)}catch(error){if(tab==='detail'){if(!String(error.message).includes('아직 정적 데이터에 수집되지 않았습니다.'))console.warn(`[공단 상세] ${id} 상세 파일을 읽지 못해 기준자료를 표시합니다.`,error);panel.innerHTML=daycareSummaryDetailHtml(center);return}const missing=String(error.message).includes('아직 정적 데이터에 수집되지 않았습니다.'),label=missing?'사진 정보 미수집':'사진 주소 확인 실패';panel.innerHTML=`<div class="popup-static-message">${esc(label)}<br>나머지 지도 기능은 계속 사용할 수 있습니다.</div>`}} // SOFTM-POPUP-CONTEXT 날짜:20260924 : 공용 스크롤 시작과 탭 선택 상태를 함께 갱신
 /** SOFTM-POPUP-TOP END */
 function popup(c){
  const ev=c.ev,grade=ev?gradeText(ev.grade):(isNew(c)?'신설·미평가':'등급 미확인'),score=ev&&Number.isFinite(ev.score)?ev.score.toFixed(1):'—',distance=Number.isFinite(c._distance)?c._distance.toFixed(1)+'km':'미산출';
@@ -456,14 +461,14 @@ function popup(c){
    <div class="popup-eyebrow"><span>목록 ${listRank(c)||'-'}번</span><span>${esc(c.p+' '+c.c)}</span><span>${esc(confidenceText(c))}</span></div>
 <!-- SOFTM-MAP-WORDING END -->
    <h3>${esc(c.n)}</h3>
-   <div class="popup-score-row"><span class="popup-score">${score}</span><span class="popup-grade-pill">${esc(grade)}</span><span class="popup-score-label">공단 평가총점</span></div>
+   ${CareDecisionSummary.render(c,'daycare')}<!-- SOFTM-DECISION-SUMMARY 날짜:20260924 : 점수 단독 강조 대신 평가연도·정원·인력의 판단 근거를 함께 표시 -->
    <!-- SOFTM-POPUP-COMPOSITION 날짜:20260911 : 비교 행동을 기관 제목·평가와 묶어 정보 탭 앞의 큰 중간 띠를 제거 -->
    <div class="care-popup-basket-action">${CareMapExperience.button(c)}<button type="button" class="care-popup-saved" data-popup-saved>담은 기관 <span data-popup-saved-count>${CareMapExperience.rows().length}</span> →</button></div><!-- SOFTM-POPUP-SAVED 날짜:20260917 : 팝업 안에서 담은 목록으로 바로 이동 --> <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공 -->
   <!-- SOFTM-DETAIL-NAV 날짜:20260917 : 전체 검색 결과 또는 담은 순서로 페이지 경계를 넘어 이동 -->
 
   </div>
   <div class="popup-body" data-daycare-detail="${esc(c.i)}">
-   <div class="popup-static-tabs" role="tablist" aria-label="기관 정보 구분"><button class="popup-static-tab active" type="button" data-daycare-tab="basic" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','basic')">기본정보</button><button class="popup-static-tab" type="button" data-daycare-tab="detail" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','detail')">상세정보</button><button class="popup-static-tab" type="button" data-daycare-tab="photos" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','photos')">사진</button></div>
+   <div class="popup-static-tabs" role="tablist" aria-label="기관 정보 구분"><button class="popup-static-tab active" type="button" data-daycare-tab="basic" role="tab" aria-selected="true" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','basic')">기본정보</button><button class="popup-static-tab" type="button" data-daycare-tab="detail" role="tab" aria-selected="false" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','detail')">상세정보</button><button class="popup-static-tab" type="button" data-daycare-tab="photos" role="tab" aria-selected="false" onclick="event.stopPropagation();setDaycareInfoTab('${c.i}','photos')">사진</button></div>
    <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 기본정보에서 기관 비교와 등급별 비용 확인을 이어갈 수 있도록 연결 -->
    <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 연락처를 같은 기본정보 묶음으로 제공 -->
    <div class="popup-basic-panel"><section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c))}
@@ -477,7 +482,7 @@ function popup(c){
    </section><!-- SOFTM-DETAIL-LAYOUT END -->
    ${CareMapExperience.costCard(c,'daycare')}<!-- SOFTM-MAP-EXPERIENCE END -->
    <div class="popup-row"><span class="popup-row-label">기관정보</span><span class="popup-row-value">기관기호 ${esc(c.i)} · 정원 ${c.z}명 · 지정 ${esc(c.d||'-')}</span></div>
-   <div class="popup-row"><span class="popup-row-label">인력</span><!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 인력 누락을 0명으로 오인하지 않도록 확인 범위 표시 --><span class="popup-row-value">${c.staffMissing?'[인력 일부 미확인 · 확인분] ':''}사회복지사 ${c.s} · 간호 ${c.rn} · 간호조무 ${c.na}<br>물리 ${c.pt} · 작업 ${c.ot} · 요양보호 ${c.cw}</span></div>
+   <div class="popup-row"><span class="popup-row-label">인력</span><!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 인력 누락을 0명으로 오인하지 않도록 확인 범위 표시 --><span class="popup-row-value">${c.staffMissing?'[인력 일부 미확인 · 확인분] ':''}사회복지사 ${CareDecisionSummary.staffText(c,'s')} · 간호 ${CareDecisionSummary.staffText(c,'rn')} · 간호조무 ${CareDecisionSummary.staffText(c,'na')}<br>물리 ${CareDecisionSummary.staffText(c,'pt')} · 작업 ${CareDecisionSummary.staffText(c,'ot')} · 요양보호 ${CareDecisionSummary.staffText(c,'cw')}</span></div>
    <div class="popup-links"><button class="c" onclick="event.stopPropagation();copyDestinationName('${c.i}')">목적지명 복사</button><button class="c" onclick="event.stopPropagation();copyDestinationAddress('${c.i}')">주소 복사</button><a class="n" target="_blank" rel="noopener" href="${naverUrl(c)}">네이버</a><a class="k" target="_blank" rel="noopener" href="${kakaoUrl(c)}">카카오</a><a class="o" target="_blank" rel="noopener" href="${officialUrl(c)}">공단 상세</a></div></div>
    <div class="popup-static-panel" hidden></div>
   </div>
@@ -505,7 +510,7 @@ function saveCoord(c,v){for(const key of coordCacheKeys(c)){try{localStorage.set
 function coordFor(c){if(c._coord)return c._coord;const p=PRESET_COORDS[c.i];if(p)return c._coord={lat:p[0],lng:p[1]};const hit=cachedCoord(c);return hit?(c._coord=hit):null}
 async function geocodeCenter(c){const known=coordFor(c);if(known)return known;if(c.addressMissing)return null;const v=await NaverGeocoder.geocodeInstitution(c);if(v){c._coord=v;saveCoord(c,v)}return v} // SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 목록 주소로 찾지 못한 기관은 같은 기관의 공식 상세주소를 확인
 /** SOFTM-DETAIL-MAP-PERSIST START 날짜:20260914 : 팝업 종료 시 지도는 기관 확인 위치에 두고 화면 단계와 포커스만 복원 */
-function closeMapPopup(finishView=true){daycareDetailGeneration++;clearTimeout(daycareDetailTimer);daycareDetailTimer=null;if(daycareEmphasizedMarker&&daycareOriginalIcon){daycareEmphasizedMarker.setIcon(daycareOriginalIcon);daycareEmphasizedMarker=null;daycareOriginalIcon=null}document.querySelector('.map-wrap')?.classList.remove('popup-active');const mobileLayer=$('mobilePopupLayer');if(mobileLayer){mobileLayer.hidden=true;$('mobilePopupContent').innerHTML=''}document.body.classList.remove('mobile-popup-open');if(infoWindow){infoWindow.close();infoWindow=null}popupViewState=null;if(finishView)CareMapExperience.finishDetail()}
+function closeMapPopup(finishView=true){daycareDetailGeneration++;clearTimeout(daycareDetailTimer);daycareDetailTimer=null;if(daycareEmphasizedMarker&&daycareOriginalIcon){daycareEmphasizedMarker.setIcon(daycareOriginalIcon);daycareEmphasizedMarker=null;daycareOriginalIcon=null}document.querySelector('.map-wrap')?.classList.remove('popup-active');const mobileLayer=$('mobilePopupLayer');if(mobileLayer){mobileLayer.hidden=true;$('mobilePopupContent').innerHTML=''}document.body.classList.remove('mobile-popup-open');if(infoWindow){infoWindow.close();infoWindow=null}popupViewState=null;if(finishView){CareDetailLayout.reset(document.querySelector('.mobile-popup-sheet'));CareMapExperience.finishDetail()}} // SOFTM-POPUP-CONTEXT 날짜:20260924 : 다음 기관으로 전환할 때는 사용자가 고른 창 크기를 유지
 /** SOFTM-DETAIL-MAP-PERSIST END */
 function clearRouteLine(){if(routePolyline){routePolyline.setMap(null);routePolyline=null}routeMarkers.forEach(m=>m.setMap(null));routeMarkers=[]}
 function drawRouteOrderMarkers(){routeMarkers.forEach(m=>m.setMap(null));routeMarkers=[];mapMarkers.forEach(baseMarker=>{const index=routeOrder.indexOf(baseMarker.centerId);if(index<0)return;const c=DATA.find(x=>x.i===baseMarker.centerId),marker=new naver.maps.Marker({map:naverMap,position:baseMarker.getPosition(),zIndex:4000,icon:{content:`<div class="route-map-marker">${index+1}</div>`,anchor:new naver.maps.Point(15,15)},title:`${index+1}. ${c?.n||''}`});if(c)naver.maps.Event.addListener(marker,'click',()=>openCenter(c,marker));routeMarkers.push(marker)})}
@@ -524,18 +529,20 @@ function openCenter(c,m,previousView=null,instant=false){ // SOFTM-SCROLL-DETAIL
   if(daycareEmphasizedMarker&&daycareOriginalIcon){daycareEmphasizedMarker.setIcon(daycareOriginalIcon);daycareEmphasizedMarker=null;daycareOriginalIcon=null}
   focusMobileRow(c.i,false,true); // SOFTM-SELECTED-MARKER 날짜:20260914 : 마커 클릭도 목록과 같은 선택 확대를 유지
   document.querySelector('.map-wrap')?.classList.add('popup-active');
-  if(window.matchMedia('(max-width:1000px)').matches||!m){$('mobilePopupContent').innerHTML=popup(c);void loadDaycareContact(c);$('mobilePopupLayer').hidden=false;document.body.classList.add('mobile-popup-open');if(!instant)requestAnimationFrame(()=>$('mobilePopupDismiss')?.focus());return} // SOFTM-SCROLL-DETAIL 날짜:20260909 : 자동 전환은 목록의 조작 포커스를 빼앗지 않음
-  infoWindow=new naver.maps.InfoWindow({content:popup(c),maxWidth:440,backgroundColor:'#fff',borderColor:'#cbd5e1',borderWidth:1,anchorSize:new naver.maps.Size(10,10),pixelOffset:new naver.maps.Point(0,-12),anchorSkew:false,disableAutoPan:false,zIndex:10000});infoWindow.open(naverMap,m);requestAnimationFrame(()=>void loadDaycareContact(c));
-  /** SOFTM-DETAIL-NAV START 날짜:20260917 : 기관 전환 후 지도 위로 벗어난 헤더와 이동 버튼을 화면 안에 유지 */
-  requestAnimationFrame(()=>{
-   if(generation!==daycareDetailGeneration)return;
-   const rect=document.querySelector('.map-wrap .popup')?.getBoundingClientRect(),mapRect=$('naverMap').getBoundingClientRect();
-   if(!rect)return;
-   const top=Math.max(mapRect.top,0)+12,bottom=Math.min(mapRect.bottom,window.innerHeight)-12,left=Math.max(mapRect.left,0)+12,right=Math.min(mapRect.right,window.innerWidth)-12;
-   const offsetY=rect.top<top?rect.top-top:rect.bottom>bottom?rect.bottom-bottom:0,offsetX=rect.left<left?rect.left-left:rect.right>right?rect.right-right:0;
-   if(offsetX||offsetY){skipIdleUntil=Date.now()+7000;naverMap.panBy(new naver.maps.Point(offsetX,offsetY));}
-  });
-  /** SOFTM-DETAIL-NAV END */
+  /** SOFTM-POPUP-CONTEXT START 날짜:20260924 : 모든 화면에서 같은 판단 요약과 측면·하단 시트를 사용하고 선택 마커의 노출을 확보 */
+  $('mobilePopupContent').innerHTML=popup(c);
+  const sheet=document.querySelector('.mobile-popup-sheet');
+  CareDetailLayout.refresh(sheet);
+  $('mobilePopupLayer').hidden=false;
+  document.body.classList.add('mobile-popup-open');
+  void loadDaycareContact(c);
+  if(m&&mapReady&&!instant){
+   const pos=m.getPosition(),bounds=naverMap.getBounds(),ne=bounds.getNE(),sw=bounds.getSW();
+   const center=CarePopupGeometry.focusCenter({lat:pos.lat(),lng:pos.lng()},{north:ne.lat(),south:sw.lat(),east:ne.lng(),west:sw.lng()},$('naverMap').getBoundingClientRect(),sheet.getBoundingClientRect());
+   skipIdleUntil=Date.now()+7000;naverMap.panTo(new naver.maps.LatLng(center.lat,center.lng));
+  }
+  if(!instant)requestAnimationFrame(()=>CareDetailLayout.focus(sheet));
+  /** SOFTM-POPUP-CONTEXT END */
  }
  if(!m||instant){reveal();return} // SOFTM-SCROLL-DETAIL 날짜:20260909 : 연속 스크롤 시 이전 기관 팝업의 지연 노출을 방지
  daycareEmphasizedMarker=m;daycareOriginalIcon=m.getIcon();

@@ -1,0 +1,11 @@
+/** SOFTM-DECISION-SUMMARY START 날짜:20260924 : 좁은 상세에서도 평가 근거와 유형별 이용 현황을 같은 눈높이로 비교 */
+.care-decision-summary{margin:8px 0 10px;color:#203c35}
+.care-decision-grid{display:grid;grid-template-columns:repeat(var(--care-decision-columns,3),minmax(0,1fr));gap:6px;margin:0}
+.care-decision-cell{min-width:0;padding:8px 9px;border:1px solid #e2eae5;border-radius:9px;background:#fff}
+.care-decision-cell:first-child{background:#f0f7f3}
+.care-decision-cell dt{margin:0;color:#52665c;font-size:13px;line-height:1.4;font-weight:500}
+.care-decision-cell dd{margin:3px 0 0;color:#234d40;font-size:18px;line-height:1.4;font-weight:750;overflow-wrap:anywhere}
+.care-decision-cell .care-decision-context{display:block;margin-top:2px;color:#52665c;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.care-decision-note{margin:5px 0 0;color:#607168;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+@media(max-width:380px){.care-decision-cell{padding:7px 6px}.care-decision-grid{gap:4px}.care-decision-cell dd{font-size:17px}}
+/** SOFTM-DECISION-SUMMARY END */

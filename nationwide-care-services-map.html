@@ -97,7 +97,12 @@
 <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
 <!-- SOFTM-LIST-ACTIONS 날짜:20260913 : 목록 동작의 균일한 크기와 선택 상태를 이전 캐시 없이 적용 -->
 <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
-<link rel="stylesheet" href="care-detail-layout.css?v=20260917-map-space1"><script src="care-detail-layout.js?v=20260917-map-space1"></script><!-- SOFTM-DETAIL-RESIZE 날짜:20260917 : 지도를 넓힌 기본 상세 높이와 크기 전환을 이전 캐시 없이 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 통합 지도 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
+<!-- SOFTM-POPUP-CONTEXT START 날짜:20260924 : 유형별 판단 요약과 팝업 방향에 맞는 마커 위치를 두 지도에 공용 적용 -->
+<link rel="stylesheet" href="care-decision-summary.css?v=20260924-1">
+<script src="care-decision-summary.js?v=20260924-1"></script>
+<script src="care-popup-geometry.js?v=20260924-1"></script>
+<!-- SOFTM-POPUP-CONTEXT END -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20260924-context1"><script src="care-detail-layout.js?v=20260924-context1"></script><!-- SOFTM-DETAIL-RESIZE 날짜:20260917 : 지도를 넓힌 기본 상세 높이와 크기 전환을 이전 캐시 없이 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 통합 지도 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT END -->
 <link rel="stylesheet" href="mobile-map-clean.css?v=20260914-sheet-focus1"> <!-- SOFTM-MOBILE-SHEET-FOCUS 날짜:20260914 : 검색창과 작업 탭을 접는 지도 집중 화면을 이전 캐시 없이 적용 -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
@@ -179,7 +184,7 @@
 <!-- SOFTM-MAP-WORDING END -->
  </section>
 </main>
-<section class="detail-sheet" id="detailSheet" hidden aria-live="polite"><div class="detail-head care-compact-head"><small id="detailRegion"></small><h3 id="detailName"></h3><!-- SOFTM-POPUP-COMPOSITION 날짜:20260911 : 비교 행동을 제목 맥락 안에 두고 탭과 본문을 연속해서 표시 --><div class="care-popup-basket-action" id="detailBasketAction"></div><!-- SOFTM-DETAIL-NAV 날짜:20260917 : 본문 스크롤과 무관하게 기관 이동 버튼을 제공 --><button class="detail-close" id="detailClose" aria-label="상세 닫기">×</button></div><div class="detail-body" id="detailBody"></div><footer class="care-detail-footer" id="detailNavigation"></footer></section><!-- SOFTM-INFO-SHEET 날짜:20260917 : 기관 이동을 본문과 분리한 하단 탐색으로 유지 -->
+<section class="detail-sheet" id="detailSheet" hidden aria-live="polite"><div class="detail-head care-compact-head"><small id="detailRegion"></small><h3 id="detailName"></h3><div id="detailDecision"></div><!-- SOFTM-DECISION-SUMMARY 날짜:20260924 : 긴 본문 전에 유형별 판단 근거를 기관명과 함께 표시 --><!-- SOFTM-POPUP-COMPOSITION 날짜:20260911 : 비교 행동을 제목 맥락 안에 두고 탭과 본문을 연속해서 표시 --><div class="care-popup-basket-action" id="detailBasketAction"></div><!-- SOFTM-DETAIL-NAV 날짜:20260917 : 본문 스크롤과 무관하게 기관 이동 버튼을 제공 --><button class="detail-close" id="detailClose" aria-label="상세 닫기">×</button></div><div class="detail-body" id="detailBody"></div><footer class="care-detail-footer" id="detailNavigation"></footer></section><!-- SOFTM-INFO-SHEET 날짜:20260917 : 기관 이동을 본문과 분리한 하단 탐색으로 유지 -->
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급·비교 선택을 혼동하지 않도록 표현 -->
 <section class="compare-modal" id="compareLayer" hidden><div class="compare-dialog" role="dialog" aria-modal="true" aria-labelledby="compareTitle"><header class="compare-head"><h2 id="compareTitle">선택센터 비교표 <span class="compare-count" id="compareCount">0곳</span></h2><div class="compare-actions"><button type="button" class="excel-btn" id="compareExcel">엑셀 다운로드</button><button type="button" class="compare-close" id="compareClose" aria-label="비교표 닫기">×</button></div></header><div class="compare-scroll"><div id="compareBody"></div></div><p class="compare-foot">컬럼 제목을 누르면 해당 값으로 오름차순·내림차순 정렬됩니다. 기관 평가점수·등급은 국민건강보험공단 평가 연결 자료이며 미평가 기관은 마지막에 표시됩니다.</p></div></section>
 <!-- SOFTM-MAP-WORDING END -->
@@ -505,9 +510,15 @@ function fitSelectedMarkers(){
 }
 function toggleCenter(id,on){on?selected.add(id):selected.delete(id);const marker=markers.get(id);if(marker)marker.setMap(on?map:null);renderList();fitSelectedMarkers()}
 /** SOFTM-MARKER-SELECTION-FIT END */
-function focusMapCenter(marker){const pos=marker.getPosition(),bounds=map.getBounds(),ne=bounds.getNE(),sw=bounds.getSW(),mapRect=$('naverMap').getBoundingClientRect(),sheetRect=$('detailSheet').getBoundingClientRect(),navBottom=document.querySelector('.category-nav')?.getBoundingClientRect().bottom||0,visibleTop=Math.max(mapRect.top+38,navBottom+18),visibleBottom=Math.min(mapRect.bottom-38,sheetRect.top-34),targetY=visibleBottom>visibleTop+54?(visibleTop+visibleBottom)/2:Math.max(mapRect.top+46,Math.min(mapRect.bottom-46,sheetRect.top-64)),visibleRatio=Math.max(.07,Math.min(.43,(targetY-mapRect.top)/Math.max(1,mapRect.height))),latSpan=Math.abs(ne.lat()-sw.lat());return new window.naver.maps.LatLng(pos.lat()-latSpan*(0.5-visibleRatio),pos.lng())}
+/** SOFTM-POPUP-CONTEXT START 날짜:20260924 : 세로 시트·가로와 PC 측면 패널을 피한 실제 지도 영역에 선택 기관을 표시 */
+function focusMapCenter(marker){
+ const pos=marker.getPosition(),bounds=map.getBounds(),ne=bounds.getNE(),sw=bounds.getSW();
+ const center=CarePopupGeometry.focusCenter({lat:pos.lat(),lng:pos.lng()},{north:ne.lat(),south:sw.lat(),east:ne.lng(),west:sw.lng()},$('naverMap').getBoundingClientRect(),$('detailSheet').getBoundingClientRect());
+ return new window.naver.maps.LatLng(center.lat,center.lng);
+}
+/** SOFTM-POPUP-CONTEXT END */
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 모바일 상세를 닫을 때 이전 목록과 스크롤로 복귀 */
-function focusCenter(id){preserveCareSelectionResults();/* SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 기관 확인 이동은 현재 결과와 순번 유지 */if(CareMapExperience.isBasketMap()&&!CareMapExperience.contains(id))CareMapExperience.exitBasketMap();/* SOFTM-BASKET-MAP 날짜:20260904 : 검색 목록의 다른 기관을 열면 원래 검색 지도로 복귀 */const c=DATA.find(x=>x.i===id);if(!c)return;CareMapExperience.beginDetail(mapReady&&markers.has(id),id);/* SOFTM-MARKER-PERSIST 날짜:20260915 : 상세 복귀에도 클릭한 기관 선택을 유지 */clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);restoreBlinkedMarker();$('detailSheet').hidden=true;$('detailSheet').style.visibility='';activeDetail=null;/* SOFTM-SELECTED-MARKER 날짜:20260914 : 목록과 마커 클릭에 동일한 선택 확대 적용 */focusMobileRow(id,false,true);if(!mapReady){openDetail(c);return}const marker=markers.get(id);if(!marker){toast('현재 지도영역에 표시된 마커가 없어 상세정보만 표시했습니다.');openDetail(c);return}if(!CareMapExperience.isBasketMap()&&!selected.has(id)){selected.add(id);marker.setMap(map);renderList()}clearTimeout(refreshTimer);skipIdleUntil=Date.now()+7000;if(window.innerWidth<=1000)document.querySelector('.map-card')?.scrollIntoView({behavior:'instant',block:'start'});openDetail(c,false);setStatus('선택 기관으로 이동 중',`${c.n} · 팝업에 가리지 않는 위치로 이동합니다.`);detailMoveTimer=setTimeout(()=>{if(markers.get(id)!==marker)return;map.panTo(focusMapCenter(marker));detailMoveTimer=setTimeout(()=>{detailMoveTimer=null;if(markers.get(id)!==marker)return;setStatus('선택 기관 확인 중',`${c.n} · 마커 강조 후 상세정보를 엽니다.`);blinkMarker(c,marker,()=>{if(markers.get(id)!==marker)return;$('detailSheet').style.visibility='';setStatus('선택 기관 상세',`${c.n} · 팝업을 닫아도 현재 지도 위치를 유지합니다.`)})},160)},0)} // SOFTM-MARKER-QUICK 날짜:20260916 : 모바일 스크롤 대기를 없애고 이동·강조 뒤 약 0.42초에 상세를 표시하며 위치 유지
+function focusCenter(id){preserveCareSelectionResults();/* SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 기관 확인 이동은 현재 결과와 순번 유지 */if(CareMapExperience.isBasketMap()&&!CareMapExperience.contains(id))CareMapExperience.exitBasketMap();/* SOFTM-BASKET-MAP 날짜:20260904 : 검색 목록의 다른 기관을 열면 원래 검색 지도로 복귀 */const c=DATA.find(x=>x.i===id);if(!c)return;CareMapExperience.beginDetail(mapReady&&markers.has(id),id);/* SOFTM-MARKER-PERSIST 날짜:20260915 : 상세 복귀에도 클릭한 기관 선택을 유지 */clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);restoreBlinkedMarker();$('detailSheet').hidden=true;$('detailSheet').style.visibility='';activeDetail=null;/* SOFTM-SELECTED-MARKER 날짜:20260914 : 목록과 마커 클릭에 동일한 선택 확대 적용 */focusMobileRow(id,false,true);if(!mapReady){openDetail(c);CareDetailLayout.focus($('detailSheet'));return}const marker=markers.get(id);if(!marker){toast('현재 지도영역에 표시된 마커가 없어 상세정보만 표시했습니다.');openDetail(c);CareDetailLayout.focus($('detailSheet'));return}if(!CareMapExperience.isBasketMap()&&!selected.has(id)){selected.add(id);marker.setMap(map);renderList()}clearTimeout(refreshTimer);skipIdleUntil=Date.now()+7000;if(window.innerWidth<=1000)document.querySelector('.map-card')?.scrollIntoView({behavior:'instant',block:'start'});openDetail(c,false);setStatus('선택 기관으로 이동 중',`${c.n} · 팝업에 가리지 않는 위치로 이동합니다.`);detailMoveTimer=setTimeout(()=>{if(markers.get(id)!==marker)return;map.panTo(focusMapCenter(marker));detailMoveTimer=setTimeout(()=>{detailMoveTimer=null;if(markers.get(id)!==marker)return;setStatus('선택 기관 확인 중',`${c.n} · 마커 강조 후 상세정보를 엽니다.`);blinkMarker(c,marker,()=>{if(markers.get(id)!==marker)return;$('detailSheet').style.visibility='';CareDetailLayout.focus($('detailSheet'));setStatus('선택 기관 상세',`${c.n} · 팝업을 닫아도 현재 지도 위치를 유지합니다.`)})},160)},0)} // SOFTM-POPUP-CONTEXT 날짜:20260924 : 기존 강조 대기 뒤 상세 조작으로 포커스를 옮기고 측면 패널의 가림을 피함
 /** SOFTM-MAP-EXPERIENCE END */
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 위치 확인부터 화면 반영까지 같은 요청으로 묶어 진행과 완료 건수를 전달 */
 /** SOFTM-MARKER-CLEAR-YIELD START 날짜:20260916 : 조건 변경 때 기존 수천 마커 제거도 분할하며 이전 마커 정리가 새 조회의 마커를 건드리지 않도록 분리 */
@@ -822,20 +833,22 @@ function switchDetailView(c,view){
  const basic=$('detailBasic'),details=$('detailOfficial');
  if(basic)basic.hidden=official;
  if(details)details.hidden=!official;
- $('detailBody').scrollTo({top:0,behavior:'instant'});
+ CareDetailLayout.scroller($('detailBody')).scrollTo({top:$('detailBody').offsetTop,behavior:'instant'}); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 탭 변경은 선택한 정보 시작으로 이동하고 긴 제목을 다시 읽게 하지 않음
  if(official&&CONFIG.source==='nhis')void loadOfficialTab(c,officialActiveTab||11);
 }
 /** SOFTM-POPUP-TOP END */
 function mainStaffCount(c){return['s','rn','na','pt','ot','cw'].reduce((sum,key)=>sum+(Number(c[key])||0),0)}
 function operationPeriod(value){if(!value)return'미확인';const start=new Date(`${String(value).slice(0,10)}T00:00:00`);if(Number.isNaN(start.getTime()))return'미확인';const today=new Date(),months=Math.max(0,(today.getFullYear()-start.getFullYear())*12+today.getMonth()-start.getMonth()-(today.getDate()<start.getDate()?1:0)),years=Math.floor(months/12),remain=months%12;return years?`${years}년${remain?` ${remain}개월`:''}`:`${Math.max(1,remain)}개월`}
 function openDetail(c,reveal=true){
+ CareDetailLayout.beginInstitution($('detailSheet')); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 다음 기관은 기존 창 크기에서 핵심 정보부터 확인
  $('detailNavigation').innerHTML=CareDetailLayout.navigation(c,CareMapExperience.isBasketMap()?CareMapExperience.rows():areaRows,focusCenter); // SOFTM-DETAIL-NAV 날짜:20260917 : 검색 정렬 또는 담은 순서로 이웃 기관을 선택
  activeDetail=c;officialDetailToken++;basicInfoToken++;officialActiveTab=11;
  $('detailRegion').textContent=`${c.p} ${c.c} · ${c.tn||CONFIG.label}`;$('detailName').textContent=c.n;
+ $('detailDecision').innerHTML=CareDecisionSummary.render(c,TYPE); // SOFTM-DECISION-SUMMARY 날짜:20260924 : 평가연도와 유형별 정원·인력의 근거를 우선 표시
  const distance=Number.isFinite(c._distance)?c._distance.toFixed(1)+'km':'—',officialLabel=CONFIG.source==='hira'?'심평원 정보':'공단 원문',staff=mainStaffCount(c),capacity=Number(c.z)||0,staffRatio=!c.staffMissing&&capacity&&staff?`${(capacity/staff).toFixed(1)}명당 1명`:'—',evaluation=c.g?`${esc(c.et||CONFIG.label)} · ${c.ey||'-'}년 · ${esc(c.ed||'-')}`:CONFIG.source==='hira'?'장기요양기관 공단평가 대상과 다른 의료기관 자료입니다.':'공식 세부평가 미연결'; // SOFTM-DATA-UNIFIED 날짜:20260904 : 일부 인력 미수집일 때 정원 대비 비율을 확정값으로 계산하지 않음
  const live=CONFIG.source==='nhis'?`<section class="basic-live-card"><div id="basicLive"><div class="basic-live-loading">전화번호와 운영정보를 확인하고 있습니다.</div></div></section>`:''; // SOFTM-DETAIL-LAYOUT 날짜:20260911 : 위치·연락처 공통 제목 아래에 연락 필드만 배치
  /** SOFTM-EQUIPMENT-VIEW START 날짜:20260904 : 사업소에 해당하지 않는 정원·돌봄인력을 0명으로 오해하지 않도록 기본정보에서 제외 */
- let basic=`<div class="detail-metrics"><div class="metric"><span>공식평가</span><b>${esc(gradeText(c))}</b></div><div class="metric"><span>평가총점</span><b>${scoreText(c)}${Number.isFinite(c.es)?'점':''}</b></div><div class="metric"><span>기준지 거리</span><b>${distance}</b></div><div class="metric"><span>정원</span><b>${capacity?`${capacity}명`:'미공개'}</b></div><div class="metric"><span>주요 돌봄인력</span><b>${staff}명</b></div><div class="metric"><span>정원 대비 인력</span><b>${staffRatio}</b></div></div>${live}<div class="detail-line"><strong>주소</strong><span>${esc(c.a)}</span></div><div class="detail-line"><strong>이용정보</strong><span>${esc(c.tn||CONFIG.label)}${capacity?` · 정원 ${capacity}명`:''}<br>${CONFIG.source==='hira'?'개설':'지정'} 후 ${operationPeriod(c.d)} 운영</span></div><div class="detail-line"><strong>기관정보</strong><span>${CONFIG.source==='hira'?'암호화 요양기호':'기관기호'} ${esc(c.i)} · ${CONFIG.source==='hira'?'개설':'지정'} ${esc(c.d||'미확인')}</span></div><div class="detail-line"><strong>평가정보</strong><span>${evaluation}<br>${esc(confidenceText(c))}</span></div><div class="detail-line"><strong>인력구성</strong><span>사회복지사 ${c.s||0} · 간호사 ${c.rn||0} · 간호조무사 ${c.na||0}<br>물리치료사 ${c.pt||0} · 작업치료사 ${c.ot||0} · 요양보호사 ${c.cw||0}</span></div><div class="detail-links"><button class="copy" id="copyName">목적지명 복사</button><button class="copy" id="copyAddress">주소 복사</button><a class="naver" href="${naverUrl(c)}" target="_blank" rel="noopener">네이버</a><a class="kakao" href="${kakaoUrl(c)}" target="_blank" rel="noopener">카카오</a><a class="official" href="${officialUrl(c)}" target="_blank" rel="noopener">${officialLabel}</a></div>`;
+ let basic=`<div class="detail-metrics"><div class="metric"><span>공식평가</span><b>${esc(gradeText(c))}</b></div><div class="metric"><span>평가총점</span><b>${scoreText(c)}${Number.isFinite(c.es)?'점':''}</b></div><div class="metric"><span>기준지 거리</span><b>${distance}</b></div><div class="metric"><span>정원</span><b>${capacity?`${capacity}명`:'미공개'}</b></div><div class="metric"><span>주요 돌봄인력</span><b>${staff}명</b></div><div class="metric"><span>정원 대비 인력</span><b>${staffRatio}</b></div></div>${live}<div class="detail-line"><strong>주소</strong><span>${esc(c.a)}</span></div><div class="detail-line"><strong>이용정보</strong><span>${esc(c.tn||CONFIG.label)}${capacity?` · 정원 ${capacity}명`:''}<br>${CONFIG.source==='hira'?'개설일':'지정일'} ${esc(c.d||'미확인')}</span></div><div class="detail-line"><strong>기관정보</strong><span>${CONFIG.source==='hira'?'암호화 요양기호':'기관기호'} ${esc(c.i)} · ${CONFIG.source==='hira'?'개설':'지정'} ${esc(c.d||'미확인')}</span></div><div class="detail-line"><strong>평가정보</strong><span>${evaluation}<br>${esc(confidenceText(c))}</span></div><div class="detail-line"><strong>인력구성</strong><span>사회복지사 ${CareDecisionSummary.staffText(c,'s')} · 간호사 ${CareDecisionSummary.staffText(c,'rn')} · 간호조무사 ${CareDecisionSummary.staffText(c,'na')}<br>물리치료사 ${CareDecisionSummary.staffText(c,'pt')} · 작업치료사 ${CareDecisionSummary.staffText(c,'ot')} · 요양보호사 ${CareDecisionSummary.staffText(c,'cw')}</span></div><div class="detail-links"><button class="copy" id="copyName">목적지명 복사</button><button class="copy" id="copyAddress">주소 복사</button><a class="naver" href="${naverUrl(c)}" target="_blank" rel="noopener">네이버</a><a class="kakao" href="${kakaoUrl(c)}" target="_blank" rel="noopener">카카오</a><a class="official" href="${officialUrl(c)}" target="_blank" rel="noopener">${officialLabel}</a></div>`;
  /** SOFTM-DATA-UNIFIED START 날짜:20260904 : 수집되지 않은 급여 인력을 0명이나 완전한 합계로 오인하지 않도록 표시 */
  if(c.staffMissing)basic=basic.replace(`${staff}명</b>`,`${staff?staff+'명 확인':'미확인'}</b>`).replace('<strong>인력구성</strong>', '<strong>인력구성</strong><small>일부 급여 미확인 · 확인된 인력만 표시</small>');
  /** SOFTM-DATA-UNIFIED END */
@@ -844,19 +857,26 @@ function openDetail(c,reveal=true){
   basic=basic.replace(/<div class="detail-line"><strong>인력구성<\/strong>[\s\S]*?<\/div>/,'');
  }
  /** SOFTM-EQUIPMENT-VIEW END */
+ /** SOFTM-POPUP-EVIDENCE START 날짜:20260924 : 병원 자료를 공단 평가나 미수집 인력 0명으로 오인하지 않도록 본문도 출처에 맞춤 */
+ if(CONFIG.source==='hira'){
+  basic=basic.replace(/<div class="metric"><span>(?:공식평가|평가총점|정원|주요 돌봄인력|정원 대비 인력)<\/span>[\s\S]*?<\/div>/g,'');
+  basic=basic.replace(/<div class="detail-line"><strong>인력구성<\/strong>[\s\S]*?<\/div>/,'');
+ }
+ /** SOFTM-POPUP-EVIDENCE END */
+
  /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 기관의 기본정보에서 같은 조건으로 비용을 가늠하고 비교에 담도록 연결 */
  const addressBlock=`<div class="detail-line"><strong>주소</strong><span>${esc(c.a)}</span></div>`;
  const evaluationBlock=`<div class="detail-line"><strong>평가정보</strong><span>${evaluation}<br>${esc(confidenceText(c))}</span></div>`;
  basic=basic.replace(addressBlock,'').replace(evaluationBlock,'').replace(live,'');
- /** SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소·연락과 평가 요약을 각각 같은 표면에 묶어 정보가 흩어져 보이지 않게 함 */
+ /** SOFTM-DETAIL-LAYOUT START 날짜:20260924 : 주소·연락과 평가를 묶고 공단 평가 대상이 아닌 병원에는 평가 미확인을 표시하지 않음 */
  const metricEnd=basic.indexOf('<div class="detail-line">'),metrics=basic.slice(0,metricEnd);
  basic=basic.slice(metricEnd);
- basic=`<section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c),TYPE)}${live}</section><section class="care-detail-group"><h3>${CONFIG.source==='hira'?'기관 현황':'공단 평가·기관 현황'}</h3>${metrics}${evaluationBlock}</section><section class="care-detail-group"><h3>이용·기관 정보</h3>${basic}</section>${CareMapExperience.costCard(c,TYPE)}`;
+ basic=`<section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c),TYPE)}${live}</section><section class="care-detail-group"><h3>${CONFIG.source==='hira'?'기관 현황':'공단 평가·기관 현황'}</h3>${metrics}${CONFIG.source==='hira'?'':evaluationBlock}</section><section class="care-detail-group"><h3>이용·기관 정보</h3>${basic}</section>${CareMapExperience.costCard(c,TYPE)}`;
  /** SOFTM-DETAIL-LAYOUT END */
  $('detailBasketAction').innerHTML=CareMapExperience.button(c)+`<button type="button" class="care-popup-saved" data-popup-saved>담은 기관 <span data-popup-saved-count>${CareMapExperience.rows().length}</span> →</button>`; // SOFTM-POPUP-SAVED 날짜:20260917 : 팝업 안에서 담은 목록으로 바로 이동 // SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공
  /** SOFTM-MAP-EXPERIENCE END */
  $('detailBody').innerHTML=CONFIG.source==='nhis'?`<div class="detail-main-tabs" role="tablist" aria-label="기관 정보 구분"><button type="button" class="detail-main-tab active" data-detail-view="basic" role="tab" aria-selected="true">기본정보</button><button type="button" class="detail-main-tab" data-detail-view="official" role="tab" aria-selected="false">상세정보</button></div><section class="detail-view" id="detailBasic" role="tabpanel">${basic}</section><section class="detail-view detail-view-official" id="detailOfficial" role="tabpanel" hidden>${officialTabsHtml()}</section>`:`<section class="detail-view">${basic}</section>`;
- $('detailSheet').style.visibility=reveal?'':'hidden';$('detailSheet').hidden=false;$('copyName').onclick=()=>copy(c.n,'목적지명을 복사했습니다.');$('copyAddress').onclick=()=>copy(c.a,'주소를 복사했습니다.');document.querySelectorAll('[data-detail-view]').forEach(button=>button.onclick=()=>switchDetailView(c,button.dataset.detailView));document.querySelectorAll('[data-official-tab]').forEach(button=>button.onclick=()=>loadOfficialTab(c,Number(button.dataset.officialTab)));if(CONFIG.source==='nhis')void loadBasicInfo(c)
+ $('detailSheet').style.visibility=reveal?'':'hidden';$('detailSheet').hidden=false;CareDetailLayout.beginInstitution($('detailSheet'));$('copyName').onclick=()=>copy(c.n,'목적지명을 복사했습니다.');$('copyAddress').onclick=()=>copy(c.a,'주소를 복사했습니다.');document.querySelectorAll('[data-detail-view]').forEach(button=>button.onclick=()=>switchDetailView(c,button.dataset.detailView));document.querySelectorAll('[data-official-tab]').forEach(button=>button.onclick=()=>loadOfficialTab(c,Number(button.dataset.officialTab)));if(CONFIG.source==='nhis')void loadBasicInfo(c)
 }
 /** SOFTM-DETAIL-MAP-PERSIST START 날짜:20260914 : 상세 종료 시 화면 단계와 포커스만 복원하고 지도 위치는 현재 상태로 유지 */
 function closeDetail(finishView=true){
@@ -864,7 +884,7 @@ function closeDetail(finishView=true){
  clearTimeout(detailMoveTimer);detailMoveTimer=null;
  clearTimeout(markerBlinkTimer);markerBlinkTimer=null;restoreBlinkedMarker();
  $('detailSheet').hidden=true;$('detailSheet').style.visibility='';activeDetail=null;
- if(finishView)CareMapExperience.finishDetail();
+ if(finishView){CareDetailLayout.reset($('detailSheet'));CareMapExperience.finishDetail();} // SOFTM-POPUP-CONTEXT 날짜:20260924 : 이전·다음 전환에는 크기를 유지하고 실제 닫기에서만 기본 상태 복원
 }
 /** SOFTM-DETAIL-MAP-PERSIST END */
 function nearestRoute(rows,start){const left=[...rows],order=[],points=[];let current=start;while(left.length){let best=0,bestD=Infinity;left.forEach((c,i)=>{const p=cachedCoord(c),d=p?hav(current,p):Infinity;if(d<bestD){bestD=d;best=i}});const c=left.splice(best,1)[0];order.push(c);current=cachedCoord(c)}return order}
@@ -1010,7 +1030,7 @@ function updateDetailFromScroll(id){
  if(!activeDetail||activeDetail.i===id)return; // SOFTM-SAVED-SCROLL 날짜:20260910 : 담은 목록도 열린 상세만 현재 기관으로 교체
  const c=DATA.find(row=>row.i===id);if(!c)return;
  clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);restoreBlinkedMarker();
- openDetail(c);$('detailBody').scrollTop=0;
+ openDetail(c);CareDetailLayout.scroller($('detailBody')).scrollTop=0; // SOFTM-POPUP-CONTEXT 날짜:20260924 : 목록 연속 선택에서도 핵심 정보 시작으로 이동
  focusMobileRow(id,false,true);
  const marker=markers.get(id);if(marker&&marker.getMap()){preserveCareSelectionResults();clearTimeout(refreshTimer);skipIdleUntil=Date.now()+1800;map.panTo(focusMapCenter(marker));}
 }

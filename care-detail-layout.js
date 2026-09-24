@@ -93,7 +93,7 @@
             }
         }
     });
-    /** SOFTM-DETAIL-NAV START 날짜:20260917 : 목록 순서를 유지하며 팝업 안에서 이웃 기관을 확인하도록 공용 이동을 제공 */
+    /** SOFTM-DETAIL-NAV START 날짜:20260924 : 기관 이동을 유지하면서 첫 화면 아래에 판단 자료가 더 있음을 안내 */
     let detailNavigation = null;
     function navigation(c, rows, open) {
         const index = rows.findIndex(row => row.i === c.i);
@@ -102,7 +102,7 @@
             const target = detailNavigation[direction];
             return `<button type="button" data-care-detail-step="${direction}" aria-label="${label}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${direction === 'previous' ? '‹ 이전' : '다음 ›'}</button>`; // SOFTM-POPUP-COMPACT 날짜:20260917 : 기관 이동은 접근성 이름을 유지한 짧은 화살표로 표시
         };
-        return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}</span>${button('next', '다음 기관 →')}</nav>`;
+        return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}<small class="care-detail-scroll-hint">정보 더 보기 · 스크롤 ↓</small></span>${button('next', '다음 기관 →')}</nav>`;
     }
     document.addEventListener('click', event => {
         const button = event.target.closest('[data-care-detail-step]');
@@ -114,38 +114,112 @@
         if (target) state.open(target.i);
     }, true);
     /** SOFTM-DETAIL-NAV END */
-    /** SOFTM-DETAIL-RESIZE START 날짜:20260917 : 지도를 가리지 않는 기본 높이와 정보 집중 보기를 DOM 재생성 없이 전환 */
+    /** SOFTM-POPUP-CONTEXT START 날짜:20260924 : 화면 크기와 무관하게 닫기·탭을 찾고 긴 제목 아래 판단 정보를 이어서 읽도록 구성 */
+    const sheets = new Map();
+    function scroller(node) {
+        return node?.closest('.care-detail-scroll') || node?.querySelector('.care-detail-scroll') || node;
+    }
+    function refresh(sheet) {
+        const state = sheets.get(sheet);
+        if (!state) return;
+        const host = sheet.id === 'detailSheet' ? sheet : sheet.querySelector('.popup');
+        if (!host || host.querySelector('.care-detail-scroll')) return;
+        const head = host.querySelector('.care-compact-head');
+        const body = host.querySelector('.detail-body,.popup-body');
+        if (!head || !body) return;
+        const scroll = document.createElement('div');
+        scroll.className = 'care-detail-scroll';
+        host.insertBefore(scroll, head);
+        scroll.append(head, body);
+        state.savedScroll = null;
+        sheet.dataset.detailAtTop = 'true';
+        const title = head.querySelector('h3');
+        if (title) {
+            if (!title.id) title.id = 'careDaycareDetailName';
+            sheet.setAttribute('aria-labelledby', title.id);
+        }
+        scroll.addEventListener('scroll', () => {
+            const pastTitle = scroll.scrollTop > head.offsetHeight;
+            state.label.textContent = pastTitle ? title?.textContent || '핵심 정보' : '핵심 정보';
+            sheet.dataset.detailAtTop = String(scroll.scrollTop < 12);
+            state.label.title = title?.textContent || '기관 정보';
+        }, { passive: true });
+        for (const name of ['wheel', 'touchstart', 'pointerdown', 'keydown']) scroll.addEventListener(name, () => { state.savedScroll = null; }, { passive: true });
+    }
+    function beginInstitution(sheet) {
+        const state = sheets.get(sheet);
+        if (!state) return;
+        state.savedScroll = null;
+        sheet.dataset.detailAtTop = 'true';
+        if (scroller(sheet)) scroller(sheet).scrollTop = 0;
+        state.label.textContent = '핵심 정보';
+    }
+    function reset(sheet) {
+        beginInstitution(sheet);
+        sheets.get(sheet)?.setExpanded(false);
+    }
+    function focus(sheet) {
+        const state = sheets.get(sheet);
+        if (state && !document.querySelector('dialog[open]')) state.close.focus({ preventScroll: true });
+    }
     function installDetailResize() {
-        for (const [selector, visibilitySelector, contentId] of [
-            ['#detailSheet', '#detailSheet', 'detailBody'],
-            ['.mobile-popup-sheet', '#mobilePopupLayer', 'mobilePopupContent']
+        for (const [selector, closeSelector, contentId] of [
+            ['#detailSheet', '#detailClose', 'detailBody'],
+            ['.mobile-popup-sheet', '#mobilePopupDismiss', 'mobilePopupContent']
         ]) {
             const sheet = document.querySelector(selector);
-            const visibility = document.querySelector(visibilitySelector);
-            if (!sheet || !visibility) continue;
+            const close = document.querySelector(closeSelector);
+            if (!sheet || !close) continue;
+            const bar = document.createElement('div');
+            bar.className = 'care-detail-toolbar';
+            bar.setAttribute('role', 'group');
+            bar.setAttribute('aria-label', '기관 상세 화면 조작');
+            const label = document.createElement('span');
+            label.className = 'care-detail-context';
+            label.textContent = '핵심 정보';
             const toggle = document.createElement('button');
             toggle.type = 'button';
             toggle.className = 'care-detail-resize';
             toggle.setAttribute('aria-controls', contentId);
-            const setExpanded = expanded => {
+            const state = { label, close, savedScroll: null, setExpanded(expanded) {
                 sheet.dataset.detailExpanded = String(expanded);
                 toggle.setAttribute('aria-expanded', String(expanded));
-                toggle.textContent = expanded ? '⌄ 지도 넓게' : '⌃ 상세 크게';
-            };
+                toggle.textContent = expanded ? '지도 넓게' : '상세 크게';
+            } };
+            sheets.set(sheet, state);
             toggle.addEventListener('click', event => {
                 event.stopPropagation();
-                setExpanded(sheet.dataset.detailExpanded !== 'true');
+                const scroll = scroller(sheet);
+                const expanded = sheet.dataset.detailExpanded !== 'true';
+                const before = scroll?.scrollTop || 0;
+                if (expanded) state.savedScroll = before;
+                state.setExpanded(expanded);
+                if (scroll) scroll.scrollTop = expanded ? before : state.savedScroll ?? before;
+                if (!expanded) state.savedScroll = null;
             });
-            sheet.prepend(toggle);
-            setExpanded(false);
-            new MutationObserver(() => {
-                if (visibility.hidden) setExpanded(false);
-            }).observe(visibility, { attributes: true, attributeFilter: ['hidden'] });
+            bar.append(label, toggle, close);
+            sheet.prepend(bar);
+            sheet.setAttribute('role', 'dialog');
+            sheet.setAttribute('aria-modal', 'false');
+            state.setExpanded(false);
+            refresh(sheet);
+            if (sheet.id !== 'detailSheet') new MutationObserver(() => refresh(sheet)).observe(document.getElementById(contentId), { childList: true });
         }
     }
+    document.addEventListener('keydown', event => {
+        if (event.defaultPrevented || document.querySelector('dialog[open]')) return;
+        const tab = event.target.closest('[data-detail-view],[data-daycare-tab]');
+        if (!tab || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        const tabs = [...tab.parentElement.querySelectorAll('button')];
+        const index = tabs.indexOf(tab);
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        event.preventDefault();
+        tabs[next].click();
+        tabs[next].focus({ preventScroll: true });
+    });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installDetailResize, { once: true });
     else installDetailResize();
-    /** SOFTM-DETAIL-RESIZE END */
-    window.CareDetailLayout = {navigation, address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-LIST-NAVIGATION 날짜:20260911 : 두 지도 목록에서 같은 길안내 버튼 생성기를 공유
+    /** SOFTM-POPUP-CONTEXT END */
+    window.CareDetailLayout = {scroller, refresh, reset, focus, beginInstitution, navigation, address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-POPUP-CONTEXT 날짜:20260924 : 두 지도에서 상세 조작·스크롤·복귀를 같은 경로로 처리
 })();
 /** SOFTM-DETAIL-LAYOUT END */
