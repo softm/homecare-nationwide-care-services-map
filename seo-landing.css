@@ -26,6 +26,11 @@ a:focus-visible { outline: 3px solid var(--blue); outline-offset: 5px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; font-size: 1.5rem; font-weight: 750; letter-spacing: -.05em; text-decoration: none; }
 .home-link { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; color: var(--muted); font-size: 1rem; text-decoration: none; }
 .home-link:hover { color: var(--blue); text-decoration: underline; }
+/* SOFTM-STATIC-HEADER START 날짜:20260924 : 지도 밖 안내 화면에서 실제 기관 검색과 서비스 배경을 같은 두 경로로 제공 */
+.site-head-nav { display: flex; align-items: center; gap: 22px; }
+.site-head-nav a { display: inline-flex; align-items: center; min-height: 48px; color: var(--muted); font-size: 1rem; text-decoration: none; }
+.site-head-nav a:hover { color: var(--blue); text-decoration: underline; }
+/* SOFTM-STATIC-HEADER END */
 .search-intro { background: var(--care-bg, #f7f8f5); border-bottom: 1px solid var(--line); }
 .breadcrumb { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding-top: 22px; color: var(--muted); font-size: .875rem; }
 .breadcrumb a { display: inline-flex; align-items: center; min-height: 48px; }
@@ -85,6 +90,8 @@ footer span { display: inline-block; margin-left: 14px; color: var(--muted); fon
   .site-head-inner { min-height: 64px; }
   .brand { font-size: 1.3125rem; }
   .home-link { gap: 8px; font-size: .875rem; }
+  .site-head-nav { gap: 14px; }
+  .site-head-nav a { font-size: .875rem; }
   .breadcrumb { padding-top: 14px; }
   .intro-grid { grid-template-columns: 1fr; gap: 24px; padding: 20px 0 24px; }
   h1 { font-size: 2rem; }
