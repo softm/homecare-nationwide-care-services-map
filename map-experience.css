@@ -861,6 +861,17 @@ dialog.care-location-notice .care-location-actions button { width:100%; }
 }
 /** SOFTM-FILTER-BADGE END */
 
+/** SOFTM-MOBILE-LIST-GAPS START 날짜:20260926 : 좁은 화면의 검색 조건과 결과 제목 사이에 남는 장식 여백을 줄여 첫 기관 카드가 더 빨리 보이게 조정 */
+@media(max-width:1000px) and (orientation:portrait) {
+ .care-map-page.care-mobile-filters-open .filters { padding:6px 12px 8px; }
+ .care-map-page.care-mobile-filters-open .filters .filter-grid { gap:6px; }
+ .care-map-page.care-mobile-filters-open .care-filter-panel-head { margin-bottom:6px; padding-bottom:6px; }
+ .care-map-page[data-care-workspace="search"] .list-head { padding:6px 12px 4px; }
+ .care-map-page[data-care-workspace="search"] .select-tools { padding:4px 12px 6px; }
+ .care-map-page[data-care-workspace="search"] .care-sheet-handle { flex-basis:50px; height:50px; min-height:50px; padding-bottom:5px; }
+}
+/** SOFTM-MOBILE-LIST-GAPS END */
+
 /** SOFTM-SELECTED-PRESERVE START 날짜:20260914 : 마커의 원래 형태를 유지하고 확대와 외곽선만으로 선택 구분 */
 .care-map-page .care-mobile-active-marker{transform:scale(1.5);filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 3px #175cb5)}
 .care-map-page .care-mobile-active-marker .map-marker,.care-map-page .care-mobile-active-marker .marker-pin{outline:2px solid #fff;box-shadow:0 0 0 2px #175cb5!important}
