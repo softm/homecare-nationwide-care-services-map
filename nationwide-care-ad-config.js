@@ -14,26 +14,28 @@ window.CARE_AD_CONFIG = {
     listAfter: 6,
     listRepeat: 6
   },
+  /** SOFTM-AD-IDS START 날짜:20260925 : AdFit 관리 화면에서 확인한 통합 지도 전용 단위를 실제 노출 위치에 연결 */
   kakao: {
     script: 'https://t1.daumcdn.net/kas/static/ba.min.js',
     desktop: {
-      unit: 'DAN-2wkGTRT6hBm8AoE1',
+      unit: 'DAN-Nl4JIjiK6awUoGyC',
       width: 728,
       height: 90
     },
     mobile: {
-      unit: 'DAN-IH5HmaPdVapZYF0x',
+      unit: 'DAN-yRxnKVmJVHCCSGTw',
       width: 320,
       height: 100
     },
     listUnits: [
       {
-        unit: 'DAN-FQMjWsPJLpaM7tdG',
+        unit: 'DAN-57vDaXi3Kup3n4HQ',
         width: 320,
         height: 100
       }
     ]
   },
+  /** SOFTM-AD-IDS END */
   direct: {
     disclosure: '기관 검색순위와 공단평가에는 영향을 주지 않는 별도 광고입니다.',
     items: [
