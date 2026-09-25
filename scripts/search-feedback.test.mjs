@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const daycareHtml = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
+const daycareHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const viewportContext = vm.createContext({ window: {}, setTimeout }); // SOFTM-QUERY-YIELD 날짜:20260916 : 입력 처리 양보를 실제 타이머로 검증
 vm.runInContext(readFileSync(new URL('../viewport-regions.js', import.meta.url), 'utf8'), viewportContext);
 const mapViewportSearch = viewportContext.window.MapViewportSearch; // SOFTM-VIEWPORT-RESOLVE 날짜:20260914 : 실제 완료순 처리기를 두 지도 조회 회귀검사에서 함께 실행
@@ -162,7 +162,7 @@ test('주간 진행 표시: 이전 종료 타이머가 새로운 진행바를 �
     assert.equal(harness.elements.get('mapProgress').hidden, false);
     assert.equal(harness.elements.get('mapProgressText').textContent, '새 조회');
 });
-const careHtml = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
+const careHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 function makeCareHarness(rows) {
     const reports = [], progress = [], elements = new Map(), deferred = new Map();
     const element = id => {

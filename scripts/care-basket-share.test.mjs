@@ -7,11 +7,11 @@ const context = { URL, URLSearchParams, Set };
 vm.runInNewContext(readFileSync(new URL('../care-basket-share.js', import.meta.url), 'utf8'), context);
 const { createUrl, readLink, copyLink, shareLink } = context.CareBasketShare;
 const ids = ['24119001267', '11110000001', '24119001267'];
-const base = 'https://homecare.designboard.net/nationwide-care-services-map.html?type=daycare&q=개인검색&lat=37&lng=127&institution=old#old';
+const base = 'https://homecare.designboard.net/index.html?type=daycare&q=개인검색&lat=37&lng=127&institution=old#old';
 const plain = value => JSON.parse(JSON.stringify(value));
 test('공유는 앱이 보존하는 쿼리로 유형과 방문 순서만 전달하며 검색·좌표·과거 선택을 제외', () => {
  const url = new URL(createUrl(base, 'daycare', ids));
- assert.equal(url.pathname, '/nationwide-care-services-map.html');
+ assert.equal(url.pathname, '/index.html');
  assert.equal(url.searchParams.get('type'), 'daycare'); assert.equal(url.searchParams.has('basket'), true);
  assert.equal(url.searchParams.has('lat'), false); assert.equal(url.hash, '');
  assert.deepEqual(plain(readLink(url.href, 'daycare', new Set(ids))), { ids: ids.slice(0, 2), missing: 0, total: 2 });

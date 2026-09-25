@@ -12,7 +12,7 @@ const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '
 function fixture(t) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'regional-seo-test-'));
   t.after(() => fs.rmSync(rootDir, { recursive: true, force: true }));
-  for (const file of ['index.html', 'daycare-map.html', 'nationwide-care-services-map.html', 'regional-seo.css', 'regions/gyeonggi-daycare.html', 'regions/gyeonggi-광명시-daycare.html']) {
+  for (const file of ['index.html', 'daycare-map.html', 'index.html', 'regional-seo.css', 'regions/gyeonggi-daycare.html', 'regions/gyeonggi-광명시-daycare.html']) {
     fs.mkdirSync(path.dirname(path.join(rootDir, file)), { recursive: true });
     fs.writeFileSync(path.join(rootDir, file), 'fixture');
   }
@@ -22,7 +22,7 @@ function fixture(t) {
     { i: '001', n: '행복 & <케어> "센터"', a: "경기도 광명시 빛로 1 <2층> & '상가'", p: '경기도', c: '광명시', g: 'A', ey: 2023 },
     { i: '002', n: '새봄 주간보호센터', a: '경기도 광명시 빛로 2', p: '경기도', c: '광명시', g: null, ey: null }
   ];
-  const mapLink = row => `../nationwide-care-services-map.html?${new URLSearchParams({ type: 'daycare', p: '경기도', c: '광명시', ...(row ? { q: row.n } : {}) })}`;
+  const mapLink = row => `../index.html?${new URLSearchParams({ type: 'daycare', p: '경기도', c: '광명시', ...(row ? { q: row.n } : {}) })}`;
   const cards = rows.map(row => `<li class="institution-card" data-institution-id="${row.i}"><h3><a href="${escape(mapLink(row))}" rel="nofollow">${escape(row.n)}</a></h3><p class="institution-address">${escape(row.a)}</p><dl><dt>공단 평가등급</dt><dd data-field="g">${row.g ? row.g + '등급' : '미확인'}</dd><dt>평가연도</dt><dd data-field="ey">${row.ey ? row.ey + '년' : '미확인'}</dd></dl></li>`).join('');
   const jsonLd = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'CollectionPage', name: '광명시 주간보호센터', url: meta.url },

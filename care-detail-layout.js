@@ -41,7 +41,7 @@
     /** SOFTM-POPUP-NAVIGATION END */
     /** SOFTM-INSTITUTION-SHARE START 날짜:20260914 : 검색조건이나 사용자 위치 없이 선택한 기관 상세를 바로 여는 공개 링크만 공유 */
     function institutionUrl(c, type) {
-        return `https://homecare.designboard.net/nationwide-care-services-map.html?${new URLSearchParams({type, institution:String(c.i)})}`;
+        return `https://homecare.designboard.net/index.html?${new URLSearchParams({type, institution:String(c.i)})}`;
     }
     function shareButton(c, type) {
         return `<button type="button" class="care-popup-share" data-institution-share="${escape(institutionUrl(c,type))}" data-share-name="${escape(c.n)}" data-share-address="${escape(c.a || '')}" aria-label="${escape(c.n)} 기관 정보 공유"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.2M8.7 13.3l6.6 4.2"/></svg><span aria-live="polite">공유</span></button>`;

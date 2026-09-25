@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from build_nationwide_care_services import ROOT, CATEGORY_CODES, DEMENTIA_CODES, build_record, read_json, update_facility_head_count, update_index_counts, write_json
+from build_nationwide_care_services import ROOT, CATEGORY_CODES, DEMENTIA_CODES, build_record, read_json, update_facility_head_count, write_json
 
 
 class CareDataTest(unittest.TestCase):
@@ -19,29 +19,6 @@ class CareDataTest(unittest.TestCase):
             self.assertEqual(first_revision, second_revision)
     # /** SOFTM-DATA-GZIP END */
 
-    # /** SOFTM-HOME-COUNT-TEST START 날짜:20260907 : 치매 CSS 선택자가 요양원 카드 수를 덮는 실제 회귀와 잘못된 카드 구조를 생성 전에 차단 */
-    def test_home_counts_are_updated_inside_each_category_card(self):
-        html = '''<meta name="dcterms.modified" content="2026-09-04">
-<style>.category-link[data-category="dementia"]{color:red}</style>
-<a class="category-link" data-category="facility" href="nursing-home-map.html"><span data-count>423곳</span></a>
-<a class="category-link" data-category="dementia" href="dementia-care-map.html"><span data-count>423곳</span></a>
-<a class="category-link" data-category="daycare" href="daycare-map.html"><span data-count>5,000곳</span></a>'''
-        updated = update_index_counts(html, {"facility": {"count": 6573}, "dementia": {"count": 423}})
-        self.assertIn('data-category="facility" href="nursing-home-map.html"><span data-count>6,573곳</span>', updated)
-        self.assertIn('data-category="dementia" href="dementia-care-map.html"><span data-count>423곳</span>', updated)
-        self.assertIn('data-category="daycare" href="daycare-map.html"><span data-count>5,000곳</span>', updated)
-        self.assertIn('.category-link[data-category="dementia"]{color:red}', updated)
-        self.assertIn('<meta name="dcterms.modified" content="2026-', updated)
-
-    def test_home_count_update_rejects_missing_or_ambiguous_cards(self):
-        card = '<meta name="dcterms.modified" content="2026-09-04"><a class="category-link" data-category="facility"><span data-count>1곳</span></a>'
-        with self.assertRaisesRegex(ValueError, '카드가 0개'):
-            update_index_counts('<style>[data-category="facility"]{}</style>', {"facility": {"count": 6573}})
-        with self.assertRaisesRegex(ValueError, '카드가 2개'):
-            update_index_counts(card + card, {"facility": {"count": 6573}})
-        with self.assertRaisesRegex(ValueError, '기관 수가 2개'):
-            update_index_counts(card.replace('</a>', '<span data-count>2곳</span></a>'), {"facility": {"count": 6573}})
-
     def test_facility_search_metadata_uses_the_manifest_count(self):
         html = '''<!-- /** SOFTM-SEO-FACILITY-INTENT START 날짜:20260907 : 테스트 */ -->
 <title>전국 요양원 100곳 찾기·비교</title><meta name="description" content="전국 요양원 100곳"><meta name="dcterms.modified" content="2026-09-04"><meta property="og:title" content="전국 요양원 100곳"><meta name="twitter:description" content="전국 요양원 100곳"><script type="application/ld+json">{"description":"전국 요양원 100곳"}</script>
@@ -52,7 +29,6 @@ class CareDataTest(unittest.TestCase):
         self.assertNotIn('100곳', head)
         self.assertIn('<p>서울 요양원 25곳</p>', updated)
         self.assertRegex(updated, r'dcterms\.modified" content="\d{4}-\d{2}-\d{2}')
-    # /** SOFTM-HOME-COUNT-TEST END */
 
     def test_collected_catalog_membership(self):
         catalog = read_json(ROOT / "data/nhis/catalog.json")["institutions"]

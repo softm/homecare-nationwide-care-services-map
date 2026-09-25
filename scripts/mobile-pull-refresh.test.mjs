@@ -31,7 +31,7 @@ test('당기는 중 목록이 이동하면 새로고침을 취소한다', () => 
 });
 
 test('두 지도는 공용 당겨서 새로고침 화면과 동작을 함께 읽는다', () => {
-    for (const path of ['nationwide-care-services-map.html']) {
+    for (const path of ['index.html']) {
         const html = readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
         assert.match(html, /mobile-pull-refresh\.css\?v=20260910-1/);
         assert.match(html, /mobile-pull-refresh\.js\?v=20260910-1/);

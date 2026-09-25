@@ -165,31 +165,6 @@ def update_facility_head_count(html, count):
     # /** SOFTM-SEO-FACILITY-COUNT END */
 
 
-def update_index_counts(index, manifest):
-    # /** SOFTM-HOME-COUNT START 날짜:20260907 : CSS 선택자를 카드로 오인해 다른 유형의 기관 수를 덮지 않도록 실제 링크 카드 안에서만 갱신 */
-    updated = index
-    for category, meta in manifest.items():
-        card_pattern = re.compile(rf'<a\b(?=[^>]*\bdata-category="{re.escape(category)}")[^>]*>[\s\S]*?</a>')
-        cards = list(card_pattern.finditer(updated))
-        if len(cards) != 1:
-            raise ValueError(f'홈 {category} 카드가 {len(cards)}개입니다.')
-        card_match = cards[0]
-        card = card_match.group(0)
-        count_pattern = re.compile(r'(<span\b(?=[^>]*\bdata-count(?:\s|=|>))[^>]*>)([\d,]+)곳(</span>)')
-        counts = list(count_pattern.finditer(card))
-        if len(counts) != 1:
-            raise ValueError(f'홈 {category} 카드의 기관 수가 {len(counts)}개입니다.')
-        count_match = counts[0]
-        replacement = card[:count_match.start(2)] + f'{meta["count"]:,}' + card[count_match.end(2):]
-        updated = updated[:card_match.start()] + replacement + updated[card_match.end():]
-    if updated != index:
-        updated, changed_dates = re.subn(r'(<meta name="dcterms\.modified" content=")[^"]+("\s*/?>)', rf'\g<1>{datetime.now():%Y-%m-%d}\2', updated)
-        if changed_dates != 1:
-            raise ValueError('홈 검색 대표 페이지의 수정일 메타가 없습니다.')
-    return updated
-    # /** SOFTM-HOME-COUNT END */
-
-
 def update_landing_counts(manifest):
     marker = f"<!-- SOFTM-DATA-UNIFIED 날짜:{datetime.now():%Y%m%d} : 안내의 기관 수와 기준일을 수집 자료 기반 지도와 일치 -->"
     for category, meta in manifest.items():
@@ -210,11 +185,7 @@ def update_landing_counts(manifest):
             old_lines = original.splitlines()
             html = "\n".join(line + (" " + marker if i < len(old_lines) and line != old_lines[i] and "SOFTM-DATA-UNIFIED" not in line else "") for i, line in enumerate(html.splitlines())) + "\n"
             path.write_text(html, encoding="utf-8")
-    index_path = ROOT / "index.html"
-    index = index_path.read_text(encoding="utf-8")
-    index = update_index_counts(index, manifest)  # SOFTM-HOME-COUNT 날짜:20260907 : 유형별 실제 카드만 갱신해 홈페이지 수치의 신뢰성을 유지
-    if index != index_path.read_text(encoding="utf-8"):
-        index_path.write_text(index, encoding="utf-8")
+    # SOFTM-ROOT-MAP 날짜:20260925 : 루트는 통합 지도 이동 전용이므로 수집 수치로 홈 카드를 갱신하지 않는다.
 
 
 def main():

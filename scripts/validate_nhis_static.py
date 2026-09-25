@@ -100,11 +100,11 @@ def main():
     assert 0 in photo_counts, "사진 없음 표본이 없습니다."
 
     forbidden = ["/api/official-detail", "/api/nhis-detail", "/api/nhis-photo", "/api/official-image"]
-    for filename in ("nationwide-care-services-map.html", "nhis-static-data.js"):
+    for filename in ("index.html", "nhis-static-data.js"):
         text = (ROOT / filename).read_text(encoding="utf-8")
         for value in forbidden:
             assert value not in text, f"{filename}에 제거 대상 브라우저 호출이 남았습니다: {value}"
-    care = (ROOT / "nationwide-care-services-map.html").read_text(encoding="utf-8")
+    care = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "/api/directions" in care, "유지해야 할 directions 호출이 누락됐습니다."
     print(f"공단 정적 데이터 검사 완료: catalog {len(institutions):,}곳 · 상세 {manifest.get('detailCount', 0):,}곳 · 사진 매니페스트 {len(photo_files):,}곳")
 

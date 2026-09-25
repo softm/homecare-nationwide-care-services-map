@@ -65,14 +65,14 @@ test('요약 요청 실패를 빈 성공으로 처리하지 않으며 다음 요
     } finally {globalThis.fetch=previous;}
 });
 test('새 페이지의 로컬 정적 의존성과 스크립트 문법을 확인', () => {
-    for(const filename of ['care-photos.html','nationwide-care-services-map.html']){
+    for(const filename of ['care-photos.html','index.html']){
         const html=fs.readFileSync(filename,'utf8');
         for(const [,src] of html.matchAll(/(?:src|href)="([^"?#]+\.(?:js|css))(?:[?#][^"]*)?"/g)) if(!src.startsWith('http')) assert.ok(fs.existsSync(src),src);
         for(const [,attrs,code] of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) if(!attrs.includes('src=')&&!attrs.includes('json')) new vm.Script(code);
     }
 });
 test('사진의 기관기호는 현재 유형에서 검증하고 이름이 같은 다른 기관을 선택하지 않음', () => {
-    const html=fs.readFileSync('nationwide-care-services-map.html','utf8');
+    const html=fs.readFileSync('index.html','utf8');
     const code=html.split('/** SOFTM-PHOTO-SELECT START')[1].split('*/')[1].split('/** SOFTM-PHOTO-SELECT END')[0];
     const fields={province:{value:''},city:{value:''},q:{value:''}}, messages=[];
     const context=vm.createContext({params:new URLSearchParams('institution=2'),DATA:[{i:'1',n:'같은센터',p:'서울',c:'강남'},{i:'2',n:'같은센터',p:'경기',c:'광명'}],$:id=>fields[id],updateCities(){},toast:message=>messages.push(message)});
@@ -82,7 +82,7 @@ test('사진의 기관기호는 현재 유형에서 검증하고 이름이 같�
     assert.equal(vm.runInContext('initialPhotoEntry',context),null);assert.equal(messages.length,1);
 });
 test('지도 초기 선택은 사용자가 새 조회를 시작하면 늦은 응답으로 상세를 열지 않음', async () => {
-    const html=fs.readFileSync('nationwide-care-services-map.html','utf8');
+    const html=fs.readFileSync('index.html','utf8');
     const code=html.split('/** SOFTM-PHOTO-SELECT START')[1].split('*/')[1].split('/** SOFTM-PHOTO-SELECT END')[0];
     let current=true, finish, focused=0;
     const context=vm.createContext({beginCareQuery:()=>({current:()=>current}),clearTimeout(){},refreshTimer:null,skipIdleUntil:0,loadMarkers:()=>new Promise(resolve=>finish=resolve),focusCenter:()=>focused++,Date});
@@ -99,19 +99,19 @@ test('현재 화면 안에서 지도에 연결된 마커만 사진 기본 범위
 });
 test('지도 범위를 세션으로 전달하며 빈 집합과 손실된 범위를 전국으로 대체하지 않음', () => {
     const data=new Map(), storage={setItem:(k,v)=>data.set(k,v),getItem:k=>data.get(k)};
-    const token=saveScope(storage,{type:'daycare',ids:['2','2'],source:'nationwide-care-services-map.html?share=1'},'test-token');
+    const token=saveScope(storage,{type:'daycare',ids:['2','2'],source:'index.html?share=1'},'test-token');
     const scope=readScope(storage,token); assert.deepEqual(scope.ids,['2']);
     const rows=[{i:'1',n:'같은기관'},{i:'2',n:'같은기관'}];
     assert.deepEqual(scopedRows(rows,scope),[rows[1]]);
     assert.deepEqual(scopedRows(rows,{ids:[]}),[]);
     assert.deepEqual(scopedRows(rows,readScope(storage,'missing')),[]);
     assert.equal(readScope(null,token),null);
-    assert.throws(()=>saveScope(null,{type:'daycare',ids:[],source:'nationwide-care-services-map.html'},'test-token'));
+    assert.throws(()=>saveScope(null,{type:'daycare',ids:[],source:'index.html'},'test-token'));
 });
 test('범위 재전달은 이전 사진 페이지의 집합을 덮어쓰지 않으며 외부 복귀 URL을 거부', () => {
     const data=new Map(), storage={setItem:(k,v)=>data.set(k,v),getItem:k=>data.get(k)};
-    saveScope(storage,{type:'daycare',ids:['1'],source:'nationwide-care-services-map.html'},'first');
-    saveScope(storage,{type:'daycare',ids:['2'],source:'nationwide-care-services-map.html'},'second');
+    saveScope(storage,{type:'daycare',ids:['1'],source:'index.html'},'first');
+    saveScope(storage,{type:'daycare',ids:['2'],source:'index.html'},'second');
     assert.deepEqual(readScope(storage,'first').ids,['1']);assert.deepEqual(readScope(storage,'second').ids,['2']);
     saveScope(storage,{type:'daycare',ids:['1'],source:'https://other.example/'},'bad');assert.equal(readScope(storage,'bad'),null);
 });

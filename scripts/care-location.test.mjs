@@ -66,7 +66,7 @@ test('방문 출발지 취소와 다시 시도 시 오류·이전 위치를 남�
     assert.deepEqual(origin.state().origin.point, point); assert.equal(origin.state().reason, '');
 });
 test('두 지도가 공용 위치 요청을 연결하고 실패 후 버튼·지도·재시도를 복구', async () => {
-    for (const filename of ['nationwide-care-services-map.html']) {
+    for (const filename of ['index.html']) {
         const source = readFileSync(new URL('../' + filename, import.meta.url), 'utf8');
         assert.match(source, /care-location\.js\?v=/); assert.doesNotMatch(source, /navigator\.geolocation\.getCurrentPosition/);
         const start = source.indexOf('async function useCurrentLocation(');
@@ -90,7 +90,7 @@ test('두 지도가 공용 위치 요청을 연결하고 실패 후 버튼·지�
     }
 });
 test('통합 지도 현재 위치 성공은 해당 좌표와 주변 조회를 유지하고 전국 범위로 맞추지 않음', async () => {
-    const source = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
+    const source = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     const start = source.indexOf('async function useCurrentLocation('), baseStart = source.indexOf('function setBase(');
     const code = source.slice(baseStart, source.indexOf('\n', baseStart)) + '\n' + source.slice(start, source.indexOf('/** SOFTM-LOCATION END */', start));
     let searched = 0, requested = 0, fitted = 0, centered = null, zoom = null;
@@ -149,7 +149,7 @@ test('권한 조회 미지원도 위치 요청으로 대체하고 거절 후 수
     env.succeed(); await retry;
 });
 test('두 지도 진입 스크립트는 지도 초기화 분기 밖에서 권한 요청', () => {
-    for (const file of ['nationwide-care-services-map.html']) {
+    for (const file of ['index.html']) {
         const source = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
         assert.match(source, /<script defer src="care-location-startup.js\?v=/);
     }

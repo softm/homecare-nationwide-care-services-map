@@ -146,7 +146,7 @@ export function inspectRegionalPage({ html, meta, rows, sitemapUrls, rootDir = R
     }
     try {
       const link = new URL(nameLink?.attrs.href || '', meta.url);
-      check(link.origin === ORIGIN && link.pathname === '/nationwide-care-services-map.html' && link.searchParams.get('type') === meta.type && link.searchParams.get('p') === row.p && link.searchParams.get('c') === row.c && link.searchParams.get('q') === row.n, `${id}: 기관 지도 링크가 실제 기관 필터와 다릅니다.`);
+      check(link.origin === ORIGIN && link.pathname === '/index.html' && link.searchParams.get('type') === meta.type && link.searchParams.get('p') === row.p && link.searchParams.get('c') === row.c && link.searchParams.get('q') === row.n, `${id}: 기관 지도 링크가 실제 기관 필터와 다릅니다.`);
     } catch { issues.push(`${id}: 기관 지도 링크가 유효하지 않습니다.`); }
   }
   if (meta.city) check(cards.length === rows.length && seen.size === rows.length, '시군구의 전체 기관 목록이 정적 HTML에 없습니다.');
@@ -172,7 +172,7 @@ export function inspectRegionalPage({ html, meta, rows, sitemapUrls, rootDir = R
       const local = localLinkPath(href, meta.url, rootDir);
       check(!local || fs.existsSync(local), `없는 내부 링크 또는 파일: ${href}`);
       const url = new URL(href, meta.url);
-      if (url.origin === ORIGIN && url.pathname === '/nationwide-care-services-map.html') {
+      if (url.origin === ORIGIN && url.pathname === '/index.html' && url.searchParams.has('type')) {
         check(url.searchParams.get('type') === meta.type && url.searchParams.get('p') === meta.province && (!meta.city || url.searchParams.get('c') === meta.city), `지도 링크의 지역 필터가 다릅니다: ${href}`);
         check(['type', 'p', 'c', 'q'].every(key => url.searchParams.getAll(key).length <= 1), `지도 링크에 중복 필터가 있습니다: ${href}`);
         check((node.attrs.rel || '').split(/\s+/).includes('nofollow'), `지도 필터 링크의 크롤 제어가 없습니다: ${href}`); // SOFTM-SEO-CRAWL 날짜:20260907 : 지역·기관 쿼리의 불필요한 크롤 확장을 생성 단계에서 차단

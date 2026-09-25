@@ -30,7 +30,7 @@ test('직접 지역 선택·지도 이동과 GPS·최근 기록 복원을 구분
 /** SOFTM-DEFAULT-MAP START 날짜:20260914 : 기본 지도의 중심·배율·안내·취소 처리를 실제 함수로 검증 */
 test('기본 지도는 PC 줌 14·모바일 줌 13과 기본 위치 표기를 유지하고 직접 탐색으로 저장하지 않는다', async()=>{
  const {readFileSync}=await import('node:fs'),vm=await import('node:vm');
- const html=readFileSync(new URL('../nationwide-care-services-map.html',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const start=html.indexOf('async function showCareDefaultMap('),source=html.slice(start,html.indexOf('\n}',start)+2);
  const nodes=new Map(),calls=[];
  const context={areaLocationRequest:0,CareRegionEntry:{hide(){},restoreLabel(label){calls.push(label)},label:()=> '기본 위치 · 서울시청'},

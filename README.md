@@ -6,12 +6,12 @@
 
 | 별칭 | 시작 파일 | 역할 |
 |---|---|---|
-| 전국 요양 | `nationwide-care-services-map.html` | 요양시설·주야간보호·방문요양·방문간호·방문목욕·단기보호·복지용구·치매전담형·요양병원 통합 지도 |
+| 전국 요양 | `index.html` | 요양시설·주야간보호·방문요양·방문간호·방문목욕·단기보호·복지용구·치매전담형·요양병원 통합 지도 |
 | 통합 시작 | `index.html` | 9개 기관 유형 선택 → 유형 안내 → 통합 지도 | <!-- SOFTM-INDEX-UNIFIED 날짜:20260904 : 실제 공통 진입 순서를 문서와 일치 -->
 
-통합 시작 화면은 주야간보호를 포함한 9개 기관 유형 안내로 들어가는 링크와 `index-ad-config.js`의 전용 광고 설정을 사용합니다. 광고는 PC `728×90`, 모바일 `320×100` 상단 배너이며 전국 요양 광고 단위와 분리됩니다. <!-- SOFTM-INDEX-AD-UNIT 날짜:20260904 : 승인된 인덱스 광고의 화면별 집계를 요양 지도와 분리 -->
+통합 시작 화면은 `index.html`의 전국 요양 통합 지도입니다. 이전 `nationwide-care-services-map.html` 주소는 같은 지도로 이동합니다. <!-- SOFTM-ROOT-MAP 날짜:20260925 : 실제 첫 화면과 공개 지도 주소를 하나로 통일 -->
 
-공개 서비스 브랜드는 `돌봄한눈`이며 검색 노출에는 보호자가 사용하는 `요양원`, `주야간보호센터`, `방문요양센터`, `요양병원` 용어를 우선 사용합니다. 검색엔진에는 유형별 정적 소개 페이지를 제출하고 `nationwide-care-services-map.html?type=...` 쿼리 주소는 실제 지도 도구로만 사용합니다. 주야간보호의 검색 대표 페이지는 `daycare-map.html` 안내이며, 실제 검색·비교는 다른 유형과 같은 `nationwide-care-services-map.html?type=daycare` 지도에서 실행합니다. <!-- SOFTM-SEO-LANDING 날짜:20260904 : 브랜드·검색 페이지·지도 도구의 역할이 다시 혼재되지 않도록 운영 기준을 기록 -->
+공개 서비스 브랜드는 `돌봄한눈`이며 검색 노출에는 보호자가 사용하는 `요양원`, `주야간보호센터`, `방문요양센터`, `요양병원` 용어를 우선 사용합니다. 검색엔진에는 유형별 정적 소개 페이지를 제출하고 `index.html?type=...` 쿼리 주소는 실제 지도 도구로만 사용합니다. 주야간보호의 검색 대표 페이지는 `daycare-map.html` 안내이며, 실제 검색·비교는 다른 유형과 같은 `index.html?type=daycare` 지도에서 실행합니다. <!-- SOFTM-SEO-LANDING 날짜:20260904 : 브랜드·검색 페이지·지도 도구의 역할이 다시 혼재되지 않도록 운영 기준을 기록 -->
 
 9개 안내 화면의 광고는 지도 찾기·자료 요약 다음에 한 개씩 배치합니다. 발급할 광고 규격과 연결 절차는 [`docs/AD_SETUP.md`](docs/AD_SETUP.md)를 참고하세요. <!-- SOFTM-LANDING-ADS 날짜:20260904 : 2단계 전용 광고 발급과 주야간보호의 동일한 진입 흐름을 안내 -->
 
@@ -36,7 +36,7 @@ npm run serve
 그다음 다음 주소를 엽니다.
 
 - `http://localhost:3000/`
-- `http://localhost:3000/nationwide-care-services-map.html?type=daycare`
+- `http://localhost:3000/index.html?type=daycare`
 
 네이버 지도 클라이언트 설정에서 로컬 주소가 허용되지 않으면 지도 인증 오류가 날 수 있습니다. 현재 Maps Application의 Web 서비스 URL에는 배포 Origin과 `http://localhost:3000`을 등록해야 합니다. 로컬 통합 검증은 `python3 -m http.server 3000`으로 실행하며, 등록하지 않은 `127.0.0.1`로 바꾸면 별도 Origin으로 판정됩니다.
 
@@ -45,8 +45,7 @@ npm run serve
 ```text
 .
 ├── index.html
-├── index-ad-config.js              # 인덱스 PC·모바일 전용 광고 단위
-├── nationwide-care-services-map.html
+├── index.html
 ├── care-data.js                    # 두 지도의 공용 검색 자료 로더
 ├── data/care/                      # 수집 JSON에서 생성한 압축 검색 인덱스
 ├── data/hira/                      # 심평원 요양병원 JSON
@@ -119,7 +118,7 @@ Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.m
 
 ## GitHub Pages
 
-정적 파일은 저장소 루트 구조 그대로 게시할 수 있습니다. 새 프로젝트 저장소에서 Pages 주소가 `/nationwide-care-maps/`처럼 하위 경로가 되더라도 내부 데이터 파일은 상대경로라 동작합니다. 다만 `nationwide-care-services-map.html`의 canonical·OG URL은 실제 공개 주소로 변경해야 합니다.
+정적 파일은 저장소 루트 구조 그대로 게시할 수 있습니다. 새 프로젝트 저장소에서 Pages 주소가 `/nationwide-care-maps/`처럼 하위 경로가 되더라도 내부 데이터 파일은 상대경로라 동작합니다. 다만 `index.html`의 canonical·OG URL은 실제 공개 주소로 변경해야 합니다.
 
 현재 공식 공개 주소와 검색 대표 Origin은 `https://homecare.designboard.net`입니다. `CNAME`, 세 HTML의 canonical·OG·구조화 데이터, `robots.txt`, `sitemap.xml`, 네이버 Maps Web 서비스 URL과 Vercel `ALLOWED_ORIGINS`를 함께 맞춰야 합니다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 도메인 변경 때 검색 대표 주소와 브라우저 호출 허용 출처가 분리되지 않도록 확인 범위를 명시 -->
 

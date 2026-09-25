@@ -62,7 +62,7 @@ function writeUrl() {
     for (const key of ['p', 'c', 'q']) if (!query.get(key)) query.delete(key);
     history.replaceState(null, '', `?${query}`);
     const mapQuery = new URLSearchParams({ type, ...controls() });
-    $('photoMapLink').href = scopeMode === 'map' && currentScope() ? currentScope().source : `nationwide-care-services-map.html?${mapQuery}`;
+    $('photoMapLink').href = scopeMode === 'map' && currentScope() ? currentScope().source : `index.html?${mapQuery}`;
 }
 function render({ append = false } = {}) {
     const host = $('photoResults'), start = append ? host.children.length : 0;

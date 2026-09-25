@@ -78,7 +78,7 @@ test('공식 관할 관계로 이름이 다른 행정동을 합치고 저장 좌
     assert.ok(context.window.NATIONAL_REGION_BOUNDS.neighborhoods['서울특별시|관악구|신림동']);
     assert.equal(context.window.NATIONAL_REGION_BOUNDS.neighborhoods['서울특별시|관악구|서원동'], undefined);
     const rowsById = new Map(Object.values(data).flat().map(row => [row.i, row]));
-    for (const file of ['nationwide-care-services-map.html']) {
+    for (const file of ['index.html']) {
         const html = read(file), start = html.indexOf('const PRESET_COORDS='), end = html.indexOf('\n};', start) + 3;
         const presetContext = vm.createContext({});
         vm.runInContext(`${html.slice(start, end)};globalThis.presets=PRESET_COORDS`, presetContext);
@@ -107,7 +107,7 @@ test('좌표 확인은 느린 고정 묶음을 기다리지 않고 제한된 동
 /** SOFTM-VIEWPORT-RESOLVE END */
 
 test('두 지도에서 기존 필터를 유지한 후보 함수가 공통 경계를 사용', () => {
-    for (const file of ['nationwide-care-services-map.html']) {
+    for (const file of ['index.html']) {
         const html = read(file);
         assert.ok(html.includes('src="region-bounds.js?'));
         assert.ok(html.includes('src="viewport-regions.js?'));
@@ -128,7 +128,7 @@ test('두 지도에서 기존 필터를 유지한 후보 함수가 공통 경계
 });
 
 test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기관을 표시', async () => {
-    const html = read('nationwide-care-services-map.html');
+    const html = read('index.html');
     const declaration = html.slice(html.indexOf('async function loadMarkers('), html.indexOf('async function searchByControls('));
     const placed = new Map();
     const node = {};

@@ -249,7 +249,7 @@ function functionSource(source, name, nextName) {
     return source.slice(start, end);
 }
 test('통합 지도 상세는 제목 아래 공통 행동 영역에서 비교함 버튼을 한 번 연결', () => {
-    const source = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
+    const source = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     const detailMarkup = source.match(/<section class="detail-sheet"[\s\S]*?<\/section>/)?.[0] || '';
     const openDetail = functionSource(source, 'openDetail', 'closeDetail');
     assert.match(detailMarkup, /detail-head[\s\S]*care-popup-basket-action[\s\S]*detail-body/);

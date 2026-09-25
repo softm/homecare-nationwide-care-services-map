@@ -36,7 +36,7 @@ export function filterLabels(filters, type) {
     return labels.concat(globalThis.CareAdvancedSearch.describeState(filters.advanced || globalThis.CareAdvancedSearch.emptyState(), type));
 }
 export function destinationUrl(draft, filters, base) {
-    const url = new URL('nationwide-care-services-map.html', base);
+    const url = new URL('index.html', base);
     const p = url.searchParams, effective = effectiveFilters(filters, draft.type);
     p.set('type', draft.type); p.set('p', draft.province);
     if (draft.city) p.set('c', draft.city);

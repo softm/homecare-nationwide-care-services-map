@@ -34,14 +34,14 @@ test('상단 유형 메뉴는 주야간보호를 포함한 기관 카테고리�
 });
 /** SOFTM-TYPE-MENU-TEXT END */
 test('category changes retain region and map but clear incompatible constraints',()=>{
- const value='https://example.test/nationwide-care-services-map.html?type=daycare&p=서울&c=강남구&cap=30&staff=nurse&grades=A&scores=high&conf=high&institution=123&basket=v1.123#careSavedPanel';
+ const value='https://example.test/index.html?type=daycare&p=서울&c=강남구&cap=30&staff=nurse&grades=A&scores=high&conf=high&institution=123&basket=v1.123#careSavedPanel';
  const url=api.destination(value,'nursing-hospital',{center:{lat:37.5,lng:127},zoom:14,filters:{q:'검색'}});
  assert.equal(url.searchParams.get('type'),'nursing-hospital');assert.equal(url.searchParams.get('p'),'서울');assert.equal(url.searchParams.get('c'),'강남구');assert.equal(url.searchParams.get('q'),'검색');assert.equal(url.searchParams.get('lat'),'37.5');assert.equal(url.searchParams.get('z'),'14');
  for(const key of ['cap','staff','grades','scores','conf','institution','basket'])assert.equal(url.searchParams.has(key),false);
  assert.equal(url.hash,'');assert.throws(()=>api.destination(value,'invalid'));
 });
 test('첫 유형 선택은 손대지 않은 전국 지도를 넘기지 않고 일반 진입은 현재 위치를 우선한다',()=>{
- const source=readFileSync(new URL('../nationwide-care-services-map.html',import.meta.url),'utf8');
+ const source=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const picker=source.slice(source.indexOf('function mountCategoryPicker()'),source.indexOf('function bootUnselected()'));
  assert.match(picker,/getMap:\(\)=>!TYPE&&!neutralViewportChosen\?null:map/);
  const init=source.slice(source.indexOf('function initNaver()'),source.indexOf('/** SOFTM-TYPE-MAP END */'));

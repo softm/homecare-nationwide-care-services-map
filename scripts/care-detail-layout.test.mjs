@@ -47,7 +47,7 @@ test('기관 공유 링크는 공개 도메인의 유형과 기관기호만 포�
  const layout=context.window.CareDetailLayout;
  const url=new URL(layout.institutionUrl({i:'A&12',n:'기관'},'home-care'));
  assert.equal(url.origin,'https://homecare.designboard.net');
- assert.equal(url.pathname,'/nationwide-care-services-map.html');
+ assert.equal(url.pathname,'/index.html');
  assert.deepEqual([...url.searchParams.keys()],['type','institution']);
  assert.equal(url.searchParams.get('institution'),'A&12');
  assert.equal(url.searchParams.get('type'),'home-care');

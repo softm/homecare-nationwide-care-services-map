@@ -122,7 +122,7 @@ function mapLink(page, institution = '') {
   const query = new URLSearchParams({ type: page.type, p: page.province });
   if (page.city) query.set('c', page.city);
   if (institution) query.set('q', institution);
-  return `../nationwide-care-services-map.html?${query}`;
+  return `../index.html?${query}`;
 }
 
 function scopeName(page) {

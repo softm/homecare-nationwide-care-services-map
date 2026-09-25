@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import '../care-map-focus.js';
-const mapHtml=readFileSync(new URL('../nationwide-care-services-map.html',import.meta.url),'utf8');
+const mapHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const focusCss=readFileSync(new URL('../care-map-focus.css',import.meta.url),'utf8');
 test('지도 배경 클릭은 일반 화면에서 상태를 유지하고 전체보기에서만 닫는다',()=>{
  assert.equal(CareMapFocus.focusAction(false,false),null);

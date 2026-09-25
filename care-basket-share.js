@@ -8,7 +8,7 @@
     const hasLink = value => basketValue(new URL(value)) !== null;
     function createUrl(value, type, ids) {
         if (!types.has(type) || !ids.length || !ids.every(validId)) throw new Error('공유할 기관 목록을 확인해 주세요.');
-        const url = new URL('nationwide-care-services-map.html', value);
+        const url = new URL('index.html', value);
         url.search = ''; url.hash = '';
         url.searchParams.set('type', type);
         url.searchParams.set('basket', `v1.${[...new Set(ids)].join(',')}`);

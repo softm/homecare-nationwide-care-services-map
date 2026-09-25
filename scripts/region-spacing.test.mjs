@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const html = readFileSync(new URL('../nationwide-care-services-map.html', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const source = html.slice(html.indexOf('function regionFocusPositions('), html.indexOf('function markerIcon('));
 class LatLng {
     constructor(lat, lng) { this.latitude = lat; this.longitude = lng; }

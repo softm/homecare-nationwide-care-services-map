@@ -17,7 +17,7 @@ export function photoUrl(photo) {
     } catch { return ''; }
 }
 export function mapUrl(type, row) {
-    return `nationwide-care-services-map.html?${new URLSearchParams({ type, institution: row.i, p: row.p || '', c: row.c || '', q: row.n })}`;
+    return `index.html?${new URLSearchParams({ type, institution: row.i, p: row.p || '', c: row.c || '', q: row.n })}`;
 }
 export function filterRows(rows, summaries, { p = '', c = '', q = '' } = {}) {
     const query = q.trim().toLocaleLowerCase();

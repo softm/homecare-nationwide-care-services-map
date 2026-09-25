@@ -27,7 +27,7 @@ function renderCriteria() {
     $('analysisCriteria').innerHTML = '<legend class="analysis-sr">희망 조건</legend>' + criteriaFor(type).map(item => `<label><input type="checkbox" value="${esc(item.id)}"><span>${esc(item.label)}</span></label>`).join('');
     $('analysisCriteria').closest('details').hidden = type === 'nursing-hospital';
     $('analysisPreferenceCount').textContent = '선택 안 함';
-    $('analysisMap').href = `nationwide-care-services-map.html?type=${encodeURIComponent(type)}`;
+    $('analysisMap').href = `index.html?type=${encodeURIComponent(type)}`;
 }
 function setBusy(value) {
     busy = value; $('analysisRun').disabled = value || originController?.state().phase === 'loading'; $('analysisCancel').hidden = !value; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 위치 확인 중 빈 주소로 분석을 시작하지 않음
@@ -188,7 +188,7 @@ function gradeTable(entries) {
 function render() {
     const { report, chosen, input, address, featureError, photoError } = current;
     const basketRegion = report.nearby.find(entry => current.basket.has(entry.row.i))?.row || report.nearby[0]?.row;
-    const basketLink = `nationwide-care-services-map.html?${new URLSearchParams({ type: input.type, p: basketRegion?.p || '', c: basketRegion?.c || '' })}#careSavedPanel`;
+    const basketLink = `index.html?${new URLSearchParams({ type: input.type, p: basketRegion?.p || '', c: basketRegion?.c || '' })}#careSavedPanel`;
     const size = report.nearby.length, selectedLabels = input.criteria.filter(item => input.selected.has(item.id)).map(item => item.label);
     $('analysisResults').innerHTML = `<section class="analysis-summary"><h2>이 주소에서 시작하는 기관 선택</h2><p>${esc(address.label)} · ${esc(labels[input.type])} · 직선 ${input.radiusKm}km</p><p>${selectedLabels.length ? `희망조건: ${selectedLabels.map(esc).join(' · ')}` : '별도 희망조건 없이 거리와 공개정보를 함께 살펴봤어요.'}</p><div class="analysis-stats"><div><strong>${size.toLocaleString()}곳</strong><span>반경 안 위치 확인</span></div><div><strong>${input.selected.size ? `${chosen.allConfirmed.length.toLocaleString()}곳` : '거리순'}</strong><span>${input.selected.size ? '희망조건 모두 확인' : '가까운 후보부터'}</span></div><div><strong>${report.unknownLocation.length.toLocaleString()}곳</strong><span>위치 추가 확인</span></div></div></section>
         ${featureError || photoError ? `<div class="analysis-warning" role="status">${featureError ? '특화서비스' : ''}${featureError && photoError ? '·' : ''}${photoError ? '사진' : ''} 자료를 불러오지 못했습니다. 해당 항목은 미확인으로 표시했습니다. <button type="button" data-analysis-retry>자료 다시 확인</button></div>` : ''}

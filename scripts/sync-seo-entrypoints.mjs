@@ -41,21 +41,6 @@ ${hubs.map(hub => `        <a href="${esc(localUrl(hub.url))}"><strong>${esc(hub
 <!-- SOFTM-SEO-REGIONS END -->`;
 }
 
-function homeSection() {
-  return `<!-- SOFTM-SEO-HOME START 날짜:20260914 : 장기요양기관 찾기 구문에서 지역별 실제 목록으로 이어지는 경로를 제공 -->
-    <section class="seo-home-content" aria-labelledby="regional-title">
-      <h2 id="regional-title">우리 동네 장기요양기관 찾기</h2>
-      <p>장기요양기관 찾기에서 요양원·주간보호센터·방문요양센터를 지역별 목록으로 살펴보세요. 기관 주소와 공단 평가연도를 확인한 뒤 지도에서 비교할 수 있습니다.</p>
-      <nav class="seo-region-grid" aria-label="지역별 장기요양기관 목록 바로가기">
-        <a href="daycare-map.html#regions"><strong>지역별 주간보호센터</strong><span>주야간보호센터 주소·평가 확인</span></a>
-        <a href="nursing-home-map.html#regions"><strong>지역별 요양원</strong><span>공개 평가·정원·시설 유형 확인</span></a>
-        <a href="home-care-map.html#regions"><strong>지역별 방문요양센터</strong><span>기관 소재지·공개 평가 확인</span></a>
-      </nav>
-      <p class="seo-service-note">돌봄한눈은 공단·심평원 공개자료를 바탕으로 정보를 제공하는 독립 검색·비교 서비스입니다. 장기요양기관은 공개 평가정보가 있는 경우에만 평가를 표시하며, 요양병원은 심평원 개설현황과 위치를 안내합니다.</p>
-    </section>
-<!-- SOFTM-SEO-HOME END -->`;
-}
-
 export function syncSeoEntrypoints({ rootDir = ROOT, check = false } = {}) {
   const { pages, byType } = getRegionalSeoPages(rootDir);
   const updates = new Map();
@@ -65,8 +50,7 @@ export function syncSeoEntrypoints({ rootDir = ROOT, check = false } = {}) {
     html = replaceBlock(html, 'SEO-REGIONS', regionSection(type, byType[type]), '    <section class="guide-section"');
     updates.set(config.file, html);
   }
-  const home = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
-  updates.set('index.html', replaceBlock(connectStyles(home), 'SEO-HOME', homeSection(), '  </main>'));
+  // SOFTM-ROOT-MAP 날짜:20260925 : 루트는 지도 진입 전용이므로 검색용 본문을 다시 주입하지 않는다.
   const oldSitemap = fs.readFileSync(path.join(rootDir, 'sitemap.xml'), 'utf8');
   const mainEntries = [...oldSitemap.matchAll(/<url>[\s\S]*?<\/url>/g)].map(match => match[0]).filter(entry => !entry.includes(`${ORIGIN}/regions/`));
   if (!mainEntries.length) throw new Error('기존 유형별 검색 대표 사이트맵이 없습니다.');
