@@ -96,8 +96,8 @@
 /** SOFTM-PHOTO-GALLERY END */
 
 /** SOFTM-PHOTO-WALL START 날짜:20260911 : 사진 아래 반복 설명을 줄이고 원본 비율의 사진과 필요한 행동에 집중 */
-.care-photo-page{background:#fff}.care-photo-main{max-width:1600px}
-.care-photo-main{padding-top:20px}.care-photo-intro .care-photo-eyebrow{display:none}.care-photo-intro h1{font-size:28px;margin:0 0 6px}.care-photo-intro>p:last-child{font-size:14px}
+.care-photo-page{background:#fff}.care-photo-main{max-width:1120px}
+.care-photo-main{padding-top:34px}.care-photo-intro .care-photo-eyebrow{display:none}.care-photo-intro h1{font-size:30px;margin:0 0 8px}.care-photo-intro>p:last-child{font-size:15px}
 .care-photo-filters{margin:16px 0;padding:14px;border-radius:10px}.care-photo-scope{margin-top:16px;padding:8px 12px}.care-photo-note{font-size:12px;margin:8px 0 14px}.care-photo-viewbar{margin-bottom:20px}
 .care-photo-grid:is([data-mode="gallery"],[data-mode="dense"]){display:block;position:relative}
 .care-photo-grid:is([data-mode="gallery"],[data-mode="dense"])>.care-photo-tile{position:absolute}
@@ -107,6 +107,14 @@
 @media(max-width:600px){.care-photo-main{padding:16px 12px 32px}.care-photo-intro h1{font-size:24px}.care-photo-intro>p:last-child{display:none}.care-photo-result-head h2{font-size:20px}.care-photo-scope{margin-top:12px}.care-photo-viewbar p{display:none}}
 
 /** SOFTM-PHOTO-WALL END */
+
+/** SOFTM-PHOTO-EMPTY-SCOPE START 날짜:20260926 : 지도 범위가 없는 사진 탐색은 빈 갤러리 대신 다음 단계가 보이는 안내 화면으로 제공 */
+.care-photo-empty-state{display:flex;align-items:flex-start;gap:20px;max-width:780px;margin:30px auto 0;padding:30px;border:1px solid #d5e1ec;border-radius:16px;background:#f3f8fd}
+.care-photo-empty-icon{display:grid;place-items:center;flex:0 0 52px;width:52px;height:52px;border-radius:16px;background:#dcecff;color:#175cb5;font-size:30px;font-weight:800}
+.care-photo-empty-state h2{margin:2px 0 8px;font-size:23px;line-height:1.35}.care-photo-empty-state p{max-width:610px;margin:0;color:#53667b;font-size:15px}.care-photo-empty-state .care-photo-empty-eyebrow{margin-bottom:4px;color:#175cb5;font-size:13px;font-weight:750}.care-photo-empty-state .care-photo-primary{display:inline-flex;align-items:center;gap:12px;margin-top:20px;text-decoration:none}
+.care-photo-main[data-photo-empty-scope="true"] .care-photo-filters,.care-photo-main[data-photo-empty-scope="true"] .care-photo-result-head,.care-photo-main[data-photo-empty-scope="true"] .care-photo-save-help,.care-photo-main[data-photo-empty-scope="true"] .care-photo-note,.care-photo-main[data-photo-empty-scope="true"] .care-photo-viewbar,.care-photo-main[data-photo-empty-scope="true"] .care-photo-gallery-errors,.care-photo-main[data-photo-empty-scope="true"] .care-photo-grid,.care-photo-main[data-photo-empty-scope="true"] #photoRetry,.care-photo-main[data-photo-empty-scope="true"] .care-photo-more,.care-photo-main[data-photo-empty-scope="true"] .care-photo-save-feedback{display:none!important}
+@media(max-width:600px){.care-photo-empty-state{gap:14px;margin-top:20px;padding:22px 18px}.care-photo-empty-icon{flex-basis:42px;width:42px;height:42px;border-radius:13px;font-size:25px}.care-photo-empty-state h2{font-size:20px}.care-photo-empty-state p{font-size:14px}}
+/** SOFTM-PHOTO-EMPTY-SCOPE END */
 
 /** SOFTM-PHOTO-SAVE-UNIT START 날짜:20260911 : 기관 저장 상태를 사진 선택 강조와 분리하고 실제 추가 수를 눈에 보이게 안내 */
 .care-photo-save-help{font-size:13px;color:#405772;margin:10px 0 4px}

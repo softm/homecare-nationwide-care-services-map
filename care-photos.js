@@ -19,6 +19,10 @@ const currentScope = () => mapScope?.type === type ? mapScope : null;
 const searchRows = () => scopeMode === 'all' ? rows : scopedRows(rows, currentScope());
 function updateScope() {
     const scope = currentScope(), pool = searchRows();
+    const missingMapScope = scopeMode === 'map' && !scope;
+    document.querySelector('.care-photo-main').dataset.photoEmptyScope = String(missingMapScope); // SOFTM-PHOTO-EMPTY-SCOPE 날짜:20260926 : 지도 범위가 없을 때 결과 없는 탐색 도구를 노출하지 않음
+    $('photoEmptyState').hidden = !missingMapScope;
+    $('photoEmptyMapLink').href = $('photoMapLink').href;
     $('photoType').disabled = scopeMode === 'map';
     $('photoAllScope').hidden = scopeMode === 'all';
     $('photoMapLink').textContent = scopeMode === 'map' ? '지도로 돌아가기' : '지도에서 찾기';
