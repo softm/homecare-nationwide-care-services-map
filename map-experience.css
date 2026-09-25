@@ -645,6 +645,14 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 }
 /** SOFTM-LANDSCAPE END */
 
+/** SOFTM-MOBILE-LIST-DENSITY START 날짜:20260926 : 휴대폰 목록에서 대표사진이 긴 기관명과 주소의 읽는 폭을 과도하게 줄이지 않도록 카드 안 여백과 사진 크기를 조정 */
+@media(max-width:1000px) and (orientation:portrait) {
+ .care-map-page[data-care-workspace="search"] .row { padding:12px 10px; }
+ .care-map-page[data-care-workspace="search"] .care-result-photo { width:58px; height:58px; margin:0 0 6px 8px; border-radius:10px; }
+ .care-map-page[data-care-workspace="search"] .care-row-actions { margin-top:6px; }
+}
+/** SOFTM-MOBILE-LIST-DENSITY END */
+
 /* SOFTM-ROUTE-ERROR-ALERT START 날짜:20260909 : 가로·세로 및 PC 화면에서 오류가 목록 스크롤 밖으로 밀리지 않도록 고정 */
 .care-route-error-alert { position:fixed; z-index:12000; top:max(16px, env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(560px, calc(100% - 32px)); box-sizing:border-box; display:flex; align-items:flex-start; gap:12px; padding:18px; border:1px solid #dbac96; border-radius:16px; background:#fff8f2; color:#893818; box-shadow:0 8px 32px #17324d40; max-height:calc(100dvh - 32px); overflow:auto; }
 .care-route-error-alert[hidden] { display:none; }
