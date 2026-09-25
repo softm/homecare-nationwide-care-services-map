@@ -1,0 +1,3 @@
+/** SOFTM-REGIONAL-ADS START 날짜:20260926 : 생성 지역 페이지의 목록 앞에서만 전용 광고를 한 번 요청 */
+(()=>{const host=document.getElementById('regionalAdHost'),config=window.REGIONAL_AD_CONFIG;if(!host||!config)return;const slot=matchMedia('(min-width:800px)').matches?config.desktop:config.mobile;if(!/^DAN-[A-Za-z0-9]+$/.test(slot?.unit||''))return;host.innerHTML=`<span class="regional-ad-label">광고</span><ins class="kakao_ad_area" style="display:none" data-ad-unit="${slot.unit}" data-ad-width="${slot.width}" data-ad-height="${slot.height}"></ins>`;const script=document.createElement('script');script.async=true;script.src=config.script;document.head.appendChild(script)})();
+/** SOFTM-REGIONAL-ADS END */

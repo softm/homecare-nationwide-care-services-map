@@ -59,3 +59,6 @@
   .home-link { min-height: 36px; text-align: right; }
 }
 /** SOFTM-REGIONAL-SEO END */
+
+/* SOFTM-REGIONAL-ADS 날짜:20260926 : 728px·320px 단위 모두 중앙에서 잘림 없이 표시 */
+.regional-ad-zone{min-height:100px;margin:28px auto;max-width:728px;text-align:center;overflow:hidden}.regional-ad-label{display:block;margin-bottom:6px;color:#718096;font-size:12px;font-weight:700}

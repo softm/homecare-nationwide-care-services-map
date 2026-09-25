@@ -295,6 +295,7 @@ ${districtPages.map((district) => `        <li data-region-city="${html(district
   <div class="container content">
     <section class="regional-context" aria-labelledby="scope-title"><h2 id="scope-title">${config.label} 자료를 보는 방법</h2><p>${config.scope}</p><p>${config.check}</p></section>
 ${districtContent}
+    <aside class="regional-ad-zone" id="regionalAdHost" aria-label="광고"></aside> <!-- SOFTM-REGIONAL-ADS 날짜:20260926 : 지역 목록 탐색을 가리지 않는 목록 뒤 전용 광고 -->
     <section class="regional-related" aria-labelledby="related-title"><h2 id="related-title">${html(region)}의 다른 돌봄기관</h2><ul>${relatedTypes}</ul>${provinceNavigation}</section>
     <section class="source-section" aria-labelledby="source-title"><h2 id="source-title">자료 출처·기준일과 미확인 정보</h2>
       <!-- SOFTM-DATA-REGIONS START 날짜:20260904 : 수집 날짜를 과거 원본 배포일로 오인하지 않도록 실제 목록·상세 출처를 안내 -->
@@ -308,6 +309,8 @@ ${districtContent}
     </section>
   </div>
 </main>
+<script src="../regional-ad-config.js?v=20260926-1"></script>
+<script src="../regional-ads.js?v=20260926-1"></script>
 <footer><div class="container"><a href="../index.html"><img src="../site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0">돌봄한눈</a><!-- SOFTM-BRAND-ICON 날짜:20260913 : 생성되는 지역 화면도 같은 브랜드 아이콘을 유지 --><span>우리 부모님 요양·돌봄기관 찾기</span></div></footer>
 </body>
 </html>
