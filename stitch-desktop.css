@@ -390,3 +390,21 @@ body.stitch-desktop .care-filter-state-badge { min-width:20px; min-height:20px; 
 /** SOFTM-LIST-YIELD START 날짜:20260916 : 전체 조회 건수와 지도 마커는 유지하고 목록의 추가 90곳을 사용자가 필요할 때 표시 */
 body.stitch-desktop .care-results-more { display:block; width:calc(100% - 48px); margin:16px 24px; padding:14px; border:1px solid #a5d7d0; border-radius:12px; background:#eefaf7; color:#004541; font:inherit; cursor:pointer; }
 /** SOFTM-LIST-YIELD END */
+
+/** SOFTM-SIDEBAR-LIST-DENSITY START 날짜:20260926 : 좌측 탐색 패널에서 카드 장식 여백보다 다음 기관을 더 많이 확인할 수 있도록 검색·목록·카드 높이를 함께 압축 */
+@media (min-width:1001px) {
+ body.stitch-desktop:not(.care-mobile-filters-open) .filters { height:180px; padding:12px 20px; }
+ body.stitch-desktop .filter-grid :is(input,select,button) { min-height:44px; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filters > .stitch-filter-toolbar { margin-top:10px; }
+ body.stitch-desktop:not(.care-mobile-filters-open) .filters > .stitch-filter-summary:not([hidden]) { top:180px; padding:0 20px 10px; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:calc(236px + var(--stitch-filter-summary-height))!important; height:calc(100% - 236px - var(--stitch-filter-summary-height))!important; }
+ body.stitch-desktop .list-head { padding:12px 20px 6px; }
+ body.stitch-desktop .select-tools { padding:0 20px 8px; }
+ body.stitch-desktop .layout #list { padding:12px; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .row { padding:14px; gap:7px 10px; margin-bottom:10px; border-radius:12px; }
+ body.stitch-desktop .row h3 { font-size:18px; line-height:1.4; }
+ body.stitch-desktop .care-result-summary { gap:5px; padding:8px 10px; line-height:1.55; }
+ body.stitch-desktop.care-map-page .row .care-row-actions { gap:6px; margin-top:4px; }
+ body.stitch-desktop .row .care-row-actions > :is(.stitch-phone,.stitch-detail) { min-height:38px; }
+}
+/** SOFTM-SIDEBAR-LIST-DENSITY END */
