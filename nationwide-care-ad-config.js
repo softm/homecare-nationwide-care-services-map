@@ -28,12 +28,32 @@ window.CARE_AD_CONFIG = {
       height: 100
     },
     listUnits: [
-      {
-        unit: 'DAN-57vDaXi3Kup3n4HQ',
-        width: 320,
-        height: 100
-      }
-    ]
+      { unit: 'DAN-57vDaXi3Kup3n4HQ', width: 320, height: 100 }
+    ],
+    /** SOFTM-AD-EXPANSION START 날짜:20260926 : 위치별 발급 단위를 재사용하지 않아 광고 수익을 분리 집계 */
+    welcome: { mobile: { unit: 'DAN-SyVDAgtVMBjcCQ17', width: 320, height: 100 } },
+    listTop: {
+      desktop: { unit: 'DAN-lKa6CMgGkWgFxfAk', width: 728, height: 90 },
+      mobile: { unit: 'DAN-AIFs0ju8mxAVNfZY', width: 320, height: 100 }
+    },
+    listPositions: {
+      12: { desktop: { unit: 'DAN-k3POD1TfIZJZ5c4U', width: 728, height: 90 }, mobile: { unit: 'DAN-bF5K4pIdZxsus3qZ', width: 320, height: 100 } },
+      18: { desktop: { unit: 'DAN-COZ9JNKLUJRpUk0g', width: 728, height: 90 }, mobile: { unit: 'DAN-r5MyEeCv1YddRkib', width: 320, height: 100 } },
+      24: { desktop: { unit: 'DAN-booaMB0yD61U26kz', width: 728, height: 90 }, mobile: { unit: 'DAN-W9haKZ2SKZEBxO4A', width: 320, height: 100 } }
+    },
+    compare: {
+      desktop: { unit: 'DAN-goDJUjfP5E9hjnWX', width: 728, height: 90 },
+      mobile: { unit: 'DAN-kj9FFJNTBu6m2m7Y', width: 320, height: 100 }
+    },
+    route: {
+      desktop: { unit: 'DAN-KkESBTehog2OA2S1', width: 728, height: 90 },
+      mobile: { unit: 'DAN-JUgio3Vi8nZUE9yZ', width: 320, height: 100 }
+    },
+    regional: {
+      desktop: { unit: 'DAN-zbA77hQsDTg7RE4P', width: 728, height: 90 },
+      mobile: { unit: 'DAN-jH4H4pIxgcFJ3J66', width: 320, height: 100 }
+    }
+    /** SOFTM-AD-EXPANSION END */
   },
   /** SOFTM-AD-IDS END */
   direct: {
