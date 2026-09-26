@@ -7,4 +7,4 @@ permissions:
   contents: read
 jobs:
   archive-audit:
-    uses: softm/softm.github.io/.github/workflows/archive-audit-reusable.yml@8cb5321c4af1c8d7b7fd750c3c09aab8399c28ee
+    uses: softm/softm.github.io/.github/workflows/archive-audit-reusable.yml@23f1a57873d96d3f071664a52a43d934682c5b87
