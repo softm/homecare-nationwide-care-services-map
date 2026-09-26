@@ -882,3 +882,9 @@ dialog.care-location-notice .care-location-actions button { width:100%; }
 .care-map-page .care-popup-basket-action .care-popup-saved { order:3; flex:0 0 100%; width:100%; min-height:44px; margin:0; padding:9px 12px; border:1px solid #b8dcd6; border-radius:10px; background:#e6f5f1; color:#004541; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
 .care-map-page .care-popup-saved:focus-visible { outline:3px solid #268c80; outline-offset:2px; }
 /** SOFTM-POPUP-SAVED END */
+
+/** SOFTM-MARKER-NAME START 날짜:20260926 : 회전하는 핀과 이름을 분리해 긴 기관명도 수평으로 읽도록 표시 */
+.care-map-page .care-named-marker { position:relative; width:32px; height:32px; }
+.care-map-page .marker-name { position:absolute; left:50%; bottom:calc(100% + 7px); transform:translateX(-50%); width:max-content; max-width:180px; padding:4px 7px; border:1px solid #b8c9d9; border-radius:6px; background:#fff; color:#183550; font-size:12px; font-weight:700; line-height:1.35; text-align:center; white-space:normal; overflow-wrap:anywhere; box-shadow:0 2px 5px #14283e26; }
+.care-map-page .care-mobile-active-marker .marker-name { border-color:#175cb5; color:#175cb5; }
+/** SOFTM-MARKER-NAME END */
