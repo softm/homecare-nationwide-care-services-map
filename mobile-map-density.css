@@ -1,0 +1,28 @@
+/** SOFTM-MOBILE-DENSITY START 날짜:20260929 : 지도는 선택 기관에 집중하고 목록은 사진·핵심 정보를 함께 읽도록 모바일 정보 밀도를 정리 */
+@media (max-width:1000px) {
+ body.stitch-desktop.care-map-page .marker-name { display:none; }
+ body.stitch-desktop.care-map-page .care-mobile-active-marker .marker-name { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; width:180px; max-width:180px; font-size:13px; line-height:1.4; padding:5px 8px; transform:translateX(-50%) scale(.666667); transform-origin:bottom center; border-radius:8px; box-shadow:0 2px 5px #14283e20; }
+ body.stitch-desktop.care-map-page .stitch-brand strong { font-size:16px; }
+ body.stitch-desktop.care-map-page .care-type-header { left:128px; right:4px; }
+ body.stitch-desktop.care-map-page .care-type-header .care-type-menu { scrollbar-width:none; }
+ body.stitch-desktop.care-map-page .care-type-menu::-webkit-scrollbar { display:none; }
+ body.stitch-desktop.care-map-page:not(.care-mobile-filters-open) .filter-grid { grid-template-columns:minmax(0,1fr) 48px 76px; gap:6px; }
+ body.stitch-desktop.care-map-page .filter-grid .care-voice-input,body.stitch-desktop.care-map-page .filter-grid #q { background:#fff; }
+ body.stitch-desktop.care-map-page .filter-grid .care-voice-input { border:1px solid #dce4e2; border-radius:12px; }
+ body.stitch-desktop.care-map-page .filter-grid .search-btn { padding:0 8px; font-size:14px; }
+ body.stitch-desktop.care-map-page .care-mobile-filter-toggle { min-height:44px; padding:6px 8px; font-size:13px; background:#f3f7f6; border:1px solid #dce4e2; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] .map-title #areaBadge { font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] #list .row { display:grid; grid-template-columns:minmax(0,1fr) 72px; gap:5px 10px; padding:14px 12px; margin:0; border:0; border-bottom:1px solid #e8eeec; border-radius:0; box-shadow:none; background:#fff; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"] #list .row.care-scroll-active { background:#f2f8f6; box-shadow:inset 3px 0 #148578; outline:0; }
+ body.stitch-desktop.care-map-page #list .row > * { grid-column:1/-1; min-width:0; }
+ body.stitch-desktop.care-map-page #list .row > .care-result-heading { grid-column:1; grid-row:1; gap:6px; align-items:start; }
+ body.stitch-desktop.care-map-page #list .row > .care-result-evaluation { grid-column:1; grid-row:2; }
+ body.stitch-desktop.care-map-page #list .row > .care-result-photo { grid-column:2; grid-row:1/3; width:72px; height:72px; margin:0; float:none; align-self:start; border-radius:10px; }
+ body.stitch-desktop.care-map-page #list .row h3 { font-size:17px; line-height:1.4; margin:0; }
+ body.stitch-desktop.care-map-page #list .row p { font-size:13px; line-height:1.5; margin:0; }
+ body.stitch-desktop.care-map-page #list .care-result-summary { background:transparent; padding:0; gap:2px; font-size:12px; line-height:1.5; color:#687772; }
+ body.stitch-desktop.care-map-page #list .row .care-row-actions { margin-top:7px; gap:6px; }
+ body.stitch-desktop.care-map-page #list .row .care-row-actions > :is(button,a,label) { font-size:12px; min-height:44px; }
+ body.stitch-desktop.care-map-page #list .row .care-result-rank { width:24px; height:24px; min-width:24px; font-size:11px; background:transparent; }
+}
+/** SOFTM-MOBILE-DENSITY END */
