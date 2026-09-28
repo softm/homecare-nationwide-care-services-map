@@ -980,6 +980,13 @@
         results.setAttribute('role', 'tabpanel'); results.setAttribute('aria-labelledby', 'careSearchTab');
         const switcher = document.createElement('div'); switcher.className = 'care-view-switch'; switcher.setAttribute('role', 'group'); switcher.setAttribute('aria-label', '기관 표시 방식');
         switcher.innerHTML = '<button type="button" data-care-view="list" aria-pressed="true">목록</button><button type="button" data-care-view="map" aria-pressed="false">지도</button>';
+        /** SOFTM-SAVED-RETURN START 날짜:20260929 : 하단 탭을 찾지 않아도 담은 기관에서 검색 지도 맥락으로 즉시 복귀 */
+        const searchReturn = document.createElement('button');
+        searchReturn.type = 'button'; searchReturn.className = 'care-saved-search-return';
+        searchReturn.textContent = '← 기관 찾기'; searchReturn.setAttribute('aria-label', '기관 찾기 지도로 돌아가기');
+        searchReturn.addEventListener('click', () => { focusSearchMap(); if (mobileSheet?.state() === 'list') mobileSheet.set('split', false); tabs.querySelector('#careSearchTab').focus({ preventScroll:true }); });
+        switcher.prepend(searchReturn);
+        /** SOFTM-SAVED-RETURN END */
         layout.before(switcher);
         bar = document.createElement('section'); bar.className = 'card care-basket care-saved-panel'; bar.id = 'careSavedPanel'; bar.setAttribute('role', 'tabpanel'); bar.setAttribute('aria-labelledby', 'careSavedTab');
         bar.innerHTML = `<div class="care-saved-heading"><div><h2 tabindex="-1">담은 기관 <span class="care-basket-count">0곳</span></h2><p>관심 있는 기관을 비교하고 방문을 준비하세요.</p></div><button type="button" class="care-text-button" data-basket-clear>비우기</button></div>

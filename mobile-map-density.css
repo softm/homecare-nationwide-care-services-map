@@ -26,3 +26,14 @@
  body.stitch-desktop.care-map-page #list .row .care-result-rank { width:24px; height:24px; min-width:24px; font-size:11px; background:transparent; }
 }
 /** SOFTM-MOBILE-DENSITY END */
+/** SOFTM-SAVED-RETURN START 날짜:20260929 : 담은 기관의 보기 전환과 검색 지도 복귀를 구분하고 상하단 고정 메뉴에 본문이 가리지 않도록 배치 */
+.care-saved-search-return { display:none; }
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page[data-care-workspace="saved"] .care-view-switch { top:56px; height:52px; display:flex; gap:6px; }
+ body.stitch-desktop.care-map-page[data-care-workspace="saved"] .care-view-switch .care-saved-search-return { display:block; flex:0 0 auto; padding:6px 10px; min-height:44px; font-size:14px; color:#004541; background:#edf7f4; border:1px solid #c9ded8; border-radius:10px; }
+ body.stitch-desktop.care-map-page[data-care-workspace="saved"] .care-view-switch [data-care-view] { flex:1; min-width:0; min-height:44px; padding:6px; }
+ body.stitch-desktop.care-map-page:not(.care-map-focus)[data-care-workspace="saved"] .layout { top:108px!important; bottom:var(--care-mobile-tab-space); }
+ body.stitch-desktop.care-map-page[data-care-workspace="saved"] .care-workspace-tabs { display:flex!important; position:fixed; inset:auto 0 0; z-index:181; width:100%; height:var(--care-mobile-tab-space); }
+ body.stitch-desktop.care-map-page[data-care-workspace="saved"] .care-workspace-tab-list { width:100%; }
+}
+/** SOFTM-SAVED-RETURN END */
