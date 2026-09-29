@@ -1,0 +1,8 @@
+/** SOFTM-MARKER-DENSITY START 날짜:20260930 : 넓은 지역은 기관 분포를 먼저 보여주고 선택 기관의 이름·점수만 강조해 지명과 도로를 가리지 않음 */
+body.care-map-page .marker-name { display:none; }
+body.care-map-page .care-mobile-active-marker .marker-name { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; width:180px; max-width:180px; font-size:13px; line-height:1.4; transform:translateX(-50%) scale(.666667); transform-origin:bottom center; }
+body.care-map-page:not(.care-basket-map) .care-compact-markers .care-named-marker .map-marker { width:14px; height:14px; position:absolute; left:9px; top:15px; border:2px solid #fff; border-radius:50%; transform:none; box-shadow:0 1px 3px #14283e40; }
+body.care-map-page:not(.care-basket-map) .care-compact-markers .care-named-marker .map-marker span { display:none; }
+body.care-map-page:not(.care-basket-map) .care-compact-markers .care-mobile-active-marker .map-marker { width:32px; height:32px; left:0; top:0; border-radius:11px 11px 11px 3px; transform:rotate(-45deg); }
+body.care-map-page:not(.care-basket-map) .care-compact-markers .care-mobile-active-marker .map-marker span { display:block; }
+/** SOFTM-MARKER-DENSITY END */
