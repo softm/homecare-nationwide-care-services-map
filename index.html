@@ -245,9 +245,9 @@
 <script src="care-list-view.js?v=20260930-sticky1"></script> <!-- SOFTM-LIST-STICKY 날짜:20260930 : 보기 전환도 현재 기관의 단일 스크롤 위치로 복원 -->
 <!-- SOFTM-LIST-VIEW END -->
 <!-- SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 목록모드의 접기형 하단 광고를 기존 지면과 별도로 연결 -->
-<link rel="stylesheet" href="care-list-ads.css?v=20260930-1">
+<link rel="stylesheet" href="care-list-ads.css?v=20260930-map1">
 <script src="care-list-ad-config.js?v=20260930-issued1"></script> <!-- SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 새로 발급된 PC·모바일 하단 광고 ID가 이전 빈 설정 캐시에 막히지 않도록 갱신 -->
-<script src="care-list-ads.js?v=20260930-sticky1"></script> <!-- SOFTM-LIST-AD-READING 날짜:20260930 : 읽기 중 광고의 일시 접힘과 수동 선택을 구분 -->
+<script src="care-list-ads.js?v=20260930-map1"></script> <!-- SOFTM-LIST-AD-READING 날짜:20260930 : 목록·지도 공용 접기 광고를 이전 캐시 없이 적용 -->
 <!-- SOFTM-LIST-ANCHOR-ADS END -->
 <!-- SOFTM-LIST-STICKY START 날짜:20260930 : 위치·검색·결과를 단계적으로 고정하며 본문 전체를 스크롤 -->
 <link rel="stylesheet" href="care-list-location-compact.css?v=20260930-toolbar1"> <!-- SOFTM-LOCATION-TOOLBAR 날짜:20260930 : 별도 위치 띠를 제거하고 PC·모바일 검색 도구에 통합 -->
@@ -1214,7 +1214,7 @@ function initCareListMode(){
    try{
    globalThis.CareListSticky?.sync(); // SOFTM-LIST-STICKY 날짜:20260930 : 지도모드로 돌아갈 때 숨긴 검색 조작을 복원
    CareListView.sync(); // SOFTM-LIST-VIEW 날짜:20260930 : 지도 복귀 시 보기 조작만 숨기고 선택한 밀도를 유지
-   CareListAds.sync(); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 지도모드에서는 고정 광고와 예약 공간을 함께 숨김
+   CareListAds.sync(); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 목록·지도 전환에서 공용 광고와 예약 공간을 함께 유지
    if(next==='map'){initCareAds();initExpandedCareAds();} // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 지도 복귀에는 기존 지도 전용 광고를 다시 연결
    careListLocation?.sync(); // SOFTM-LIST-LOCATION 날짜:20260930 : 지도 복귀 후 늦은 위치 응답이 검색을 변경하지 않도록 취소
    syncCareListSort();if(TYPE)renderNav();
@@ -1246,7 +1246,7 @@ function initCareListMode(){
   },error:error=>toast(error.message||'화면을 전환하지 못했습니다. 다시 시도해 주세요.')
  });
  CareListView.mount(); // SOFTM-LIST-VIEW 날짜:20260930 : 결과 제목에 보기 선택을 한 번 연결하고 재조회 없이 전환
- CareListAds.mount({isList:()=>CareListMode.isList()}); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 목록에서만 하단 고정 광고를 요청하고 접힘 상태를 보존
+ CareListAds.mount({isList:()=>CareListMode.isList()}); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 목록·지도에서 단일 하단 광고와 접힘 상태를 공유
  /** SOFTM-LIST-LOCATION START 날짜:20260930 : 접속 위치는 표시만 하고 사용자가 찾기를 눌렀을 때 확인된 지역을 적용 */
  careListLocation=CareListLocation.mount({
   enabled:()=>CareListMode.isList(),signature:()=>JSON.stringify([refreshToken,careListSignature()]),

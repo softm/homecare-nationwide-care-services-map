@@ -1,14 +1,14 @@
-/** SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 접을 수 있는 목록 전용 광고가 기관 목록을 가리지 않고 실제 펼침에만 한 번 요청되도록 관리 */
+/** SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 접을 수 있는 목록·지도 공용 광고가 기관 목록을 가리지 않고 실제 펼침에만 한 번 요청되도록 관리 */
 (function (root) {
     'use strict';
     const storageKey = 'careListAd:collapsed:v1';
-    let options = {}, config, zone, handle, panel, host, fallback, mountElement, ad, timeout, desktop;
+    let options = {}, config, zone, handle, panel, host, fallback, mountElement, ad, timeout, desktop, inquiry; // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 모드별 문의 위치를 같은 광고에서 갱신
     let expanded = true, attempted = false, failed = false, requestedDesktop, slotWidth = 0;
     /** SOFTM-LIST-AD-READING START 날짜:20260930 : 목록 읽기 중 임시 접힘이 사용자의 세션 선택을 바꾸지 않도록 분리 */
     let reading = false, readingExpanded = false;
 
     function isExpanded() {
-        return reading ? readingExpanded : expanded;
+        return reading && (options.isList ? options.isList() : root.document.body.dataset.careMode === 'list') ? readingExpanded : expanded; // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 목록의 임시 접힘이 지도 광고 선택을 덮지 않도록 구분
     }
     /** SOFTM-LIST-AD-READING END */
 
@@ -74,7 +74,11 @@
     function sync() {
         if (!zone) return;
         const isList = options.isList ? options.isList() : root.document.body.dataset.careMode === 'list';
-        zone.hidden = !isList || config.enabled === false || config.mode === 'off';
+        /** SOFTM-MAP-ANCHOR-ADS START 날짜:20260930 : 두 모드에서 단일 광고와 접힘 선택을 공유하고 실제 문의 위치를 전달 */
+        zone.hidden = config.enabled === false || config.mode === 'off';
+        zone.setAttribute('aria-label', isList ? '목록 하단 광고' : '지도 하단 광고');
+        inquiry.dataset.partnerPlacement = isList ? '목록모드 하단 고정' : '지도모드 하단 고정';
+        /** SOFTM-MAP-ANCHOR-ADS END */
         /** SOFTM-LIST-AD-READING START 날짜:20260930 : 표시 상태와 접근성·예약 공간을 실제 읽기 단계의 펼침 상태로 일치 */
         const visibleExpanded = isExpanded();
         panel.hidden = !visibleExpanded;
@@ -91,7 +95,7 @@
 
     function setExpanded(value) {
         /** SOFTM-LIST-AD-READING START 날짜:20260930 : 읽기 중 수동 선택은 현재 단계에만 적용하고 원래 광고 선택은 보존 */
-        if (reading) {
+        if (reading && (options.isList ? options.isList() : root.document.body.dataset.careMode === 'list')) { // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 지도에서 수동 선택한 접힘은 세션에 보존
             readingExpanded = Boolean(value);
         } else {
             expanded = Boolean(value);
@@ -134,7 +138,7 @@
         const copy = element('div', 'care-list-ad-copy');
         copy.appendChild(element('strong', '', '돌봄 서비스를 알려보세요'));
         copy.appendChild(element('span', '', '요양·돌봄 사업자를 위한 광고·제휴 안내'));
-        const inquiry = element('button', 'care-list-ad-inquiry', '제휴 문의');
+        inquiry = element('button', 'care-list-ad-inquiry', '제휴 문의'); // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 모드 전환 시 문의 출처를 갱신
         inquiry.type = 'button';
         inquiry.dataset.partnerInquiry = '';
         inquiry.dataset.partnerPlacement = '목록모드 하단 고정';
