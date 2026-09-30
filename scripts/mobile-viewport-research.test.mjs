@@ -37,6 +37,7 @@ for (const name of ['index.html']) {
         const config = { placements: { listNative: true, listAfter: 6, listRepeat: 6 }, kakao: { list: { unit: 'unit', width: 320, height: 100 } } };
         let mode = 'hybrid';
         const context = { AD_CONFIG: config, careAdConfig: () => config, careAdMode: () => mode, adMode: () => mode, configuredListAds: () => [config.kakao.list], kakaoIns: () => 'KAKAO', esc: x => x, activeDirectAd: () => ({}), directAds: () => [{}], directAdHtml: () => 'DIRECT', page: 1 };
+        context.CareListMode = { isList: () => false }; // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 기존 지도 지면 회귀는 목록모드와 구분된 상태로 검사
         vm.createContext(context); vm.runInContext(html.slice(start, end), context);
         for (const total of [1, 2, 3, 4, 5, 6, 12, 18]) {
             const slots = Array.from({ length: total }, (_, i) => context.listAdHtml(i, total)).map((ad, i) => ad ? i + 1 : 0).filter(Boolean);
