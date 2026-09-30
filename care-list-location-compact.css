@@ -101,3 +101,16 @@ body[data-care-mode="list"] #careListLocation[data-phase="error"] [data-location
     body.stitch-desktop.care-map-page[data-care-mode="list"] #careListLocation { flex:0 1 480px; }
 }
 /** SOFTM-LOCATION-TOOLBAR END */
+
+/** SOFTM-LOCATION-RESULT START 날짜:20260930 : 실제 위치 조회 완료를 진한 적용 버튼과 결과 영역의 지속 안내로 구분 */
+body[data-care-mode="list"] .care-location-result { display:flex; flex:1 0 100%; order:10; flex-wrap:wrap; align-items:center; gap:4px 12px; box-sizing:border-box; padding:10px 14px; border:1px solid #7cb6a2; border-left:4px solid #007264; border-radius:10px; background:#e6f5ee; color:#164e3c; font-size:14px; line-height:1.5; }
+body[data-care-mode="list"] .care-location-result strong { font-size:15px; }
+body[data-care-mode="list"] .care-location-result span { overflow-wrap:anywhere; }
+body[data-care-mode="list"] .care-location-result[data-state="pending"] { border-color:#8badd1; background:#edf5ff; color:#234e7d; }
+body[data-care-mode="list"] .care-location-result[data-state="error"] { border-color:#cead78; background:#fff7e9; color:#755021; }
+.care-location-result[hidden],body:not([data-care-mode="list"]) .care-location-result { display:none!important; }
+body.stitch-desktop.care-map-page[data-care-mode="list"] #careListLocation[data-applied="true"] { border-color:#007264; }
+body.stitch-desktop.care-map-page[data-care-mode="list"] #careListLocation[data-applied="true"] > [data-list-locate] { background:#006556; color:#fff; }
+@media (max-width:1000px) { body[data-care-mode="list"] .care-location-result { padding:8px 10px; font-size:13px; } body[data-care-mode="list"] .care-location-result strong { font-size:14px; } }
+@media (max-height:560px) and (min-width:600px) { body.stitch-desktop.care-map-page[data-care-mode="list"] .results .list-head:has(.care-location-result:not([hidden])) { flex-wrap:wrap; } }
+/** SOFTM-LOCATION-RESULT END */

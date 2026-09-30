@@ -238,7 +238,7 @@
 <!-- SOFTM-LIST-MODE START 날짜:20260930 : 기존 지도와 별개인 목록 탐색 모드를 공용 상태에 연결 -->
 <link rel="stylesheet" href="care-list-mode.css?v=20260930-summary1"> <!-- SOFTM-SUMMARY-COMPACT 날짜:20260930 : 줄인 분석 요약과 접이식 자료 안내를 캐시 없이 반영 -->
 <script src="care-list-mode.js?v=20260930-summary1"></script> <!-- SOFTM-SUMMARY-COMPACT 날짜:20260930 : 등급 한 줄 요약과 보조 정보 분리를 함께 반영 -->
-<script src="care-list-location.js?v=20260930-toolbar1"></script> <!-- SOFTM-LOCATION-TOOLBAR 날짜:20260930 : 위치 검색과 주소·권한 안내의 역할을 한 컨트롤 안에서 구분 -->
+<script src="care-list-location.js?v=20260930-result1"></script> <!-- SOFTM-LOCATION-RESULT 날짜:20260930 : 실제 위치 조회 완료와 적용 상태를 즉시 표시 -->
 <!-- SOFTM-LIST-MODE END -->
 <!-- SOFTM-LIST-VIEW START 날짜:20260930 : 검색 결과를 다시 조회하지 않고 목록의 표시 밀도를 선택 -->
 <link rel="stylesheet" href="care-list-view.css?v=20260930-1">
@@ -250,7 +250,7 @@
 <script src="care-list-ads.js?v=20260930-map1"></script> <!-- SOFTM-LIST-AD-READING 날짜:20260930 : 목록·지도 공용 접기 광고를 이전 캐시 없이 적용 -->
 <!-- SOFTM-LIST-ANCHOR-ADS END -->
 <!-- SOFTM-LIST-STICKY START 날짜:20260930 : 위치·검색·결과를 단계적으로 고정하며 본문 전체를 스크롤 -->
-<link rel="stylesheet" href="care-list-location-compact.css?v=20260930-toolbar1"> <!-- SOFTM-LOCATION-TOOLBAR 날짜:20260930 : 별도 위치 띠를 제거하고 PC·모바일 검색 도구에 통합 -->
+<link rel="stylesheet" href="care-list-location-compact.css?v=20260930-result1"> <!-- SOFTM-LOCATION-RESULT 날짜:20260930 : 적용 버튼과 지역·건수 완료 안내를 PC·모바일에서 강조 -->
 <link rel="stylesheet" href="care-list-sticky.css?v=20260930-filter-layer1"> <!-- SOFTM-FILTER-LAYER 날짜:20260930 : 상세필터가 가림막 위에서 조작되도록 겹침 수정본을 즉시 반영 -->
 <script src="care-list-sticky.js?v=20260930-location-ui1"></script> <!-- SOFTM-LOCATION-TOOLBAR 날짜:20260930 : 위치 도구의 높이 중복 계산과 버튼 포커스 중 숨김을 방지 -->
 <!-- SOFTM-LIST-STICKY END -->
@@ -445,6 +445,7 @@ let careSelectionViewport=false;
 function preserveCareSelectionResults(){careSelectionViewport=true;clearTimeout(refreshTimer);careViewportResearch?.cancel();}
 /** SOFTM-SELECTION-VIEWPORT END */
 function beginCareQuery(feedback){
+ if(typeof careListLocation!=='undefined')careListLocation?.clearResult(); // SOFTM-LOCATION-RESULT 날짜:20260930 : 다른 검색을 시작하면 이전 내 위치 완료 표시를 해제
  ++careListVersion; // SOFTM-LIST-YIELD 날짜:20260916 : 진행 중인 이전 목록 생성도 새 조건과 함께 취소
  careSelectionViewport=false; // SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 명시 검색과 실제 지도 탐색이 시작되면 선택 보존을 해제
  globalThis.CareMapExperience?.releaseDetailSelection(); // SOFTM-MARKER-PERSIST 날짜:20260915 : 새 검색 결과에는 이전 기관의 선택 고정을 이어가지 않음
