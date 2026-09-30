@@ -7,7 +7,7 @@
             const bounds = host.getBoundingClientRect();
             const labels = [...host.querySelectorAll('.marker-name')];
             labels.forEach(label => label.classList.remove('care-label-visible','care-label-measure'));
-            if (map.getZoom() < 15 || host.classList.contains('care-compact-markers') || !bounds.width || !bounds.height) return;
+            if (host.classList.contains('care-compact-markers') || !bounds.width || !bounds.height) return; // SOFTM-LABEL-SPACE 날짜:20260930 : 배율이 낮아도 기관 사이에 읽을 공간이 있으면 이름을 허용
             const inside = rect => rect.width && rect.left >= bounds.left+8 && rect.right <= bounds.right-8 && rect.top >= bounds.top+8 && rect.bottom <= bounds.bottom-8;
             const pins = [...host.querySelectorAll('.map-marker')].map(node=>node.getBoundingClientRect()).filter(inside);
             const occupied = labels.filter(label=>label.closest('.care-mobile-active-marker')).map(label=>label.getBoundingClientRect()).filter(rect=>rect.width);

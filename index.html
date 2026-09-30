@@ -231,7 +231,7 @@
 <script src="map-share-state.js?v=20260916-view1"></script> <!-- SOFTM-SHARE-VIEW 날짜:20260916 : 초기 좌표 해석 전에 기존 공유 주소의 안내 문구를 분리 -->
 <script src="care-basket-share.js?v=20260915-text1"></script> <!-- SOFTM-SHARE-URL 날짜:20260915 : 안내 문구가 섞인 기존 공유 링크 복원을 즉시 적용 -->
 <script src="stitch-controls.js?v=20260916-filter-design1"></script> <!-- SOFTM-FILTER-DESIGN 날짜:20260916 : 상세필터 시안과 실제 적용조건 상태를 함께 갱신 -->
-<script src="map-marker-labels.js?v=20260930-1"></script> <!-- SOFTM-MARKER-LABELS 날짜:20260930 : 지도 공간에 맞춘 이름표 배치 모듈 연결 -->
+<script src="map-marker-labels.js?v=20260930-2"></script> <!-- SOFTM-MARKER-LABELS 날짜:20260930 : 지도 공간에 맞춘 이름표 배치 모듈 연결 -->
 <script src="map-experience.js?v=20260929-saved-return1"></script> <!-- SOFTM-POPUP-SAVED 날짜:20260917 : 팝업에서 담은 목록으로 직접 이동하는 동작을 갱신 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <script>
@@ -557,6 +557,7 @@ async function clearQueryMarkers(keep=new Set(),current=()=>true){
 }
 /** SOFTM-MARKER-DIFF END */
 /** SOFTM-MARKER-CLEAR-YIELD END */
+function careMarkerDensityLimit(){const host=$('naverMap');return Math.max(12,Math.min(80,Math.floor((host.clientWidth||1000)*(host.clientHeight||720)/9000)))} // SOFTM-LABEL-SPACE 날짜:20260930 : 배율 대신 실제 지도 면적으로 모바일·전체화면의 점수 핀 밀도를 판단
 async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQuery(),partial=false}={}){
  if(!query.current())return {cancelled:true};
  if(globalThis.CareRegionEntry?.waiting())return publishCareResult(query,{count:0,markerCount:0,mapReady:false,scope:'지역 선택 전'}); // SOFTM-REGION-ENTRY 날짜:20260913 : 지역 미선택 상태의 상세조건 변경은 전국 좌표 조회를 시작하지 않음
@@ -564,7 +565,7 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
  /** SOFTM-MARKER-DIFF START 날짜:20260917 : 새 조건에 남는 마커는 전체 삭제와 재생성을 건너뜀 */
  await clearQueryMarkers(new Set(candidates.map(c=>c.i)),query.current);if(!query.current())return {cancelled:true};
  /** SOFTM-MARKER-DIFF END */
- $('naverMap').classList?.toggle('care-compact-markers',candidates.length>80||map.getZoom()<=13); // SOFTM-MARKER-DENSITY 날짜:20260930 : 넓거나 기관이 많은 지도에서 점수 대신 등급색 위치점을 사용하고 전체 결과는 보존
+ $('naverMap').classList?.toggle('care-compact-markers',candidates.length>careMarkerDensityLimit()); // SOFTM-MARKER-DENSITY 날짜:20260930 : 넓거나 기관이 많은 지도에서 점수 대신 등급색 위치점을 사용하고 전체 결과는 보존
  $('naverMap').classList?.toggle('care-dense-map',candidates.length>500); // SOFTM-DENSE-PAINT 날짜:20260917 : 넓은 지도에서도 선택 대비를 유지하며 일반 마커 그림자만 생략
  const bounds=map.getBounds(),center={lat:map.getCenter().lat(),lng:map.getCenter().lng()},known=[],unknown=[];
  for(const c of candidates){const p=cachedCoord(c);if(p){c._mapCenterDistance=hav(center,p);known.push(c)}else unknown.push(c)}
@@ -626,7 +627,7 @@ async function loadMarkers(candidates,{fit=false,regionText='',query=beginCareQu
    /** SOFTM-MARKER-DIFF END */
   }});
   if(ranked.cancelled||!query.current())return {cancelled:true};
-  $('naverMap').classList?.toggle('care-compact-markers',placed.length>80||map.getZoom()<=13); // SOFTM-MARKER-DENSITY 날짜:20260930 : 좌표 후보 수 대신 최종 화면 안 기관 수로 점수 핀 복귀를 판단
+  $('naverMap').classList?.toggle('care-compact-markers',placed.length>careMarkerDensityLimit()); // SOFTM-MARKER-DENSITY 날짜:20260930 : 좌표 후보 수 대신 최종 화면 안 기관 수로 점수 핀 복귀를 판단
   /** SOFTM-QUERY-YIELD END */
   /** SOFTM-REGION-SPACING START 날짜:20260904 : 시군구 선택 시 도심을 읽기 쉽게 확대하면서 조회 목록과 모든 마커는 유지 */
   if(fit&&placed.length){
