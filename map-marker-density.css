@@ -6,3 +6,7 @@ body.care-map-page:not(.care-basket-map) .care-compact-markers .care-named-marke
 body.care-map-page:not(.care-basket-map) .care-compact-markers .care-mobile-active-marker .map-marker { width:32px; height:32px; left:0; top:0; border-radius:11px 11px 11px 3px; transform:rotate(-45deg); }
 body.care-map-page:not(.care-basket-map) .care-compact-markers .care-mobile-active-marker .map-marker span { display:block; }
 /** SOFTM-MARKER-DENSITY END */
+/** SOFTM-MARKER-LABELS START 날짜:20260930 : 확대된 지도의 겹치지 않는 일반 기관명은 모바일 숨김 규칙보다 우선해 점수와 함께 표시 */
+body.care-map-page .marker-name.care-label-visible,body.care-map-page .marker-name.care-label-measure { display:-webkit-box!important; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; max-width:160px; bottom:calc(100% + 16px); font-size:12px; line-height:1.35; }
+body.care-map-page .marker-name.care-label-measure { visibility:hidden; }
+/** SOFTM-MARKER-LABELS END */
