@@ -1,6 +1,9 @@
 /** SOFTM-LIST-STICKY START 날짜:20260930 : 고정 영역과 중첩 스크롤에 갇힌 목록을 하나의 흐름으로 넓히고 검색·결과만 단계적으로 고정 */
 body.stitch-desktop.care-map-page[data-care-mode="list"] .wrap {
-    position:fixed;
+    /** SOFTM-FILTER-LAYER START 날짜:20260930 : 고정 부모의 독립 겹침 영역을 제거해 상세필터가 본문 가림막 위에서 조작되도록 유지 */
+    position:absolute;
+    z-index:auto;
+    /** SOFTM-FILTER-LAYER END */
     inset:var(--care-list-controls-top,120px) 0 var(--care-list-ad-space,0px);
     width:100%;
     max-width:none;
