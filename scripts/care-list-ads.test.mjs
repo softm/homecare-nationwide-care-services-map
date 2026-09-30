@@ -140,6 +140,73 @@ test('정상 iframe은 유지하고 화면 회전·폭 부족 때에는 축소�
     assert.equal(narrow.fallback.hidden, false);
     assert.equal(narrow.scripts().length, 1);
 });
+/** SOFTM-LIST-AD-READING-TEST START 날짜:20260930 : 읽기 단계의 임시 접힘·수동 선택·원래 세션 복원을 실제 표시와 광고 요청으로 검증 */
+test('읽기 진입은 광고를 접어 공간을 반환하고 복귀할 때 원래 사용자 선택을 복원한다', () => {
+    for (const desktop of [true, false]) {
+        for (const collapsed of [true, false]) {
+            const state = setup({ desktop, collapsed });
+            const panel = state.zone.querySelector('#careListAdPanel');
+            const previousStorage = state.storage.get('careListAd:collapsed:v1');
+            const previousRequests = state.scripts().length;
+            state.scope.CareListAds.setReading(true);
+            assert.equal(panel.hidden, true);
+            assert.equal(state.zone.dataset.expanded, 'false');
+            assert.equal(state.handle.attributes['aria-expanded'], 'false');
+            assert.equal(state.handle.textContent, '광고 펼치기');
+            assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '28px');
+            assert.equal(state.storage.get('careListAd:collapsed:v1'), previousStorage);
+            state.scope.CareListAds.setReading(false);
+            assert.equal(panel.hidden, collapsed);
+            assert.equal(state.handle.attributes['aria-expanded'], String(!collapsed));
+            assert.equal(state.handle.textContent, collapsed ? '광고 펼치기' : '광고 접기');
+            assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), collapsed ? '28px' : desktop ? '143px' : '153px');
+            assert.equal(state.storage.get('careListAd:collapsed:v1'), previousStorage);
+            assert.equal(state.scripts().length, previousRequests);
+        }
+    }
+});
+
+test('읽기 중 수동 펼침은 반복 스크롤·화면 갱신에도 유지되고 다음 읽기 진입은 다시 접힌다', () => {
+    const state = setup({ collapsed: true, desktop: false });
+    state.scope.CareListAds.setReading(true);
+    state.handle.click();
+    assert.equal(state.handle.attributes['aria-expanded'], 'true');
+    assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '153px');
+    assert.equal(state.scripts().length, 1);
+    state.scope.CareListAds.setReading(true);
+    state.listeners.resize();
+    state.scope.CareListAds.sync();
+    assert.equal(state.handle.attributes['aria-expanded'], 'true');
+    assert.equal(state.storage.get('careListAd:collapsed:v1'), '1');
+    state.handle.click();
+    state.scope.CareListAds.setReading(true);
+    assert.equal(state.handle.attributes['aria-expanded'], 'false');
+    state.handle.click();
+    state.scope.CareListAds.setReading(false);
+    assert.equal(state.handle.attributes['aria-expanded'], 'false', '읽기 임시 펼침 후에도 원래 접힘 선택으로 복귀한다');
+    state.scope.CareListAds.setExpanded(true);
+    state.scope.CareListAds.setReading(true);
+    assert.equal(state.handle.attributes['aria-expanded'], 'false');
+    assert.equal(state.storage.get('careListAd:collapsed:v1'), '0');
+    assert.equal(state.scripts().length, 1, '같은 광고를 다시 요청하지 않는다');
+});
+
+test('읽기 단계에서 숨은 페이지가 활성화되어도 요청하지 않고 지도 전환 후 기존 선택을 복원한다', () => {
+    const state = setup({ hidden: true });
+    state.scope.CareListAds.setReading(true);
+    state.scope.document.hidden = false;
+    state.listeners.visibilitychange();
+    assert.equal(state.scripts().length, 0);
+    state.mode('map');
+    state.scope.CareListAds.setReading(false);
+    assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '0px');
+    assert.equal(state.scripts().length, 0);
+    state.mode('list');
+    assert.equal(state.handle.attributes['aria-expanded'], 'true');
+    assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '143px');
+    assert.equal(state.scripts().length, 1);
+});
+/** SOFTM-LIST-AD-READING-TEST END */
 /** SOFTM-LIST-ANCHOR-PAGE-TEST START 날짜:20260930 : 실제 페이지의 광고 생성·정리를 실행해 목록 전환 중 숨은 광고와 반복 단위가 남는 회귀를 방지 */
 const page = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const adStart = page.indexOf('function careAdConfig()');

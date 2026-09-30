@@ -1,0 +1,216 @@
+/** SOFTM-LIST-STICKY-TEST START 날짜:20260930 : 스크롤 단계가 방향 흔들림에 깜박이거나 보기·상세 복원으로 선택 기관을 가리지 않도록 검증 */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
+
+const source = readFileSync(new URL('../care-list-sticky.js', import.meta.url), 'utf8');
+const logic = vm.createContext({});
+vm.runInContext(source, logic);
+const { createProgression } = logic.CareListSticky;
+const dimensions = { locationHeight: 56, filterHeight: 112, summaryHeight: 60 };
+
+test('현재 위치·검색조건을 지난 뒤 읽기 단계로 바뀌고 처음으로 돌아오면 전체를 표시한다', () => {
+    const state = createProgression();
+    assert.equal(state.update(0, dimensions), 'expanded');
+    assert.equal(state.update(50, dimensions), 'expanded');
+    assert.equal(state.update(56, dimensions), 'search');
+    assert.equal(state.update(200, dimensions), 'search');
+    assert.equal(state.update(250, dimensions), 'reading');
+    assert.equal(state.update(0, dimensions), 'expanded');
+});
+
+test('읽기 중 짧은 방향 흔들림은 유지하고 누적 위스크롤에서 검색을 다시 표시한다', () => {
+    const state = createProgression();
+    assert.equal(state.update(400, dimensions), 'reading');
+    for (const top of [390, 395, 380, 385, 360, 338]) assert.equal(state.update(top, dimensions), 'reading', `scrollTop=${top}`);
+    assert.equal(state.update(337, dimensions), 'search');
+    assert.equal(state.update(347, dimensions), 'search');
+    assert.equal(state.update(369, dimensions), 'reading');
+});
+
+test('입력 포커스·상세조건 잠금 중에는 깊게 내려가도 검색을 숨기지 않는다', () => {
+    const state = createProgression();
+    state.update(400, dimensions);
+    assert.equal(state.update(450, { ...dimensions, locked: true }), 'search');
+    assert.equal(state.update(800, { ...dimensions, locked: true }), 'search');
+    assert.equal(state.update(850, dimensions), 'reading');
+});
+
+test('조건 초기화는 이전 스크롤 방향을 지우고 위치줄부터 다시 시작한다', () => {
+    const state = createProgression();
+    state.update(600, dimensions); state.update(500, dimensions);
+    state.reset();
+    assert.equal(state.update(0, dimensions), 'expanded');
+    assert.equal(state.update(100, dimensions), 'search');
+    assert.equal(state.update(260, dimensions), 'reading');
+});
+
+test('기관 복원의 큰 좌표 이동은 사용자 위스크롤로 오인하지 않고 이후 방향만 새로 계산한다', () => {
+    const state = createProgression();
+    state.update(1000, dimensions);
+    state.rebase(400, 'reading');
+    assert.equal(state.update(400, dimensions), 'reading');
+    assert.equal(state.update(380, dimensions), 'reading');
+    assert.equal(state.update(352, dimensions), 'search');
+    state.rebase(700, 'search');
+    assert.equal(state.update(700, dimensions), 'search');
+    assert.equal(state.update(731, dimensions), 'search');
+    assert.equal(state.update(732, dimensions), 'reading');
+});
+
+function environment() {
+    let listMode = true, rowHeight = 100, frames = [];
+    const classes = new Set(), listeners = new Map();
+    function node() {
+        const attributes = new Map();
+        return { dataset: {}, hidden: false, inert: false, children: [],
+            setAttribute(name, value) { attributes.set(name, String(value)); },
+            getAttribute(name) { return attributes.get(name) ?? null; },
+            removeAttribute(name) { attributes.delete(name); },
+            addEventListener(name, callback) { listeners.set(`${name}:${listeners.size}`, callback); },
+            append(child) { this.children.push(child); }, before() {},
+            getBoundingClientRect: () => ({ top: 0, bottom: 0, height: 0 })
+        };
+    }
+    const body = node(); body.dataset.careMode = 'list';
+    body.classList = { contains: value => classes.has(value) };
+    body.style = { setProperty() {} };
+    const viewport = node(); viewport.scrollTop = 0;
+    viewport.getBoundingClientRect = () => ({ top: 120, bottom: 720, height: 600 });
+    const filters = node(), input = { tagName: 'INPUT', focus() { document.activeElement = input; } }, head = node(), list = node();
+    filters.contains = value => value === input;
+    filters.getBoundingClientRect = () => ({ top: 120, bottom: 232, height: dimensions.filterHeight });
+    head.querySelector = selector => selector === '[data-list-search-return]' ? head.children.find(child => 'listSearchReturn' in child.dataset) : null;
+    head.getBoundingClientRect = () => {
+        const naturalTop = 120 + dimensions.locationHeight + dimensions.filterHeight - viewport.scrollTop;
+        const stickyTop = body.dataset.careListStage === 'reading' ? 120 : 120 + dimensions.filterHeight;
+        const top = Math.max(naturalTop, stickyTop);
+        return { top, bottom: top + 56, height: 56 };
+    };
+    const location = node(), summary = node();
+    location.getBoundingClientRect = () => ({ height: dimensions.locationHeight });
+    summary.getBoundingClientRect = () => ({ height: dimensions.summaryHeight });
+    const rows = Array.from({ length: 30 }, (_, index) => {
+        const row = node(); row.dataset.id = `institution-${index}`;
+        row.getBoundingClientRect = () => {
+            const top = 120 + dimensions.locationHeight + dimensions.filterHeight + 56 + dimensions.summaryHeight + index * rowHeight - viewport.scrollTop;
+            return { top, bottom: top + rowHeight, height: rowHeight };
+        };
+        return row;
+    });
+    const document = { body, activeElement: null, createElement: node,
+        querySelector: selector => ({ 'main.wrap': viewport, '.filters': filters, '.results .list-head': head })[selector] || null,
+        querySelectorAll: selector => selector === '#list .row' ? rows : [],
+        getElementById: id => ({ list, q: input, careListLocation: location, careListSummary: summary })[id] || null
+    };
+    const context = vm.createContext({ document, CareListMode: { isList: () => listMode },
+        requestAnimationFrame(callback) { frames.push(callback); return frames.length; }, addEventListener() {},
+        MutationObserver: class { observe() {} }, ResizeObserver: class { observe() {} }
+    });
+    vm.runInContext(source, context);
+    const api = context.CareListSticky;
+    return { api, body, filters, viewport, head, list, rows, input, document,
+        mode(value) { listMode = value; body.dataset.careMode = value ? 'list' : 'map'; },
+        scroll(top) { viewport.scrollTop = top; api.sync(); },
+        density(value) { rowHeight = value; },
+        open(value) { if (value) classes.add('care-mobile-filters-open'); else classes.delete('care-mobile-filters-open'); },
+        flush() { const ready = frames; frames = []; for (const callback of ready) callback(); }
+    };
+}
+
+test('읽기 단계에서는 검색을 포커스 순서에서 빼고 검색조건 버튼으로 맨 위와 입력을 복구한다', () => {
+    const env = environment(); env.api.mount(); env.scroll(900);
+    const button = env.head.querySelector('[data-list-search-return]');
+    assert.equal(env.body.dataset.careListStage, 'reading');
+    assert.equal(env.filters.inert, true);
+    assert.equal(env.filters.getAttribute('aria-hidden'), 'true');
+    assert.equal(button.hidden, false);
+    button.onclick();
+    assert.equal(env.viewport.scrollTop, 0);
+    assert.equal(env.body.dataset.careListStage, 'expanded');
+    assert.equal(env.filters.inert, false);
+    assert.equal(env.filters.getAttribute('aria-hidden'), 'false');
+    assert.equal(button.hidden, true);
+    assert.equal(env.document.activeElement, env.input);
+});
+
+test('입력 포커스 또는 열린 상세조건은 읽기 위치에서도 검색의 접근성을 유지한다', () => {
+    const env = environment(); env.api.mount(); env.scroll(900);
+    env.document.activeElement = env.input; env.api.sync();
+    assert.equal(env.body.dataset.careListStage, 'search'); assert.equal(env.filters.inert, false);
+    env.document.activeElement = null; env.scroll(1000); assert.equal(env.filters.inert, true);
+    env.open(true); env.api.sync();
+    assert.equal(env.body.dataset.careListStage, 'search'); assert.equal(env.filters.inert, false);
+});
+
+test('카드에서 간단형으로 바꿔도 읽던 기관의 고정 헤더 아래 위치와 읽기 단계를 보존한다', () => {
+    const env = environment(); env.api.mount(); env.scroll(840);
+    const position = env.api.capture();
+    assert.equal(position.stage, 'reading');
+    assert.ok(position.id);
+    env.density(45);
+    env.api.restore(position);
+    const restored = env.api.capture();
+    assert.equal(env.body.dataset.careListStage, 'reading');
+    assert.equal(restored.id, position.id);
+    assert.equal(restored.offset, position.offset);
+    assert.ok(restored.scroll < position.scroll);
+});
+
+test('헤더에 일부 가린 카드가 간단형으로 줄어도 같은 기관을 헤더 뒤에 완전히 숨기지 않는다', () => {
+    const env = environment(); env.api.mount(); env.scroll(900);
+    const position = env.api.capture();
+    assert.ok(position.offset < -45);
+    env.density(45); env.api.restore(position);
+    const restored = env.api.capture();
+    assert.equal(restored.id, position.id);
+    const row = env.rows.find(item => item.dataset.id === position.id);
+    assert.ok(row.getBoundingClientRect().bottom > env.api.visibleTop());
+    assert.equal(env.body.dataset.careListStage, 'reading');
+});
+
+test('간단형에서 카드형으로 바꿔도 검색 표시 단계를 유지하며 같은 기관으로 복귀한다', () => {
+    const env = environment(); env.api.mount(); env.density(45); env.scroll(650); env.scroll(590);
+    const position = env.api.capture(); assert.equal(position.stage, 'search');
+    env.density(120); env.api.restore(position);
+    const restored = env.api.capture();
+    assert.equal(env.body.dataset.careListStage, 'search');
+    assert.equal(restored.id, position.id); assert.equal(restored.offset, position.offset);
+});
+
+test('기관이 재검색으로 사라졌다면 저장한 스크롤 위치만 안전하게 복구한다', () => {
+    const env = environment(); env.api.mount(); env.scroll(600);
+    env.api.restore({ scroll: 450, id: 'removed-institution', offset: 0, stage: 'reading' });
+    assert.equal(env.viewport.scrollTop, 450);
+    assert.equal(env.body.dataset.careListStage, 'reading');
+});
+
+test('목록 맨 위의 복원은 기관 앵커 때문에 위치줄을 건너뛰지 않는다', () => {
+    const env = environment(); env.api.mount();
+    const position = env.api.capture(); assert.equal(position.scroll, 0);
+    env.scroll(900); env.density(60); env.api.restore(position);
+    assert.equal(env.viewport.scrollTop, 0);
+    assert.equal(env.body.dataset.careListStage, 'expanded');
+});
+
+test('지도 복귀는 숨긴 필터의 접근 제한을 풀고 목록용 검색 복귀 버튼을 숨긴다', () => {
+    const env = environment(); env.api.mount(); env.scroll(900);
+    const position = env.api.capture();
+    env.mode(false); env.api.sync();
+    assert.equal(env.filters.inert, false);
+    assert.notEqual(env.filters.getAttribute('aria-hidden'), 'true');
+    assert.equal(env.body.dataset.careListStage, undefined);
+    assert.equal(env.head.querySelector('[data-list-search-return]').hidden, true);
+    assert.equal(env.api.scroller(), env.list);
+    assert.equal(env.api.capture(), null);
+    const top = env.viewport.scrollTop; env.api.restore(position); env.api.reset();
+    assert.equal(env.viewport.scrollTop, top);
+});
+
+test('스티키 초기화를 반복해도 검색 복귀 버튼을 중복 만들지 않는다', () => {
+    const env = environment(); env.api.mount(); env.api.mount();
+    assert.equal(env.head.children.length, 1);
+    assert.equal(env.api.scroller(), env.viewport);
+});
+/** SOFTM-LIST-STICKY-TEST END */
