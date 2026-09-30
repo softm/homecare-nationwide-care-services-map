@@ -18,6 +18,7 @@
 
     function setView(value) {
         if (!views.includes(value) || value === view) return;
+        const position = root.CareListSticky?.capture(); // SOFTM-LIST-STICKY 날짜:20260930 : 보기 밀도를 바꿔도 실제 화면에 보이던 기관을 유지
         const list = root.document?.getElementById('list');
         const top = list?.getBoundingClientRect().top ?? 0;
         const anchor = [...(list?.querySelectorAll('.row') || [])].find(row => row.getBoundingClientRect().bottom > top);
@@ -25,7 +26,8 @@
         view = value;
         try { root.sessionStorage?.setItem(storageKey, view); } catch {}
         sync();
-        if (anchor?.isConnected && root.CareListMode?.isList()) {
+        if (position) root.CareListSticky.restore(position); // SOFTM-LIST-STICKY 날짜:20260930 : 단일 본문 스크롤과 고정 도구 아래 기준선으로 복원
+        else if (anchor?.isConnected && root.CareListMode?.isList()) {
             list.scrollTop += anchor.getBoundingClientRect().top - list.getBoundingClientRect().top - offset;
         }
     }

@@ -1,0 +1,73 @@
+/** SOFTM-LIST-LOCATION-COMPACT START 날짜:20260930 : 현재 위치는 검색 위 한 줄로 확인하고 상세 안내가 목록 공간을 줄이지 않도록 분리 */
+body.stitch-desktop.care-map-page[data-care-mode="list"] #careListLocation {
+    box-sizing:border-box;
+    display:flex!important;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:8px;
+    min-height:56px;
+    margin:0;
+    padding:6px max(20px,calc((100vw - 1480px)/2));
+    border:0;
+    border-bottom:1px solid #e0e9e4;
+    border-radius:0;
+    background:#f1f7f4;
+}
+body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="saved"] #careListLocation { display:none!important; }
+body[data-care-mode="list"] #careListLocation .care-list-location-copy {
+    display:flex;
+    flex:1 1 auto;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+}
+body[data-care-mode="list"] #careListLocation .care-list-location-copy strong { flex:none; font-size:12px; white-space:nowrap; }
+body[data-care-mode="list"] #careListLocation [data-location-label] {
+    display:block;
+    flex:1 1 auto;
+    min-width:0;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    color:#284c40;
+    font-size:13px;
+    line-height:1.5;
+}
+body[data-care-mode="list"] #careListLocation button {
+    box-sizing:border-box;
+    flex:none;
+    min-height:44px;
+    padding:8px 12px;
+    border:1px solid #b9d1c5;
+    border-radius:8px;
+    background:#fff;
+    white-space:nowrap;
+    font-size:12px;
+}
+body[data-care-mode="list"] #careListLocation [data-list-location-help] { width:44px; padding:0; border-color:transparent; background:transparent; color:#547564; font-size:21px; font-weight:500; }
+body[data-care-mode="list"] #careListLocation [data-location-action-short] { display:none; }
+body[data-care-mode="list"] #careListLocation[data-phase="error"] [data-location-label],
+body[data-care-mode="list"] #careListLocation[data-phase="error"] [data-list-location-help] { color:#994536; }
+.care-list-location-announcement { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.care-list-location-dialog { box-sizing:border-box; position:fixed; inset:0; margin:auto; width:min(420px,calc(100vw - 24px)); max-height:calc(100dvh - 32px); padding:22px; border:1px solid #c5d9ce; border-radius:16px; color:#264f40; background:#fff; box-shadow:0 14px 44px #12352933; overflow-y:auto; }
+.care-list-location-dialog::backdrop { background:#132b4555; }
+.care-list-location-dialog h2 { margin:0 0 14px; font-size:19px; }
+.care-list-location-dialog p { margin:8px 0; line-height:1.6; overflow-wrap:anywhere; }
+.care-list-location-dialog [data-location-detail-address] { font-weight:700; }
+.care-list-location-dialog [data-location-detail-message] { color:#587263; font-size:14px; }
+.care-list-location-dialog > div { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:8px; margin-top:18px; }
+.care-list-location-dialog button { min-height:44px; padding:8px 14px; border:1px solid #b9d1c5; border-radius:8px; font:inherit; font-size:14px; color:#225b45; background:#f4f8f5; cursor:pointer; }
+.care-list-location-dialog [data-location-detail-close] { color:#fff; border-color:#004541; background:#004541; }
+.care-list-location-dialog button:focus-visible { outline:3px solid #43877b; outline-offset:2px; }
+.care-list-location-dialog [hidden] { display:none!important; }
+@media (max-width:1000px) {
+    body.stitch-desktop.care-map-page[data-care-mode="list"] #careListLocation { gap:3px; min-height:56px; padding:6px 12px; }
+    body[data-care-mode="list"] #careListLocation .care-list-location-copy { gap:7px; }
+    body[data-care-mode="list"] #careListLocation .care-list-location-copy strong { font-size:11px; }
+    body[data-care-mode="list"] #careListLocation [data-location-label] { font-size:12px; }
+    body[data-care-mode="list"] #careListLocation [data-list-locate] { flex:0 0 auto; padding:8px 11px; }
+    body[data-care-mode="list"] #careListLocation [data-location-action-full] { display:none; }
+    body[data-care-mode="list"] #careListLocation [data-location-action-short] { display:inline; }
+}
+/** SOFTM-LIST-LOCATION-COMPACT END */

@@ -244,11 +244,11 @@
             node.textContent = active ? '✓ 비교에 담음' : '+ 비교에 담기';
         });
     }
-    function remember() { return { top: root.scrollY, list: document.getElementById('list')?.scrollTop || 0, saved: bar?.scrollTop || 0 }; }
+    function remember() { return { top: root.scrollY, list: document.getElementById('list')?.scrollTop || 0, saved: bar?.scrollTop || 0, listViewport: root.CareListSticky?.capture() }; } // SOFTM-LIST-STICKY 날짜:20260930 : 상세·담은 기관 복귀 시 단일 본문 스크롤의 기관 위치도 보관
     function restore(position) {
         if (!position) return;
         const generation = ++restoreGeneration;
-        requestAnimationFrame(() => { if (generation !== restoreGeneration) return; const list = document.getElementById('list'); if (list) list.scrollTop = position.list; if (bar) bar.scrollTop = position.saved; root.scrollTo({ top: position.top, behavior: 'instant' }); });
+        requestAnimationFrame(() => { if (generation !== restoreGeneration) return; const list = document.getElementById('list'); if (list) list.scrollTop = position.list; if (bar) bar.scrollTop = position.saved; root.CareListSticky?.restore(position.listViewport); /* SOFTM-LIST-STICKY 날짜:20260930 : 상세와 작업탭에서 기존 목록 위치로 복귀 */ root.scrollTo({ top: position.top, behavior: 'instant' }); });
     }
     /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 작업영역 확대 전의 페이지·목록 위치를 저장하고 버튼이나 Esc로 같은 위치에 복귀 */
     function setWorkspaceExpanded(next) {
@@ -738,7 +738,7 @@
                     figure.replaceChildren(img);
                 }).catch(() => { figure.textContent = '사진 정보 없음'; photoCache.delete(id); });
             }
-        }, { root: list, rootMargin: '120px' });
+        }, { root: null, rootMargin: '120px' }); // SOFTM-LIST-STICKY 날짜:20260930 : 지도·목록 모드 모두 실제 화면과 상위 스크롤의 잘린 영역 안에서만 사진 로딩
         const sync = () => {
             frame = 0;
             if (isListMode()) { scrollRequested = false; return; } // SOFTM-LIST-MODE 날짜:20260930 : 목록 스크롤이 숨긴 지도나 열린 상세의 기관을 바꾸지 않도록 분리
@@ -915,7 +915,10 @@
             const top = Math.max(8, Math.min(root.innerHeight - drag.height - 8, drag.y - drag.offsetY));
             drag.preview.style.transform = `translate3d(${left}px,${top}px,0)${reducedMotion.matches ? '' : ' rotate(-1deg) scale(1.02)'}`;
             if (autoScroll) {
-                const rect = host.getBoundingClientRect(), scrollHost = host.scrollHeight > host.clientHeight + 2 ? host : getComputedStyle(host).position === 'fixed' ? null : root;
+                /** SOFTM-LIST-STICKY START 날짜:20260930 : 담은 기관 순서 변경도 목록모드의 단일 본문 가장자리에서 스크롤 */
+                const scrollHost = isListMode() ? root.CareListSticky?.scroller() : host.scrollHeight > host.clientHeight + 2 ? host : getComputedStyle(host).position === 'fixed' ? null : root;
+                const rect = (isListMode() && scrollHost ? scrollHost : host).getBoundingClientRect();
+                /** SOFTM-LIST-STICKY END */
                 const topEdge = scrollHost === root ? 48 : Math.max(rect.top, 0) + 48, bottomEdge = scrollHost === root ? root.innerHeight - 48 : Math.min(rect.bottom, root.innerHeight) - 48;
                 if (scrollHost && drag.x >= rect.left && drag.x <= rect.right) {
                     const step = drag.y < topEdge ? -9 : drag.y > bottomEdge ? 9 : 0;

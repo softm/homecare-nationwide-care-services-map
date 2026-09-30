@@ -4,6 +4,13 @@
     const storageKey = 'careListAd:collapsed:v1';
     let options = {}, config, zone, handle, panel, host, fallback, mountElement, ad, timeout, desktop;
     let expanded = true, attempted = false, failed = false, requestedDesktop, slotWidth = 0;
+    /** SOFTM-LIST-AD-READING START 날짜:20260930 : 목록 읽기 중 임시 접힘이 사용자의 세션 선택을 바꾸지 않도록 분리 */
+    let reading = false, readingExpanded = false;
+
+    function isExpanded() {
+        return reading ? readingExpanded : expanded;
+    }
+    /** SOFTM-LIST-AD-READING END */
 
     function element(tag, className, text) {
         const node = root.document.createElement(tag);
@@ -30,7 +37,7 @@
     }
 
     function requestAd() {
-        if (attempted || zone.hidden || !expanded || root.document.hidden || config.mode === 'direct') return;
+        if (attempted || zone.hidden || !isExpanded() || root.document.hidden || config.mode === 'direct') return; // SOFTM-LIST-AD-READING 날짜:20260930 : 자동 접힌 동안에는 광고를 새로 요청하지 않음
         const slot = desktop.matches ? config.kakao?.desktop : config.kakao?.mobile;
         const expected = desktop.matches ? [728, 90] : [320, 100];
         const unit = String(slot?.unit || '').trim();
@@ -68,22 +75,41 @@
         if (!zone) return;
         const isList = options.isList ? options.isList() : root.document.body.dataset.careMode === 'list';
         zone.hidden = !isList || config.enabled === false || config.mode === 'off';
-        panel.hidden = !expanded;
-        zone.dataset.expanded = String(expanded);
-        handle.setAttribute('aria-expanded', String(expanded));
-        handle.textContent = expanded ? '광고 접기' : '광고 펼치기';
-        if (!zone.hidden && expanded && attempted && !failed && (desktop.matches !== requestedDesktop || host.clientWidth < slotWidth)) {
+        /** SOFTM-LIST-AD-READING START 날짜:20260930 : 표시 상태와 접근성·예약 공간을 실제 읽기 단계의 펼침 상태로 일치 */
+        const visibleExpanded = isExpanded();
+        panel.hidden = !visibleExpanded;
+        zone.dataset.expanded = String(visibleExpanded);
+        handle.setAttribute('aria-expanded', String(visibleExpanded));
+        handle.textContent = visibleExpanded ? '광고 접기' : '광고 펼치기';
+        if (!zone.hidden && visibleExpanded && attempted && !failed && (desktop.matches !== requestedDesktop || host.clientWidth < slotWidth)) {
             showFallback();
         }
+        /** SOFTM-LIST-AD-READING END */
         syncSpace();
         requestAd();
     }
 
     function setExpanded(value) {
-        expanded = Boolean(value);
-        try { root.sessionStorage.setItem(storageKey, expanded ? '0' : '1'); } catch {}
+        /** SOFTM-LIST-AD-READING START 날짜:20260930 : 읽기 중 수동 선택은 현재 단계에만 적용하고 원래 광고 선택은 보존 */
+        if (reading) {
+            readingExpanded = Boolean(value);
+        } else {
+            expanded = Boolean(value);
+            try { root.sessionStorage.setItem(storageKey, expanded ? '0' : '1'); } catch {}
+        }
+        /** SOFTM-LIST-AD-READING END */
         sync();
     }
+
+    /** SOFTM-LIST-AD-READING START 날짜:20260930 : 반복 스크롤 갱신이 수동 펼침을 덮지 않고 읽기 단계 진입 때만 자동 접힘 */
+    function setReading(value) {
+        const next = Boolean(value);
+        if (next === reading) return;
+        reading = next;
+        readingExpanded = false;
+        sync();
+    }
+    /** SOFTM-LIST-AD-READING END */
 
     function mount(settings = {}) {
         if (zone || !root.document) return;
@@ -98,7 +124,7 @@
         handle = element('button', 'care-list-ad-toggle');
         handle.type = 'button';
         handle.setAttribute('aria-controls', 'careListAdPanel');
-        handle.addEventListener('click', () => setExpanded(!expanded));
+        handle.addEventListener('click', () => setExpanded(!isExpanded())); // SOFTM-LIST-AD-READING 날짜:20260930 : 자동 접힘 상태에서도 한 번의 클릭으로 광고를 펼침
         panel = element('div', 'care-list-ad-panel');
         panel.id = 'careListAdPanel';
         host = element('div', 'care-list-ad-host');
@@ -127,6 +153,6 @@
         sync();
     }
 
-    root.CareListAds = Object.freeze({ mount, sync, setExpanded });
+    root.CareListAds = Object.freeze({ mount, sync, setExpanded, setReading }); // SOFTM-LIST-AD-READING 날짜:20260930 : 목록 스크롤 단계에서 일시적 광고 접기를 연결
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-LIST-ANCHOR-ADS END */
