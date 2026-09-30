@@ -59,7 +59,10 @@
         mounted = true; options = config;
         const toggle = root.document.createElement('div'); toggle.className = 'care-mode-toggle';
         toggle.setAttribute('role', 'group'); toggle.setAttribute('aria-label', '기관 탐색 모드');
-        toggle.innerHTML = '<button type="button" data-care-mode-choice="list">목록모드</button><button type="button" data-care-mode-choice="map">지도모드</button>';
+        /** SOFTM-MODE-ICONS START 날짜:20260930 : 짧은 이름과 서로 다른 아이콘으로 모드를 빠르게 구분하고 접근성 이름은 유지 */
+        toggle.innerHTML = `<button type="button" data-care-mode-choice="list" aria-label="목록모드" title="목록모드로 보기"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>목록</span></button>
+            <button type="button" data-care-mode-choice="map" aria-label="지도모드" title="지도모드로 보기"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6ZM9 3v15M15 6v15"/></svg><span>지도</span></button>`;
+        /** SOFTM-MODE-ICONS END */
         toggle.addEventListener('click', event => { const button = event.target.closest('[data-care-mode-choice]'); if (button) void setMode(button.dataset.careModeChoice); });
         root.document.body.append(toggle);
         const list = root.document.getElementById('list'), summary = root.document.createElement('details');

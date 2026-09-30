@@ -1,7 +1,7 @@
-/** SOFTM-LIST-MODE-TOGGLE START 날짜:20260930 : 검색 조건을 유지한 채 목록 분석과 기존 지도 탐색을 명시적으로 구분 */
+/** SOFTM-MODE-ICONS START 날짜:20260930 : 목록·지도 아이콘과 짧은 이름을 함께 읽고 선택 상태와 터치 영역을 명확하게 제공 */
 .care-mode-toggle {
     position:fixed;
-    top:10px;
+    top:6px;
     right:16px;
     z-index:184;
     display:flex;
@@ -16,16 +16,17 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:5px;
-    min-height:36px;
-    padding:7px 12px;
+    gap:7px;
+    min-width:80px;
+    min-height:44px;
+    padding:8px 12px;
     border:0;
     border-radius:8px;
     background:transparent;
     color:#536a62;
     font:inherit;
-    font-size:13px;
-    font-weight:650;
+    font-size:14px;
+    font-weight:700;
     line-height:1.2;
     white-space:nowrap;
     cursor:pointer;
@@ -33,21 +34,26 @@
 .care-mode-toggle [data-care-mode-choice][aria-pressed="true"] {
     background:#004541;
     color:#fff;
+    box-shadow:0 1px 3px #123d3426;
 }
+.care-mode-toggle [data-care-mode-choice]:not([aria-pressed="true"]):hover { background:#edf5f1; color:#004541; }
 .care-mode-toggle [data-care-mode-choice]:focus-visible {
     outline:3px solid #43877b;
     outline-offset:2px;
 }
 .care-mode-toggle svg {
-    width:17px;
-    height:17px;
+    width:20px;
+    height:20px;
+    flex:0 0 20px;
     fill:none;
     stroke:currentColor;
-    stroke-width:1.8;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
 }
 body.stitch-desktop.care-map-page .care-type-header { right:212px; }
 body.care-map-page:not([data-care-mode="list"]) #careListSummary { display:none; }
-/** SOFTM-LIST-MODE-TOGGLE END */
+/** SOFTM-MODE-ICONS END */
 
 /** SOFTM-LIST-MODE-LAYOUT START 날짜:20260930 : 지도 영역과 좌표 표시 조작을 숨겨 목록 검색에 화면 전체를 사용 */
 body.stitch-desktop.care-map-page[data-care-mode="list"] {
@@ -296,10 +302,10 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] .mobile-popup-layer:not
 }
 @media (max-width:1000px) {
     .care-mode-toggle { top:auto; right:12px; bottom:calc(68px + env(safe-area-inset-bottom)); padding:3px; border-radius:999px; box-shadow:0 4px 16px #123d3426; }
-    .care-mode-toggle [data-care-mode-choice] { min-height:38px; padding:7px 11px; border-radius:999px; font-size:12px; }
+    .care-mode-toggle [data-care-mode-choice] { min-width:72px; min-height:44px; gap:6px; padding:7px 10px; border-radius:999px; font-size:13px; } /* SOFTM-MODE-ICONS 날짜:20260930 : 모바일에서도 아이콘·이름과 충분한 터치 높이를 함께 확보 */
     body.stitch-desktop.care-map-page .care-type-header { right:4px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] { --care-list-controls-top:100px; }
-    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle { top:6px; right:10px; bottom:auto; border-radius:10px; box-shadow:none; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle { top:2px; right:10px; bottom:auto; border-radius:10px; box-shadow:none; } /* SOFTM-MODE-ICONS 날짜:20260930 : 커진 터치 영역을 56px 헤더 안에 맞춰 유형 메뉴와 겹침 방지 */
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle [data-care-mode-choice] { border-radius:7px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .stitch-app-header { display:flex; height:56px; padding:0 12px 0 58px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-type-header { top:56px!important; left:0; right:0; width:100%; height:44px; padding:4px 10px; background:#fff; border-bottom:1px solid #dce7e3; }
