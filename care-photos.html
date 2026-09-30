@@ -8,7 +8,7 @@
 <!-- SOFTM-PHOTO-EXPLORE START 날짜:20260911 : 사진 중심 배치와 기관별 보기를 같은 탐색 도구로 제공 -->
 <link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-photos.css?v=20260911-header1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
 <script src="care-data.js" defer></script><script src="nhis-static-data.js" defer></script><script src="map-experience.js?v=20260910-photos1" defer></script><script src="photo-viewer.js?v=20260911-gallery1" defer></script>
-<script type="module" src="care-photos.js?v=20260911-overlay2"></script>
+<script type="module" src="care-photos.js?v=20260930-direct1"></script><!-- SOFTM-PHOTO-DIRECT 날짜:20260930 : 지도 선행 없이 사진 검색을 여는 최신 진입 동작을 전달 -->
 <!-- SOFTM-PHOTO-EXPLORE END -->
 <!-- SOFTM-PHOTO-BACK START 날짜:20260911 : 사진 자료 로딩과 독립적으로 이전 화면 복귀 버튼 제공 -->
 <link rel="stylesheet" href="care-photo-back.css?v=20260911-1"><script src="care-photo-back.js?v=20260911-1" defer></script>
@@ -21,15 +21,13 @@
 </head>
 <body class="care-photo-page">
 <!-- SOFTM-PHOTO-EXPLORE START 날짜:20260910 : 보호자가 사진 탐색에서 기존 비교함으로 이어갈 수 있는 작업 화면 -->
-<header class="care-photo-top"><div class="care-photo-top-inner"><a href="index.html" class="care-photo-brand"><img src="site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0"><!-- SOFTM-BRAND-ICON 날짜:20260913 : 상단 로고와 사이트 대표 아이콘의 식별을 통일 -->돌봄한눈</a><nav aria-label="주요 메뉴"><a href="index.html?type=daycare" id="photoMapLink">지도에서 찾기</a><a href="about.html">서비스 소개</a></nav></div></header>
+<header class="care-photo-top"><div class="care-photo-top-inner"><a href="index.html" class="care-photo-brand"><img src="site-icon-512.png" width="40" height="40" alt="" style="display:inline-block;object-fit:contain;vertical-align:middle;flex-shrink:0"><!-- SOFTM-BRAND-ICON 날짜:20260913 : 상단 로고와 사이트 대표 아이콘의 식별을 통일 -->돌봄한눈</a><nav aria-label="주요 메뉴"><a href="index.html?type=daycare&amp;mode=list" id="photoMapLink">기관 찾기</a><a href="about.html">서비스 소개</a></nav></div></header><!-- SOFTM-PHOTO-DIRECT 날짜:20260930 : 직접 진입의 기관 검색 복귀에도 지도 실행을 강제하지 않음 -->
 <main class="care-photo-main">
-<div class="care-photo-intro"><p class="care-photo-eyebrow">공간을 살펴보고, 방문을 준비하세요</p><h1>사진으로 기관 찾기</h1><p>지도에 표시된 기관의 사진을 살펴보고 관심 있는 기관을 담아 비교하세요.</p></div>
-<!-- SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 사진 검색의 기본 범위가 현재 지도임을 알리고 전체 탐색은 명시적으로 전환 -->
-<section class="care-photo-scope" aria-label="사진 탐색 범위"><p id="photoScopeStatus" role="status">지도에 표시된 기관 기준</p><button id="photoAllScope" type="button">전체 기관에서 찾기</button></section>
-<!-- SOFTM-PHOTO-MAP-SCOPE END -->
-<!-- SOFTM-PHOTO-EMPTY-SCOPE START 날짜:20260926 : 지도 범위 없이 사진 탐색에 들어온 경우 작동하지 않는 검색 도구 대신 다음 행동을 분명히 안내 -->
-<section id="photoEmptyState" class="care-photo-empty-state" hidden><span class="care-photo-empty-icon" aria-hidden="true">⌖</span><div><p class="care-photo-empty-eyebrow">사진 탐색 준비</p><h2>먼저 지도에서 지역을 찾아 주세요</h2><p>지도에 표시된 기관만 사진으로 이어서 살펴볼 수 있습니다. 지역과 기관 유형을 정한 뒤 사진 탐색을 열면 해당 범위의 사진을 보여 드립니다.</p><a id="photoEmptyMapLink" class="care-photo-primary" href="index.html?type=daycare">지도에서 지역 찾기 <span aria-hidden="true">→</span></a></div></section>
-<!-- SOFTM-PHOTO-EMPTY-SCOPE END -->
+<!-- SOFTM-PHOTO-DIRECT START 날짜:20260930 : 사진 검색을 바로 시작하고 전달 범위가 만료된 경우에만 명시적인 복구 행동을 안내 -->
+<div class="care-photo-intro"><p class="care-photo-eyebrow">공간을 살펴보고, 방문을 준비하세요</p><h1>사진으로 기관 찾기</h1><p>기관 사진을 바로 살펴보고, 지역과 이름으로 좁혀 관심 있는 기관을 담아 비교하세요.</p></div>
+<section class="care-photo-scope" aria-label="사진 탐색 범위"><p id="photoScopeStatus" role="status">전체 기관에서 사진 찾기</p><button id="photoAllScope" type="button" hidden>전체 기관에서 찾기</button></section>
+<section id="photoEmptyState" class="care-photo-empty-state" hidden><span class="care-photo-empty-icon" aria-hidden="true">⌕</span><div><p class="care-photo-empty-eyebrow">검색 범위 안내</p><h2 id="photoEmptyTitle">이전 검색 범위가 만료되었습니다</h2><p id="photoEmptyDescription">이전 기관 목록을 확인할 수 없습니다. 기관 찾기에서 범위를 다시 열거나 전체 기관에서 사진을 찾아보세요.</p><a id="photoEmptyMapLink" class="care-photo-primary" href="index.html?type=daycare&amp;mode=list">기관 찾기로 돌아가기</a></div></section>
+<!-- SOFTM-PHOTO-DIRECT END -->
 <form id="photoSearch" class="care-photo-filters">
 <label>기관 유형<select id="photoType" name="type"><option value="daycare">주·야간보호센터</option></select></label>
 <label>시·도<select id="photoProvince" name="p"><option value="">전국</option></select></label>

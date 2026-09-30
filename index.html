@@ -86,7 +86,7 @@
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <!-- SOFTM-PHOTO-MAP START 날짜:20260910 : 기존 비교함과 사진 탐색을 같은 기관 순서로 연결 -->
 <link rel="stylesheet" href="care-photos.css?v=20260911-entry-compact1"> <!-- SOFTM-PHOTO-ENTRY-COMPACT 날짜:20260911 : 줄인 사진 탐색 버튼을 이전 캐시 없이 적용 -->
-<script type="module" src="care-photos-map.js?v=20260911-mapfirst1"></script>
+<script type="module" src="care-photos-map.js?v=20260930-direct1"></script> <!-- SOFTM-PHOTO-DIRECT 날짜:20260930 : 목록 검색 결과에서도 사진 탐색을 바로 연결 -->
 <!-- SOFTM-CARE-ANALYSIS START 날짜:20260911 : 지도 탐색에서 집 주변의 공개정보 일괄 분석으로 연결 -->
 <link rel="stylesheet" href="care-analysis.css?v=20260911-binding1">
 <script type="module" src="care-analysis-entry.js?v=20260911-mapfirst1"></script>
@@ -120,7 +120,7 @@
 <script defer src="care-location-state.js?v=20260914-1"></script>
 <!-- SOFTM-LOCATION-STATE END -->
 <!-- SOFTM-MENU-LEFT 날짜:20260915 : 전체 메뉴를 로고 앞에 두고 키보드 순서도 일치 -->
-<link rel="stylesheet" href="care-navigation-menu.css?v=20260914-1"><script defer src="care-navigation-menu.js?v=20260915-left1"></script>
+<link rel="stylesheet" href="care-navigation-menu.css?v=20260914-1"><script defer src="care-navigation-menu.js?v=20260930-direct1"></script> <!-- SOFTM-PHOTO-DIRECT 날짜:20260930 : 사진 찾기를 지도 전용으로 오인하지 않도록 메뉴 안내 갱신 -->
 <!-- SOFTM-COMPACT-STATUS START 날짜:20260914 : 지도 진행 표시와 목록 결과 요약의 공간을 최소화 -->
 <style>
 #mapStatus[hidden]{display:none!important}
@@ -233,7 +233,7 @@
 <script src="stitch-controls.js?v=20260930-location-ui1"></script> <!-- SOFTM-LOCATION-TOOLBAR 날짜:20260930 : 목록에서 위치 찾기와 상세필터를 같은 검색 도구 행으로 배치 -->
 <script src="map-marker-placement.js?v=20260930-1"></script> <!-- SOFTM-MARKER-PLACEMENT 날짜:20260930 : 이름표가 위쪽 충돌만으로 숨지 않도록 주변 배치 계산을 먼저 연결 -->
 <script src="map-marker-labels.js?v=20260930-4"></script> <!-- SOFTM-MARKER-LABELS 날짜:20260930 : 지도 공간에 맞춘 이름표 배치 모듈 연결 -->
-<script src="map-experience.js?v=20260930-sticky1"></script> <!-- SOFTM-LIST-STICKY 날짜:20260930 : 단일 스크롤에서도 상세·작업 탭 복귀와 사진 지연 로딩을 유지 -->
+<script src="map-experience.js?v=20260930-route-direct1"></script> <!-- SOFTM-ROUTE-DIRECT 날짜:20260930 : 첫 경로 버튼부터 실제 탐색으로 이어지는 최신 동작을 반영 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <!-- SOFTM-LIST-MODE START 날짜:20260930 : 기존 지도와 별개인 목록 탐색 모드를 공용 상태에 연결 -->
 <link rel="stylesheet" href="care-list-mode.css?v=20260930-summary1"> <!-- SOFTM-SUMMARY-COMPACT 날짜:20260930 : 줄인 분석 요약과 접이식 자료 안내를 캐시 없이 반영 -->
@@ -1274,9 +1274,12 @@ async function boot(){if(!TYPE){bootUnselected();return;}if(!CATEGORY_ORDER.incl
 boot().catch(error=>{hideLoading();$('list').innerHTML=`<div class="empty">${esc(error.message)}</div>`;setStatus('데이터 로드 실패',error.message)});
 </script>
 <script>
-/** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 사진 탐색에 통합 지도의 실제 기관 마커와 현재 화면을 전달 */
-window.CarePhotoMapScope=()=>({ready:mapReady,type:TYPE,map,entries:[...markers.entries()]});
-/** SOFTM-PHOTO-MAP-SCOPE END */
+/** SOFTM-PHOTO-DIRECT START 날짜:20260930 : 목록·지도 조회 중에도 사진 탐색을 좌표 변환이나 지도 생성에 종속시키지 않음 */
+window.CarePhotoSearchScope=()=>{
+ const fromMap=!CareListMode.isList()&&mapReady&&!careMatchPending&&!careMatchError;
+ return {ready:Boolean(CONFIG),type:TYPE,kind:fromMap?'map':'search',map:fromMap?map:null,entries:fromMap?[...markers.entries()]:[],rows:CONFIG&&!fromMap?applyFilters():[],source:location.href};
+};
+/** SOFTM-PHOTO-DIRECT END */
 </script>
 </body>
 </html>

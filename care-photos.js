@@ -1,6 +1,6 @@
 /** SOFTM-PHOTO-EXPLORE START 날짜:20260910 : 기관 사진 탐색과 기존 유형별 비교함을 같은 세션 흐름으로 연결 */
 import { escapeHtml, readJson, filterRows, mapUrl, thumbnail, openComparison } from './care-photos-common.js?v=20260910-1';
-import { readScope, scopedRows } from './care-photo-scope.js?v=20260910-1';
+import { readScope, scopedRows } from './care-photo-scope.js?v=20260930-direct1'; // SOFTM-PHOTO-DIRECT 날짜:20260930 : 목록 검색 범위를 지원하는 같은 버전의 전달 규격 사용
 import { createGallery } from './care-photo-gallery.js?v=20260911-1'; // SOFTM-PHOTO-GALLERY 날짜:20260911 : 기관 사진 요청량을 제한하는 공용 로더 사용
 const $ = id => document.getElementById(id);
 import { mountMasonry } from './care-photo-masonry.js?v=20260911-readable1'; // SOFTM-PHOTO-WALL 날짜:20260911 : 사진 비율과 화면 폭에 맞춰 빈 공간을 채움
@@ -9,35 +9,40 @@ const labels = { facility: '요양원·공동생활가정', daycare: '주·야�
 const initial = new URLSearchParams(location.search);
 $('photoType').innerHTML = Object.entries(labels).map(([id, label]) => `<option value="${id}">${label}</option>`).join('');
 $('photoType').value = labels[initial.get('type')] ? initial.get('type') : 'daycare';
-let type, rows = [], summaries = {}, matches = [], limit = 24, basket, generation = 0;
+let type = $('photoType').value, rows = [], summaries = {}, matches = [], limit = 24, basket, generation = 0; // SOFTM-PHOTO-DIRECT 날짜:20260930 : 자료 로딩 전에도 전달된 유형의 범위와 복귀 링크를 정확히 안내
 let storage; try { storage = sessionStorage; } catch {}
-/** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 지도에서 전달받은 기관 집합을 기본으로 유지하고 자료가 없어도 전국으로 넓히지 않음 */
-let scopeMode = initial.get('scope') === 'all' ? 'all' : 'map';
+/** SOFTM-PHOTO-DIRECT START 날짜:20260930 : 직접 진입은 바로 검색하고 전달받은 검색·지도 기관 집합은 명시적으로 전체 탐색할 때까지 보존 */
+let scopeMode = ['map', 'search'].includes(initial.get('scope')) ? initial.get('scope') : 'all';
 const scopeToken = initial.get('view');
-const mapScope = readScope(storage, scopeToken);
-const currentScope = () => mapScope?.type === type ? mapScope : null;
+const savedScope = readScope(storage, scopeToken);
+const currentScope = () => savedScope?.type === type ? savedScope : null;
+const hasScopedSearch = () => scopeMode !== 'all';
+const scopeLabel = () => currentScope()?.kind === 'search' ? '검색 결과' : '지도 표시';
 const searchRows = () => scopeMode === 'all' ? rows : scopedRows(rows, currentScope());
 function updateScope() {
     const scope = currentScope(), pool = searchRows();
-    const missingMapScope = scopeMode === 'map' && !scope;
-    document.querySelector('.care-photo-main').dataset.photoEmptyScope = String(missingMapScope); // SOFTM-PHOTO-EMPTY-SCOPE 날짜:20260926 : 지도 범위가 없을 때 결과 없는 탐색 도구를 노출하지 않음
-    $('photoEmptyState').hidden = !missingMapScope;
+    const missingScope = hasScopedSearch() && !scope;
+    const emptyScope = hasScopedSearch() && scope?.ids.length === 0;
+    $('photoEmptyState').hidden = !(missingScope || emptyScope);
+    $('photoEmptyTitle').textContent = missingScope ? '이전 검색 범위가 만료되었습니다' : '현재 범위에 기관이 없습니다';
+    $('photoEmptyDescription').textContent = missingScope ? '이전 기관 목록을 확인할 수 없습니다. 기관 찾기에서 범위를 다시 열거나 전체 기관에서 사진을 찾아보세요.' : '기관 찾기에서 검색 범위를 바꾸거나 전체 기관에서 사진을 찾아보세요.';
     $('photoEmptyMapLink').href = $('photoMapLink').href;
-    $('photoType').disabled = scopeMode === 'map';
+    $('photoEmptyMapLink').textContent = scope ? '이전 범위로 돌아가기' : '기관 찾기로 돌아가기';
+    $('photoType').disabled = hasScopedSearch();
     $('photoAllScope').hidden = scopeMode === 'all';
-    $('photoMapLink').textContent = scopeMode === 'map' ? '지도로 돌아가기' : '지도에서 찾기';
+    $('photoMapLink').textContent = hasScopedSearch() && scope ? scope.kind === 'search' ? '검색 결과로 돌아가기' : '지도로 돌아가기' : '기관 찾기';
     const withPhotos = pool.filter(row => summaries[row.i]?.count > 0).length;
     const withoutPhotos = pool.filter(row => summaries[row.i]?.count === 0).length;
     const unknown = scope ? scope.ids.length - withPhotos - withoutPhotos : 0;
-    $('photoScopeStatus').textContent = scopeMode === 'all' ? '전체 기관에서 사진 찾기' : !scope ? '먼저 지도에서 지역을 찾은 뒤 ‘사진으로 기관 찾기’를 눌러 주세요.' : `지도 표시 ${scope.ids.length.toLocaleString()}곳 기준 · 사진 있는 기관 ${withPhotos.toLocaleString()}곳${withoutPhotos ? ` · 사진 없음 ${withoutPhotos}곳` : ''}${unknown ? ` · 자료 미확인 ${unknown}곳` : ''}`;
+    $('photoScopeStatus').textContent = scopeMode === 'all' ? '전체 기관에서 사진 찾기' : !scope ? '이전 검색 범위가 만료되었습니다. 전체 기관에서 찾기로 다시 시작할 수 있습니다.' : `${scopeLabel()} ${scope.ids.length.toLocaleString()}곳 기준 · 사진 있는 기관 ${withPhotos.toLocaleString()}곳${withoutPhotos ? ` · 사진 없음 ${withoutPhotos}곳` : ''}${unknown ? ` · 자료 미확인 ${unknown}곳` : ''}`;
 }
-/** SOFTM-PHOTO-MAP-SCOPE END */
+/** SOFTM-PHOTO-DIRECT END */
 const controls = () => ({ p: $('photoProvince').value, c: $('photoCity').value, q: $('photoQuery').value.trim() });
 function options(select, values, label, value = '') {
     select.innerHTML = `<option value="">${label}</option>${[...new Set(values.filter(Boolean))].sort().map(text => `<option>${escapeHtml(text)}</option>`).join('')}`;
     select.value = values.includes(value) ? value : '';
 }
-function cities(value = '') { options($('photoCity'), searchRows().filter(row => !$('photoProvince').value || row.p === $('photoProvince').value).map(row => row.c), scopeMode === 'map' ? '지도 표시 시·군·구' : '전체', value); }
+function cities(value = '') { options($('photoCity'), searchRows().filter(row => !$('photoProvince').value || row.p === $('photoProvince').value).map(row => row.c), hasScopedSearch() ? `${scopeLabel()} 시·군·구` : '전체', value); } // SOFTM-PHOTO-DIRECT 날짜:20260930 : 목록 검색 범위에서도 전달받은 시군구만 추가 검색
 let saveFeedbackTimer; // SOFTM-PHOTO-SAVE-UNIT 날짜:20260911 : 담기 안내가 사진을 계속 가리지 않도록 마지막 알림만 잠시 유지
 function syncBasket() {
     if (!basket) return;
@@ -62,11 +67,13 @@ function syncBasket() {
 }
 function writeUrl() {
     const query = new URLSearchParams({ type, scope: scopeMode, mode, ...controls() }); // SOFTM-PHOTO-GALLERY 날짜:20260911 : 범위 토큰과 별개로 보기 모드를 복원
-    if (scopeMode === 'map' && scopeToken) query.set('view', scopeToken);
+    if (hasScopedSearch() && scopeToken) query.set('view', scopeToken); // SOFTM-PHOTO-DIRECT 날짜:20260930 : 목록과 지도에서 전달된 범위를 새로고침 뒤에도 유지
     for (const key of ['p', 'c', 'q']) if (!query.get(key)) query.delete(key);
     history.replaceState(null, '', `?${query}`);
-    const mapQuery = new URLSearchParams({ type, ...controls() });
-    $('photoMapLink').href = scopeMode === 'map' && currentScope() ? currentScope().source : `index.html?${mapQuery}`;
+    /** SOFTM-PHOTO-DIRECT START 날짜:20260930 : 검색 범위 복귀는 원래 목록 모드를 보존하고 직접 진입도 기관 검색으로 연결 */
+    const mapQuery = new URLSearchParams({ type, mode: 'list', ...controls() });
+    $('photoMapLink').href = hasScopedSearch() && currentScope() ? currentScope().source : `index.html?${mapQuery}`;
+    /** SOFTM-PHOTO-DIRECT END */
 }
 function render({ append = false } = {}) {
     const host = $('photoResults'), start = append ? host.children.length : 0;
@@ -82,11 +89,11 @@ function render({ append = false } = {}) {
         card.append(figure, body); host.append(card); // SOFTM-PHOTO-SAVE-UNIT 날짜:20260911 : 기관 카드는 갤러리 전용 설명 객체를 참조하지 않음
     }
     $('photoStatus').textContent = type === 'nursing-hospital' ? '요양병원은 공단 등록사진 제공 대상이 아닙니다.' : matches.length ? `${matches.length.toLocaleString()}곳 중 ${Math.min(limit, matches.length)}곳 표시 · 기관명순` : '조건에 맞는 사진 등록 기관이 없습니다.';
-    /** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 빈 지도·범위 유실·사진 미등록을 전국 검색 결과와 구분 */
-    if (scopeMode === 'map' && !currentScope()) $('photoStatus').textContent = '전달된 지도 범위가 없습니다. 지도에서 사진 탐색을 다시 열어 주세요.';
-    else if (scopeMode === 'map' && !currentScope().ids.length) $('photoStatus').textContent = '지도에 표시된 기관이 없습니다. 지도에서 마커를 표시해 주세요.';
+    /** SOFTM-PHOTO-DIRECT START 날짜:20260930 : 범위 유실·빈 검색 결과를 사진 미등록과 구분하고 지도 선택을 강제하지 않음 */
+    if (hasScopedSearch() && !currentScope()) $('photoStatus').textContent = '이전 검색 범위가 만료되었습니다. 전체 기관에서 찾기를 눌러 다시 시작해 주세요.';
+    else if (hasScopedSearch() && !currentScope().ids.length) $('photoStatus').textContent = `${scopeLabel()} 0곳입니다. 검색 범위를 바꾸거나 전체 기관에서 찾아보세요.`;
     updateScope();
-    /** SOFTM-PHOTO-MAP-SCOPE END */
+    /** SOFTM-PHOTO-DIRECT END */
     $('photoMore').hidden = limit >= matches.length;
     syncBasket();
 }
@@ -199,6 +206,7 @@ async function load(values = {}) {
     $('photoStatus').textContent = '기관과 사진 자료를 불러오고 있습니다.';
     $('photoMore').hidden = true; $('photoRetry').hidden = true; $('photoCompare').disabled = true; $('photoSavedCount').textContent = '0곳';
     $('photoProvince').disabled = true; $('photoCity').disabled = true;
+    writeUrl(); updateScope(); // SOFTM-PHOTO-DIRECT 날짜:20260930 : 로딩·실패 중에도 정확한 범위 복귀와 전체 탐색 복구를 제공
     try {
         const [nextRows, manifest] = await Promise.all([window.CareData.category(type), readJson('data/care-photos/manifest.json')]);
         const config = manifest[type];
@@ -208,7 +216,7 @@ async function load(values = {}) {
         if (Object.keys(nextSummaries).length !== config.count || (config.source === 'nhis' && (config.count !== nextRows.length || nextRows.some(row => !Object.hasOwn(nextSummaries, row.i))))) throw new Error('사진 자료 갱신 중입니다. 잠시 후 다시 시도해 주세요.');
         rows = nextRows; summaries = nextSummaries;
         basket = window.CareMapExperience.createBasket(storage, type); basket.retain(new Set(rows.map(row => row.i)));
-        options($('photoProvince'), searchRows().map(row => row.p), scopeMode === 'map' ? '지도 표시 지역 전체' : '전국', values.p); cities(values.c);
+        options($('photoProvince'), searchRows().map(row => row.p), hasScopedSearch() ? `${scopeLabel()} 지역 전체` : '전국', values.p); cities(values.c); // SOFTM-PHOTO-DIRECT 날짜:20260930 : 검색 결과로 진입한 지역 필터도 동일한 기관 집합 안에서 제공
         $('photoQuery').value = values.q || ''; search();
     } catch (error) {
         if (token !== generation) return;
@@ -217,19 +225,20 @@ async function load(values = {}) {
         if (token === generation) { $('photoResults').setAttribute('aria-busy', String(mode !== 'institutions' && galleryBusy)); $('photoProvince').disabled = !basket; $('photoCity').disabled = !basket; } // SOFTM-PHOTO-GALLERY 날짜:20260911 : 기관 인덱스 완료 후에도 사진 로딩 상태를 유지
     }
 }
-/** SOFTM-PHOTO-MAP-SCOPE START 날짜:20260910 : 사용자가 전체 탐색을 선택한 경우에만 지도 기관 제한과 유형 잠금을 해제 */
+/** SOFTM-PHOTO-DIRECT START 날짜:20260930 : 만료 범위도 검색 도구를 유지하고 사용자의 전체 탐색 선택으로만 기관 제한을 해제 */
 $('photoAllScope').onclick = () => {
     scopeMode = 'all';
+    if (!basket) { void load(); return; }
     options($('photoProvince'), rows.map(row => row.p), '전국'); cities(); $('photoQuery').value = '';
     updateScope(); search();
 };
 $('photoMapLink').addEventListener('click', event => {
-    if (scopeMode !== 'map' || !currentScope() || !document.referrer) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !hasScopedSearch() || !currentScope() || !document.referrer) return;
     const source = new URL(currentScope().source, location.href), referrer = new URL(document.referrer);
-    if (source.origin === referrer.origin && source.pathname === referrer.pathname && history.length > 1) { event.preventDefault(); history.back(); }
+    if (source.href === referrer.href && history.length > 1) { event.preventDefault(); history.back(); }
 });
 updateScope();
-/** SOFTM-PHOTO-MAP-SCOPE END */
+/** SOFTM-PHOTO-DIRECT END */
 $('photoType').onchange = () => void load(controls());
 $('photoProvince').onchange = () => { cities(); search(); };
 $('photoCity').onchange = search;
@@ -258,5 +267,5 @@ window.addEventListener('pageshow', event => {
     if (!basket) return;
     basket = window.CareMapExperience.createBasket(storage, type); basket.retain(new Set(rows.map(row => row.i))); syncBasket();
 });
-void load({ p: initial.get('p'), c: initial.get('c'), q: initial.get('q') }); // SOFTM-PHOTO-MAP-SCOPE 날짜:20260910 : 최초 진입은 전달된 마커 집합 안에서만 추가 검색조건을 적용
+void load({ p: initial.get('p'), c: initial.get('c'), q: initial.get('q') }); // SOFTM-PHOTO-DIRECT 날짜:20260930 : 직접 진입도 즉시 사진을 보여 주고 명시적으로 전달된 기관 범위와 추가 조건은 보존
 /** SOFTM-PHOTO-EXPLORE END */
