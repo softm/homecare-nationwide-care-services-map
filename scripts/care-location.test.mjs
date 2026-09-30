@@ -167,6 +167,67 @@ test('지도 진입은 초기화 분기 밖에서 권한을 요청하고 독립 
 });
 /** SOFTM-LOCATION-STARTUP END */
 
+/** SOFTM-MAP-ENTRY-LOCATION START 날짜:20260930 : 목록에서 지도로 넘긴 위치 요청의 재시도와 모든 소비자가 취소된 요청의 종료를 구분 */
+function sharedRequestDevice(outcomes) {
+    const context = device(outcomes);
+    vm.createContext(context);
+    vm.runInContext(readFileSync(new URL('../care-location.js', import.meta.url), 'utf8'), context);
+    return { api: context.CareLocation, calls: context.calls };
+}
+test('목록 요청 취소 뒤 활성 지도 요청이 공유하면 지연·신호 오류를 고정밀로 재시도한다', async () => {
+    for (const code of [2, 3]) {
+        let fail, listCurrent = true;
+        const env = sharedRequestDevice([(success, failure) => { fail = failure; }, point]);
+        const list = env.api.request({ isCurrent: () => listCurrent });
+        listCurrent = false;
+        const map = env.api.request({ isCurrent: () => true });
+        assert.equal(list, map);
+        fail({ code });
+        assert.equal((await map).lat, point.lat);
+        assert.equal(env.calls.length, 2);
+        assert.equal(env.calls[0].enableHighAccuracy, false);
+        assert.equal(env.calls[1].enableHighAccuracy, true);
+    }
+});
+test('공유한 목록·지도 요청이 모두 취소되면 지연·신호 오류를 재시도하지 않는다', async () => {
+    for (const code of [2, 3]) {
+        let fail, listCurrent = true, mapCurrent = true;
+        const env = sharedRequestDevice([(success, failure) => { fail = failure; }]);
+        const list = env.api.request({ isCurrent: () => listCurrent });
+        const map = env.api.request({ isCurrent: () => mapCurrent });
+        assert.equal(list, map);
+        listCurrent = false; mapCurrent = false;
+        const rejected = assert.rejects(map, error => error.reason === (code === 2 ? 'unavailable' : 'timeout'));
+        fail({ code }); await rejected;
+        assert.equal(env.calls.length, 1);
+    }
+});
+test('공유 요청에 취소 조건을 지정하지 않은 소비자는 활성 상태로 유지한다', async () => {
+    let fail;
+    const env = sharedRequestDevice([(success, failure) => { fail = failure; }, point]);
+    const cancelled = env.api.request({ isCurrent: () => false });
+    const active = env.api.request();
+    assert.equal(cancelled, active);
+    fail({ code: 3 });
+    assert.equal((await active).lng, point.lng);
+    assert.equal(env.calls.length, 2);
+});
+test('완료·실패한 요청의 활성 소비자는 다음 취소 요청의 재시도를 되살리지 않는다', async () => {
+    for (const firstOutcome of [point, { code: 1 }]) {
+        let fail;
+        const env = sharedRequestDevice([firstOutcome, (success, failure) => { fail = failure; }]);
+        const first = env.api.request();
+        if (firstOutcome.code) await assert.rejects(first, error => error.reason === 'denied');
+        else await first;
+        const next = env.api.request({ isCurrent: () => false });
+        assert.notEqual(next, first);
+        const rejected = assert.rejects(next, error => error.reason === 'timeout');
+        fail({ code: 3 }); await rejected;
+        assert.equal(env.calls.length, 2);
+    }
+});
+/** SOFTM-MAP-ENTRY-LOCATION END */
+
 /** SOFTM-LOCATION-FOLLOW START 날짜:20260924 : 권한 응답과 지도 준비 순서가 바뀌어도 허용 좌표를 한 번 전달 */
 for (const readyFirst of [true, false]) test(`초기 권한 허용 후 좌표 전달: 지도 준비 우선=${readyFirst}`, async () => {
     const env = startupDevice('prompt');
