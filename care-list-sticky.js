@@ -65,9 +65,13 @@
         viewportSize = size;
         if (!open && filters.getBoundingClientRect().height) filterHeight = filters.getBoundingClientRect().height;
         body.style.setProperty('--care-sticky-filter-height', `${filterHeight}px`);
-        const locationHeight = root.document.getElementById('careListLocation')?.getBoundingClientRect().height || 0;
+        /** SOFTM-LOCATION-TOOLBAR START 날짜:20260930 : 검색 안으로 옮긴 위치 도구를 높이에 중복 계산하거나 키보드 조작 중 숨기지 않음 */
+        const location = root.document.getElementById('careListLocation');
+        const locationHeight = location && !filters.contains(location) ? location.getBoundingClientRect().height : 0;
         const summaryHeight = root.document.getElementById('careListSummary')?.getBoundingClientRect().height || 0;
-        const focused = filters.contains(root.document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(root.document.activeElement?.tagName || '');
+        const active = root.document.activeElement;
+        const focused = filters.contains(active) && (/^(INPUT|SELECT|TEXTAREA)$/.test(active?.tagName || '') || active?.tagName === 'BUTTON' && active.matches(':focus-visible'));
+        /** SOFTM-LOCATION-TOOLBAR END */
         const stage = progression.update(viewport.scrollTop, { locationHeight, filterHeight, summaryHeight, locked: open || focused });
         if (body.dataset.careListStage !== stage) body.dataset.careListStage = stage;
         root.CareListAds?.setReading?.((stage === 'reading' || root.innerHeight <= 700) && body.dataset.careWorkspace !== 'saved');

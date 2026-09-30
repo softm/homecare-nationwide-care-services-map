@@ -18,8 +18,11 @@
         icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6"/></svg>';
         toggle.prepend(icon);
         const desktop = matchMedia('(min-width:1001px)');
-        const placeToggle = () => { if (desktop.matches) toolbar.prepend(toggle); else grid.append(toggle); };
+        /** SOFTM-LOCATION-TOOLBAR START 날짜:20260930 : 목록에서는 위치 찾기와 상세필터를 같은 행으로 묶고 지도 복귀 시 기존 배치를 복원 */
+        const placeToggle = () => { if (desktop.matches || document.body.dataset.careMode === 'list') toolbar.prepend(toggle); else grid.append(toggle); };
         desktop.addEventListener('change', placeToggle); placeToggle();
+        new MutationObserver(placeToggle).observe(document.body, { attributes: true, attributeFilter: ['data-care-mode'] });
+        /** SOFTM-LOCATION-TOOLBAR END */
         reset.onclick = () => {
             const groups = new Set([...filters.querySelectorAll('[data-filter].active:not([data-value="all"])')].map(node => node.dataset.filter));
             for (const key of groups) filters.querySelector(`[data-filter="${key}"][data-value="all"]`)?.click();
