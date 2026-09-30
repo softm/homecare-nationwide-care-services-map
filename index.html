@@ -236,8 +236,9 @@
 <script src="map-experience.js?v=20260930-list1"></script> <!-- SOFTM-LIST-MODE 날짜:20260930 : 지도 없는 상세·비교 동작과 작업 탭 보존을 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <!-- SOFTM-LIST-MODE START 날짜:20260930 : 기존 지도와 별개인 목록 탐색 모드를 공용 상태에 연결 -->
-<link rel="stylesheet" href="care-list-mode.css?v=20260930-1">
-<script src="care-list-mode.js?v=20260930-1"></script>
+<link rel="stylesheet" href="care-list-mode.css?v=20260930-location1"> <!-- SOFTM-LIST-LOCATION 날짜:20260930 : 접속 위치와 찾기 버튼의 반응형 배치를 갱신 -->
+<script src="care-list-mode.js?v=20260930-location1"></script> <!-- SOFTM-LIST-LOCATION 날짜:20260930 : 낮은 화면의 위치 안내와 목록 높이를 함께 확보 -->
+<script src="care-list-location.js?v=20260930-1"></script> <!-- SOFTM-LIST-LOCATION 날짜:20260930 : 지도 생성 없이 접속 위치와 지역 검색을 연결 -->
 <!-- SOFTM-LIST-MODE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -956,7 +957,17 @@ async function refreshAfterFilterClick(feedback){
 }
 /** SOFTM-SEARCH-FEEDBACK END */
 function toggleMultiFilter(type,value){const set=multiFilterSet(type);if(value==='all')set.clear();else set.has(value)?set.delete(value):set.add(value);syncMultiFilterButtons(type);CareAdvancedSearch.updateFilterUrl({[type==='grade'?'grades':type==='score'?'scores':'conf']:[...set].sort().join(',')});void refreshAfterFilterClick()} // SOFTM-FILTER-RELOAD 날짜:20260917 : 전체 선택·개별 해제를 URL에 즉시 반영해 새로고침 복원을 방지
-function restoreState(){for(const [key,id] of [['q','q'],['p','province'],['c','city']]){const v=params.get(key);if(v&&$(id)){if(id==='province'){$(id).value=v;updateCities()}else $(id).value=v}}if(CONFIG.source==='nhis'){gradeFilters=new Set((params.get('grades')||'').split(',').filter(v=>['A','B','C','D','E','new','unknown'].includes(v)));scoreFilters=new Set((params.get('scores')||'').split(',').filter(v=>['high','mid','low','lowest','unknown'].includes(v)));confidenceFilters=new Set((params.get('conf')||'').split(',').filter(v=>['high','medium','low'].includes(v)))}else{gradeFilters.clear();scoreFilters.clear();confidenceFilters.clear()}syncMultiFilterButtons('grade');syncMultiFilterButtons('score');syncMultiFilterButtons('confidence')}
+/** SOFTM-LIST-LOCATION START 날짜:20260930 : 기관이 없는 현재 지역도 새로고침·공유 뒤 전국으로 넓어지지 않도록 복원 */
+function restoreState(){
+ const listRegion=CareListMode.isList()&&NATIONAL_REGION_BOUNDS.regions[MapViewportSearch.regionKey(params.get('p'),'')];
+ for(const [key,id] of [['q','q'],['p','province'],['c','city']]){
+  const value=params.get(key),input=$(id);
+  if(!value||!input)continue;
+  if(listRegion&&id!=='q'&&![...input.options].some(option=>option.value===value))input.add(new Option(value,value));
+  input.value=value;if(id==='province')updateCities();
+ }
+ if(CONFIG.source==='nhis'){gradeFilters=new Set((params.get('grades')||'').split(',').filter(v=>['A','B','C','D','E','new','unknown'].includes(v)));scoreFilters=new Set((params.get('scores')||'').split(',').filter(v=>['high','mid','low','lowest','unknown'].includes(v)));confidenceFilters=new Set((params.get('conf')||'').split(',').filter(v=>['high','medium','low'].includes(v)))}else{gradeFilters.clear();scoreFilters.clear();confidenceFilters.clear()}syncMultiFilterButtons('grade');syncMultiFilterButtons('score');syncMultiFilterButtons('confidence')}
+/** SOFTM-LIST-LOCATION END */
 /** SOFTM-POPUP-ESC START 날짜:20260904 : 사진·문의 확대창의 Esc를 보존하고 현재 열린 팝업 하나만 닫기 */
 function closePopupOnEscape(event){
  if(event.key!=='Escape'||event.defaultPrevented||document.querySelector('dialog[open]'))return;
@@ -1036,7 +1047,24 @@ function initNaver(){if(CareListMode.isList())return;/* SOFTM-LIST-MODE 날짜:2
 /** SOFTM-TYPE-MAP END */
 /** SOFTM-MAP-RESTORE END */
 window.initNaver=initNaver;
-function loadNaver(){if(window.naver&&window.naver.maps){initNaver();return}const s=document.createElement('script');s.async=true;s.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=etfcybk8vf&submodules=geocoder&callback=initNaver';s.onload=()=>{let tries=0;const ready=()=>{if(window.naver&&window.naver.maps){initNaver();return}if(++tries<40)setTimeout(ready,100);else setStatus('지도 연결 지연','목록과 검색은 사용할 수 있습니다. 지도를 새로고침해 주세요.')};ready()};s.onerror=()=>{hideLoading();setStatus('지도 로드 실패','목록 검색은 계속 사용할 수 있습니다. 지도 API 인증을 확인해 주세요.')};document.head.appendChild(s);setTimeout(()=>{if(!mapReady&&window.naver&&window.naver.maps)initNaver();if(!mapReady)setStatus('지도 연결 지연','목록과 검색은 사용할 수 있습니다. 지도를 새로고침해 주세요.')},12000)} // SOFTM-MAPS-KEY 날짜:20260902 : Geocoding 권한이 연결된 신규 Maps API Key ID로 SDK 인증을 통일
+/** SOFTM-LIST-LOCATION START 날짜:20260930 : 주소 확인과 지도 생성이 SDK 한 번의 로드를 공유하도록 준비 단계를 분리 */
+let careNaverSdkPromise=null;
+function ensureCareNaverSdk(){
+ if(window.naver?.maps?.Service)return Promise.resolve();
+ if(careNaverSdkPromise)return careNaverSdkPromise;
+ careNaverSdkPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');script.async=true;
+  let poll;
+  const fail=()=>{clearTimeout(poll);script.remove();reject(new Error('위치의 지역명을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'))};
+  const started=Date.now();
+  const ready=()=>{if(window.naver?.maps?.Service){resolve();return;}if(Date.now()-started>=12000){fail();return;}poll=setTimeout(ready,100)};
+  script.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=etfcybk8vf&submodules=geocoder';
+  script.onerror=fail;document.head.appendChild(script);ready();
+ }).catch(error=>{careNaverSdkPromise=null;throw error});
+ return careNaverSdkPromise;
+}
+function loadNaver(){void ensureCareNaverSdk().then(()=>initNaver()).catch(()=>{if(CareListMode.isList())return;hideLoading();setStatus('지도 로드 실패','목록 검색은 계속 사용할 수 있습니다. 지도 API 인증을 확인해 주세요.')})}
+/** SOFTM-LIST-LOCATION END */
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 기존 검색을 보존하면서 검색 우선 배치와 지도 크기 복원을 공용으로 초기화 */
 /** SOFTM-BASKET-MAP START 날짜:20260904 : 검색 필터·목록·지도 위치를 보관해 비교함 지도에서 원래 검색으로 복귀 */
 /** SOFTM-WORKSPACE-ADAPTER START 날짜:20260905 : 검색 마커·선택·기준 위치를 보관하고 방문 출발 마커는 독립적으로 관리 */
@@ -1107,6 +1135,7 @@ function bootUnselected(){
 /** SOFTM-TYPE-ENTRY END */
 /** SOFTM-LIST-MODE START 날짜:20260930 : 목록은 좌표 처리 없이 전체 필터 결과를 사용하고 지도 복귀 상태를 보존 */
 let careListMapState=null,careListMapStarting=false;
+let careListLocation=null; // SOFTM-LIST-LOCATION 날짜:20260930 : 모드 전환 때 진행 중인 위치 요청을 취소하고 표시를 유지
 function careListSignature(){return JSON.stringify([$('q').value,$('province').value,$('city').value,[...gradeFilters],[...scoreFilters],[...confidenceFilters],advancedSearch?.state()]);}
 function syncCareListSort(){
  const listMode=CareListMode.isList(),select=$('sort');
@@ -1139,6 +1168,7 @@ function initCareListMode(){
   },
   async change(next,previous,transition){
    try{
+   careListLocation?.sync(); // SOFTM-LIST-LOCATION 날짜:20260930 : 지도 복귀 후 늦은 위치 응답이 검색을 변경하지 않도록 취소
    syncCareListSort();if(TYPE)renderNav();
    if(!TYPE){$('list').innerHTML='<div class="empty">찾을 돌봄 유형을 선택해 주세요.</div>';if(next==='map')loadNaver();return;}
    if(next==='list'){await refreshCareList();return;}
@@ -1161,6 +1191,23 @@ function initCareListMode(){
    }finally{if(transition.current())await CareMapExperience.resumeModeMap();}
   },error:error=>toast(error.message||'화면을 전환하지 못했습니다. 다시 시도해 주세요.')
  });
+ /** SOFTM-LIST-LOCATION START 날짜:20260930 : 접속 위치는 표시만 하고 사용자가 찾기를 눌렀을 때 확인된 지역을 적용 */
+ careListLocation=CareListLocation.mount({
+  enabled:()=>CareListMode.isList(),signature:()=>JSON.stringify([refreshToken,careListSignature()]),
+  describe:async point=>{await ensureCareNaverSdk();return NaverGeocoder.reverseGeocode(point.lat,point.lng)},
+  apply:async address=>{
+   if(!TYPE){categoryPicker?.open?.();throw new Error('먼저 찾을 돌봄 유형을 선택해 주세요.')}
+   const region=CareListLocation.resolveRegion(address,DATA,MapViewportSearch.regionKey,NATIONAL_REGION_BOUNDS.regions);
+   const choose=(id,value)=>{const select=$(id);if(![...select.options].some(option=>option.value===value))select.add(new Option(value,value));select.value=value};
+   choose('province',region.province);updateCities();choose('city',region.city);$('q').value='';
+   globalThis.CareRegionEntry?.hide();
+   const outcome=await refreshCareList();
+   if(!outcome?.cancelled)toast(`${outcome.scope} · ${outcome.count.toLocaleString()}곳 검색 완료`);
+   return outcome;
+  }
+ });
+ careListLocation.sync();
+ /** SOFTM-LIST-LOCATION END */
  syncCareListSort();
 }
 /** SOFTM-LIST-MODE END */

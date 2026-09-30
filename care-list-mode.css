@@ -339,3 +339,32 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] .mobile-popup-layer:not
     body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="saved"] .layout { top:56px!important; }
 }
 /** SOFTM-LIST-MODE-SHORT END */
+
+/** SOFTM-LIST-LOCATION START 날짜:20260930 : 검색지역과 접속 위치를 구분하고 작은 화면에서도 현재 위치 찾기에 접근 */
+#careListLocation { display:none; }
+body[data-care-mode="list"] #careListLocation {
+    display:flex!important;
+    align-items:center;
+    gap:8px 16px;
+    flex-wrap:wrap;
+    margin:0 0 12px;
+    padding:10px 12px;
+    border:1px solid #d5e6df;
+    border-radius:10px;
+    background:#f1f8f5;
+}
+.care-list-location-copy { display:flex; flex:1 1 240px; flex-wrap:wrap; align-items:baseline; gap:3px 10px; min-width:0; }
+.care-list-location-copy strong { color:#245c50; font-size:12px; }
+.care-list-location-copy [data-location-label] { color:#203c35; font-size:14px; font-weight:650; overflow-wrap:anywhere; }
+.care-list-location-copy small { flex-basis:100%; color:#567064; font-size:12px; line-height:1.4; overflow-wrap:anywhere; }
+#careListLocation button { min-height:42px; padding:8px 12px; border:1px solid #bad3c8; border-radius:8px; background:#fff; color:#004541; font:inherit; font-size:13px; font-weight:700; line-height:1.4; word-break:keep-all; cursor:pointer; }
+#careListLocation button:disabled { cursor:wait; opacity:.65; }
+#careListLocation button:focus-visible { outline:3px solid #43877b; outline-offset:2px; }
+#careListLocation[data-phase="error"] .care-list-location-copy small { color:#a13932; }
+@media (max-width:680px) {
+    body[data-care-mode="list"] #careListLocation { gap:8px; padding:8px 10px; margin-bottom:8px; }
+    .care-list-location-copy { flex-basis:160px; }
+    #careListLocation [data-list-locate] { flex:0 0 112px; font-size:12px; }
+    #careListLocation button { min-height:44px; }
+}
+/** SOFTM-LIST-LOCATION END */

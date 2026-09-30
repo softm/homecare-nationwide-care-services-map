@@ -64,7 +64,7 @@
         root.document.body.append(toggle);
         const list = root.document.getElementById('list'), summary = root.document.createElement('details');
         summary.id = 'careListSummary'; summary.setAttribute('aria-label', '검색 결과 분석'); summary.hidden = true; list?.before(summary);
-        const shortScreen = root.matchMedia?.('(max-height:560px)');
+        const shortScreen = root.matchMedia?.('(max-height:740px)'); // SOFTM-LIST-LOCATION 날짜:20260930 : 위치 안내가 추가된 낮은 화면에서도 기관 목록을 먼저 볼 수 있도록 요약을 접음
         summary.open = !shortScreen?.matches;
         shortScreen?.addEventListener('change', event => { summary.open = !event.matches; });
         const filters = root.document.querySelector('.filters');
