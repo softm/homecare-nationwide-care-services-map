@@ -288,7 +288,7 @@ if (exists('nationwide-care-data') || exists('nationwide-care-manifest.js') || e
 execFileSync('python3', [path.join(root, 'scripts/test_care_data.py')], { stdio: 'inherit' });
 /** SOFTM-ADVANCED-SEARCH START 날짜:20260904 : 공단 검색 인덱스의 누락·조건 조합·공유 복원을 정기 검사에 포함 */
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/advanced-search.test.mjs')], { stdio: 'inherit' });
-execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-popup-geometry.test.mjs'), path.join(root, 'scripts/care-decision-summary.test.mjs')], { stdio: 'inherit' }); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 화면별 마커 가림과 유형별 판단 근거의 오해 방지를 기본 검증에 포함
+execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-popup-geometry.test.mjs'), path.join(root, 'scripts/care-decision-summary.test.mjs'), path.join(root, 'scripts/map-marker-labels.test.mjs')], { stdio: 'inherit' }); // SOFTM-MARKER-INSIGHTS 날짜:20260930 : 확대 단계별 정보·충돌 축소·유형별 판단 근거를 기본 검증에 포함
 // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 제거한 전용 지도 조회 흐름 전용 회귀검사는 통합 지도 검사로 대체
 execFileSync('python3', ['-m', 'unittest', 'discover', '-s', path.join(root, 'scripts'), '-p', 'test_nhis_search.py'], { stdio: 'inherit' });
 /** SOFTM-ADVANCED-SEARCH END */

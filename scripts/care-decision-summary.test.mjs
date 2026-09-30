@@ -29,3 +29,40 @@ assert.equal(globalThis.CareDecisionSummary.staffText({cw:0,staffMissing:true}, 
 assert.equal(globalThis.CareDecisionSummary.staffText({}, 'cw'), '미확인');
 console.log('care-decision-summary: 유형별 판단 요약 검증 통과');
 /** SOFTM-DECISION-SUMMARY END */
+
+/** SOFTM-MARKER-INSIGHT-TEST START 날짜:20260930 : 근접 지도에서 유형에 맞는 판단 근거와 수집 누락을 일관되게 안내하도록 검증 */
+const { markerLines } = globalThis.CareDecisionSummary;
+const near = { ...base, ey: 2024 };
+for (const type of ['facility', 'daycare', 'short-stay']) {
+    assert.deepEqual(markerLines(near, type), [
+        '공단 A등급 · 2024년 평가',
+        '등록 정원 49명 · 요양보호사 9명'
+    ], `${type}: 정원은 잔여 자리가 아닌 등록 정원으로 표시`);
+}
+for (const type of ['home-care', 'home-bath']) {
+    assert.deepEqual(markerLines(near, type), ['공단 A등급 · 2024년 평가', '요양보호사 9명']);
+    assert.deepEqual(markerLines({ ...near, staffMissing: true }, type), ['공단 A등급 · 2024년 평가', '요양보호사 9명 확인']);
+    assert.match(markerLines({ ...near, cw: 0, staffMissing: true }, type)[1], /요양보호사 미확인/);
+    assert.match(markerLines({ ...near, cw: null }, type)[1], /요양보호사 미확인/);
+    assert.match(markerLines({ ...near, cw: 0 }, type)[1], /요양보호사 0명/);
+    assert.doesNotMatch(markerLines(near, type).join(' '), /정원|잔여|이용 가능/);
+}
+assert.deepEqual(markerLines(near, 'home-nursing'), ['공단 A등급 · 2024년 평가', '간호인력 3명']);
+assert.equal(markerLines({ ...near, staffMissing: true }, 'home-nursing')[1], '간호인력 3명 확인');
+assert.equal(markerLines({ ...near, rn: null }, 'home-nursing')[1], '간호인력 1명 확인');
+assert.equal(markerLines({ ...near, rn: 0, na: 0, staffMissing: true }, 'home-nursing')[1], '간호인력 미확인');
+assert.doesNotMatch(markerLines(near, 'home-nursing').join(' '), /요양보호사|정원/);
+assert.deepEqual(markerLines(near, 'welfare-equipment'), ['공단 A등급 · 2024년 평가', '장기요양 복지용구 · 지정 2019년']);
+assert.equal(markerLines({ ...near, d: '' }, 'welfare-equipment')[1], '장기요양 복지용구 · 지정연도 미확인');
+assert.doesNotMatch(markerLines(near, 'welfare-equipment').join(' '), /정원|인력|요양보호사/);
+assert.deepEqual(markerLines(near, 'nursing-hospital'), ['요양병원 · 의료기관', '개설 2019.09.03 · 심평원']);
+assert.deepEqual(markerLines({ ...near, d: '', z: 0, cw: 0, rn: 0, na: 0 }, 'nursing-hospital'), ['요양병원 · 의료기관', '개설일 미확인 · 심평원']);
+assert.doesNotMatch(markerLines(near, 'nursing-hospital').join(' '), /공단|등급|평가|정원|인력|요양보호사|0명/);
+assert.equal(markerLines({ ...near, t: 'B03,H31' }, 'dementia')[1], '등록 정원 49명 · 요양보호사 9명');
+assert.equal(markerLines({ ...near, t: 'C01' }, 'dementia')[1], '요양보호사 9명');
+assert.equal(markerLines({ ...near, g: '' }, 'daycare')[0], '공단 평가 미확인');
+assert.equal(markerLines({ g: 'B', ev: { year: 2025 } }, 'home-care')[0], '공단 B등급 · 2025년 평가');
+assert.match(markerLines({ staffMissing: true }, 'daycare')[1], /등록 정원 미확인.*요양보호사 미확인/);
+assert.doesNotMatch(markerLines({ staffMissing: true }, 'daycare').join(' '), /0명|undefined|null|NaN/);
+console.log('care-decision-summary: 9개 유형 근접 마커 판단정보 검증 통과');
+/** SOFTM-MARKER-INSIGHT-TEST END */
