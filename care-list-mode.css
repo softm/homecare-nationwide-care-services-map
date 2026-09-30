@@ -421,3 +421,9 @@ body[data-care-mode="list"] .care-list-data-info p { margin:4px 0 0; }
 body[data-care-mode="list"] .care-list-data-info a { color:inherit; }
 body[data-care-mode="list"] .care-list-data-info > summary:focus-visible { outline:2px solid #43877b; outline-offset:2px; }
 /** SOFTM-SUMMARY-COMPACT END */
+
+/** SOFTM-ROUTE-CONTROLS START 날짜:20260930 : 담은 기관은 상단 전환 탭을 사용해 하단 모의주행을 중복 전환 버튼이 가리지 않도록 함 */
+@media (max-width:1000px) {
+    body.care-map-page[data-care-workspace="saved"] .care-mode-toggle { display:none; }
+}
+/** SOFTM-ROUTE-CONTROLS END */

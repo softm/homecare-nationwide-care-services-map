@@ -58,3 +58,9 @@
  .care-map-page .map-wrap:has(.care-simulation:not([hidden]) .care-simulation-controls:not([hidden])) { margin-bottom:120px; }
 }
 /** SOFTM-SIMULATION-BOTTOM END */
+
+/** SOFTM-ROUTE-CONTROLS START 날짜:20260930 : 광고 손잡이·펼친 배너 높이를 함께 피하여 시작·설정 조작을 항상 노출 */
+@media (max-width:1000px) {
+ .care-map-page .care-simulation { bottom:calc(var(--care-tabs-height,calc(58px + env(safe-area-inset-bottom))) + var(--care-list-ad-space,0px)); }
+}
+/** SOFTM-ROUTE-CONTROLS END */
