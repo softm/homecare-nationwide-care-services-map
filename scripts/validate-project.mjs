@@ -107,6 +107,22 @@ const nursingHospitalSource = read(categoryLandingPages['nursing-hospital']);
 const nursingHospitalHead = nursingHospitalSource.match(/<head>[\s\S]*?<\/head>/)?.[0] || '';
 const nursingHospitalEyebrow = nursingHospitalSource.match(/<p\s+class="eyebrow">([^<]*)<\/p>/)?.[1] || '';
 if (nursingHospitalHead.includes('장기요양기관') || nursingHospitalEyebrow.includes('장기요양기관')) fail('nursing-hospital-map.html: 요양병원을 장기요양기관으로 표현함');
+/** SOFTM-NURSING-ORGANIZATION-TITLE START 날짜:20260930 : 요청한 요양기관 대표 제목이 검색 메타와 화면에서 다시 요양병원 제목으로 돌아가지 않도록 검사 */
+const nursingOrganizationTitle = '전국 요양기관 찾기·위치 비교';
+const nursingHospitalTitleSignals = [
+  nursingHospitalSource.match(/<title>([^<]*)<\/title>/)?.[1] || '',
+  nursingHospitalSource.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] || '',
+  nursingHospitalSource.match(/<meta\s+property="og:title"\s+content="([^"]*)"/)?.[1] || '',
+  nursingHospitalSource.match(/<meta\s+property="og:description"\s+content="([^"]*)"/)?.[1] || '',
+  nursingHospitalSource.match(/<meta\s+name="twitter:title"\s+content="([^"]*)"/)?.[1] || '',
+  nursingHospitalSource.match(/<meta\s+name="twitter:description"\s+content="([^"]*)"/)?.[1] || '',
+  nursingHospitalSource.match(/<h1\s+id="page-title">([^<]*)<\/h1>/)?.[1] || ''
+];
+const nursingHospitalStructured = [...nursingHospitalSource.matchAll(/<script\s+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(match => JSON.parse(match[1]));
+if (!nursingHospitalTitleSignals.every(value => value.includes(nursingOrganizationTitle))) fail('nursing-hospital-map.html: 요양기관 대표 제목 신호 불일치');
+if (!nursingHospitalStructured.some(item => item['@type'] === 'CollectionPage' && item.name === nursingOrganizationTitle && item.description?.includes(nursingOrganizationTitle))) fail('nursing-hospital-map.html: 요양기관 구조화 데이터 제목 불일치');
+if (!nursingHospitalSource.includes('<meta name="dcterms.modified" content="2026-09-30">')) fail('nursing-hospital-map.html: 요양기관 대표 제목 변경일 누락');
+/** SOFTM-NURSING-ORGANIZATION-TITLE END */
 /** SOFTM-LTC-KEYWORD END */
 /** SOFTM-LANDING-ADS START 날짜:20260904 : 안내 광고가 기존 수익 슬롯을 재사용하거나 잘못된 크기로 요청되지 않도록 검증 */
 const landingAdConfig = runFiles(['category-landing-ad-config.js']).CATEGORY_LANDING_AD_CONFIG;
