@@ -25,10 +25,17 @@
         host.hidden = !isList();
         if (!isList()) return;
         const report = summarize(rows, type), fmt = count => count.toLocaleString('ko-KR');
+        /** SOFTM-SUMMARY-COMPACT START 날짜:20260930 : 결과 탐색 공간을 확보하고 기준일·평가 해설은 필요할 때만 펼쳐 확인 */
         host.innerHTML = `<summary class="care-list-summary-heading"><strong>검색 결과 분석</strong><span class="care-list-scope">${escape(scope || '전국')} · 전체 ${fmt(report.total)}곳</span></summary>
             <div class="care-list-summary-grid"><article><strong>${fmt(report.total)}곳</strong><span>검색 결과</span></article><article><strong>${fmt(report.regions)}개</strong><span>시·군·구</span></article>${report.hospital ? '' : `<article><strong>${fmt(report.evaluated)}곳</strong><span>공단 평가 확인</span></article><article><strong>${fmt(report.grades.unknown)}곳</strong><span>평가 미확인</span></article>`}</div>
-            ${report.hospital ? '<p class="care-list-grade-summary">심평원 의료기관 개설현황 · 공단 장기요양 평가 대상이 아닙니다.</p>' : `<p class="care-list-grade-summary">${['A', 'B', 'C', 'D', 'E'].map(grade => `${grade}등급 ${fmt(report.grades[grade])}곳`).join(' · ')}<br>평가연도 ${escape(report.years.join('·') || '미확인')} · 미확인은 낮은 평가를 뜻하지 않습니다.</p>`}
-            <p class="care-list-scope">자료 기준일 ${escape(sourceDate || '미확인')} · 기관을 담아 비교표와 엑셀로 함께 확인할 수 있습니다.</p>`;
+            <div class="care-list-summary-meta">
+                ${report.hospital ? '' : `<div class="care-list-grade-summary" aria-label="등급별 기관 수">${['A', 'B', 'C', 'D', 'E'].map(grade => `<span aria-label="${grade}등급 ${fmt(report.grades[grade])}곳"><b>${grade}</b> ${fmt(report.grades[grade])}</span>`).join('')}</div>`}
+                <details class="care-list-data-info"><summary>${report.hospital ? '자료 안내' : '평가·자료 안내'}</summary><div>
+                    <p>${report.hospital ? '심평원 의료기관 개설현황 · 공단 장기요양 평가 대상이 아닙니다.' : `평가연도 ${escape(report.years.join('·') || '미확인')} · 미확인은 낮은 평가를 뜻하지 않습니다.`}</p>
+                    <p>자료 기준일 ${escape(sourceDate || '미확인')} · <a href="data-status.html" target="_blank" rel="noopener">자료 갱신 현황</a></p>
+                </div></details>
+            </div>`;
+        /** SOFTM-SUMMARY-COMPACT END */
     }
 
     function sync() {

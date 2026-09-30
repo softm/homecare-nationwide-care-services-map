@@ -408,3 +408,16 @@ body[data-care-mode="list"] #careListLocation {
     #careListLocation button { min-height:44px; }
 }
 /** SOFTM-LIST-LOCATION END */
+
+/** SOFTM-SUMMARY-COMPACT START 날짜:20260930 : 등급 분포는 한 행으로 유지하고 보조 해설은 펼칠 때만 공간을 사용 */
+body[data-care-mode="list"] .care-list-summary-meta { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; margin-top:6px; }
+body[data-care-mode="list"] .care-list-grade-summary { display:flex; gap:12px; margin:0; max-width:100%; overflow-x:auto; white-space:nowrap; font-size:12px; line-height:1.5; }
+body[data-care-mode="list"] .care-list-grade-summary > span { flex:none; }
+body[data-care-mode="list"] .care-list-grade-summary b { margin-right:3px; }
+body[data-care-mode="list"] .care-list-data-info { flex:1; min-width:104px; color:#536d62; font-size:11px; line-height:1.5; }
+body[data-care-mode="list"] .care-list-data-info > summary { width:max-content; min-height:24px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+body[data-care-mode="list"] .care-list-data-info[open] { flex-basis:100%; }
+body[data-care-mode="list"] .care-list-data-info p { margin:4px 0 0; }
+body[data-care-mode="list"] .care-list-data-info a { color:inherit; }
+body[data-care-mode="list"] .care-list-data-info > summary:focus-visible { outline:2px solid #43877b; outline-offset:2px; }
+/** SOFTM-SUMMARY-COMPACT END */
