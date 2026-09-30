@@ -1,11 +1,11 @@
-/** SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 하단 고정 지면의 성과를 기존 지도·목록 상단 광고와 분리해 집계 */
+/** SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 실제 발급한 하단 전용 광고로 연결하고 기존 지도·목록 상단과 성과를 분리해 집계 */
 window.CARE_LIST_AD_CONFIG = {
     enabled: true,
     mode: 'hybrid',
     kakao: {
         script: 'https://t1.kakaocdn.net/kas/static/ba.min.js',
-        desktop: { unit: '', width: 728, height: 90 },
-        mobile: { unit: '', width: 320, height: 100 }
+        desktop: { unit: 'DAN-u93PIUlMdcBVxmBT', width: 728, height: 90 },
+        mobile: { unit: 'DAN-pvxgpyPRxWaG5Z56', width: 320, height: 100 }
     }
 };
 /** SOFTM-LIST-ANCHOR-ADS END */
