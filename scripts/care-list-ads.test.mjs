@@ -46,11 +46,11 @@ function setup({ list = true, collapsed = false, desktop = true, unit = 'DAN-tes
         mode(value) { body.dataset.careMode = value; scope.CareListAds.sync(); } };
 }
 
-test('지도·접힘·비활성 탭에서 요청하지 않고 목록의 첫 실제 펼침에서만 요청한다', () => {
+test('목록·지도에서 접힘·비활성 탭은 요청하지 않고 첫 실제 펼침에서만 요청한다', () => {
     const state = setup({ list: false, collapsed: true });
     assert.equal(state.scripts().length, 0);
-    assert.equal(state.zone.hidden, true);
-    assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '0px');
+    assert.equal(state.zone.hidden, false); // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 지도에서도 접힌 손잡이는 유지
+    assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '28px');
     state.mode('list');
     assert.equal(state.scripts().length, 0);
     assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '28px');
@@ -199,8 +199,8 @@ test('읽기 단계에서 숨은 페이지가 활성화되어도 요청하지 �
     assert.equal(state.scripts().length, 0);
     state.mode('map');
     state.scope.CareListAds.setReading(false);
-    assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '0px');
-    assert.equal(state.scripts().length, 0);
+    assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '143px'); // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 지도 복귀는 원래 펼침으로 요청
+    assert.equal(state.scripts().length, 1);
     state.mode('list');
     assert.equal(state.handle.attributes['aria-expanded'], 'true');
     assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '143px');
@@ -345,3 +345,29 @@ test('빠른 지도 왕복과 배너 재연결은 이전 미노출 타이머를 
 });
 /** SOFTM-LIST-ANCHOR-PAGE-TEST END */
 /** SOFTM-LIST-ANCHOR-ADS-TEST END */
+
+/** SOFTM-MAP-ANCHOR-ADS-TEST START 날짜:20260930 : 지도 직접 진입·모드 왕복·문의 출처와 목록 임시 접힘의 분리를 검증 */
+test('PC·모바일 지도 광고는 접기·펼치기·목록 왕복에도 한 개만 요청하고 문의 출처를 갱신한다', () => {
+    for (const desktop of [true, false]) {
+        const state = setup({ list: false, desktop });
+        const inquiry = state.host.querySelector('.care-list-ad-inquiry');
+        assert.equal(state.zone.hidden, false);
+        assert.equal(state.scripts().length, 1);
+        assert.equal(inquiry.dataset.partnerPlacement, '지도모드 하단 고정');
+        state.handle.click();
+        assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '28px');
+        state.mode('list');
+        assert.equal(state.handle.attributes['aria-expanded'], 'false');
+        assert.equal(inquiry.dataset.partnerPlacement, '목록모드 하단 고정');
+        state.handle.click();
+        state.scope.CareListAds.setReading(true);
+        state.mode('map');
+        assert.equal(state.handle.attributes['aria-expanded'], 'true');
+        state.handle.click();
+        assert.equal(state.storage.get('careListAd:collapsed:v1'), '1');
+        state.handle.click();
+        assert.equal(state.storage.get('careListAd:collapsed:v1'), '0');
+        assert.equal(state.scripts().length, 1);
+    }
+});
+/** SOFTM-MAP-ANCHOR-ADS-TEST END */
