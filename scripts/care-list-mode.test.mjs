@@ -293,7 +293,7 @@ function setupModeWorkspace() {
     const events = [];
     let listMode = false, active = true;
     const context = {
-        workspace: 'saved', view: 'map', bar: {}, readyTimer: 1, routeRevision: 0,
+        workspace: 'saved', view: 'map', bar: {}, readyTimer: 1, routeRevision: 0, routeEntryRevision: 0, // SOFTM-ROUTE-DIRECT 날짜:20260930 : 모드 전환의 자동 경로 대기 취소 상태도 함께 검증
         routePanel: false, originState: { origin: null }, originController: { cancel() { events.push('cancel-origin'); } },
         isListMode: () => listMode, clearTimeout() {}, setTimeout() { assert.fail('준비된 지도의 재시도는 필요하지 않습니다.'); },
         syncView() { events.push(`sync:${context.workspace}`); }, rows: () => [{ i: 'saved-1' }],

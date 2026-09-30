@@ -258,3 +258,67 @@ test('통합 지도 상세는 제목 아래 공통 행동 영역에서 비교함
     assert.doesNotMatch(openDetail, /care-row-actions[^\n]*CareMapExperience\.button\(c\)/);
 });
 /** SOFTM-POPUP-BASKET-TEST END */
+
+/** SOFTM-ROUTE-DIRECT-TEST START 날짜:20260930 : 첫 경로 클릭이 위치 확인 뒤 한 번 실행되고 취소·실패·중복 입력에는 실행되지 않는지 검증 */
+function directRouteHarness({ origin: selectedOrigin = null, locate } = {}) {
+    let runs = 0, locations = 0, placements = 0;
+    const context = vm.createContext({
+        routeEntryBusy: false, routeEntryRevision: 0, workspace: 'saved', routePanel: false,
+        rows: () => [row('1'), row('2')], isListMode: () => false,
+        originState: { phase: selectedOrigin ? 'ready' : 'idle', origin: selectedOrigin },
+        async editRoute(open, autoLocate) { assert.equal(open, true); assert.equal(autoLocate, false); context.routeEntryRevision++; context.routePanel = true; },
+        originController: { async locate() { locations++; context.originState = locate ? await locate() : { phase: 'ready', origin }; } },
+        async showSaved() { placements++; }, async routeBasket() { runs++; }
+    });
+    const source = readFileSync('map-experience.js', 'utf8').split('/** SOFTM-ROUTE-DIRECT START')[1].split('*/')[1].split('/** SOFTM-ROUTE-DIRECT END')[0];
+    vm.runInContext(source, context);
+    return { context, start: () => context.startRoute(), counts: () => ({ runs, locations, placements }) };
+}
+test('첫 경로 클릭은 지정 출발지를 재사용하고 위치 권한을 다시 묻지 않는다', async () => {
+    const h = directRouteHarness({ origin }); await h.start();
+    assert.deepEqual(h.counts(), { runs: 1, locations: 0, placements: 1 });
+    assert.equal(h.context.routeEntryBusy, false);
+});
+test('출발지 없는 경로 클릭은 위치 확인을 기다린 뒤 중복 클릭 없이 한 번 계산한다', async () => {
+    let finish; const h = directRouteHarness({ locate: () => new Promise(resolve => { finish = resolve; }) });
+    const pending = h.start(); await flush(); await h.start();
+    assert.deepEqual(h.counts(), { runs: 0, locations: 1, placements: 0 });
+    finish({ phase: 'ready', origin }); await pending;
+    assert.deepEqual(h.counts(), { runs: 1, locations: 1, placements: 1 });
+});
+test('위치 확인 실패와 주소 미선택 상태에서는 도로 경로를 실행하지 않는다', async () => {
+    for (const phase of ['error', 'idle', 'choices']) {
+        const h = directRouteHarness({ locate: async () => ({ phase, origin: null }) }); await h.start();
+        assert.equal(h.counts().runs, 0); assert.equal(h.context.routeEntryBusy, false);
+    }
+});
+test('위치 확인 중 화면·기관·출발지를 변경해 취소하면 늦은 성공으로 탐색하지 않는다', async () => {
+    let finish; const h = directRouteHarness({ locate: () => new Promise(resolve => { finish = resolve; }) });
+    const pending = h.start(); await flush(); h.context.routeEntryRevision++;
+    finish({ phase: 'ready', origin }); await pending;
+    assert.equal(h.counts().runs, 0); assert.equal(h.context.routeEntryBusy, false);
+});
+/** SOFTM-ROUTE-DIRECT-TEST END */
+
+/** SOFTM-ROUTE-MODE-TEST START 날짜:20260930 : 경로 자체의 지도 전환과 사용자가 중단한 전환을 구분 */
+test('경로 진입의 자체 지도 정리는 이어받고 준비 중 사용자 취소는 경로 화면을 다시 열지 않는다', async () => {
+    const source = readFileSync('map-experience.js', 'utf8');
+    const code = source.slice(source.indexOf('    async function editRoute('), source.indexOf('    /** SOFTM-ROUTE-DIRECT START 날짜:20260930 : 담은 기관'));
+    for (const cancelled of [false, true]) {
+        let finish, shown = 0;
+        const context = vm.createContext({
+            routeEntryRevision: 0, routeRevision: 0, routePanel: false, workspace: 'saved', originState: { origin: null },
+            isListMode: () => true,
+            root: { CareListMode: { setMode() { context.routeEntryRevision++; return new Promise(resolve => { finish = resolve; }); } } },
+            setWorkspace() {}, originController: { cancel() {}, locate() { assert.fail('출발지 확인은 직접 실행 단계에서 수행'); } },
+            syncView() {}, setView() {}, showSaved() { shown++; }, renderOrigin() {},
+            bar: { querySelector: () => ({ focus() {} }) }
+        });
+        vm.runInContext(code, context); const pending = context.editRoute(true, false);
+        if (cancelled) context.routeEntryRevision++;
+        finish(); await pending;
+        assert.equal(shown, cancelled ? 0 : 1);
+        assert.equal(context.routePanel, !cancelled);
+    }
+});
+/** SOFTM-ROUTE-MODE-TEST END */

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { gunzipSync } from 'node:zlib';
 import { classify, filterRows, mapUrl, photoUrl, readJson } from '../care-photos-common.js';
-import { visibleMarkerIds, saveScope, readScope, scopedRows } from '../care-photo-scope.js';
+import { captureScope, visibleMarkerIds, saveScope, readScope, scopedRows } from '../care-photo-scope.js'; // SOFTM-PHOTO-SEARCH-SCOPE-TEST 날짜:20260930 : 지도 없이 확정된 전체 검색 결과를 사진으로 전달하는 공개 동작을 검사
 
 test('제목 분류는 명시한 공간만 분류하고 미상·행사 사진을 기타로 유지', () => {
     for (const [title, group] of [['생활실','생활공간'],['생활실 화장실','위생'],['시설 전경','외관'],['정원','외관'],['인지 프로그램','프로그램/재활'],['물리치료실','프로그램/재활'],['식당','식사'],['생신잔치','기타'],['','기타']]) assert.equal(classify(title), group);
@@ -115,6 +115,131 @@ test('범위 재전달은 이전 사진 페이지의 집합을 덮어쓰지 않�
     assert.deepEqual(readScope(storage,'first').ids,['1']);assert.deepEqual(readScope(storage,'second').ids,['2']);
     saveScope(storage,{type:'daycare',ids:['1'],source:'https://other.example/'},'bad');assert.equal(readScope(storage,'bad'),null);
 });
+/** SOFTM-PHOTO-SEARCH-SCOPE-TEST START 날짜:20260930 : 지도 선행 조건 제거로 목록 전체 범위·새로고침 복원·검색 복귀 조건이 손실되는 회귀를 방지 */
+test('확정된 목록 검색은 좌표 없이 90곳을 넘는 전체 고유 기관을 사진 범위로 전달한다', () => {
+    const rows = Array.from({ length: 151 }, (_, i) => ({ i: String(i + 1), n: '같은센터' }));
+    rows.push({ i: 1, n: '중복 등록' });
+    const source = 'https://homecare.designboard.net/index.html?type=daycare&mode=list&p=%EA%B2%BD%EA%B8%B0&c=%EA%B4%91%EB%AA%85&q=%EC%84%BC%ED%84%B0&grade=A&adv_services=dementia&institution=2';
+    const snapshot = captureScope({ type: 'daycare', kind: 'search', ready: true, rows, source });
+    assert.equal(snapshot.type, 'daycare');
+    assert.equal(snapshot.kind, 'search');
+    assert.deepEqual(snapshot.ids, rows.slice(0, 151).map(row => row.i));
+    assert.ok(snapshot.source.startsWith('index.html?'));
+    const before = new URL(source).searchParams;
+    const after = new URL(snapshot.source, 'https://homecare.designboard.net/').searchParams;
+    for (const [key, value] of before) if (key !== 'institution') assert.equal(after.get(key), value, `${key} 검색 조건이 유지되어야 한다`);
+    assert.equal(after.has('institution'), false);
+    rows.splice(0);
+    assert.equal(snapshot.ids.length, 151, '다음 검색이 원래 사진 페이지의 전달 집합을 바꾸지 않는다');
+});
+
+test('확정된 지도는 표시 마커만 보존하고 현재 중심·배율로 복귀하며 기관 자동선택을 제거한다', () => {
+    const map = {
+        getBounds: () => ({ hasLatLng: point => point.inside }),
+        getCenter: () => ({ lat: () => 37.478, lng: () => 126.865 }),
+        getZoom: () => 14
+    };
+    const marker = (shown, inside) => ({ getMap: () => shown ? map : null, getPosition: () => ({ inside }) });
+    const snapshot = captureScope({
+        type: 'facility', kind: 'map', ready: true, map,
+        entries: [['1', marker(true, true)], ['2', marker(false, true)], ['3', marker(true, false)], ['1', marker(true, true)]],
+        rows: [{ i: '1' }, { i: '2' }, { i: '3' }, { i: '4' }],
+        source: 'https://homecare.designboard.net/index.html?type=facility&mode=map&q=%EC%84%BC%ED%84%B0&lat=1&lng=2&z=3&institution=2'
+    });
+    assert.equal(snapshot.kind, 'map');
+    assert.deepEqual(snapshot.ids, ['1']);
+    const query = new URL(snapshot.source, 'https://homecare.designboard.net/').searchParams;
+    assert.equal(query.get('mode'), 'map');
+    assert.equal(query.get('q'), '센터');
+    assert.equal(Number(query.get('lat')), 37.478);
+    assert.equal(Number(query.get('lng')), 126.865);
+    assert.equal(Number(query.get('z')), 14);
+    assert.equal(query.has('institution'), false);
+});
+
+test('지도 생성 전에도 확정된 검색 결과를 전달하되 조회 대기와 유형 미확정은 전달하지 않는다', () => {
+    const current = {
+        type: 'daycare', kind: 'map', ready: true, rows: [{ i: 'no-coordinate' }, { i: '2' }],
+        source: 'https://homecare.designboard.net/index.html?type=daycare&mode=list&adv_owner=private'
+    };
+    const snapshot = captureScope(current);
+    assert.equal(snapshot.kind, 'search');
+    assert.deepEqual(snapshot.ids, ['no-coordinate', '2']);
+    assert.equal(new URL(snapshot.source, 'https://homecare.designboard.net/').searchParams.get('adv_owner'), 'private');
+    assert.equal(captureScope({ ...current, ready: false }), null);
+    assert.equal(captureScope({ ...current, type: '' }), null);
+    assert.equal(captureScope({ ...current, type: undefined }), null);
+});
+
+test('검색 사진 범위는 새로고침 뒤 종류·전체 집합·복귀 조건을 복원하고 빈 검색을 손실된 범위와 구분한다', () => {
+    const data = new Map();
+    const storage = { setItem: (key, value) => data.set(key, value), getItem: key => data.get(key) };
+    const rows = [{ i: '1', n: '사진 있음' }, { i: '2', n: '사진 없음' }];
+    const current = {
+        type: 'daycare', kind: 'search', ready: true, rows,
+        source: 'https://homecare.designboard.net/index.html?type=daycare&mode=list&grade=A&institution=1'
+    };
+    const snapshot = captureScope(current);
+    saveScope(storage, snapshot, 'search-reload');
+    const reloaded = readScope({ getItem: key => data.get(key) }, 'search-reload');
+    assert.equal(reloaded.kind, 'search');
+    assert.equal(reloaded.type, 'daycare');
+    assert.deepEqual(reloaded.ids, ['1', '2']);
+    assert.equal(reloaded.source, snapshot.source);
+    assert.deepEqual(scopedRows([...rows, { i: '3', n: '다른검색' }], reloaded), rows);
+    const empty = captureScope({ ...current, rows: [] });
+    assert.ok(empty);
+    assert.deepEqual(empty.ids, []);
+    saveScope(storage, empty, 'empty-search');
+    const restoredEmpty = readScope(storage, 'empty-search');
+    assert.equal(restoredEmpty.kind, 'search');
+    assert.deepEqual(restoredEmpty.ids, []);
+    assert.deepEqual(scopedRows(rows, restoredEmpty), []);
+    assert.equal(readScope(storage, 'missing-search'), null);
+});
+
+test('루트 홈페이지에서 연 사진도 검색 조건을 유지한 index.html 복귀 주소로 저장하고 복원한다', () => {
+    const data = new Map();
+    const storage = { setItem: (key, value) => data.set(key, value), getItem: key => data.get(key) };
+    const snapshot = captureScope({
+        type: 'facility', kind: 'search', ready: true, rows: [{ i: 'root-1' }],
+        source: 'https://homecare.designboard.net/?type=facility&mode=list&q=%EA%B4%91%EB%AA%85&adv_owner=private&institution=root-1'
+    });
+    assert.ok(snapshot.source.startsWith('index.html?'));
+    saveScope(storage, snapshot, 'root-search');
+    const restored = readScope(storage, 'root-search');
+    assert.ok(restored, '루트에서 생성한 범위가 복귀 주소 검증을 통과해야 한다');
+    assert.equal(restored.kind, 'search');
+    assert.deepEqual(restored.ids, ['root-1']);
+    const target = new URL(restored.source, 'https://homecare.designboard.net/');
+    assert.equal(target.pathname, '/index.html');
+    assert.equal(target.searchParams.get('type'), 'facility');
+    assert.equal(target.searchParams.get('mode'), 'list');
+    assert.equal(target.searchParams.get('q'), '광명');
+    assert.equal(target.searchParams.get('adv_owner'), 'private');
+    assert.equal(target.searchParams.has('institution'), false);
+});
+
+test('기존 v1 지도 사진 범위는 호환하고 잘못된 종류나 외부 복귀 주소는 재사용하지 않는다', () => {
+    const base = { version: 1, type: 'daycare', ids: ['1', '1'], source: 'index.html?type=daycare&mode=map' };
+    const data = new Map([['carePhotoScope:v1:legacy', JSON.stringify(base)]]);
+    const storage = { setItem: (key, value) => data.set(key, value), getItem: key => data.get(key) };
+    assert.equal(readScope(storage, 'legacy').kind, 'map');
+    assert.deepEqual(readScope(storage, 'legacy').ids, ['1']);
+    for (const kind of ['search', 'map']) {
+        saveScope(storage, { ...base, kind }, kind);
+        assert.equal(readScope(storage, kind).kind, kind);
+    }
+    for (const kind of ['all', '', null, 1, {}, []]) {
+        data.set('carePhotoScope:v1:invalid-kind', JSON.stringify({ ...base, kind }));
+        assert.equal(readScope(storage, 'invalid-kind'), null);
+    }
+    for (const source of ['https://other.example/index.html', '//other.example/index.html', 'javascript:alert(1)', '../index.html']) {
+        data.set('carePhotoScope:v1:external', JSON.stringify({ ...base, kind: 'search', source }));
+        assert.equal(readScope(storage, 'external'), null);
+    }
+});
+/** SOFTM-PHOTO-SEARCH-SCOPE-TEST END */
 /** SOFTM-PHOTO-TEST END */
 
 /** SOFTM-PHOTO-GALLERY START 날짜:20260911 : 대량 사진의 요청 제한·순서·취소·재시도를 회귀검사 */
