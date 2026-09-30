@@ -108,18 +108,21 @@
     }
     /** SOFTM-LOCATION-DIALOG END */
     /** SOFTM-LOCATION-STARTUP START 날짜:20260924 : 초기 권한 요청과 지도 위치 조회를 공유해 중복 요청 없이 브라우저 권한창을 열기 */
-    let inFlight;
+    /** SOFTM-MAP-ENTRY-LOCATION START 날짜:20260930 : 목록 요청이 취소돼도 같은 위치를 기다리는 지도 요청의 재시도를 보존 */
+    let inFlight, requestCallers = [];
     function request(options) {
+        requestCallers.push(typeof options?.isCurrent === 'function' ? options.isCurrent : () => true);
         if (inFlight) return inFlight;
-        inFlight = requestPosition(root, options).then(point => {
+        inFlight = requestPosition(root, { isCurrent: () => requestCallers.some(current => current()) }).then(point => {
             root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: { reason: '' } }));
             return point;
         }, error => {
             root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: info(error) }));
             throw error;
-        }).finally(() => { inFlight = null; });
+        }).finally(() => { inFlight = null; requestCallers = []; });
         return inFlight;
     }
+    /** SOFTM-MAP-ENTRY-LOCATION END */
     /** SOFTM-LOCATION-FOLLOW START 날짜:20260924 : 권한 획득 좌표를 지도 준비 전에도 보관해 주변 조회에 한 번 전달 */
     let initialPoint, initialHandler, initialDelivered = false;
     function deliverInitialPosition() {
