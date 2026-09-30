@@ -10,3 +10,15 @@ body.care-map-page:not(.care-basket-map) .care-compact-markers .care-mobile-acti
 body.care-map-page .marker-name.care-label-visible,body.care-map-page .marker-name.care-label-measure { display:-webkit-box!important; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; max-width:160px; bottom:calc(100% + 16px); font-size:12px; line-height:1.35; }
 body.care-map-page .marker-name.care-label-measure { visibility:hidden; }
 /** SOFTM-MARKER-LABELS END */
+/** SOFTM-MARKER-INSIGHTS START 날짜:20260930 : 이름·평가·등록 현황을 계층적으로 읽고 모바일에서도 선택 이름표가 과도하게 확대되지 않도록 구성 */
+body.care-map-page .marker-name .care-marker-title { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+body.care-map-page .marker-name .care-marker-fact { display:none; }
+body.care-map-page .marker-name.care-label-context { display:block!important; width:220px!important; max-width:220px!important; padding:8px 10px; border-radius:9px; text-align:left; -webkit-line-clamp:unset; box-sizing:border-box; }
+body.care-map-page .marker-name.care-label-context .care-marker-title { font-size:12px; line-height:1.4; color:#183550; }
+body.care-map-page .marker-name.care-label-context .care-marker-overview { display:block; margin-top:4px; color:#346255; font-size:11px; font-weight:600; line-height:1.5; }
+body.care-map-page .marker-name.care-label-insight .care-marker-detail { display:block; margin-top:4px; padding-top:4px; border-top:1px solid #e3eae8; color:#53655f; font-size:11px; font-weight:500; line-height:1.5; }
+body.care-map-page .care-mobile-active-marker .marker-name.care-label-context { border:1.5px solid #175cb5; }
+@media(max-width:1000px) {
+ body.care-map-page .marker-name.care-label-context { width:200px!important; max-width:200px!important; }
+}
+/** SOFTM-MARKER-INSIGHTS END */

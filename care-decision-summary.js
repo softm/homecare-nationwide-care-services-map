@@ -7,9 +7,10 @@
         const value = count(c[key]);
         return value === null || (c.staffMissing && value === 0) ? '미확인' : `${value}명${c.staffMissing ? ' 확인' : ''}`;
     }
-    function render(c, type) {
+    /** SOFTM-MARKER-INSIGHTS START 날짜:20260930 : 지도와 상세가 같은 유형별 지표와 누락 기준을 사용하도록 요약 근거를 공유 */
+    function summary(c, type) {
         const cells = [];
-        const add = (label, value, detail = '') => cells.push(`<div class="care-decision-cell"><dt>${escape(label)}</dt><dd>${escape(value)}</dd>${detail ? `<span class="care-decision-context">${escape(detail)}</span>` : ''}</div>`);
+        const add = (label, value, detail = '') => cells.push({ label, value, detail });
         let note = '';
         if (type === 'nursing-hospital') {
             add('기관 구분', '요양병원', '의료기관');
@@ -33,8 +34,25 @@
                 note = capacityType ? '정원은 잔여 자리가 아닙니다. 실제 이용 가능 여부·근무인원은 기관에 문의하세요.' : '수집 인력 현황입니다. 실제 서비스 가능 여부·근무인원은 기관에 문의하세요.';
             }
         }
-        return `<section class="care-decision-summary" aria-label="기관 판단 요약"><dl class="care-decision-grid" style="--care-decision-columns:${cells.length}">${cells.join('')}</dl>${note ? `<p class="care-decision-note">${escape(note)}</p>` : ''}</section>`;
+        return { cells, note };
     }
-    globalThis.CareDecisionSummary = { render, staffText };
+    function markerLines(c, type) {
+        const { cells } = summary(c, type);
+        if (type === 'nursing-hospital') {
+            return ['요양병원 · 의료기관', `${cells[1].value === '미확인' ? '개설일 미확인' : `개설 ${cells[1].value}`} · 심평원`];
+        }
+        const evaluation = cells[0];
+        const first = evaluation.value === '미확인' ? '공단 평가 미확인' : `공단 ${evaluation.value} · ${evaluation.detail}`;
+        const second = cells.slice(1).map(cell => `${cell.label} ${cell.value}`).join(' · ');
+        const year = /^\d{4}-\d{2}-\d{2}$/.test(String(c.d || '')) ? `지정 ${String(c.d).slice(0,4)}년` : '지정연도 미확인';
+        return [first, second || `장기요양 복지용구 · ${year}`];
+    }
+    function render(c, type) {
+        const { cells, note } = summary(c, type);
+        const html = cells.map(({ label, value, detail }) => `<div class="care-decision-cell"><dt>${escape(label)}</dt><dd>${escape(value)}</dd>${detail ? `<span class="care-decision-context">${escape(detail)}</span>` : ''}</div>`).join('');
+        return `<section class="care-decision-summary" aria-label="기관 판단 요약"><dl class="care-decision-grid" style="--care-decision-columns:${cells.length}">${html}</dl>${note ? `<p class="care-decision-note">${escape(note)}</p>` : ''}</section>`;
+    }
+    globalThis.CareDecisionSummary = { render, staffText, markerLines };
+    /** SOFTM-MARKER-INSIGHTS END */
 })();
 /** SOFTM-DECISION-SUMMARY END */
