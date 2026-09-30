@@ -59,7 +59,7 @@ test('기관 복원의 큰 좌표 이동은 사용자 위스크롤로 오인하�
     assert.equal(state.update(732, dimensions), 'reading');
 });
 
-function environment() {
+function environment({ locationInsideFilters = false } = {}) { // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 위치 도구의 필터 내부·외부 배치를 같은 회귀 환경에서 비교
     let listMode = true, rowHeight = 100, frames = [];
     const classes = new Set(), listeners = new Map();
     function node() {
@@ -70,6 +70,7 @@ function environment() {
             removeAttribute(name) { attributes.delete(name); },
             addEventListener(name, callback) { listeners.set(`${name}:${listeners.size}`, callback); },
             append(child) { this.children.push(child); }, before() {},
+            contains(value) { return value === this || this.children.some(child => child === value || child.contains?.(value)); }, // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 중첩된 위치 버튼도 실제 DOM처럼 필터 내부로 판별
             getBoundingClientRect: () => ({ top: 0, bottom: 0, height: 0 })
         };
     }
@@ -79,22 +80,31 @@ function environment() {
     const viewport = node(); viewport.scrollTop = 0;
     viewport.getBoundingClientRect = () => ({ top: 120, bottom: 720, height: 600 });
     const filters = node(), input = { tagName: 'INPUT', focus() { document.activeElement = input; } }, head = node(), list = node();
-    filters.contains = value => value === input;
+    filters.append(input); // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 입력과 위치 버튼에 동일한 DOM 포함 관계를 적용
     filters.getBoundingClientRect = () => ({ top: 120, bottom: 232, height: dimensions.filterHeight });
     head.querySelector = selector => selector === '[data-list-search-return]' ? head.children.find(child => 'listSearchReturn' in child.dataset) : null;
     head.getBoundingClientRect = () => {
-        const naturalTop = 120 + dimensions.locationHeight + dimensions.filterHeight - viewport.scrollTop;
+        const naturalTop = 120 + (locationInsideFilters ? 0 : dimensions.locationHeight) + dimensions.filterHeight - viewport.scrollTop; // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 필터 내부 위치줄은 필터 높이에 이미 포함
         const stickyTop = body.dataset.careListStage === 'reading' ? 120 : 120 + dimensions.filterHeight;
         const top = Math.max(naturalTop, stickyTop);
         return { top, bottom: top + 56, height: 56 };
     };
     const location = node(), summary = node();
+    /** SOFTM-LIST-LOCATION-TEST START 날짜:20260930 : 위치 버튼의 중첩 배치와 키보드·마우스 포커스에 따른 읽기 복귀를 재현 */
+    const locationButton = node(); locationButton.tagName = 'BUTTON';
+    let focusVisible = false;
+    locationButton.focus = ({ keyboard = true } = {}) => { document.activeElement = locationButton; focusVisible = keyboard; };
+    locationButton.matches = selector => selector === ':focus-visible' && focusVisible && document.activeElement === locationButton;
+    locationButton.blur = () => { if (document.activeElement === locationButton) document.activeElement = null; focusVisible = false; };
+    location.append(locationButton);
+    if (locationInsideFilters) filters.append(location);
+    /** SOFTM-LIST-LOCATION-TEST END */
     location.getBoundingClientRect = () => ({ height: dimensions.locationHeight });
     summary.getBoundingClientRect = () => ({ height: dimensions.summaryHeight });
     const rows = Array.from({ length: 30 }, (_, index) => {
         const row = node(); row.dataset.id = `institution-${index}`;
         row.getBoundingClientRect = () => {
-            const top = 120 + dimensions.locationHeight + dimensions.filterHeight + 56 + dimensions.summaryHeight + index * rowHeight - viewport.scrollTop;
+            const top = 120 + (locationInsideFilters ? 0 : dimensions.locationHeight) + dimensions.filterHeight + 56 + dimensions.summaryHeight + index * rowHeight - viewport.scrollTop; // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 위치 도구를 필터 안으로 옮긴 실제 카드 시작선을 반영
             return { top, bottom: top + rowHeight, height: rowHeight };
         };
         return row;
@@ -110,7 +120,7 @@ function environment() {
     });
     vm.runInContext(source, context);
     const api = context.CareListSticky;
-    return { api, body, filters, viewport, head, list, rows, input, document,
+    return { api, body, filters, viewport, head, list, rows, input, location, locationButton, document, // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 위치 도구 포함 관계와 키보드 포커스를 직접 검증
         mode(value) { listMode = value; body.dataset.careMode = value ? 'list' : 'map'; },
         scroll(top) { viewport.scrollTop = top; api.sync(); },
         density(value) { rowHeight = value; },
@@ -143,6 +153,45 @@ test('입력 포커스 또는 열린 상세조건은 읽기 위치에서도 검�
     env.open(true); env.api.sync();
     assert.equal(env.body.dataset.careListStage, 'search'); assert.equal(env.filters.inert, false);
 });
+
+/** SOFTM-LIST-LOCATION-TEST START 날짜:20260930 : 위치 도구를 검색 보조줄로 옮겨도 스크롤 임계값과 키보드 접근성이 유지되어야 함 */
+test('필터 안의 위치 도구 높이를 읽기 전환 임계값에 이중으로 더하지 않는다', () => {
+    const env = environment({ locationInsideFilters: true }); env.api.mount();
+    assert.equal(env.filters.contains(env.location), true);
+    const readingThreshold = dimensions.filterHeight + dimensions.summaryHeight - 4;
+    env.scroll(readingThreshold - 1);
+    assert.equal(env.body.dataset.careListStage, 'search');
+    assert.equal(env.filters.inert, false);
+    env.scroll(readingThreshold);
+    assert.equal(env.body.dataset.careListStage, 'reading');
+    assert.equal(env.filters.inert, true);
+});
+
+test('위치 버튼에 키보드 포커스가 있으면 깊게 스크롤해도 조작 가능하며 해제 후 읽기로 복귀한다', () => {
+    const env = environment({ locationInsideFilters: true }); env.api.mount();
+    env.locationButton.focus(); env.scroll(900);
+    assert.equal(env.body.dataset.careListStage, 'search');
+    assert.equal(env.filters.inert, false);
+    assert.equal(env.filters.getAttribute('aria-hidden'), 'false');
+    assert.equal(env.document.activeElement, env.locationButton);
+    env.locationButton.blur(); env.api.sync();
+    assert.equal(env.body.dataset.careListStage, 'reading');
+    assert.equal(env.filters.inert, true);
+    assert.equal(env.filters.getAttribute('aria-hidden'), 'true');
+});
+
+test('마우스 클릭 포커스는 상세조건을 닫은 뒤 읽기 전환을 막지 않는다', () => {
+    const env = environment({ locationInsideFilters: true }); env.api.mount();
+    env.locationButton.focus({ keyboard: false }); env.open(true); env.scroll(900);
+    assert.equal(env.body.dataset.careListStage, 'search');
+    assert.equal(env.filters.inert, false);
+    env.open(false); env.api.sync();
+    assert.equal(env.document.activeElement, env.locationButton);
+    assert.equal(env.body.dataset.careListStage, 'reading');
+    assert.equal(env.filters.inert, true);
+    assert.equal(env.filters.getAttribute('aria-hidden'), 'true');
+});
+/** SOFTM-LIST-LOCATION-TEST END */
 
 test('카드에서 간단형으로 바꿔도 읽던 기관의 고정 헤더 아래 위치와 읽기 단계를 보존한다', () => {
     const env = environment(); env.api.mount(); env.scroll(840);

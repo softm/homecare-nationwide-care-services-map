@@ -147,6 +147,73 @@ test('실제 검색이 취소되면 완료 건수 대신 취소 상태를 표시
     assert.doesNotMatch(env.api.state().message, /검색 완료/);
 });
 
+/** SOFTM-LOCATION-TOOLBAR-TEST START 날짜:20260930 : 실제 위치 도구의 버튼 연결이 권한 요청 반복이나 의도하지 않은 지역 검색을 만들지 않도록 검증 */
+function mountedLocation({ denied = false } = {}) {
+    const requests = [], applied = [], notices = [];
+    const conditions = { province: '서울특별시', city: '종로구', query: '기존 기관명' };
+    function element(tagName = 'span') {
+        const nodes = new Map(), attributes = new Map(), listeners = new Map();
+        return { tagName: tagName.toUpperCase(), dataset: {}, children: [], open: false,
+            querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, element(selector === 'h2' ? 'h2' : 'button')); return nodes.get(selector); },
+            setAttribute(name, value) { attributes.set(name, String(value)); },
+            getAttribute(name) { return attributes.get(name) ?? null; },
+            append(child) { this.children.push(child); }, insertBefore(child) { this.append(child); },
+            addEventListener(name, callback) { listeners.set(name, callback); },
+            focus() { document.activeElement = this; },
+            showModal() { this.open = true; }, close() { this.open = false; listeners.get('close')?.(); }
+        };
+    }
+    const toolbar = element('div'), document = { body: element('body'), activeElement: null,
+        createElement: element, querySelector: selector => selector === '.stitch-filter-toolbar' ? toolbar : null
+    };
+    const context = vm.createContext({ document, CareLocation: {
+        async request(config) { requests.push(config); if (denied) throw Object.assign(new Error('위치 권한 차단'), { reason: 'denied' }); return point; },
+        info: error => ({ title: '현재 위치 접근이 차단되어 있습니다', message: error.message, reason: error.reason }),
+        showNotice(error, retry) { notices.push({ error, retry }); }, hideNotice() {}
+    } });
+    vm.runInContext(readFileSync(new URL('../care-list-location.js', import.meta.url), 'utf8'), context);
+    const api = context.CareListLocation.mount({ enabled: () => true, signature: () => JSON.stringify(conditions),
+        describe: async () => address,
+        async apply(value) { applied.push(value); Object.assign(conditions, { province: value.province, city: value.city, query: '' }); return { scope: '경기도 광명시', count: 1234 }; }
+    });
+    const host = toolbar.children[0];
+    return { api, requests, applied, notices, conditions, document, host,
+        main: host.querySelector('[data-list-locate]'), help: host.querySelector('[data-list-location-help]') };
+}
+
+test('권한이 차단된 위치 찾기 버튼은 재요청 대신 권한 안내를 열고 기존 검색을 유지한다', async () => {
+    const env = mountedLocation({ denied: true }); env.api.sync(); await settle();
+    assert.equal(env.api.state().phase, 'error');
+    const original = { ...env.conditions };
+    env.main.onclick(); env.main.onclick(); await settle();
+    assert.equal(env.requests.length, 1);
+    assert.equal(env.notices.length, 2);
+    assert.equal(env.notices[0].error.reason, 'denied');
+    assert.equal(typeof env.notices[0].retry, 'function');
+    assert.equal(env.applied.length, 0);
+    assert.deepEqual(env.conditions, original);
+});
+
+test('상세 안내의 위치 다시 확인은 주소만 갱신하고 검색 버튼을 눌러야 지역 검색을 적용한다', async () => {
+    const env = mountedLocation(); env.api.sync(); await settle();
+    const original = { ...env.conditions };
+    env.help.onclick();
+    const dialog = env.document.body.children.find(node => node.tagName === 'DIALOG');
+    assert.equal(dialog.open, true);
+    dialog.querySelector('[data-location-detail-retry]').onclick(); await settle();
+    assert.equal(dialog.open, false);
+    assert.equal(env.document.activeElement, env.help);
+    assert.equal(env.requests.length, 2);
+    assert.equal(env.api.state().phase, 'ready');
+    assert.equal(env.applied.length, 0);
+    assert.deepEqual(env.conditions, original);
+    env.main.onclick(); await settle();
+    assert.equal(env.requests.length, 3);
+    assert.deepEqual(env.applied, [address]);
+    assert.deepEqual(env.conditions, { province: '경기도', city: '광명시', query: '' });
+});
+/** SOFTM-LOCATION-TOOLBAR-TEST END */
+
 test('시·구 공백 차이를 데이터의 실제 지역명으로 연결한다', () => {
     assert.deepEqual(resolveRegion({ province: '경기도', city: '부천시소사구' }, [{ p: '경기도', c: '부천시 소사구' }], regionKey, bounds), { province: '경기도', city: '부천시 소사구' });
 });
