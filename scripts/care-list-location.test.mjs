@@ -59,6 +59,7 @@ test('현재 위치에서 찾기는 확인한 주소를 적용하고 완료 범�
     assert.equal(env.api.state().phase, 'ready');
     assert.match(env.api.state().message, /경기도 광명시 · 1,234곳 검색 완료/);
     assert.ok(env.rendered.some(state => state.phase === 'searching'));
+    assert.equal(env.rendered.some(state => state.requested && state.phase === 'ready' && !state.result), false); // SOFTM-LOCATION-RESULT 날짜:20260930 : 주소 확인 직후 조회 취소 안내가 잠깐 노출되지 않도록 검증
 });
 
 test('권한 거절은 검색을 보존하고 반복 자동 요청 없이 오류와 수동 재시도를 제공한다', async () => {
@@ -368,3 +369,29 @@ test('알 수 없는 시도와 지도모드 URL에는 목록 전용 지역 옵�
 });
 /** SOFTM-LIST-LOCATION-RESTORE END */
 /** SOFTM-LIST-LOCATION-TEST END */
+
+/** SOFTM-LOCATION-RESULT-TEST START 날짜:20260930 : 위치 확인·실제 조회·취소·새 조건을 구분해 완료 안내가 잘못 남지 않도록 검증 */
+test('자동 주소 확인은 적용 완료가 아니며 실제 0곳 조회도 완료 지역을 보존한다', async () => {
+    const env = controller({ apply: async () => ({ scope: '대전광역시 유성구', count: 0 }) });
+    await env.api.locate(false); assert.equal(env.api.state().result, null);
+    await env.api.locate(true); assert.deepEqual(env.api.state().result, { scope: '대전광역시 유성구', count: 0 });
+    env.api.clearResult(); assert.equal(env.api.state().result, null); assert.equal(env.api.state().requested, false);
+});
+test('조회 중 새 검색 시작 훅은 진행 안내를 유지하고 취소 응답은 완료 표시를 만들지 않는다', async () => {
+    const wait = deferred(), env = controller({ apply: () => wait.promise });
+    const pending = env.api.locate(true); await settle();
+    env.api.clearResult(); assert.equal(env.api.state().requested, true);
+    wait.resolve({ cancelled: true }); await pending;
+    assert.equal(env.api.state().result, null); assert.match(env.api.state().message, /취소/);
+});
+test('실제 위치 도구는 조회 성공 후 적용 버튼을 표시하고 다른 조회에서 해제한다', async () => {
+    const env = mountedLocation(); await env.api.locate(false);
+    assert.equal(env.host.dataset.applied, 'false');
+    await env.api.locate(true);
+    assert.equal(env.host.dataset.applied, 'true');
+    assert.equal(env.host.querySelector('[data-location-action-full]').textContent, '✓ 내 위치 적용됨');
+    assert.equal(env.main.getAttribute('aria-label'), '내 위치 기준 조회 적용됨, 다시 찾기');
+    env.api.clearResult(); assert.equal(env.host.dataset.applied, 'false');
+    assert.equal(env.host.querySelector('[data-location-action-full]').textContent, '내 위치로 찾기');
+});
+/** SOFTM-LOCATION-RESULT-TEST END */
