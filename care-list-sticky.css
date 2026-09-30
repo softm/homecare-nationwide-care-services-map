@@ -13,6 +13,7 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] .wrap {
     scroll-padding-top:calc(var(--care-sticky-filter-height,112px) + 112px);
     scrollbar-gutter:stable;
 }
+body.stitch-desktop.care-map-page[data-care-mode="list"] .care-data-note { display:none!important; } /* SOFTM-LIST-SOURCE-NOTE 날짜:20260930 : 본문 없이 남은 출처 제목·여백이 검색과 결과를 벌리지 않도록 영역 전체를 숨김 */
 body.stitch-desktop.care-map-page[data-care-mode="list"]:not(.care-mobile-filters-open) .filters {
     position:sticky;
     inset:0 0 auto!important;
