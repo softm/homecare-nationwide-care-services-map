@@ -2,6 +2,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import vm from 'node:vm'; // SOFTM-LIST-MODE 날짜:20260930 : 유형 선택의 지도 전달 여부를 코드 문자열 대신 실제 동작으로 검증
 import '../care-category-picker.js';
 const api=globalThis.CareCategoryPicker;
 test('explicit links beat saved choice without modifying it',()=>{
@@ -43,7 +44,15 @@ test('category changes retain region and map but clear incompatible constraints'
 test('첫 유형 선택은 손대지 않은 전국 지도를 넘기지 않고 일반 진입은 현재 위치를 우선한다',()=>{
  const source=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const picker=source.slice(source.indexOf('function mountCategoryPicker()'),source.indexOf('function bootUnselected()'));
- assert.match(picker,/getMap:\(\)=>!TYPE&&!neutralViewportChosen\?null:map/);
+ /** SOFTM-LIST-MODE START 날짜:20260930 : 목록은 지도 좌표를 전달하지 않고 기존 지도 최초 선택 정책은 유지 */
+ const context={TYPE:null,neutralViewportChosen:false,map:{id:'map'},mapReady:false,listMode:false,CareCategoryPicker:{mount:config=>config}};
+ context.CareListMode={isList:()=>context.listMode};
+ vm.createContext(context);vm.runInContext(picker,context);context.mountCategoryPicker();
+ assert.equal(context.categoryPicker.getMap(),null);
+ context.neutralViewportChosen=true;assert.equal(context.categoryPicker.getMap(),context.map);
+ context.neutralViewportChosen=false;context.TYPE='daycare';assert.equal(context.categoryPicker.getMap(),context.map);
+ context.listMode=true;assert.equal(context.categoryPicker.getMap(),null);
+ /** SOFTM-LIST-MODE END */
  const init=source.slice(source.indexOf('function initNaver()'),source.indexOf('/** SOFTM-TYPE-MAP END */'));
  const basket=init.indexOf('CareBasketShare.hasLink'),photo=init.indexOf('initialPhotoEntry'),shared=init.indexOf('hasSharedView&&'),region=init.indexOf("$('q').value.trim()"),current=init.indexOf('else void useCurrentLocation(true)');
  assert.ok(basket>=0&&basket<photo&&photo<shared&&shared<region&&region<current);

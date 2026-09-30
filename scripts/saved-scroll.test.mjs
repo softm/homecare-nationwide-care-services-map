@@ -22,7 +22,7 @@ function harness(ownScroll = true) {
         querySelector: selector => selector === '.care-basket-items' ? list : { getBoundingClientRect: () => ({ height: 60 }) },
         addEventListener: (type, fn) => { const previous = events[type]; events[type] = event => { previous?.(event); fn(event); }; }
     };
-    const ctx = { bar, workspace: 'saved', tabs: { getBoundingClientRect: () => ({ bottom: 100 }) },
+    const ctx = { bar, workspace: 'saved', tabs: { getBoundingClientRect: () => ({ bottom: 100 }) }, isListMode: () => false, // SOFTM-LIST-MODE 날짜:20260930 : 기존 담은 기관 스크롤 정책은 지도 모드에서 계속 검증
         root: { innerWidth: 1200, innerHeight: 800, scrollY: 0, addEventListener: (type, fn) => { rootEvents[type] = fn; } },
         document: { addEventListener: (type, fn) => { const previous = events[type]; events[type] = event => { previous?.(event); fn(event); }; }, documentElement: { scrollHeight: 1600 }, createElement: () => tail, body: { classList: { contains: () => dragging } }, querySelector: () => ({}) },
         getComputedStyle: () => ({ overflowY: ownScroll ? 'auto' : 'visible', visibility: 'visible' }),
@@ -75,6 +75,16 @@ test('검색 작업과 손잡이 드래그 중에는 담은 목록의 선택을 
     h.ctx.workspace = 'search'; h.scroll(220); assert.equal(h.focused.length, count);
     h.ctx.workspace = 'saved'; h.setDragging(true); h.scroll(400); assert.equal(h.focused.length, count);
 });
+/** SOFTM-LIST-MODE START 날짜:20260930 : 담은 기관도 독립 목록에서는 스크롤과 선택이 지도를 움직이지 않도록 검증 */
+test('독립 목록의 담은 기관은 스크롤·카드 선택·화면 갱신으로 지도와 상세를 자동 변경하지 않는다', () => {
+    const h = harness(), count = h.focused.length;
+    h.ctx.isListMode = () => true;
+    h.scroll(220); h.click(2); h.redraw();
+    assert.equal(h.focused.length, count);
+    assert.equal(h.details.length, 0);
+    assert.equal(h.tail.isConnected, false);
+});
+/** SOFTM-LIST-MODE END */
 /** SOFTM-SAVED-SCROLL END */
 
 /** SOFTM-SAVED-SELECTION START 날짜:20260914 : 자동 갱신이 명시 선택을 덮지 않고 사용자 스크롤만 선택을 재개 */

@@ -137,7 +137,7 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
     class LatLngBounds { extend() {} }
     class Marker {getIcon(){return this.icon}getMap(){return this.options.map}setMap(map){this.options.map=map}setIcon(icon){this.icon=icon} /* SOFTM-MARKER-DIFF 날짜:20260917 : 마커 재사용에 필요한 실제 지도 API 계약을 제공 */ constructor(options) { this.options = options; } }
     const sandbox = vm.createContext({
-        window: { naver: { maps: { LatLng, LatLngBounds, Marker, Event: { addListener() {} } } } }, MapViewportSearch: api,
+        window: { naver: { maps: { LatLng, LatLngBounds, Marker, Event: { addListener() {} } } } }, MapViewportSearch: api, CareListMode: { isList: () => false }, // SOFTM-LIST-MODE 날짜:20260930 : 기존 지도 후보 검증에 명시적인 지도 모드 계약을 제공
         mobileActiveMarker: null, mobileActiveIcon: null, mapReady: true, refreshToken: 0, clearMarkers() {}, clearQueryMarkers() {}, map: { getBounds: () => ({ hasLatLng: () => true }), getCenter: () => point(37.45, 126.8), getZoom: () => 10 },
         cachedCoord: row => row._coord, hav: () => 0, PAGE_LIMIT: 90, MAP_CANDIDATE_LIMIT: 300,
         geocode: async row => row._coord, basePoint: null, showLoading() {}, hideLoading() {},
@@ -149,6 +149,12 @@ test('통합 지도는 축소 화면에서도 300번째 이후의 화면 안 기
         /** SOFTM-SEARCH-FEEDBACK END */
     });
     vm.runInContext(declaration, sandbox);
+    /** SOFTM-LIST-MODE START 날짜:20260930 : 목록으로 전환한 뒤 호출된 이전 지도 작업은 목록과 마커를 변경하지 않음 */
+    sandbox.CareListMode.isList = () => true;
+    assert.equal((await vm.runInContext('loadMarkers(rows)', sandbox)).cancelled, true);
+    assert.equal(placed.size, 0); assert.equal(sandbox.areaRows.length, 0);
+    sandbox.CareListMode.isList = () => false;
+    /** SOFTM-LIST-MODE END */
     await vm.runInContext('loadMarkers(rows)', sandbox);
     assert.equal(placed.size, 351);
     assert.equal(sandbox.areaRows.length, 351);

@@ -55,7 +55,7 @@ test('검색 목록은 직접 선택한 마커를 복귀 후 유지하고 사용
  const sync = source.slice(start, source.indexOf('        const schedule =', start));
  const focused = [], details = [], events = {};
  const rows = ['a','b','c'].map(id => ({dataset:{id},classList:{add(){},remove(){}},setAttribute(){},removeAttribute(){}}));
- const context = {workspace:'search',frame:0,scrollRequested:false,active:null,media:{matches:false},
+ const context = {workspace:'search',frame:0,scrollRequested:false,active:null,media:{matches:false},isListMode:()=>false, // SOFTM-LIST-MODE 날짜:20260930 : 기존 지도 선택 유지 시나리오는 지도 모드로 검증
   list:{getBoundingClientRect:()=>({}),querySelectorAll:()=>rows,addEventListener:(name,fn)=>{events[name]=fn;}},
   pickSearchScrollRow:()=>rows[0], options:{mobileFocus:(...args)=>focused.push(args),scrollDetail:id=>details.push(id)}};
  runInNewContext(selection + sync + "bindSelectionIntent(list); detailSelection={id:'c',workspace:'search'}; sync();",context);
@@ -66,5 +66,10 @@ test('검색 목록은 직접 선택한 마커를 복귀 후 유지하고 사용
  assert.equal(focused.length,2);
  events.wheel(); context.scrollRequested=true; runInNewContext('sync()',context);
  assert.deepEqual(focused.at(-1),['a',true]); assert.equal(details.at(-1),'a');
+ /** SOFTM-LIST-MODE START 날짜:20260930 : 같은 스크롤 이벤트도 독립 목록에서는 지도와 상세 자동 선택을 실행하지 않음 */
+ const focusedCount=focused.length,detailCount=details.length;
+ context.isListMode=()=>true;context.scrollRequested=true;runInNewContext('sync()',context);
+ assert.equal(focused.length,focusedCount);assert.equal(details.length,detailCount);assert.equal(context.scrollRequested,false);
+ /** SOFTM-LIST-MODE END */
 });
 /** SOFTM-MARKER-PERSIST END */
