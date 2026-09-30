@@ -240,6 +240,15 @@
 <script src="care-list-mode.js?v=20260930-location1"></script> <!-- SOFTM-LIST-LOCATION 날짜:20260930 : 낮은 화면의 위치 안내와 목록 높이를 함께 확보 -->
 <script src="care-list-location.js?v=20260930-1"></script> <!-- SOFTM-LIST-LOCATION 날짜:20260930 : 지도 생성 없이 접속 위치와 지역 검색을 연결 -->
 <!-- SOFTM-LIST-MODE END -->
+<!-- SOFTM-LIST-VIEW START 날짜:20260930 : 검색 결과를 다시 조회하지 않고 목록의 표시 밀도를 선택 -->
+<link rel="stylesheet" href="care-list-view.css?v=20260930-1">
+<script src="care-list-view.js?v=20260930-1"></script>
+<!-- SOFTM-LIST-VIEW END -->
+<!-- SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 목록모드의 접기형 하단 광고를 기존 지면과 별도로 연결 -->
+<link rel="stylesheet" href="care-list-ads.css?v=20260930-1">
+<script src="care-list-ad-config.js?v=20260930-1"></script>
+<script src="care-list-ads.js?v=20260930-1"></script>
+<!-- SOFTM-LIST-ANCHOR-ADS END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
 const CATEGORY_ORDER=['facility','daycare','home-care','home-nursing','home-bath','short-stay','welfare-equipment','dementia','nursing-hospital']; // SOFTM-CARE-CATEGORIES 날짜:20260904 : 기본 급여·특화 유형·의료기관의 분류와 표시 범위를 일치
@@ -301,9 +310,24 @@ function queueCareAdFit(){if(!['hybrid','kakao'].includes(careAdMode())||!docume
 function configuredSlot(group){const value=careAdConfig().kakao?.[group];return matchMedia('(min-width:800px)').matches?value?.desktop||value?.mobile:value?.mobile||value?.desktop}
 function renderConfiguredAd(host,group){const slot=configuredSlot(group);if(!host||!slot?.unit)return false;host.innerHTML=kakaoIns(slot);host.hidden=false;queueCareAdFit();return true}
 /** SOFTM-AD-EXPANSION END */
-function initCareAds(){const config=careAdConfig(),zone=$('careAdBanner'),host=$('careAdBannerHost'),mode=careAdMode();if(!zone||mode==='off'||!config.placements?.banner){if(zone)zone.hidden=true;return}const slot=matchMedia('(max-width:640px)').matches?config.kakao?.mobile:config.kakao?.desktop;if(mode==='direct'||!slot?.unit){const item=activeDirectAd();host.innerHTML=item?directAdHtml(item):'';zone.hidden=!item;return}host.innerHTML=kakaoIns(slot);zone.hidden=false;queueCareAdFit();if(config.fallbackToDirect)setTimeout(()=>{if(!host.querySelector('iframe')){const item=activeDirectAd();if(item)host.innerHTML=directAdHtml(item)}},5200)}
-function initWelcomeAd(){const dialog=$('welcomeAdDialog');if(!dialog||sessionStorage.getItem('careWelcomeAdShown'))return;if(CareListMode.isList()){dialog.querySelector('p').textContent='지역과 조건으로 돌봄기관을 찾아 비교해 보세요.';$('welcomeAdClose').textContent='목록에서 시작하기';}/* SOFTM-LIST-MODE 날짜:20260930 : 처음 안내의 행동을 선택한 탐색 모드에 일치 */const slot=careAdConfig().kakao?.welcome?.mobile;if(slot?.unit){$('welcomeAdHost').innerHTML=kakaoIns(slot);queueCareAdFit()}$('welcomeAdClose').onclick=()=>dialog.close();dialog.addEventListener('close',()=>sessionStorage.setItem('careWelcomeAdShown','1'),{once:true});dialog.showModal()}
-function initExpandedCareAds(){const zone=$('careListTopAd');if(!zone)return;zone.hidden=!renderConfiguredAd($('careListTopAdHost'),'listTop')}
+/** SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 목록에서 보이지 않는 지도 배너·환영 광고는 요청하지 않음 */
+let careBannerFallbackTimer=null;
+function initCareAds(){clearTimeout(careBannerFallbackTimer);const config=careAdConfig(),zone=$('careAdBanner'),host=$('careAdBannerHost'),mode=careAdMode();if(!zone||CareListMode.isList()||mode==='off'||!config.placements?.banner){if(zone)zone.hidden=true;return}const slot=matchMedia('(max-width:640px)').matches?config.kakao?.mobile:config.kakao?.desktop;if(mode==='direct'||!slot?.unit){const item=activeDirectAd();host.innerHTML=item?directAdHtml(item):'';zone.hidden=!item;return}host.innerHTML=kakaoIns(slot);zone.hidden=false;queueCareAdFit();if(config.fallbackToDirect)careBannerFallbackTimer=setTimeout(()=>{if(CareListMode.isList())return;if(!host.querySelector('iframe')){const item=activeDirectAd();if(item)host.innerHTML=directAdHtml(item)}},5200)}
+function initWelcomeAd(){const dialog=$('welcomeAdDialog');if(!dialog||sessionStorage.getItem('careWelcomeAdShown'))return;if(CareListMode.isList()){dialog.querySelector('p').textContent='지역과 조건으로 돌봄기관을 찾아 비교해 보세요.';$('welcomeAdClose').textContent='목록에서 시작하기';}/* SOFTM-LIST-MODE 날짜:20260930 : 처음 안내의 행동을 선택한 탐색 모드에 일치 */const slot=!CareListMode.isList()&&careAdConfig().kakao?.welcome?.mobile;if(slot?.unit){$('welcomeAdHost').innerHTML=kakaoIns(slot);queueCareAdFit()}$('welcomeAdClose').onclick=()=>dialog.close();dialog.addEventListener('close',()=>sessionStorage.setItem('careWelcomeAdShown','1'),{once:true});dialog.showModal()}
+function initExpandedCareAds(){const zone=$('careListTopAd');if(!zone)return;zone.hidden=CareListMode.isList()||!renderConfiguredAd($('careListTopAdHost'),'listTop')}
+/** SOFTM-LIST-ANCHOR-ADS END */
+/** SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 지도에서 생성한 광고를 목록 전환 전에 정리해 숨긴 지면의 요청을 남기지 않음 */
+function clearMapOnlyCareAds(){
+ clearTimeout(adRefreshTimer);clearTimeout(careBannerFallbackTimer);destroyRenderedListAds();
+ for(const slot of $('list')?.querySelectorAll('.list-ad-slot')||[])slot.remove();
+ for(const id of ['careAdBannerHost','careListTopAdHost','welcomeAdHost']){
+  const host=$(id);if(!host)continue;
+  for(const ins of host.querySelectorAll('ins.kakao_ad_area'))try{window.adfit?.destroy?.(ins.dataset.adUnit)}catch{}
+  host.replaceChildren();
+ }
+ for(const id of ['careAdBanner','careListTopAd'])if($(id))$(id).hidden=true;
+}
+/** SOFTM-LIST-ANCHOR-ADS END */
 function configuredListAds(config){const units=Array.isArray(config.kakao?.listUnits)?config.kakao.listUnits:config.kakao?.list?[config.kakao.list]:[];const seen=new Set();return units.filter(slot=>{const unit=String(slot?.unit||'').trim();if(!unit||seen.has(unit))return false;seen.add(unit);return true})}
 /** SOFTM-LIST-AD-RESTORE START 날짜:20260909 : 기존 첫 광고 단위를 유지하고 나머지 목록 슬롯에서 제휴 문의를 접수 */
 function listAdHtml(index,total=Infinity){
@@ -314,7 +338,7 @@ function listAdHtml(index,total=Infinity){
         return slot?.unit?`<aside class="list-ad-slot" aria-label="광고"><span class="ad-zone-label">광고</span>${kakaoIns(slot)}</aside>`:'';
     }
     if(mode==='kakao')return'';
-    const item=activeDirectAd(),extra=config.kakao?.listPositions?.[position];
+    const item=activeDirectAd(),extra=CareListMode.isList()?null:config.kakao?.listPositions?.[position]; // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 목록은 첫 기관광고와 고정하단을 쓰고 반복 지면은 제휴 안내로 유지
     if(extra){const slot=matchMedia('(min-width:800px)').matches?extra.desktop:extra.mobile;return `${item?directAdHtml(item,false):''}<aside class="list-ad-slot" aria-label="광고"><span class="ad-zone-label">광고</span>${kakaoIns(slot)}</aside>`}
     return item?directAdHtml(item,false):'';
 }
@@ -1164,10 +1188,14 @@ function initCareListMode(){
    careMapFocus?.leave();closeDetail();CareMapExperience.suspendModeMap();
    careListMapStarting=next==='map'&&!mapReady;
    if(next==='list')careListMapState=mapReady?{signature:careListSignature(),rows:areaRows.slice(),matchRows:careMatchRows,count:resultCount,unresolved:careUnresolvedCount,selected:new Set(selected),scroll:$('list').scrollTop,scope:careMatchScope,pending:careMatchPending,sort:$('sort').value,note:$('routeNote').textContent,center:map.getCenter(),zoom:map.getZoom()}:null;
+   if(next==='list')clearMapOnlyCareAds(); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 원래 스크롤 저장 뒤 숨길 지면을 정리해 복귀 위치를 보존
    ++refreshToken;++careListVersion;advancedSearch?.cancel();clearTimeout(refreshTimer);careViewportResearch?.cancel();hideLoading();
   },
   async change(next,previous,transition){
    try{
+   CareListView.sync(); // SOFTM-LIST-VIEW 날짜:20260930 : 지도 복귀 시 보기 조작만 숨기고 선택한 밀도를 유지
+   CareListAds.sync(); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 지도모드에서는 고정 광고와 예약 공간을 함께 숨김
+   if(next==='map'){initCareAds();initExpandedCareAds();} // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 지도 복귀에는 기존 지도 전용 광고를 다시 연결
    careListLocation?.sync(); // SOFTM-LIST-LOCATION 날짜:20260930 : 지도 복귀 후 늦은 위치 응답이 검색을 변경하지 않도록 취소
    syncCareListSort();if(TYPE)renderNav();
    if(!TYPE){$('list').innerHTML='<div class="empty">찾을 돌봄 유형을 선택해 주세요.</div>';if(next==='map')loadNaver();return;}
@@ -1191,6 +1219,8 @@ function initCareListMode(){
    }finally{if(transition.current())await CareMapExperience.resumeModeMap();}
   },error:error=>toast(error.message||'화면을 전환하지 못했습니다. 다시 시도해 주세요.')
  });
+ CareListView.mount(); // SOFTM-LIST-VIEW 날짜:20260930 : 결과 제목에 보기 선택을 한 번 연결하고 재조회 없이 전환
+ CareListAds.mount({isList:()=>CareListMode.isList()}); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 목록에서만 하단 고정 광고를 요청하고 접힘 상태를 보존
  /** SOFTM-LIST-LOCATION START 날짜:20260930 : 접속 위치는 표시만 하고 사용자가 찾기를 눌렀을 때 확인된 지역을 적용 */
  careListLocation=CareListLocation.mount({
   enabled:()=>CareListMode.isList(),signature:()=>JSON.stringify([refreshToken,careListSignature()]),
