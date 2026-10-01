@@ -63,7 +63,8 @@
                         <label>예산 <span>(선택)</span><select name="budget"><option value="">상담 후 결정</option><option>10만원 미만</option><option>10만~30만원</option><option>30만원 이상</option></select></label>
                         <!-- SOFTM-PARTNER-OFFER END -->
                         <label class="partner-wide">문의 내용 <span>(필수)</span><textarea name="message" rows="4" maxlength="5000" placeholder="소개할 서비스와 희망 광고 내용을 알려주세요." required></textarea></label>
-                        <label class="partner-wide partner-consent"><input type="checkbox" name="consent" required><span>입력한 정보를 제휴 상담 및 회신을 위해 전송하는 데 동의합니다. (필수)</span></label>
+                        <!-- SOFTM-PRIVACY-CONSENT 날짜:20261001 : 전송 전 목적·삭제·거부와 처리방침을 안내 -->
+                        <label class="partner-wide partner-consent"><input type="checkbox" name="consent" required><span>입력한 정보를 제휴 상담 및 회신을 위해 Web3Forms를 통해 운영자에게 전송하는 데 동의합니다. 목적 달성 또는 삭제 요청 시 삭제하며, 동의를 거부하면 양식 접수가 제한됩니다. <a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a> (필수)</span></label>
                     </fieldset>
                     <p class="partner-status" role="status" aria-live="polite" aria-atomic="true"></p>
                     <button type="submit" class="partner-submit">문의 보내기</button>

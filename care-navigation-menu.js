@@ -23,6 +23,11 @@
         button.onclick = () => { const target = document.querySelector(selector); if (!target) return; close(false); target.click(); const message = document.querySelector('.care-photo-map-status')?.textContent; if (selector === '.care-photo-map-entry' && message) { menu.querySelector('[role="status"]').textContent = message; menu.showModal(); trigger.setAttribute('aria-expanded', 'true'); } };
         menu.querySelector('nav').append(button);
     }
+    /** SOFTM-PRIVACY-LINK START 날짜:20261001 : 앱 안에서도 개인정보 안내에 상시 접근 */
+    const privacy = document.createElement('a'); privacy.href = 'privacy.html';
+    privacy.textContent = '개인정보처리방침'; privacy.style.cssText = 'display:block;padding:16px;color:inherit';
+    menu.querySelector('nav').append(privacy);
+    /** SOFTM-PRIVACY-LINK END */
     trigger.onclick = () => {
         for (const button of menu.querySelectorAll('[data-menu-target]')) button.disabled = !document.querySelector(button.dataset.menuTarget);
         menu.showModal(); trigger.setAttribute('aria-expanded', 'true');
