@@ -1,0 +1,30 @@
+name: Refresh dementia public data
+on:
+  schedule:
+    - cron: '31 21 * * 1' # 매주 화요일 06:31 Asia/Seoul
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: nhis-static-refresh # 기존 MASTER 수집과 직렬화해 동시 push 충돌을 방지
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download both official datasets and normalize
+        run: python3 scripts/collect_dementia.py
+      - name: Validate reconciliation
+        run: python3 -m unittest discover -s tests -p 'test_dementia.py'
+      - name: Commit by direct parent directory
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 scripts/commit_dementia.py
+          git push origin HEAD:main
