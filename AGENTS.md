@@ -493,3 +493,5 @@ ZIP을 다시 만들 때 파일명 앞에 `YYYYMMDD_`를 붙인다.
 - 내 위치 목록 조회는 실제 검색 완료 후에만 적용 버튼과 결과 제목 아래 지역·전체 건수를 지속 표시한다. 자동 주소 확인은 적용 완료로 표시하지 않으며 다른 조회·지도 전환 시 완료 표시를 해제하고 0곳도 정확한 검색 지역과 함께 알린다. <!-- SOFTM-LOCATION-RESULT 날짜:20260930 : 위치 권한 허용·주소 확인과 실제 기관 조회 완료의 혼동 방지 -->
 
 - 모바일 지도모드의 담은 기관에서는 상단 목록·지도 전환을 사용하고 전역 떠 있는 모드 버튼은 숨긴다. 목록모드의 상단 모드 버튼은 유지한다. 모의주행 조작부는 하단 작업탭과 실제 광고 높이 위에 배치해 접힌 손잡이·펼친 광고 모두 시작·설정을 가리지 않도록 한다. <!-- SOFTM-ROUTE-CONTROLS 날짜:20260930 : 경로 화면의 중복 전환과 고정 광고로 주행 조작이 차단되는 회귀 방지 -->
+
+- 치매안심(`dementia-care-map`, `dementia.designboard.net`)은 독립 프론트엔드이며 공개 JSON의 MASTER는 계속 돌봄한눈이다. 치매 원본·수집·정규화는 `source-data/dementia`, `scripts/collect_dementia.py`, `scripts/build_dementia.py`에서만 관리하고 소비 프로젝트는 전체 공개 JSON을 배포 시 복사한다. 운영 방법은 `docs/DEMENTIA_DATA.md`를 따른다. 기존 지도에는 `dementia-service-link.js` 연결만 추가하며 서버·DB를 만들지 않는다. <!-- SOFTM-DEMENTIA-MASTER 날짜:20261001 : 두 서비스의 원본 중복 관리를 방지 -->
