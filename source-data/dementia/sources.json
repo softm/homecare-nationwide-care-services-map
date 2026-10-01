@@ -1,0 +1,12 @@
+{
+  "standard": {
+    "name": "전국치매센터표준데이터",
+    "url": "https://www.data.go.kr/data/15021138/standard.do",
+    "sourceDate": "2026-08-14"
+  },
+  "nmc": {
+    "name": "국립중앙의료원 치매안심센터 정보",
+    "url": "https://www.data.go.kr/data/15138421/fileData.do",
+    "sourceDate": "2026-01-28"
+  }
+}
