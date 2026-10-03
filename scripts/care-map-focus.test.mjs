@@ -5,12 +5,14 @@ import {readFileSync} from 'node:fs';
 import '../care-map-focus.js';
 const mapHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const focusCss=readFileSync(new URL('../care-map-focus.css',import.meta.url),'utf8');
-test('지도 배경 클릭은 일반 화면에서 상태를 유지하고 전체보기에서만 닫는다',()=>{
+/** SOFTM-MOBILE-FOCUS START 날짜:20261003 : 모바일 배경 탭 유지와 데스크톱 기존 복귀를 구분해 검증 */
+test('모바일 지도 배경은 전체보기를 유지하고 데스크톱은 기존 복귀를 유지한다',()=>{
  assert.equal(CareMapFocus.focusAction(false,false),null);
  assert.equal(CareMapFocus.focusAction(true,false),'leave');
  assert.equal(CareMapFocus.focusAction(false,true),null);
- assert.equal(CareMapFocus.focusAction(true,true),'leave');
+ assert.equal(CareMapFocus.focusAction(true,true),null); // SOFTM-MOBILE-FOCUS 날짜:20261003 : 모바일 배경 탭으로 의도치 않게 전체보기가 끝나지 않도록 검증
 });
+/** SOFTM-MOBILE-FOCUS END */
 test('짧은 단일 포인터만 지도 탭으로 인정한다',()=>{
  const start={id:1,x:100,y:100,time:1000,multi:false,moved:false};
  assert.equal(CareMapFocus.isTap(start,{id:1,x:104,y:105,time:1300,inside:true}),true);

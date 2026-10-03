@@ -371,3 +371,28 @@ test('PC·모바일 지도 광고는 접기·펼치기·목록 왕복에도 한 
     }
 });
 /** SOFTM-MAP-ANCHOR-ADS-TEST END */
+
+/** SOFTM-MOBILE-FOCUS START 날짜:20261003 : 전체 지도 임시 접힘·수동 펼침·복귀가 광고 요청과 세션 선호를 보존하는지 검증 */
+test('전체 지도는 광고를 임시로 접고 수동 펼침과 원래 선호를 각각 유지한다', () => {
+    const state = setup({ list:false });
+    const original = state.storage.get('careListAd:collapsed:v1');
+    const requests = state.scripts().length;
+    state.scope.CareListAds.setFocus(true);
+    assert.equal(state.zone.dataset.expanded, 'false');
+    state.handle.click();
+    assert.equal(state.zone.dataset.expanded, 'true');
+    state.scope.CareListAds.setFocus(true);
+    assert.equal(state.zone.dataset.expanded, 'true');
+    state.handle.click();
+    state.scope.CareListAds.setFocus(false);
+    assert.equal(state.zone.dataset.expanded, 'true');
+    assert.equal(state.storage.get('careListAd:collapsed:v1'), original);
+    assert.equal(state.scripts().length, requests);
+    const collapsed = setup({ list:false, collapsed:true });
+    collapsed.scope.CareListAds.setFocus(true);
+    collapsed.handle.click();
+    collapsed.scope.CareListAds.setFocus(false);
+    assert.equal(collapsed.zone.dataset.expanded, 'false');
+    assert.equal(collapsed.storage.get('careListAd:collapsed:v1'), '1');
+});
+/** SOFTM-MOBILE-FOCUS END */
