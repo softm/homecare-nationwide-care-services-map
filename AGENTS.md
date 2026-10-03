@@ -497,3 +497,5 @@ ZIP을 다시 만들 때 파일명 앞에 `YYYYMMDD_`를 붙인다.
 - 치매안심(`dementia-care-map`, `dementia.designboard.net`)은 독립 프론트엔드이며 공개 JSON의 MASTER는 계속 돌봄한눈이다. 치매 원본·수집·정규화는 `source-data/dementia`, `scripts/collect_dementia.py`, `scripts/build_dementia.py`에서만 관리하고 소비 프로젝트는 전체 공개 JSON을 배포 시 복사한다. 운영 방법은 `docs/DEMENTIA_DATA.md`를 따른다. 기존 지도에는 `dementia-service-link.js` 연결만 추가하며 서버·DB를 만들지 않는다. <!-- SOFTM-DEMENTIA-MASTER 날짜:20261001 : 두 서비스의 원본 중복 관리를 방지 -->
 
 - 개인정보처리방침은 루트의 `privacy.html`·`privacy.css`에서 관리한다. 웹과 `net.softm.care.homecare` Android WebView 앱에 공통 적용하며 지도·광고·저장소·문의 처리 변경 때 방침도 갱신한다. 개인정보 안내 페이지에는 광고·분석 스크립트를 넣지 않는다. <!-- SOFTM-PRIVACY 날짜:20261001 : 실제 데이터 처리와 Play 선언의 불일치 방지 -->
+
+- 모바일 지도에서 목록 손잡이를 최대로 올려도 검색창·조회·상세필터는 같은 한 행을 유지한다. 이전 시트의 뒤로가기·떠 있는 지도보기 버튼은 숨기고 손잡이의 `지도와 함께 보기`로 복귀하며 전역 목록·지도 모드 전환과 구분한다. <!-- SOFTM-SHEET-MAX 날짜:20261003 : 전체 목록 단계에서 검색 도구와 하단 고정 버튼이 겹치는 회귀 방지 -->

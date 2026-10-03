@@ -37,3 +37,13 @@
  body.stitch-desktop.care-map-page[data-care-workspace="saved"] .care-workspace-tab-list { width:100%; }
 }
 /** SOFTM-SAVED-RETURN END */
+
+/** SOFTM-SHEET-MAX START 날짜:20261003 : 전체 목록에서도 검색창의 열 배치를 유지하고 중복 지도 복귀 버튼이 고정 조작부를 가리지 않게 함 */
+@media (max-width:1000px) {
+ body.stitch-desktop.care-map-page[data-care-workspace="search"][data-care-sheet="list"] :is(.care-sheet-back,.care-sheet-map-button) { display:none; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"][data-care-sheet="list"]:not(.care-mobile-filters-open) .filter-grid { grid-template-columns:minmax(0,1fr) 48px 76px; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"][data-care-sheet="list"]:not(.care-mobile-filters-open) .filter-grid .care-voice-input { grid-column:1; grid-row:1; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"][data-care-sheet="list"]:not(.care-mobile-filters-open) .filter-grid .search-btn { grid-column:2; grid-row:1; }
+ body.stitch-desktop.care-map-page[data-care-workspace="search"][data-care-sheet="list"]:not(.care-mobile-filters-open) .filter-grid .care-mobile-filter-toggle { grid-column:3; grid-row:1; }
+}
+/** SOFTM-SHEET-MAX END */
