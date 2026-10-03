@@ -259,7 +259,31 @@ test('지도 복귀는 숨긴 필터의 접근 제한을 풀고 목록용 검색
 
 test('스티키 초기화를 반복해도 검색 복귀 버튼을 중복 만들지 않는다', () => {
     const env = environment(); env.api.mount(); env.api.mount();
-    assert.equal(env.head.children.length, 1);
+    assert.equal(env.head.children.length, 2); // SOFTM-LIST-READING 날짜:20261003 : 검색 복귀와 보조 도구 버튼이 각각 한 번만 생성됨을 검증
     assert.equal(env.api.scroller(), env.viewport);
 });
 /** SOFTM-LIST-STICKY-TEST END */
+
+/** SOFTM-LIST-READING START 날짜:20261003 : 읽기 중 수동 펼침 보존과 모드·방향 전환 복귀를 검증 */
+test('읽기 도구는 수동으로 펼치고 같은 방향 스크롤에는 유지하며 검색 복귀 때 초기화한다', () => {
+    const env = environment(); env.api.mount();
+    const button = env.head.children.find(child => 'listToolsToggle' in child.dataset);
+    assert.equal(button.hidden, true);
+    env.scroll(900);
+    assert.equal(button.hidden, false);
+    button.onclick();
+    assert.equal(button.getAttribute('aria-expanded'), 'true');
+    env.scroll(1000);
+    assert.equal(env.body.dataset.careListTools, 'open');
+    button.onclick();
+    assert.equal(button.getAttribute('aria-expanded'), 'false');
+    button.onclick();
+    env.scroll(900);
+    assert.equal(button.hidden, true);
+    assert.equal(env.body.dataset.careListTools, undefined);
+    env.scroll(1000);
+    assert.equal(button.getAttribute('aria-expanded'), 'false');
+    env.mode(false); env.api.sync();
+    assert.equal(button.hidden, true);
+});
+/** SOFTM-LIST-READING END */
