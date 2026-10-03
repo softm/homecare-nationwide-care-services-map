@@ -89,3 +89,20 @@ body[data-care-mode="list"] .care-saved-footer { position:sticky; bottom:0; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] :is(.filters,.results .list-head) { transition:none; }
 }
 /** SOFTM-LIST-STICKY END */
+
+/** SOFTM-LIST-READING START 날짜:20261003 : 스크롤 중 보조 도구 두 줄과 모바일 유형 메뉴 공간을 기관 본문에 반환 */
+[data-list-tools-toggle] { min-height:44px; padding:7px 10px; border:1px solid #bad3c8; border-radius:9px; background:#fff; color:#004541; font:inherit; font-size:12px; font-weight:700; white-space:nowrap; cursor:pointer; }
+[data-list-tools-toggle][hidden] { display:none!important; }
+[data-list-tools-toggle]:focus-visible { outline:3px solid #43877b; outline-offset:2px; }
+body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-stage="reading"] .results .list-head { gap:6px; min-height:52px; padding:4px 0; }
+body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-stage="reading"] .list-head h2 { flex:1 1 auto; font-size:14px; }
+body[data-care-mode="list"][data-care-list-stage="reading"] [data-list-search-return] { min-height:44px; }
+body[data-care-mode="list"][data-care-list-stage="reading"]:not([data-care-list-tools="open"]) .list-head :is(.care-sort-trigger,#careListViewToolbar) { display:none!important; }
+body[data-care-mode="list"][data-care-list-stage="reading"][data-care-list-tools="open"] .list-head .care-sort-trigger { order:2; margin-left:auto; }
+body[data-care-mode="list"][data-care-list-stage="reading"][data-care-list-tools="open"] .list-head #careListViewToolbar { order:3; flex-basis:100%; }
+body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-stage="reading"] .wrap { scroll-padding-top:60px; }
+@media (max-width:1000px) and (min-height:561px) {
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-stage="reading"]:not([data-care-workspace="saved"]) { --care-list-controls-top:56px; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-stage="reading"]:not([data-care-workspace="saved"]) .care-type-header { visibility:hidden; pointer-events:none; }
+}
+/** SOFTM-LIST-READING END */

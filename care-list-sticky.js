@@ -1,7 +1,7 @@
 /** SOFTM-LIST-STICKY START 날짜:20260930 : 목록 전체를 한 번에 스크롤하고 읽는 방향에 맞춰 필요한 검색 조작만 고정 */
 (function (root) {
     'use strict';
-    let viewport, filters, head, spacer, mounted = false, frame = 0, filterHeight = 0, viewportSize = '';
+    let viewport, filters, head, spacer, mounted = false, frame = 0, filterHeight = 0, viewportSize = '', toolsButton; // SOFTM-LIST-READING 날짜:20261003 : 읽기 단계의 보조 조작 펼침 버튼을 함께 관리
     const isList = () => Boolean(root.CareListMode?.isList());
     const scroller = () => isList() ? root.document?.querySelector('main.wrap') : root.document?.getElementById('list');
     function createProgression() {
@@ -58,7 +58,7 @@
     }
     function sync() {
         if (!mounted) return;
-        if (!isList()) { delete root.document.body.dataset.careListStage; filters.inert = false; filters.removeAttribute('aria-hidden'); head.querySelector('[data-list-search-return]').hidden = true; root.CareListAds?.setReading?.(false); return; }
+        if (!isList()) { if (toolsButton) toolsButton.hidden = true; delete root.document.body.dataset.careListStage; filters.inert = false; filters.removeAttribute('aria-hidden'); head.querySelector('[data-list-search-return]').hidden = true; root.CareListAds?.setReading?.(false); return; } // SOFTM-LIST-READING 날짜:20261003 : 지도 전환 시 목록 전용 펼침 버튼을 남기지 않음
         const body = root.document.body, open = body.classList.contains('care-mobile-filters-open');
         const size = `${viewport.clientWidth}:${viewport.clientHeight}`;
         if (viewportSize && size !== viewportSize) progression.rebase(viewport.scrollTop, body.dataset.careListStage);
@@ -73,7 +73,14 @@
         const focused = filters.contains(active) && (/^(INPUT|SELECT|TEXTAREA)$/.test(active?.tagName || '') || active?.tagName === 'BUTTON' && active.matches(':focus-visible'));
         /** SOFTM-LOCATION-TOOLBAR END */
         const stage = progression.update(viewport.scrollTop, { locationHeight, filterHeight, summaryHeight, locked: open || focused });
-        if (body.dataset.careListStage !== stage) body.dataset.careListStage = stage;
+        /** SOFTM-LIST-READING START 날짜:20261003 : 읽기 전환마다 보조 조작을 접되 사용자가 펼친 동안에는 스크롤에도 유지 */
+        if (body.dataset.careListStage !== stage) {
+            body.dataset.careListStage = stage;
+            delete body.dataset.careListTools;
+            toolsButton?.setAttribute('aria-expanded', 'false');
+        }
+        if (toolsButton) toolsButton.hidden = stage !== 'reading';
+        /** SOFTM-LIST-READING END */
         root.CareListAds?.setReading?.((stage === 'reading' || root.innerHeight <= 700) && body.dataset.careWorkspace !== 'saved');
         const hidden = stage === 'reading' && !open;
         filters.inert = hidden;
@@ -99,6 +106,18 @@
         const button = root.document.createElement('button'); button.type = 'button'; button.dataset.listSearchReturn = ''; button.textContent = '검색조건'; button.hidden = true;
         button.onclick = () => { reset(); root.document.getElementById('q')?.focus({ preventScroll: true }); };
         head.append(button);
+        /** SOFTM-LIST-READING START 날짜:20261003 : 정렬과 보기 선택을 필요할 때 펼쳐 고정 도구가 기관 본문을 가리지 않도록 함 */
+        toolsButton = root.document.createElement('button');
+        toolsButton.type = 'button'; toolsButton.dataset.listToolsToggle = '';
+        toolsButton.textContent = '보기·정렬'; toolsButton.hidden = true;
+        toolsButton.setAttribute('aria-expanded', 'false');
+        toolsButton.onclick = () => {
+            const expanded = root.document.body.dataset.careListTools !== 'open';
+            root.document.body.dataset.careListTools = expanded ? 'open' : 'closed';
+            toolsButton.setAttribute('aria-expanded', String(expanded));
+        };
+        head.append(toolsButton);
+        /** SOFTM-LIST-READING END */
         viewport.addEventListener('scroll', schedule, { passive: true });
         filters.addEventListener('focusin', schedule); filters.addEventListener('focusout', schedule);
         root.addEventListener('resize', schedule, { passive: true });
