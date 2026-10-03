@@ -1,0 +1,54 @@
+/** SOFTM-MOBILE-FOCUS START 날짜:20261003 : 모바일 전체 지도는 화면을 채우고 검색·하단 시트·광고의 실제 영역만 조작부에서 피함 */
+.care-mobile-focus,.care-focus-saved-close { display:none; }
+.care-focus-types { width:min(440px,calc(100vw - 32px)); max-height:80dvh; box-sizing:border-box; border:0; border-radius:22px; padding:20px; color:#123c36; background:#fff; }
+.care-focus-types::backdrop { background:#102c3755; }
+.care-focus-types header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.care-focus-types header button { border:0; background:#f1f6f4; width:44px; height:44px; border-radius:50%; font-size:28px; }
+.care-focus-types > div { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.care-focus-types > div button { min-height:48px; border:1px solid #dce7e3; border-radius:12px; background:#f4f8f6; color:#284d43; font:inherit; font-size:14px; }
+.care-focus-types > div button[aria-pressed="true"] { background:#004541; color:#fff; }
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] { --care-focus-bottom:calc(var(--care-list-ad-space,0px) + 80px + env(safe-area-inset-bottom)); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] :is(.stitch-app-header,.care-type-header,.care-menu-trigger,.care-workspace-tabs,.care-mode-toggle,.care-focus-controls,.care-view-switch) { display:none!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"][data-care-workspace] .layout>.map-card.card { position:fixed!important; inset:0!important; visibility:visible!important; pointer-events:auto!important; width:100%!important; height:100dvh!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-mobile-focus:not([hidden]) { display:block; position:absolute; inset:0; pointer-events:none; z-index:85; color:#153c35; }
+ .care-mobile-focus button,.care-mobile-focus input { pointer-events:auto; box-sizing:border-box; font:inherit; }
+ .care-mobile-focus button { display:inline-flex; justify-content:center; align-items:center; gap:6px; min-height:44px; border:0; cursor:pointer; color:#12483f; background:#fff; }
+ .care-mobile-focus button:focus-visible,.care-mobile-focus input:focus-visible { outline:3px solid #2c8a79; outline-offset:2px; }
+ .care-mobile-focus svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+ .care-mobile-focus-top { position:absolute; top:calc(12px + env(safe-area-inset-top)); left:max(12px,env(safe-area-inset-left)); right:max(12px,env(safe-area-inset-right)); }
+ .care-mobile-focus-search { display:flex; align-items:center; height:56px; border-radius:18px; background:#fff; box-shadow:0 3px 18px #173b3724; pointer-events:auto; padding:0 4px; }
+ .care-mobile-focus-search button { width:44px; flex:none; padding:0; border-radius:14px; }
+ .care-mobile-focus-search input { min-width:0; width:100%; flex:1; height:48px; padding:0 2px; border:0; border-radius:8px; background:#fff; color:#163a32; font-size:16px; }
+ .care-mobile-focus-chips { display:flex; gap:8px; margin-top:10px; }
+ .care-mobile-focus-chips button { max-width:65%; min-width:0; padding:0 14px; border-radius:24px; font-size:13px; font-weight:650; box-shadow:0 2px 10px #173b3720; }
+ .care-mobile-focus-side { position:absolute; right:max(12px,env(safe-area-inset-right)); top:calc(138px + env(safe-area-inset-top)); }
+ .care-mobile-focus-side button { width:46px; height:46px; border-radius:50%; box-shadow:0 2px 12px #173b3724; }
+ .care-mobile-focus-dock { position:absolute; left:50%; bottom:calc(var(--care-list-ad-space,0px) + 12px + env(safe-area-inset-bottom)); transform:translateX(-50%); display:flex; gap:2px; padding:5px; width:max-content; max-width:calc(100% - 24px); box-sizing:border-box; background:#fffffff5; border:1px solid #d7e5df; border-radius:32px; box-shadow:0 4px 20px #173b3728; pointer-events:auto; }
+ .care-mobile-focus-dock button { gap:5px; min-height:48px; padding:0 12px; border-radius:26px; font-size:13px; white-space:nowrap; background:transparent; }
+ .care-mobile-focus-dock button[aria-expanded="true"] { color:#fff; background:#004541; }
+ .care-mobile-focus-dock b { font-size:12px; font-variant-numeric:tabular-nums; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .map-controls { top:calc(196px + env(safe-area-inset-top))!important; right:12px!important; bottom:auto!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-region-research { bottom:calc(var(--care-focus-bottom) + 12px)!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-location-state { top:calc(128px + env(safe-area-inset-top)); max-width:calc(100% - 84px); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .map-status { bottom:calc(var(--care-focus-bottom) + 12px); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-list-ad-zone:not([hidden]) { bottom:env(safe-area-inset-bottom); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace] .layout>.results,
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel {
+  display:flex!important; flex-direction:column!important; position:fixed!important; inset:auto 0 var(--care-focus-bottom)!important; z-index:170!important; width:100%!important; height:45dvh!important; max-height:calc(100dvh - var(--care-focus-bottom) - 132px - env(safe-area-inset-top))!important; min-height:0!important; margin:0!important; padding:0!important; box-sizing:border-box; border:0; border-radius:22px 22px 0 0!important; box-shadow:0 -3px 24px #173b3724; background:#fff; visibility:visible!important; pointer-events:auto!important; transform:none!important;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="list"] .layout>.results { height:calc(100dvh - var(--care-focus-bottom) - 132px - env(safe-area-inset-top))!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list:is([data-care-sheet="map"],[data-care-sheet="focus"]) .layout>.results { height:64px!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list.care-sheet-dragging .layout>.results { height:var(--care-focus-drag-size,45dvh)!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .results .care-sheet-handle { display:grid!important; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:10px 1fr; flex:0 0 56px; height:56px; min-height:56px; padding:4px 14px 8px; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .results .care-sheet-summary { font-size:13px; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .results .care-sheet-action { font-size:12px; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel { overflow-y:auto!important; padding:0 14px 14px!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-focus-saved-close { display:block; position:sticky; top:0; z-index:3; flex:none; width:100%; min-height:48px; padding:10px; border:0; border-bottom:1px solid #e2eae6; background:#fff; color:#226c5c; font:inherit; font-size:13px; font-weight:650; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-mobile-filters-open .filters { display:block!important; position:fixed!important; inset:12px 12px auto!important; z-index:186!important; max-height:calc(100dvh - 24px)!important; overflow:auto!important; padding:16px!important; border-radius:20px!important; }
+}
+@media(max-width:360px) {
+ .care-mobile-focus-dock button { padding:0 9px; font-size:12px; }
+ .care-mobile-focus-dock svg { width:20px; }
+}
+/** SOFTM-MOBILE-FOCUS END */

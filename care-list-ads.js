@@ -6,8 +6,10 @@
     let expanded = true, attempted = false, failed = false, requestedDesktop, slotWidth = 0;
     /** SOFTM-LIST-AD-READING START 날짜:20260930 : 목록 읽기 중 임시 접힘이 사용자의 세션 선택을 바꾸지 않도록 분리 */
     let reading = false, readingExpanded = false;
+    let focus = false, focusExpanded = false; // SOFTM-MOBILE-FOCUS 날짜:20261003 : 전체 지도에서만 임시로 접고 원래 광고 선택은 보존
 
     function isExpanded() {
+        if (focus) return focusExpanded; // SOFTM-MOBILE-FOCUS 날짜:20261003 : 전체 지도 수동 펼침은 이번 진입 동안 유지
         return reading && (options.isList ? options.isList() : root.document.body.dataset.careMode === 'list') ? readingExpanded : expanded; // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 목록의 임시 접힘이 지도 광고 선택을 덮지 않도록 구분
     }
     /** SOFTM-LIST-AD-READING END */
@@ -94,6 +96,7 @@
     }
 
     function setExpanded(value) {
+        if (focus) { focusExpanded = Boolean(value); sync(); return; } // SOFTM-MOBILE-FOCUS 날짜:20261003 : 임시 지도 선택으로 세션의 광고 선호를 덮지 않음
         /** SOFTM-LIST-AD-READING START 날짜:20260930 : 읽기 중 수동 선택은 현재 단계에만 적용하고 원래 광고 선택은 보존 */
         if (reading && (options.isList ? options.isList() : root.document.body.dataset.careMode === 'list')) { // SOFTM-MAP-ANCHOR-ADS 날짜:20260930 : 지도에서 수동 선택한 접힘은 세션에 보존
             readingExpanded = Boolean(value);
@@ -157,6 +160,13 @@
         sync();
     }
 
-    root.CareListAds = Object.freeze({ mount, sync, setExpanded, setReading }); // SOFTM-LIST-AD-READING 날짜:20260930 : 목록 스크롤 단계에서 일시적 광고 접기를 연결
+    /** SOFTM-MOBILE-FOCUS START 날짜:20261003 : 전체 지도 진입 때만 접고 반복 상태 갱신은 수동 펼침을 유지 */
+    function setFocus(value) {
+        const next = Boolean(value);
+        if (next === focus) return;
+        focus = next; focusExpanded = false; sync();
+    }
+    /** SOFTM-MOBILE-FOCUS END */
+    root.CareListAds = Object.freeze({ mount, sync, setExpanded, setReading, setFocus }); // SOFTM-MOBILE-FOCUS 날짜:20261003 : 목록 읽기와 전체 지도 임시 접힘을 별도 진입점으로 연결
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-LIST-ANCHOR-ADS END */
