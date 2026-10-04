@@ -42,8 +42,20 @@
         });
     }
     /** SOFTM-SEARCH-LIST-SCROLL START 날짜:20260910 : 목록 끝 광고까지 빠르게 이동해도 강조가 이전 기관에 남지 않도록 가시 기관과 스크롤 끝을 함께 판정 */
-    function pickSearchScrollRow(rows, listRect, scrollState) {
+    function pickSearchScrollRow(rows, listRect, scrollState, horizontal = false) { // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 가로 카드의 가시 너비로 현재 기관을 선택
         if (!rows.length) return null;
+        /** SOFTM-MOBILE-CAROUSEL START 날짜:20261004 : 가로 넘김에서 첫 기관만 선택되거나 화면 밖 기관으로 지도가 이동하지 않도록 판정 */
+        if (horizontal) {
+            let best = null, width = 0;
+            for (const row of rows) {
+                const rect = row.getBoundingClientRect();
+                if (rect.left >= listRect.right) break;
+                const visible = Math.min(rect.right, listRect.right) - Math.max(rect.left, listRect.left);
+                if (visible > width) { best = row; width = visible; }
+            }
+            return best;
+        }
+        /** SOFTM-MOBILE-CAROUSEL END */
         /** SOFTM-LIST-YIELD START 날짜:20260916 : 지도 마커가 추가될 때마다 수천 카드의 레이아웃을 읽지 않고 보이는 구간에서 탐색을 끝냄 */
         if (scrollState.scrollTop <= 2) return rows[0];
         const visible = [];
@@ -245,11 +257,11 @@
             node.textContent = active ? '✓ 비교에 담음' : '+ 비교에 담기';
         });
     }
-    function remember() { return { top: root.scrollY, list: document.getElementById('list')?.scrollTop || 0, saved: bar?.scrollTop || 0, listViewport: root.CareListSticky?.capture() }; } // SOFTM-LIST-STICKY 날짜:20260930 : 상세·담은 기관 복귀 시 단일 본문 스크롤의 기관 위치도 보관
+    function remember() { return { top: root.scrollY, list: document.getElementById('list')?.scrollTop || 0, saved: bar?.scrollTop || 0, listLeft: document.getElementById('list')?.scrollLeft || 0, listViewport: root.CareListSticky?.capture() }; } // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 상세·담은 기관 복귀에 목록의 가로 위치도 보관
     function restore(position) {
         if (!position) return;
         const generation = ++restoreGeneration;
-        requestAnimationFrame(() => { if (generation !== restoreGeneration) return; const list = document.getElementById('list'); if (list) list.scrollTop = position.list; if (bar) bar.scrollTop = position.saved; root.CareListSticky?.restore(position.listViewport); /* SOFTM-LIST-STICKY 날짜:20260930 : 상세와 작업탭에서 기존 목록 위치로 복귀 */ root.scrollTo({ top: position.top, behavior: 'instant' }); });
+        requestAnimationFrame(() => { if (generation !== restoreGeneration) return; const list = document.getElementById('list'); if (list) { list.scrollTop = position.list; list.scrollLeft = position.listLeft || 0; } if (bar) bar.scrollTop = position.saved; root.CareListSticky?.restore(position.listViewport); /* SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 상세와 작업탭에서 가로·세로 목록 위치로 복귀 */ root.scrollTo({ top: position.top, behavior: 'instant' }); });
     }
     /** SOFTM-WORKSPACE-EXPAND START 날짜:20260907 : 작업영역 확대 전의 페이지·목록 위치를 저장하고 버튼이나 Esc로 같은 위치에 복귀 */
     function setWorkspaceExpanded(next) {
@@ -622,14 +634,24 @@
         };
         const transition = (action, restoreTop) => {
             if (!active()) return;
+            /** SOFTM-MOBILE-CAROUSEL START 날짜:20261004 : 가로 카드와 전체 세로 목록을 왕복해도 읽던 기관으로 연결 */
             const before = state.state(), top = restoreTop ?? (before === 'map' ? storedScroll : list.scrollTop);
+            const anchor = pickSearchScrollRow([...list.querySelectorAll('.row')], list.getBoundingClientRect(), list, before === 'split');
+            /** SOFTM-MOBILE-CAROUSEL END */
             storedScroll = top;
             layout.style.setProperty('--care-sheet-hidden-map-height', `${map.clientHeight}px`);
             action(); sync(); const current = ++revision;
             if (state.state() !== 'list') options.resizeMap?.();
             requestAnimationFrame(() => {
                 if (current !== revision) return;
+                /** SOFTM-MOBILE-CAROUSEL START 날짜:20261004 : 축 전환 후 동일 카드 위치를 새 스크롤 축에 맞춤 */
                 if (state.state() !== 'map') list.scrollTop = top;
+                if (anchor && before !== 'map' && state.state() !== 'map') {
+                    const rect = anchor.getBoundingClientRect(), bounds = list.getBoundingClientRect();
+                    if (state.state() === 'split') list.scrollLeft += rect.left - bounds.left - 12;
+                    else list.scrollTop += rect.top - bounds.top;
+                }
+                /** SOFTM-MOBILE-CAROUSEL END */
             });
         };
         const goBack = () => transition(() => state.back());
@@ -735,7 +757,7 @@
         const scrollTail = document.createElement('div');
         scrollTail.className = 'care-list-scroll-tail'; scrollTail.setAttribute('aria-hidden', 'true');
         function updateScrollTail() {
-            if (isListMode()) { scrollTail.style.height = '0px'; return; } // SOFTM-LIST-MODE 날짜:20260930 : 지도 자동 선택용 끝 여백을 분석 목록에 남기지 않음
+            if (isListMode() || media.matches && document.body.dataset.careSheet === 'split') { scrollTail.style.height = '0px'; return; } // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 가로 목록에는 세로 선택용 끝 여백을 만들지 않음
             const rows = [...list.querySelectorAll('.row')], last = rows.at(-1);
             if (!last || rows.length < 2 || !list.clientHeight) { scrollTail.style.height = '0px'; return; }
             if (!scrollTail.isConnected) list.append(scrollTail);
@@ -777,7 +799,7 @@
             const rows = [...list.querySelectorAll('.row')];
             /** SOFTM-MARKER-PERSIST START 날짜:20260915 : 선택 기관이 현재 목록 페이지 밖에 있어도 복귀 시 첫 기관으로 교체하지 않음 */
             const pinned = detailSelection?.workspace === workspace ? detailSelection : null;
-            const row = pinned ? rows.find(node => String(node.dataset.id || node.querySelector('[data-care-basket]')?.dataset.careBasket) === pinned.id) : pickSearchScrollRow(rows, listRect, list);
+            const row = pinned ? rows.find(node => String(node.dataset.id || node.querySelector('[data-care-basket]')?.dataset.careBasket) === pinned.id) : pickSearchScrollRow(rows, listRect, list, media.matches && document.body.dataset.careSheet === 'split'); // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 모바일 지도 분할 목록의 좌우 넘김을 마커 선택과 연결
             /** SOFTM-MARKER-PERSIST END */
             /** SOFTM-SEARCH-LIST-SCROLL END */
             if (!row) return;

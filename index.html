@@ -139,7 +139,7 @@
 <link rel="stylesheet" href="pretendard-fonts.css?v=1.3.9">
 <link rel="stylesheet" href="care-typography.css?v=20260916-pretendard1">
 <link rel="stylesheet" href="map-marker-density.css?v=20260930-3"> <!-- SOFTM-MARKER-DENSITY 날짜:20260930 : PC·모바일 모두 기관명 중첩 없이 선택 기관에 집중 -->
-<link rel="stylesheet" href="mobile-map-density.css?v=20261003-sheet-max1"> <!-- SOFTM-SHEET-MAX 날짜:20261003 : 목록 최대 확장의 검색창 겹침 수정본을 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="mobile-map-density.css?v=20261004-carousel1"> <!-- SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 모바일 가로 목록 배치를 이전 캐시 없이 적용 -->
 <!-- SOFTM-PARTNER-OFFER 날짜:20260917 : 공용 문의 상품과 예산 입력의 최신 버전 적용 -->
 <!-- SOFTM-LOCATION-STARTUP START 날짜:20260930 : 지도 진입의 권한 요청은 유지하고 목록 직접 진입의 불필요한 위치 요청은 생략 -->
 <script defer src="care-location-startup.js?v=20260930-list1"></script>
@@ -233,7 +233,7 @@
 <script src="stitch-controls.js?v=20260930-location-ui1"></script> <!-- SOFTM-LOCATION-TOOLBAR 날짜:20260930 : 목록에서 위치 찾기와 상세필터를 같은 검색 도구 행으로 배치 -->
 <script src="map-marker-placement.js?v=20260930-1"></script> <!-- SOFTM-MARKER-PLACEMENT 날짜:20260930 : 이름표가 위쪽 충돌만으로 숨지 않도록 주변 배치 계산을 먼저 연결 -->
 <script src="map-marker-labels.js?v=20260930-4"></script> <!-- SOFTM-MARKER-LABELS 날짜:20260930 : 지도 공간에 맞춘 이름표 배치 모듈 연결 -->
-<script src="map-experience.js?v=20260930-route-direct1"></script> <!-- SOFTM-ROUTE-DIRECT 날짜:20260930 : 첫 경로 버튼부터 실제 탐색으로 이어지는 최신 동작을 반영 -->
+<script src="map-experience.js?v=20261004-carousel1"></script> <!-- SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 가로 넘김의 마커 선택과 상세 복귀 위치를 함께 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <!-- SOFTM-LIST-MODE START 날짜:20260930 : 기존 지도와 별개인 목록 탐색 모드를 공용 상태에 연결 -->
 <link rel="stylesheet" href="care-list-mode.css?v=20260930-route-controls1"> <!-- SOFTM-ROUTE-CONTROLS 날짜:20260930 : 담은 기관에서 중복 모드 버튼이 주행 조작을 덮지 않도록 반영 -->
@@ -521,7 +521,7 @@ async function renderList(query=null,visibleLimit=PAGE_LIMIT){
  if(rows.length<totalRows){
   const more=document.createElement('button');more.type='button';more.className='care-results-more';
   more.textContent=`기관 더 보기 (${rows.length.toLocaleString()} / ${totalRows.toLocaleString()}곳)`;
-  more.onclick=()=>{const top=$('list').scrollTop;void renderList(query,visibleLimit+PAGE_LIMIT).then(finished=>{if(finished===careListVersion&&!CareListMode.isList())$('list').scrollTop=top})}; // SOFTM-LIST-STICKY 날짜:20260930 : 목록 더보기는 공용 화면 앵커로 복원하고 지도만 내부 스크롤 사용
+  more.onclick=()=>{const top=$('list').scrollTop,left=$('list').scrollLeft;void renderList(query,visibleLimit+PAGE_LIMIT).then(finished=>{if(finished===careListVersion&&!CareListMode.isList()){$('list').scrollTop=top;$('list').scrollLeft=left}})}; // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 더보기 후 지도 목록의 가로·세로 위치를 함께 복원
   $('list').append(more);
  }
  updateStats();queueCareAdFit();CareMapExperience.refresh();
@@ -1211,7 +1211,7 @@ function initCareListMode(){
   beforeChange(next){
    careMapFocus?.leave();closeDetail();CareMapExperience.suspendModeMap();
    careListMapStarting=next==='map'&&!mapReady;
-   if(next==='list')careListMapState=mapReady?{signature:careListSignature(),rows:areaRows.slice(),matchRows:careMatchRows,count:resultCount,unresolved:careUnresolvedCount,selected:new Set(selected),scroll:$('list').scrollTop,scope:careMatchScope,pending:careMatchPending,sort:$('sort').value,note:$('routeNote').textContent,center:map.getCenter(),zoom:map.getZoom()}:null;
+   if(next==='list')careListMapState=mapReady?{signature:careListSignature(),rows:areaRows.slice(),matchRows:careMatchRows,count:resultCount,unresolved:careUnresolvedCount,selected:new Set(selected),scroll:$('list').scrollTop,scrollLeft:$('list').scrollLeft,scope:careMatchScope,pending:careMatchPending,sort:$('sort').value,note:$('routeNote').textContent,center:map.getCenter(),zoom:map.getZoom()}:null; // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 목록모드 왕복에도 지도 카드의 가로 위치를 보관
    if(next==='list')clearMapOnlyCareAds(); // SOFTM-LIST-ANCHOR-ADS 날짜:20260930 : 원래 스크롤 저장 뒤 숨길 지면을 정리해 복귀 위치를 보존
    ++refreshToken;++careListVersion;advancedSearch?.cancel();clearTimeout(refreshTimer);careViewportResearch?.cancel();hideLoading();
   },
@@ -1245,7 +1245,7 @@ function initCareListMode(){
    if(saved&&!saved.pending&&saved.signature===careListSignature()){
     areaRows=saved.rows;careMatchRows=saved.matchRows;resultCount=saved.count;careUnresolvedCount=saved.unresolved;selected=saved.selected;careMatchScope=saved.scope;careMatchPending=false;
     if(CareResultSort.usesCenter(saved.sort)){$('sort').value=saved.sort;$('sort').dispatchEvent(new Event('change'));}
-    $('routeNote').textContent=saved.note;await renderList();if(!transition.current())return;$('list').scrollTop=saved.scroll;CareMapExperience.refreshMatch();
+    $('routeNote').textContent=saved.note;await renderList();if(!transition.current())return;$('list').scrollTop=saved.scroll;$('list').scrollLeft=saved.scrollLeft||0;CareMapExperience.refreshMatch(); // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 지도 복원 후 읽던 가로 카드로 복귀
    }else{skipIdleUntil=0;await searchByControls(false,false);}
    }finally{if(transition.current())await CareMapExperience.resumeModeMap();}
   },error:error=>toast(error.message||'화면을 전환하지 못했습니다. 다시 시도해 주세요.')
