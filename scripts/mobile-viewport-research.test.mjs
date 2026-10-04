@@ -93,3 +93,14 @@ test('기관이 보이지 않는 중간 광고 구간에서는 이전 강조를 
     assert.equal(pick(rows, { top: 200, bottom: 500 }, { scrollTop: 300, clientHeight: 300, scrollHeight: 1000 }), null);
 });
 /** SOFTM-SEARCH-LIST-SCROLL END */
+
+/** SOFTM-MOBILE-CAROUSEL START 날짜:20261004 : 가로 스크롤의 중앙 기관·광고·끝 카드 선택을 검증 */
+test('가로 목록은 세로 위치가 0이어도 가장 넓게 보이는 기관을 선택한다', () => {
+    const pick = searchListPicker();
+    const card = (name, left, right) => ({ name, getBoundingClientRect: () => ({ left, right, top: 0, bottom: 200 }) });
+    const rows = [card('첫 기관', -300, 20), card('둘째 기관', 30, 350), card('셋째 기관', 360, 680)];
+    assert.equal(pick(rows, { left: 0, right: 390 }, { scrollTop: 0, scrollLeft: 330 }, true).name, '둘째 기관');
+    assert.equal(pick([card('앞 기관', -350, -30), card('뒤 기관', 400, 720)], { left: 0, right: 390 }, { scrollLeft: 500 }, true), null);
+    assert.equal(pick([card('앞 기관', -300, 20), card('마지막 기관', 30, 350)], { left: 0, right: 390 }, { scrollLeft: 900 }, true).name, '마지막 기관');
+});
+/** SOFTM-MOBILE-CAROUSEL END */
