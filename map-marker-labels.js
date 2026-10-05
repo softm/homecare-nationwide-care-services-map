@@ -4,6 +4,7 @@
     const overlaps = (a,b) => a.left < b.right+6 && a.right+6 > b.left && a.top < b.bottom+6 && a.bottom+6 > b.top;
     const inside = (rect,bounds) => rect.width > 0 && rect.height > 0 && rect.left >= bounds.left+8 && rect.right <= bounds.right-8 && rect.top >= bounds.top+8 && rect.bottom <= bounds.bottom-8;
     const detailLevel = zoom => zoom >= 18 ? 2 : zoom >= 16 ? 1 : 0;
+    const markerScale = zoom => zoom < 14 ? 'dot' : zoom < 16 ? 'pin' : zoom < 18 ? 'name' : 'detail'; // SOFTM-MARKER-SCALE 날짜:20261005 : 축소는 위치점, 중간은 핀, 확대는 이름·상세로 단계화
     function fitLevel(rects, bounds, obstacles) {
         for (let level=rects.length-1;level>=0;level--) {
             if (inside(rects[level],bounds) && !obstacles.some(other=>overlaps(rects[level],other))) return level;
@@ -19,6 +20,8 @@
     function mount(host, map) {
         let timer;
         function layout() {
+            const zoom = map.getZoom();
+            host.dataset.markerScale = markerScale(zoom); // SOFTM-MARKER-SCALE 날짜:20261005 : 실제 확대 배율로 마커 모양과 이름표 표시를 함께 갱신
             const bounds = host.getBoundingClientRect();
             const labels = [...host.querySelectorAll('.marker-name')];
             /** SOFTM-MARKER-PLACEMENT START 날짜:20260930 : 선택·배율 변경 뒤 이전 이동량이 다음 충돌 실측에 남지 않도록 초기화 */
@@ -28,15 +31,14 @@
             });
             /** SOFTM-MARKER-PLACEMENT END */
             if (!bounds.width || !bounds.height) return;
-            const compact = host.classList.contains('care-compact-markers');
-            const level = detailLevel(map.getZoom());
-            if (compact && level === 0) return;
+            const level = zoom >= 18 ? detailLevel(zoom) : 0; // SOFTM-MARKER-SCALE 날짜:20261005 : 16·17은 기관명만, 18부터 현황을 단계적으로 표시
+            const namesVisible = zoom >= 16; // SOFTM-MARKER-SCALE 날짜:20261005 : 축소 지도는 명칭을 생략하고 선택 기관만 예외로 표시
             const intersects = rect => rect.width && rect.height && rect.right > bounds.left && rect.left < bounds.right && rect.bottom > bounds.top && rect.top < bounds.bottom;
             const pins = [...host.querySelectorAll('.map-marker')].map(node=>node.getBoundingClientRect()).filter(intersects);
-            const controls = [...host.parentElement.querySelectorAll('.map-controls,.care-region-research,.care-focus-controls button')].map(node=>node.getBoundingClientRect()).filter(intersects); // SOFTM-MARKER-PLACEMENT 날짜:20260930 : 전체 지도에서 실제 버튼이 옮긴 기관명을 가리지 않도록 실측
+            const controls = [...host.parentElement.querySelectorAll('.map-controls,.care-region-research,.care-focus-controls button,.care-location-state'), ...root.document.querySelectorAll('.care-mobile-focus:not([hidden]) .care-mobile-focus-top,.care-mobile-focus:not([hidden]) .care-mobile-focus-side,.care-mobile-focus:not([hidden]) .care-mobile-focus-dock,body.care-mobile-focus-active .results')].map(node=>node.getBoundingClientRect()).filter(intersects); // SOFTM-MARKER-SCALE 날짜:20261005 : 지도 밖 레이어로 이동한 검색·메뉴·목록도 기관명 충돌 검사에 포함
             const occupied = new Map(); // SOFTM-MARKER-PLACEMENT 날짜:20260930 : 다른 기관 이름을 먼저 확보한 뒤 정보 확장 때 자신의 영역만 교체
             const candidates = labels.map(label=>({label,selected:!!label.closest('.care-mobile-active-marker'),rects:[]}))
-                .filter(item=>(item.selected || !compact) && intersects(item.label.parentElement.getBoundingClientRect()));
+                .filter(item=>(item.selected || namesVisible) && intersects(item.label.parentElement.getBoundingClientRect()));
             /** SOFTM-MARKER-PLACEMENT START 날짜:20260930 : 이름만 이동하고 핀의 실제 위치·선택 확대는 보존 */
             candidates.forEach(item=>{
                 const parent = item.label.parentElement;
@@ -88,9 +90,10 @@
             if(records.some(record=>!record.target.closest?.('.marker-name'))) schedule();
         }).observe(host,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
         new ResizeObserver(schedule).observe(host);
+        root.naver.maps.Event.addListener(map,'zoom_changed',schedule); // SOFTM-MARKER-SCALE 날짜:20261005 : 재검색 완료를 기다리지 않고 배율 변경을 표시
         root.naver.maps.Event.addListener(map,'idle',schedule);
         schedule();
     }
-    root.CareMarkerLabels = {mount,detailLevel,fitLevel};
+    root.CareMarkerLabels = {mount,detailLevel,fitLevel,markerScale};
 })(globalThis);
 /** SOFTM-MARKER-INSIGHTS END */

@@ -22,3 +22,12 @@ body.care-map-page .care-mobile-active-marker .marker-name.care-label-context { 
  body.care-map-page .marker-name.care-label-context { width:200px!important; max-width:200px!important; }
 }
 /** SOFTM-MARKER-INSIGHTS END */
+
+/** SOFTM-MARKER-SCALE START 날짜:20261005 : 지도 배율별 위치점·핀 전환으로 축소 화면의 지명과 도로를 확보 */
+body.care-map-page:not(.care-basket-map) #naverMap[data-marker-scale="dot"] .care-named-marker .map-marker { width:12px; height:12px; position:absolute; left:10px; top:16px; border:2px solid #fff; border-radius:50%; transform:none; box-shadow:0 1px 4px #1238; }
+body.care-map-page:not(.care-basket-map) #naverMap[data-marker-scale="dot"] .map-marker span { display:none; }
+body.care-map-page:not(.care-basket-map) #naverMap:is([data-marker-scale="pin"],[data-marker-scale="name"],[data-marker-scale="detail"]) .care-named-marker .map-marker,
+body.care-map-page:not(.care-basket-map) #naverMap[data-marker-scale] .care-mobile-active-marker .map-marker { width:32px; height:32px; left:0; top:0; border-radius:11px 11px 11px 3px; transform:rotate(-45deg); }
+body.care-map-page:not(.care-basket-map) #naverMap:is([data-marker-scale="pin"],[data-marker-scale="name"],[data-marker-scale="detail"]) .map-marker span,
+body.care-map-page:not(.care-basket-map) #naverMap[data-marker-scale] .care-mobile-active-marker .map-marker span { display:block; }
+/** SOFTM-MARKER-SCALE END */

@@ -399,11 +399,12 @@
     }
     /** SOFTM-MARKER-PERSIST START 날짜:20260915 : 상세 복귀의 DOM·크기·스크롤 복원이 클릭한 기관을 첫 카드로 덮지 않도록 선택을 보존 */
     let detailSelection = null;
+    let selectionInteracted = false; // SOFTM-MAP-INITIAL 날짜:20261005 : 최초 렌더링을 사용자의 기관 선택으로 취급하지 않음
     function releaseDetailSelection() { detailSelection = null; }
     function bindSelectionIntent(host) {
-        for (const name of ['wheel', 'touchmove', 'pointerdown']) host.addEventListener(name, releaseDetailSelection, { passive: true });
+        for (const name of ['wheel', 'touchmove', 'pointerdown']) host.addEventListener(name, () => { selectionInteracted = true; releaseDetailSelection(); }, { passive: true }); // SOFTM-MAP-INITIAL 날짜:20261005 : 직접 목록을 조작한 뒤부터 보이는 카드의 마커를 선택
         host.addEventListener('keydown', event => {
-            if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) releaseDetailSelection();
+            if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) { selectionInteracted = true; releaseDetailSelection(); } // SOFTM-MAP-INITIAL 날짜:20261005 : 키보드 목록 탐색도 명시적인 선택 시작으로 인정
         });
     }
     /** SOFTM-MARKER-PERSIST END */
@@ -799,6 +800,7 @@
             const rows = [...list.querySelectorAll('.row')];
             /** SOFTM-MARKER-PERSIST START 날짜:20260915 : 선택 기관이 현재 목록 페이지 밖에 있어도 복귀 시 첫 기관으로 교체하지 않음 */
             const pinned = detailSelection?.workspace === workspace ? detailSelection : null;
+            if (!pinned && !selectionInteracted && !active) return; // SOFTM-MAP-INITIAL 날짜:20261005 : 목록 생성·크기 변경만으로 첫 마커가 강조되지 않도록 차단
             const row = pinned ? rows.find(node => String(node.dataset.id || node.querySelector('[data-care-basket]')?.dataset.careBasket) === pinned.id) : pickSearchScrollRow(rows, listRect, list, media.matches && document.body.dataset.careSheet === 'split'); // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 모바일 지도 분할 목록의 좌우 넘김을 마커 선택과 연결
             /** SOFTM-MARKER-PERSIST END */
             /** SOFTM-SEARCH-LIST-SCROLL END */
@@ -1252,9 +1254,9 @@
     }
     /** SOFTM-WORKSPACE START 날짜:20260905 : 기존 검색·상세 진입점은 유지하면서 담은 기관 상태를 검색 선택과 분리 */
     /** SOFTM-FOCUS-LIST START 날짜:20260914 : 전체 지도에서 돌아올 때 기존 손잡이·스크롤을 가진 하단 목록을 그대로 재사용 */
-    function showResultsSheet() {
+    function showResultsSheet(initialState = 'split') { // SOFTM-MAP-INITIAL 날짜:20261005 : 첫 지도는 접힘으로 열고 사용자가 누른 목록은 펼침으로 열기
         setWorkspace('search', false);
-        mobileSheet?.set('split');
+        mobileSheet?.set(initialState); // SOFTM-MAP-INITIAL 날짜:20261005 : 초기 지도 집중 상태와 일반 목록 열기를 구분
         document.querySelector('.care-sheet-handle')?.focus({ preventScroll: true });
     }
     /** SOFTM-FOCUS-LIST END */

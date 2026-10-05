@@ -63,7 +63,7 @@
    if (!defaultPending || !matchMedia('(max-width:1000px)').matches || document.body.dataset.careMode !== 'map' || !config.ready()) return;
    defaultPending = false;
    enter();
-   if (document.body.dataset.careWorkspace !== 'saved') { config.results(); document.body.classList.add('care-focus-list'); }
+   if (document.body.dataset.careWorkspace !== 'saved') { config.results('focus'); document.body.classList.add('care-focus-list'); } // SOFTM-MAP-INITIAL 날짜:20261005 : 첫 화면은 검색결과 손잡이만 보이는 지도 집중 상태로 시작
   };
   new MutationObserver(records => {
    if (records.some(record => record.attributeName === 'data-care-mode') && document.body.dataset.careMode === 'map') defaultPending = true;
