@@ -53,10 +53,10 @@
 }
 /** SOFTM-MOBILE-FOCUS END */
 
-/** SOFTM-MAP-STYLE START 날짜:20261005 : 지도 위 검색·색상 도구와 목록 바로 위 메뉴로 탐색 공간을 확보 */
+/** SOFTM-MAP-STYLE START 날짜:20261005 : 지도 위 검색·색상 도구와 목록 위에 겹쳐 표시하는 하단 메뉴로 탐색 공간을 확보 */
 @media(max-width:1000px) {
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] { --care-focus-bottom:calc(var(--care-list-ad-space,0px) + env(safe-area-inset-bottom)); }
- .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + var(--care-focus-panel-height,0px) + 10px); box-shadow:0 4px 20px #143e3b38; border:2px solid #fff; }
+ .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 12px); box-shadow:0 4px 20px #143e3b38; border:2px solid #fff; }
  .care-mobile-focus-search { border:1px solid #e4eae8; box-shadow:0 4px 20px #12362e30; }
  .care-mobile-focus-search button[type="submit"] { color:#fff; background:#087e74; }
  .care-mobile-focus-chips button { padding:6px 12px 6px 7px; max-width:70%; font-size:14px; border:1px solid #ffffffb3; }
@@ -71,8 +71,8 @@
  .care-mobile-focus-dock [data-mobile-focus="more"] svg { color:#7360b5; }
  .care-mobile-focus-dock [aria-expanded="true"] svg { color:#fff; }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace] .layout>.results,
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel { height:320px!important; max-height:calc(100dvh - var(--care-focus-bottom) - 210px - env(safe-area-inset-top))!important; }
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="list"] .layout>.results { height:calc(100dvh - var(--care-focus-bottom) - 210px - env(safe-area-inset-top))!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel { height:400px!important; max-height:calc(100dvh - var(--care-focus-bottom) - 140px - env(safe-area-inset-top))!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="list"] .layout>.results { height:calc(100dvh - var(--care-focus-bottom) - 140px - env(safe-area-inset-top))!important; }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .results .care-sheet-handle { flex-basis:44px; height:44px; min-height:44px; padding:2px 12px 4px; grid-template-rows:6px minmax(0,1fr); }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-region-research { left:12px!important; right:auto!important; top:calc(138px + env(safe-area-inset-top)); bottom:auto!important; transform:none!important; max-width:calc(100% - 84px); }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-location-state { top:calc(190px + env(safe-area-inset-top)); }
@@ -90,3 +90,14 @@
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .map-controls { top:calc(184px + env(safe-area-inset-top))!important; }
 }
 /** SOFTM-MAP-STYLE END */
+
+/** SOFTM-DOCK-OVERLAY START 날짜:20261005 : 하단 메뉴는 목록 위 레이어에 띄우고 본문 끝까지 읽을 공간을 확보 */
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-mobile-focus:not([hidden]) { position:fixed; z-index:175; }
+ .care-mobile-focus-dock { background:#f4f8f5e8; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list .layout #list { padding-bottom:86px!important; scroll-padding-bottom:86px; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] .layout #list { padding-bottom:6px!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] #list > .row { padding-bottom:86px; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel { padding-bottom:90px!important; scroll-padding-bottom:90px; }
+}
+/** SOFTM-DOCK-OVERLAY END */

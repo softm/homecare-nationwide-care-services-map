@@ -28,7 +28,7 @@
         /** SOFTM-MAP-STYLE START 날짜:20261005 : 기본 실사지도와 아이콘별 기능을 접근성 이름에도 반영 */
         ui.innerHTML = `<div class="care-mobile-focus-top"><form class="care-mobile-focus-search" role="search" aria-label="전체 지도 검색"><button type="button" data-mobile-focus="exit" aria-label="전체 지도 닫기">${svg('back')}</button><input type="search" aria-label="지도에서 지역·기관 검색" placeholder="지역·기관명 검색" autocomplete="off"><button type="button" data-mobile-focus="voice" aria-label="음성검색">${svg('voice')}</button><button type="submit" aria-label="검색">${svg('search')}</button></form><div class="care-mobile-focus-chips"><button type="button" data-mobile-focus="type" aria-haspopup="dialog">${svg('type')}<span data-focus-type>유형 선택 ▾</span></button><button type="button" data-mobile-focus="filter" aria-expanded="false">${svg('filter')}<span data-focus-filter>상세필터</span></button></div></div><div class="care-mobile-focus-side"><button type="button" data-mobile-focus="layers" aria-label="일반지도 보기" aria-pressed="true">${svg('layers')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
         /** SOFTM-MAP-STYLE END */
-        card.querySelector('.map-wrap').append(ui);
+        document.body.append(ui); // SOFTM-DOCK-OVERLAY 날짜:20261005 : 지도 겹침 영역 밖에 두어 메뉴가 목록 위에 실제로 떠 있게 함
         const input = ui.querySelector('input');
         const original = document.getElementById('q');
         const results = document.querySelector('.results');
@@ -134,16 +134,6 @@
         for (const node of [document.querySelector('#areaCount,#filteredCount'), document.querySelector('#careSavedTab [data-saved-count]'), document.querySelector('.care-filter-state-badge')]) {
             if (node) new MutationObserver(update).observe(node, { childList:true, characterData:true, subtree:true, attributes:true });
         }
-        /** SOFTM-MAP-STYLE START 날짜:20261005 : 펼친 시트 실측 높이를 메뉴 위치에 반영해 목록을 가리지 않음 */
-        const syncDock = () => {
-            const panel = body.classList.contains('care-focus-saved') ? saved : body.classList.contains('care-focus-list') ? results : null;
-            const height = enabled && panel ? panel.getBoundingClientRect().height : 0;
-            ui.style.setProperty('--care-focus-panel-height', `${height}px`);
-        };
-        new ResizeObserver(syncDock).observe(results);
-        new ResizeObserver(syncDock).observe(saved);
-        new MutationObserver(syncDock).observe(body, { attributes:true, attributeFilter:['class','data-care-sheet','data-care-workspace'] });
-        /** SOFTM-MAP-STYLE END */
         function enter() {
             enabled = media.matches;
             ui.hidden = !enabled;
