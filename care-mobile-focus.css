@@ -70,7 +70,7 @@
  .care-mobile-focus-dock [data-mobile-focus="saved"] svg { color:#bd7420; }
  .care-mobile-focus-dock [data-mobile-focus="more"] svg { color:#7360b5; }
  .care-mobile-focus-dock [aria-expanded="true"] svg { color:#fff; }
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace] .layout>.results,
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace][data-care-sheet="split"] .layout>.results,
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel { height:400px!important; max-height:calc(100dvh - var(--care-focus-bottom) - 140px - env(safe-area-inset-top))!important; }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="list"] .layout>.results { height:calc(100dvh - var(--care-focus-bottom) - 140px - env(safe-area-inset-top))!important; }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .results .care-sheet-handle { flex-basis:44px; height:44px; min-height:44px; padding:2px 12px 4px; grid-template-rows:6px minmax(0,1fr); }
@@ -101,3 +101,11 @@
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel { padding-bottom:90px!important; scroll-padding-bottom:90px; }
 }
 /** SOFTM-DOCK-OVERLAY END */
+
+/** SOFTM-SHEET-COLLAPSE START 날짜:20261005 : 접힌 목록의 숨긴 본문에 펼침 높이가 남지 않도록 단계별 높이를 마지막에 확정 */
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace]:is([data-care-sheet="map"],[data-care-sheet="focus"]) .layout>.results { height:64px!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace][data-care-sheet].care-sheet-dragging .layout>.results { height:var(--care-focus-drag-size,400px)!important; }
+ body.care-mobile-focus-active.care-focus-list:is([data-care-sheet="map"],[data-care-sheet="focus"]) .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 76px); }
+}
+/** SOFTM-SHEET-COLLAPSE END */
