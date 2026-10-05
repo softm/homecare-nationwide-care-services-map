@@ -4,7 +4,16 @@
     const overlaps = (a,b) => a.left < b.right+6 && a.right+6 > b.left && a.top < b.bottom+6 && a.bottom+6 > b.top;
     const inside = (rect,bounds) => rect.width > 0 && rect.height > 0 && rect.left >= bounds.left+8 && rect.right <= bounds.right-8 && rect.top >= bounds.top+8 && rect.bottom <= bounds.bottom-8;
     const detailLevel = zoom => zoom >= 18 ? 2 : zoom >= 16 ? 1 : 0;
-    const markerScale = zoom => zoom < 14 ? 'dot' : zoom < 16 ? 'pin' : zoom < 18 ? 'name' : 'detail'; // SOFTM-MARKER-SCALE 날짜:20261005 : 축소는 위치점, 중간은 핀, 확대는 이름·상세로 단계화
+    const markerScale = zoom => zoom < 14 ? 'dot' : zoom < 16 ? 'pin' : zoom < 18 ? 'name' : 'detail'; // SOFTM-MARKER-SCALE 날짜:20261005 : 위치점·핀의 크기 단계와 상세 현황 단계를 구분하며 이름은 모든 배율에서 배치
+    /** SOFTM-LABEL-DENSITY START 날짜:20261005 : 이름을 일괄 숨기는 대신 지도 배율·화면 넓이로 표시 밀도만 조절 */
+    function labelBudget(zoom, width, height) {
+        const area = Math.max(0, width) * Math.max(0, height);
+        if (!area) return 0;
+        const spacing = zoom < 12 ? 50000 : zoom < 14 ? 35000 : zoom < 16 ? 24000 : 16000;
+        const limit = zoom < 12 ? 6 : zoom < 14 ? 12 : zoom < 16 ? 24 : 40;
+        return Math.max(1, Math.min(limit, Math.floor(area / spacing)));
+    }
+    /** SOFTM-LABEL-DENSITY END */
     function fitLevel(rects, bounds, obstacles) {
         for (let level=rects.length-1;level>=0;level--) {
             if (inside(rects[level],bounds) && !obstacles.some(other=>overlaps(rects[level],other))) return level;
@@ -31,14 +40,13 @@
             });
             /** SOFTM-MARKER-PLACEMENT END */
             if (!bounds.width || !bounds.height) return;
-            const level = zoom >= 18 ? detailLevel(zoom) : 0; // SOFTM-MARKER-SCALE 날짜:20261005 : 16·17은 기관명만, 18부터 현황을 단계적으로 표시
-            const namesVisible = zoom >= 16; // SOFTM-MARKER-SCALE 날짜:20261005 : 축소 지도는 명칭을 생략하고 선택 기관만 예외로 표시
+            const level = zoom >= 18 ? detailLevel(zoom) : 0; // SOFTM-MARKER-SCALE 날짜:20261005 : 모든 배율에서 기관명, 18부터 현황을 단계적으로 표시
             const intersects = rect => rect.width && rect.height && rect.right > bounds.left && rect.left < bounds.right && rect.bottom > bounds.top && rect.top < bounds.bottom;
             const pins = [...host.querySelectorAll('.map-marker')].map(node=>node.getBoundingClientRect()).filter(intersects);
             const controls = [...host.parentElement.querySelectorAll('.map-controls,.care-region-research,.care-focus-controls button,.care-location-state'), ...root.document.querySelectorAll('.care-mobile-focus:not([hidden]) .care-mobile-focus-top,.care-mobile-focus:not([hidden]) .care-mobile-focus-side,.care-mobile-focus:not([hidden]) .care-mobile-focus-dock,body.care-mobile-focus-active .results')].map(node=>node.getBoundingClientRect()).filter(intersects); // SOFTM-MARKER-SCALE 날짜:20261005 : 지도 밖 레이어로 이동한 검색·메뉴·목록도 기관명 충돌 검사에 포함
             const occupied = new Map(); // SOFTM-MARKER-PLACEMENT 날짜:20260930 : 다른 기관 이름을 먼저 확보한 뒤 정보 확장 때 자신의 영역만 교체
             const candidates = labels.map(label=>({label,selected:!!label.closest('.care-mobile-active-marker'),rects:[]}))
-                .filter(item=>(item.selected || namesVisible) && intersects(item.label.parentElement.getBoundingClientRect()));
+                .filter(item=>intersects(item.label.parentElement.getBoundingClientRect())); // SOFTM-LABEL-DENSITY 날짜:20261005 : 모든 배율에서 미선택 기관명도 배치 후보에 포함
             /** SOFTM-MARKER-PLACEMENT START 날짜:20260930 : 이름만 이동하고 핀의 실제 위치·선택 확대는 보존 */
             candidates.forEach(item=>{
                 const parent = item.label.parentElement;
@@ -62,7 +70,7 @@
             candidates.forEach(item=>item.label.classList.remove(...classes));
             const distance = item => Math.hypot(item.rects[0].left+item.rects[0].width/2-bounds.left-bounds.width/2,item.rects[0].bottom-bounds.top-bounds.height/2);
             candidates.sort((a,b)=>Number(b.selected)-Number(a.selected) || distance(a)-distance(b));
-            let remaining = Math.max(1,Math.min(40,Math.floor(bounds.width*bounds.height/18000)));
+            let remaining = labelBudget(zoom,bounds.width,bounds.height); // SOFTM-LABEL-DENSITY 날짜:20261005 : 축소에서도 이름을 남기고 확대할수록 더 많은 기관명을 배치
             /** SOFTM-MARKER-PLACEMENT START 날짜:20260930 : 위쪽이 막히면 옆·아래를 찾고 모든 기관 이름을 예약한 뒤 남는 공간에 평가·현황을 확장 */
             const obstacles = item => [...pins,...controls,...[...occupied].filter(([other])=>other!==item).map(([,rect])=>rect)];
             for (const item of candidates) {
@@ -94,6 +102,6 @@
         root.naver.maps.Event.addListener(map,'idle',schedule);
         schedule();
     }
-    root.CareMarkerLabels = {mount,detailLevel,fitLevel,markerScale};
+    root.CareMarkerLabels = {mount,detailLevel,fitLevel,markerScale,labelBudget};
 })(globalThis);
 /** SOFTM-MARKER-INSIGHTS END */

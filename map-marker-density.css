@@ -31,3 +31,8 @@ body.care-map-page:not(.care-basket-map) #naverMap[data-marker-scale] .care-mobi
 body.care-map-page:not(.care-basket-map) #naverMap:is([data-marker-scale="pin"],[data-marker-scale="name"],[data-marker-scale="detail"]) .map-marker span,
 body.care-map-page:not(.care-basket-map) #naverMap[data-marker-scale] .care-mobile-active-marker .map-marker span { display:block; }
 /** SOFTM-MARKER-SCALE END */
+
+/** SOFTM-LABEL-DENSITY START 날짜:20261005 : 축소 지도에서도 읽을 수 있는 짧은 두 줄 기관명을 작은 마커 옆에 표시 */
+body.care-map-page #naverMap[data-marker-scale="dot"] .marker-name:is(.care-label-visible,.care-label-measure) { max-width:116px; font-size:11px; line-height:1.3; padding:3px 5px; }
+body.care-map-page #naverMap[data-marker-scale="pin"] .marker-name:is(.care-label-visible,.care-label-measure) { max-width:140px; font-size:12px; }
+/** SOFTM-LABEL-DENSITY END */
