@@ -102,7 +102,7 @@
             const target = detailNavigation[direction];
             return `<button type="button" data-care-detail-step="${direction}" aria-label="${label}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${direction === 'previous' ? '‹ 이전' : '다음 ›'}</button>`; // SOFTM-POPUP-COMPACT 날짜:20260917 : 기관 이동은 접근성 이름을 유지한 짧은 화살표로 표시
         };
-        return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}<small class="care-detail-scroll-hint">정보 더 보기 · 스크롤 ↓</small></span>${button('next', '다음 기관 →')}</nav>`;
+        return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}<small class="care-detail-scroll-hint">좌우로 밀어 이전·다음 · 아래로 스크롤</small></span>${button('next', '다음 기관 →')}</nav>`; // SOFTM-DETAIL-SWIPE 날짜:20261005 : 이전·다음 스와이프와 세로 읽기 방향을 함께 안내
     }
     document.addEventListener('click', event => {
         const button = event.target.closest('[data-care-detail-step]');
@@ -114,6 +114,45 @@
         if (target) state.open(target.i);
     }, true);
     /** SOFTM-DETAIL-NAV END */
+    /** SOFTM-DETAIL-SWIPE START 날짜:20261005 : 세로 읽기·사진 조작과 구분한 좌우 제스처를 기존 이전·다음 기관 이동에 연결 */
+    function swipeStep(dx, dy, elapsed) {
+        if (elapsed > 900 || Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.6) return null;
+        return dx < 0 ? 'next' : 'previous';
+    }
+    let swipe = null, suppressClickUntil = 0, swipeBusyUntil = 0;
+    const swipeHost = target => target.closest?.('#detailSheet');
+    document.addEventListener('pointerdown', event => {
+        if (swipe || event.isPrimary === false) { swipe = null; return; }
+        const host = swipeHost(event.target);
+        if (!host || host.hidden || event.button !== 0 || Date.now() < swipeBusyUntil || !detailNavigation) return;
+        if (event.target.closest('button,a,input,select,textarea,[role="tab"],img,video,canvas,.photo-viewer,[data-photo-index]')) return;
+        for (let node = event.target; node && node !== host; node = node.parentElement) {
+            if (node.scrollWidth > node.clientWidth + 4 && ['auto','scroll'].includes(getComputedStyle(node).overflowX)) return;
+        }
+        swipe = { pointer:event.pointerId, x:event.clientX, y:event.clientY, time:Date.now(), host, state:detailNavigation };
+    }, { passive:true });
+    document.addEventListener('pointermove', event => {
+        if (!swipe || swipe.pointer !== event.pointerId) return;
+        const dx = Math.abs(event.clientX - swipe.x), dy = Math.abs(event.clientY - swipe.y);
+        if (dy > 16 && dy > dx) swipe = null;
+    }, { passive:true });
+    document.addEventListener('pointerup', event => {
+        const start = swipe; swipe = null;
+        if (!start || start.pointer !== event.pointerId || start.host.hidden || start.state !== detailNavigation) return;
+        const step = swipeStep(event.clientX - start.x, event.clientY - start.y, Date.now() - start.time);
+        if (!step) return;
+        suppressClickUntil = Date.now() + 450;
+        const target = start.state[step];
+        if (!target) return;
+        swipeBusyUntil = Date.now() + 650;
+        start.state.open(target.i);
+    }, { passive:true });
+    document.addEventListener('pointercancel', () => { swipe = null; }, { passive:true });
+    document.addEventListener('click', event => {
+        if (Date.now() < suppressClickUntil && swipeHost(event.target)) { event.preventDefault(); event.stopImmediatePropagation(); }
+    }, true);
+    /** SOFTM-DETAIL-SWIPE END */
+
     /** SOFTM-POPUP-CONTEXT START 날짜:20260924 : 화면 크기와 무관하게 닫기·탭을 찾고 긴 제목 아래 판단 정보를 이어서 읽도록 구성 */
     const sheets = new Map();
     function scroller(node) {
@@ -220,6 +259,6 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installDetailResize, { once: true });
     else installDetailResize();
     /** SOFTM-POPUP-CONTEXT END */
-    window.CareDetailLayout = {scroller, refresh, reset, focus, beginInstitution, navigation, address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-POPUP-CONTEXT 날짜:20260924 : 두 지도에서 상세 조작·스크롤·복귀를 같은 경로로 처리
+    window.CareDetailLayout = {swipeStep,scroller, refresh, reset, focus, beginInstitution, navigation, address, listButton, popupButton, shareButton, institutionUrl, links, externalMaps}; // SOFTM-DETAIL-SWIPE 날짜:20261005 : 제스처 판정과 상세 조작을 함께 제공해 회귀 검증
 })();
 /** SOFTM-DETAIL-LAYOUT END */

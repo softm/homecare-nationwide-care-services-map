@@ -169,3 +169,7 @@ body.care-map-page .mobile-popup-sheet[data-detail-expanded="true"] { width:min(
 body.care-map-page .care-detail-scroll-hint { display:block; color:#53695e; font-size:11px; line-height:1.3; }
 body.care-map-page [data-detail-at-top="false"] .care-detail-scroll-hint { display:none; }
 /** SOFTM-POPUP-CONTEXT END */
+
+/** SOFTM-DETAIL-SWIPE START 날짜:20261005 : 가로 기관 넘김은 앱에서 처리하고 세로 스크롤·확대는 브라우저에 유지 */
+#detailSheet .care-detail-scroll, #detailSheet .care-detail-navigation { touch-action:pan-y pinch-zoom; }
+/** SOFTM-DETAIL-SWIPE END */
