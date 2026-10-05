@@ -57,3 +57,20 @@
  body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list > .care-list-scroll-tail { display:none; }
 }
 /** SOFTM-MOBILE-CAROUSEL END */
+
+/** SOFTM-CAROUSEL-FIT START 날짜:20261005 : 한 카드의 연락·상세 행동까지 보이도록 목록 높이를 확보하고 겹치는 전환 버튼을 지도 쪽으로 이동 */
+@media (max-width:1000px) and (orientation:portrait) {
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] { --care-carousel-panel-height:min(320px,calc(100dvh - 270px)); }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"]:not(.care-sheet-dragging):not(.care-map-focus) .layout { grid-template-rows:minmax(0,1fr) var(--care-carousel-panel-height)!important; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"]:not(.care-map-focus) .care-mode-toggle { bottom:calc(var(--care-mobile-tab-space,58px) + var(--care-list-ad-space,0px) + var(--care-carousel-panel-height) + 8px); }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"]:not(.care-map-focus) .care-region-research { left:12px; transform:none; max-width:calc(100% - 184px); padding:8px 10px; font-size:12px; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] .results .care-sheet-handle { flex-basis:44px; height:44px; min-height:44px; padding:2px 12px 4px; grid-template-rows:6px minmax(0,1fr); }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] .layout #list { padding:6px 12px; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list > .row { padding:8px 10px; gap:4px 8px; grid-template-columns:minmax(0,1fr) 56px; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .row > .care-result-photo { width:56px; height:56px; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .row h3 { font-size:15px; line-height:1.35; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .row p { font-size:12px; line-height:1.4; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .care-result-summary { font-size:11px; line-height:1.4; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .row .care-row-actions { margin-top:2px; gap:4px; }
+}
+/** SOFTM-CAROUSEL-FIT END */
