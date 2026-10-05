@@ -63,3 +63,11 @@ test('스크롤 위치가 있는 지도에서도 화면 좌표 기준으로 충�
     assert.equal(fitLevel([rect(308, 208, 500, 300)], shiftedBounds, [rect(450, 250, 550, 350)]), -1);
 });
 /** SOFTM-MARKER-LEVEL-TEST END */
+
+/** SOFTM-MARKER-SCALE START 날짜:20261005 : 배율 경계에서 위치점·핀·이름·상세가 올바르게 전환되는지 검증 */
+test('지도 배율 14·16·18 경계에서 마커 표시 수준을 전환한다', () => {
+    for (const [zoom, expected] of [[7,'dot'],[13.99,'dot'],[14,'pin'],[15.99,'pin'],[16,'name'],[17.99,'name'],[18,'detail'],[19,'detail']]) {
+        assert.equal(CareMarkerLabels.markerScale(zoom), expected);
+    }
+});
+/** SOFTM-MARKER-SCALE END */
