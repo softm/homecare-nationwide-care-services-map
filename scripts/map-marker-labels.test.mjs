@@ -71,3 +71,13 @@ test('지도 배율 14·16·18 경계에서 마커 표시 수준을 전환한다
     }
 });
 /** SOFTM-MARKER-SCALE END */
+
+/** SOFTM-LABEL-DENSITY START 날짜:20261005 : 기본·축소 배율에서 기관명을 전부 숨기는 회귀를 방지 */
+test('모든 배율에서 이름을 허용하고 확대할수록 표시 한도를 늘린다', () => {
+    const budgets = [7,12,14,16,18].map(zoom => CareMarkerLabels.labelBudget(zoom,390,844));
+    assert.ok(budgets.every(value => value > 0));
+    assert.ok(budgets.every((value,index) => !index || value >= budgets[index-1]));
+    assert.equal(CareMarkerLabels.labelBudget(12,0,844),0);
+    assert.ok(CareMarkerLabels.labelBudget(12,1920,1080) <= 12);
+});
+/** SOFTM-LABEL-DENSITY END */
