@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-const context={window:{},document:{addEventListener(){}},navigator:{userAgent:'desktop'},URLSearchParams};
+const context={window:{},document:{readyState:"loading",addEventListener(){}},navigator:{userAgent:'desktop'},URLSearchParams}; // SOFTM-DETAIL-SWIPE 날짜:20261005 : 순수 기능 검사에서는 실제 DOM 초기화를 대기시킴
 vm.runInNewContext(readFileSync(new URL('../care-detail-layout.js',import.meta.url),'utf8'),context);
 const {links,address}=context.window.CareDetailLayout;
 const c={n:'센터 & 분원',a:'서울시 테스트로 3'},point={lat:37.5,lng:127.1};
@@ -63,7 +63,7 @@ test('기관 공유는 기본 공유창 취소를 존중하고 실패 시 링크
   const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'공개 주소',institutionShare:'https://homecare.designboard.net/?institution=1'},querySelector:()=>label};
   const navigator={clipboard:{writeText:async value=>{if(mode==='copy-fail')throw Error();copied=value;}}};
   if(mode==='native-fail'||mode==='cancel')navigator.share=async()=>{const error=Error();error.name=mode==='cancel'?'AbortError':'NotAllowedError';throw error;};
-  const sandbox={window:{},navigator,URLSearchParams,setTimeout(){},document:{addEventListener:(_name,fn)=>{click=fn;}}};
+  const sandbox={window:{},navigator,URLSearchParams,setTimeout(){},document:{readyState:'loading',addEventListener:(name,fn,capture)=>{if(name==='click'&&!capture)click=fn;}} /* SOFTM-DETAIL-SWIPE 날짜:20261005 : 공유 검사는 다른 제스처 이벤트와 분리 */};
   vm.runInNewContext(readFileSync(new URL('../care-detail-layout.js',import.meta.url),'utf8'),sandbox);
   await click({target:{closest:()=>button},preventDefault(){},stopPropagation(){}});
   assert.equal(button.disabled,false);
@@ -78,7 +78,7 @@ test('팝업 상태의 지도 공유는 기관 URL만 전달하고 일반 지도
  const listeners=[];let payload,stopped=false;
  const label={textContent:'공유'};
  const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'주소',institutionShare:'https://homecare.designboard.net/?type=facility&institution=14119001002'},querySelector:()=>label,getClientRects:()=>[{}]};
- const sandbox={window:{},URLSearchParams,setTimeout(){},getComputedStyle:()=>({visibility:'visible'}),navigator:{share:async data=>{payload=data}},document:{addEventListener:(name,fn,capture)=>listeners.push({fn,capture}),querySelectorAll:()=>[button]}};
+ const sandbox={window:{},URLSearchParams,setTimeout(){},getComputedStyle:()=>({visibility:'visible'}),navigator:{share:async data=>{payload=data}},document:{readyState:'loading',addEventListener:(name,fn,capture)=>listeners.push({fn,capture}) /* SOFTM-DETAIL-SWIPE 날짜:20261005 : 실제 DOM 초기화 없이 공유 핸들러만 검사 */,querySelectorAll:()=>[button]}};
  vm.runInNewContext(readFileSync(new URL('../care-detail-layout.js',import.meta.url),'utf8'),sandbox);
  const handler=listeners.find(item=>item.capture).fn;
  handler({target:{closest:()=>true},preventDefault(){},stopImmediatePropagation(){stopped=true}});
@@ -89,3 +89,13 @@ test('팝업 상태의 지도 공유는 기관 URL만 전달하고 일반 지도
  assert.equal(stopped,false);
 });
 /** SOFTM-POPUP-SHARE END */
+
+/** SOFTM-DETAIL-SWIPE START 날짜:20261005 : 짧은 탭·세로 읽기·느린 드래그가 기관을 바꾸지 않도록 경계를 검증 */
+test('좌우로 충분히 민 경우만 이전·다음 기관으로 이동한다', () => {
+ const step=context.window.CareDetailLayout.swipeStep;
+ assert.equal(step(-100,10,250),'next');
+ assert.equal(step(100,-10,250),'previous');
+ for (const [x,y,time] of [[30,0,100],[70,90,300],[80,60,300],[100,0,1000]]) assert.equal(step(x,y,time),null);
+ assert.equal(step(-64,0,900),'next');
+});
+/** SOFTM-DETAIL-SWIPE END */
