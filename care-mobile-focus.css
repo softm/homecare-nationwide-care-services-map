@@ -52,3 +52,41 @@
  .care-mobile-focus-dock svg { width:20px; }
 }
 /** SOFTM-MOBILE-FOCUS END */
+
+/** SOFTM-MAP-STYLE START 날짜:20261005 : 지도 위 검색·색상 도구와 목록 바로 위 메뉴로 탐색 공간을 확보 */
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] { --care-focus-bottom:calc(var(--care-list-ad-space,0px) + env(safe-area-inset-bottom)); }
+ .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + var(--care-focus-panel-height,0px) + 10px); box-shadow:0 4px 20px #143e3b38; border:2px solid #fff; }
+ .care-mobile-focus-search { border:1px solid #e4eae8; box-shadow:0 4px 20px #12362e30; }
+ .care-mobile-focus-search button[type="submit"] { color:#fff; background:#087e74; }
+ .care-mobile-focus-chips button { padding:6px 12px 6px 7px; max-width:70%; font-size:14px; border:1px solid #ffffffb3; }
+ .care-mobile-focus-chips svg { width:24px; height:24px; padding:6px; border-radius:50%; box-sizing:content-box; }
+ .care-mobile-focus-chips [data-mobile-focus="type"] svg { color:#fff; background:linear-gradient(145deg,#20b79a,#07856d); }
+ .care-mobile-focus-chips [data-mobile-focus="filter"] svg { color:#fff; background:linear-gradient(145deg,#a775e7,#7548bf); }
+ .care-mobile-focus-chips span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+ .care-mobile-focus-chips [aria-expanded="true"] { background:#f0e7ff; color:#6536a2; }
+ .care-mobile-focus-side button { color:#2473ee; border:2px solid #fff; }
+ .care-mobile-focus-side button[aria-pressed="true"] { background:#eaf2ff; }
+ .care-mobile-focus-dock [data-mobile-focus="saved"] svg { color:#bd7420; }
+ .care-mobile-focus-dock [data-mobile-focus="more"] svg { color:#7360b5; }
+ .care-mobile-focus-dock [aria-expanded="true"] svg { color:#fff; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace] .layout>.results,
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-saved[data-care-workspace] .layout>.care-saved-panel { height:320px!important; max-height:calc(100dvh - var(--care-focus-bottom) - 210px - env(safe-area-inset-top))!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="list"] .layout>.results { height:calc(100dvh - var(--care-focus-bottom) - 210px - env(safe-area-inset-top))!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .results .care-sheet-handle { flex-basis:44px; height:44px; min-height:44px; padding:2px 12px 4px; grid-template-rows:6px minmax(0,1fr); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-region-research { left:12px!important; right:auto!important; top:calc(138px + env(safe-area-inset-top)); bottom:auto!important; transform:none!important; max-width:calc(100% - 84px); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .care-location-state { top:calc(190px + env(safe-area-inset-top)); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="list"] :is(.map-controls,.care-mobile-focus-side,.care-region-research,.care-location-state) { visibility:hidden; }
+ .care-focus-types > div button { display:flex; align-items:center; gap:8px; padding:10px; text-align:left; word-break:keep-all; }
+ .care-focus-types > div button svg { box-sizing:content-box; flex:none; width:22px; height:22px; padding:5px; border-radius:10px; background:#dff5ed; color:#0b886a; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+ .care-focus-types > div button:nth-child(3n+2) svg { background:#e8e4ff; color:#7751c4; }
+ .care-focus-types > div button:nth-child(3n) svg { background:#fff0dc; color:#c57c20; }
+}
+/** SOFTM-MAP-STYLE END */
+
+/** SOFTM-MAP-STYLE START 날짜:20261005 : 낮은 모바일에서도 지도 확대 버튼과 목록 위 메뉴의 겹침을 방지 */
+@media(max-width:1000px) and (max-height:760px) {
+ .care-mobile-focus-side { top:calc(130px + env(safe-area-inset-top)); }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .map-controls { top:calc(184px + env(safe-area-inset-top))!important; }
+}
+/** SOFTM-MAP-STYLE END */

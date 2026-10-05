@@ -8,6 +8,16 @@
         ui.className = 'care-mobile-focus';
         ui.hidden = true;
         const icons = {
+            /* SOFTM-MAP-STYLE START 날짜:20261005 : 기능을 글자뿐 아니라 색상 아이콘으로 구분 */
+            type: '<path d="M12 20s-8-5-8-11a4 4 0 0 1 8-2 4 4 0 0 1 8 2c0 6-8 11-8 11Z"/><path d="M9 11h6M12 8v6"/>',
+            facility: '<path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7"/>',
+            daycare: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+            bath: '<path d="M12 2s-7 8-7 13a7 7 0 0 0 14 0c0-5-7-13-7-13Z"/>',
+            bed: '<path d="M3 5v16M3 16h18v5M3 9h6v7M9 10h10a2 2 0 0 1 2 2v4"/>',
+            equipment: '<circle cx="10" cy="4" r="2"/><path d="M10 7v7h7l3 6M10 10h6M7 10a6 6 0 1 0 7 9"/>',
+            medical: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z"/>',
+            filter: '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/>',
+            /* SOFTM-MAP-STYLE END */
             back: '<path d="m15 5-7 7 7 7"/>', search: '<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',
             voice: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/>',
             layers: '<path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5"/>',
@@ -15,7 +25,9 @@
             saved: '<path d="M6 3h12v18l-6-4-6 4Z"/>', more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
         };
         const svg = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name]}</svg>`;
-        ui.innerHTML = `<div class="care-mobile-focus-top"><form class="care-mobile-focus-search" role="search" aria-label="전체 지도 검색"><button type="button" data-mobile-focus="exit" aria-label="전체 지도 닫기">${svg('back')}</button><input type="search" aria-label="지도에서 지역·기관 검색" placeholder="지역·기관명 검색" autocomplete="off"><button type="button" data-mobile-focus="voice" aria-label="음성검색">${svg('voice')}</button><button type="submit" aria-label="검색">${svg('search')}</button></form><div class="care-mobile-focus-chips"><button type="button" data-mobile-focus="type" aria-haspopup="dialog">유형 선택 ▾</button><button type="button" data-mobile-focus="filter" aria-expanded="false">상세필터</button></div></div><div class="care-mobile-focus-side"><button type="button" data-mobile-focus="layers" aria-label="위성지도 보기" aria-pressed="false">${svg('layers')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
+        /** SOFTM-MAP-STYLE START 날짜:20261005 : 기본 실사지도와 아이콘별 기능을 접근성 이름에도 반영 */
+        ui.innerHTML = `<div class="care-mobile-focus-top"><form class="care-mobile-focus-search" role="search" aria-label="전체 지도 검색"><button type="button" data-mobile-focus="exit" aria-label="전체 지도 닫기">${svg('back')}</button><input type="search" aria-label="지도에서 지역·기관 검색" placeholder="지역·기관명 검색" autocomplete="off"><button type="button" data-mobile-focus="voice" aria-label="음성검색">${svg('voice')}</button><button type="submit" aria-label="검색">${svg('search')}</button></form><div class="care-mobile-focus-chips"><button type="button" data-mobile-focus="type" aria-haspopup="dialog">${svg('type')}<span data-focus-type>유형 선택 ▾</span></button><button type="button" data-mobile-focus="filter" aria-expanded="false">${svg('filter')}<span data-focus-filter>상세필터</span></button></div></div><div class="care-mobile-focus-side"><button type="button" data-mobile-focus="layers" aria-label="일반지도 보기" aria-pressed="true">${svg('layers')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
+        /** SOFTM-MAP-STYLE END */
         card.querySelector('.map-wrap').append(ui);
         const input = ui.querySelector('input');
         const original = document.getElementById('q');
@@ -52,10 +64,12 @@
             setText('[data-focus-count]', count.replace(/\s*곳$/, ''));
             ui.querySelector('[data-mobile-focus="list"]').setAttribute('aria-label', `검색 결과 ${count} 목록`);
             setText('[data-focus-saved]', String(root.CareMapExperience?.rows().length || 0));
-            setText('[data-mobile-focus="type"]', (document.querySelector('.care-type-menu-item[aria-current="true"]')?.textContent || '유형 선택') + ' ▾');
+            /* SOFTM-MAP-STYLE START 날짜:20261005 : 조건 갱신으로 아이콘이 사라지지 않도록 문구만 변경 */
+            setText('[data-focus-type]', (document.querySelector('.care-type-menu-item[aria-current="true"]')?.textContent || '유형 선택') + ' ▾');
             const filtered = document.querySelector('.care-mobile-filter-toggle')?.classList.contains('has-active-filters');
             const filterCount = document.querySelector('.care-mobile-filter-toggle')?.dataset.filterCount;
-            setText('[data-mobile-focus="filter"]', filtered ? `상세필터 · ${filterCount || '설정됨'}` : '상세필터');
+            setText('[data-focus-filter]', filtered ? `상세필터 · ${filterCount || '설정됨'}` : '상세필터');
+            /* SOFTM-MAP-STYLE END */
             const filterOpen = body.classList.contains('care-mobile-filters-open');
             ui.querySelector('[data-mobile-focus="filter"]').setAttribute('aria-expanded', String(filterOpen));
             if (filterWasOpen && !filterOpen) { input.value = original.value; ui.querySelector('[data-mobile-focus="filter"]').focus({ preventScroll:true }); }
@@ -89,7 +103,12 @@
                 button.setAttribute('aria-label', satellite ? '일반지도 보기' : '위성지도 보기');
             } else if (action === 'type') {
                 const choices = [...document.querySelectorAll('.care-type-menu-item')].map(source => {
-                    const choice = document.createElement('button'); choice.type = 'button'; choice.textContent = source.textContent;
+                    /** SOFTM-MAP-STYLE START 날짜:20261005 : 기관 유형을 집·햇살·방문돌봄 등 의미 있는 그림으로 구분 */
+                    const choice = document.createElement('button'); choice.type = 'button';
+                    const typeIcons = {facility:'facility',daycare:'daycare','home-care':'type','home-nursing':'medical','home-bath':'bath','short-stay':'bed','welfare-equipment':'equipment',dementia:'type','nursing-hospital':'medical'};
+                    choice.innerHTML = svg(typeIcons[source.dataset.typeMenu] || 'type');
+                    const label = document.createElement('span'); label.textContent = source.textContent; choice.append(label);
+                    /** SOFTM-MAP-STYLE END */
                     choice.setAttribute('aria-pressed', String(source.getAttribute('aria-current') === 'true'));
                     choice.onclick = () => {
                         types.close();
@@ -115,6 +134,16 @@
         for (const node of [document.querySelector('#areaCount,#filteredCount'), document.querySelector('#careSavedTab [data-saved-count]'), document.querySelector('.care-filter-state-badge')]) {
             if (node) new MutationObserver(update).observe(node, { childList:true, characterData:true, subtree:true, attributes:true });
         }
+        /** SOFTM-MAP-STYLE START 날짜:20261005 : 펼친 시트 실측 높이를 메뉴 위치에 반영해 목록을 가리지 않음 */
+        const syncDock = () => {
+            const panel = body.classList.contains('care-focus-saved') ? saved : body.classList.contains('care-focus-list') ? results : null;
+            const height = enabled && panel ? panel.getBoundingClientRect().height : 0;
+            ui.style.setProperty('--care-focus-panel-height', `${height}px`);
+        };
+        new ResizeObserver(syncDock).observe(results);
+        new ResizeObserver(syncDock).observe(saved);
+        new MutationObserver(syncDock).observe(body, { attributes:true, attributeFilter:['class','data-care-sheet','data-care-workspace'] });
+        /** SOFTM-MAP-STYLE END */
         function enter() {
             enabled = media.matches;
             ui.hidden = !enabled;

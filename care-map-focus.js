@@ -8,7 +8,9 @@
   const icons={back:'<path d="m15 5-7 7 7 7"/>',search:'<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',layers:'<path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5"/>',saved:'<path d="M6 3h12v18l-6-4-6 4Z"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1"/>'};
   const button=(action,label,icon)=>`<button type="button" data-focus="${action}" aria-label="${label}" title="${label}"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[icon]}</svg><span>${label}</span></button>`;
   const controls=document.createElement('div');controls.className='care-focus-controls';controls.hidden=true;
-  controls.innerHTML=`<div class="care-focus-top">${button('exit','전체 지도 닫기','back')}${button('search','지역·기관 검색','search')}</div><div class="care-focus-side">${button('layers','위성지도 보기','layers')}${button('saved','담은 기관','saved')}</div><div class="care-focus-bottom">${button('list','목록 보기','list')}</div>`;
+  /* SOFTM-MAP-STYLE START 날짜:20261005 : 기본 혼합지도에서 일반지도 전환 동작을 정확히 안내 */
+  controls.innerHTML=`<div class="care-focus-top">${button('exit','전체 지도 닫기','back')}${button('search','지역·기관 검색','search')}</div><div class="care-focus-side">${button('layers','일반지도 보기','layers')}${button('saved','담은 기관','saved')}</div><div class="care-focus-bottom">${button('list','목록 보기','list')}</div>`;
+  /* SOFTM-MAP-STYLE END */
   card.querySelector('.map-wrap').append(controls);
   const dialog=document.createElement('dialog');dialog.className='care-focus-dialog';dialog.innerHTML='<header><h2></h2><button type="button" aria-label="지도 도구 닫기">×</button></header><div class="care-focus-content"></div>';document.body.append(dialog);
   function closePanel(){if(moved){moved.placeholder.replaceWith(moved.node);if(moved.node.classList.contains('care-focus-search'))moved.node.hidden=true;moved=null}if(dialog.open)dialog.close();}
@@ -55,6 +57,20 @@
   dialog.addEventListener('click',e=>{if(e.target.closest('.row')&&!e.target.closest('button,a,input,label')||e.target.closest('[data-saved-detail]'))closePanel()});
   const entry=document.createElement('button');entry.type='button';entry.className='care-focus-entry';entry.textContent='전체 지도';entry.setAttribute('aria-label','전체 지도 열기');entry.onclick=enter;card.querySelector('.map-head-actions').insertBefore(entry,card.querySelector('#shareBtn')); // SOFTM-MAP-SHARE-ORDER 날짜:20260914 : 키보드 이동도 전체 위치·전체 지도·공유의 화면 순서를 따르도록 배치
   mobile=root.CareMobileFocus?.mount({card,config,enter,leave}); // SOFTM-MOBILE-FOCUS 날짜:20261003 : 검색·목록·담은 기관의 기존 동작을 모바일 전용 배치에서 재사용
+  /** SOFTM-MAP-DEFAULT START 날짜:20261005 : 모바일 첫 지도와 목록모드 복귀를 떠 있는 검색·가로 목록으로 통일 */
+  let defaultPending = true;
+  const openDefault = () => {
+   if (!defaultPending || !matchMedia('(max-width:1000px)').matches || document.body.dataset.careMode !== 'map' || !config.ready()) return;
+   defaultPending = false;
+   enter();
+   if (document.body.dataset.careWorkspace !== 'saved') { config.results(); document.body.classList.add('care-focus-list'); }
+  };
+  new MutationObserver(records => {
+   if (records.some(record => record.attributeName === 'data-care-mode') && document.body.dataset.careMode === 'map') defaultPending = true;
+   openDefault();
+  }).observe(document.body, {attributes:true, attributeFilter:['class','data-care-mode']});
+  root.setTimeout(openDefault, 0);
+  /** SOFTM-MAP-DEFAULT END */
   return {enter,leave,active:()=>active}; // SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 전체보기 상태를 외부 기능과 회귀검사에서 확인
  }
  root.CareMapFocus={mount,isTap,focusAction}; // SOFTM-MAP-FOCUS-TOGGLE 날짜:20260914 : 짧은 탭과 열기·닫기 상태 판정을 회귀검사에서 직접 확인
