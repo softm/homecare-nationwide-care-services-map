@@ -57,13 +57,13 @@
   dialog.addEventListener('click',e=>{if(e.target.closest('.row')&&!e.target.closest('button,a,input,label')||e.target.closest('[data-saved-detail]'))closePanel()});
   const entry=document.createElement('button');entry.type='button';entry.className='care-focus-entry';entry.textContent='전체 지도';entry.setAttribute('aria-label','전체 지도 열기');entry.onclick=enter;card.querySelector('.map-head-actions').insertBefore(entry,card.querySelector('#shareBtn')); // SOFTM-MAP-SHARE-ORDER 날짜:20260914 : 키보드 이동도 전체 위치·전체 지도·공유의 화면 순서를 따르도록 배치
   mobile=root.CareMobileFocus?.mount({card,config,enter,leave}); // SOFTM-MOBILE-FOCUS 날짜:20261003 : 검색·목록·담은 기관의 기존 동작을 모바일 전용 배치에서 재사용
-  /** SOFTM-MAP-DEFAULT START 날짜:20261005 : 모바일 첫 지도와 목록모드 복귀를 떠 있는 검색·가로 목록으로 통일 */
+  /** SOFTM-MAP-DEFAULT START 날짜:20261005 : 모바일 첫 지도는 목록 손잡이 없이 검색과 하단 메뉴만 표시 */
   let defaultPending = true;
   const openDefault = () => {
    if (!defaultPending || !matchMedia('(max-width:1000px)').matches || document.body.dataset.careMode !== 'map' || !config.ready()) return;
    defaultPending = false;
    enter();
-   if (document.body.dataset.careWorkspace !== 'saved') { config.results('focus'); document.body.classList.add('care-focus-list'); } // SOFTM-MAP-INITIAL 날짜:20261005 : 첫 화면은 검색결과 손잡이만 보이는 지도 집중 상태로 시작
+   if (document.body.dataset.careWorkspace !== 'saved') document.body.classList.remove('care-focus-list'); // SOFTM-MAP-INITIAL 날짜:20261005 : 목록 버튼을 누르기 전에는 손잡이와 결과 영역을 모두 숨김
   };
   new MutationObserver(records => {
    if (records.some(record => record.attributeName === 'data-care-mode') && document.body.dataset.careMode === 'map') defaultPending = true;
