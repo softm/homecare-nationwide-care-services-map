@@ -250,6 +250,7 @@
         dock.querySelector('[data-saved-count]').textContent = selected.length; // SOFTM-TAB-FEEDBACK 날짜:20260905 : 반복 갱신에서도 숫자 강조 요소를 유지
         dock.hidden = !selected.length || workspace !== 'search';
         document.body.classList.toggle('has-care-dock', !!selected.length && workspace === 'search');
+        document.querySelectorAll('[data-row-saved]').forEach(node => { node.hidden = !basket.has(node.dataset.rowSaved); }); // SOFTM-ROW-SAVED 날짜:20261007 : 담기·해제와 재렌더 뒤 바로가기 노출을 동기화
         document.querySelectorAll('.care-basket-button[data-care-basket]').forEach(node => {
             const active = basket.has(node.dataset.careBasket), row = rowById.get(node.dataset.careBasket);
             node.setAttribute('aria-pressed', String(active));

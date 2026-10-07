@@ -116,7 +116,7 @@
  body.care-mobile-focus-active:is(.care-focus-list,.care-focus-saved) .care-mobile-focus-dock button[aria-expanded="true"] { background:#dceae4b3; color:#245a50; }
  body.care-mobile-focus-active:is(.care-focus-list,.care-focus-saved) .care-mobile-focus-dock [aria-expanded="true"] svg { color:inherit; }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list .layout #list { padding-bottom:64px!important; scroll-padding-bottom:64px; }
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] #list > .row { padding-bottom:12px; align-self:flex-start; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] #list > .row { padding-bottom:12px; align-self:flex-start; max-height:100%; box-sizing:border-box; }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] .layout #list { padding-bottom:64px!important; }
  body.care-mobile-focus-active.care-focus-list:is([data-care-sheet="map"],[data-care-sheet="focus"]) .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 68px); }
 }

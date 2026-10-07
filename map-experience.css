@@ -888,3 +888,8 @@ dialog.care-location-notice .care-location-actions button { width:100%; }
 .care-map-page .marker-name { position:absolute; left:50%; bottom:calc(100% + 7px); transform:translateX(-50%); width:max-content; max-width:180px; padding:4px 7px; border:1px solid #b8c9d9; border-radius:6px; background:#fff; color:#183550; font-size:12px; font-weight:700; line-height:1.35; text-align:center; white-space:normal; overflow-wrap:anywhere; box-shadow:0 2px 5px #14283e26; }
 .care-map-page .care-mobile-active-marker .marker-name { border-color:#175cb5; color:#175cb5; }
 /** SOFTM-MARKER-NAME END */
+
+/** SOFTM-ROW-SAVED START 날짜:20261007 : 담기 해제와 보기를 구분하면서 카드 높이 증가를 최소화 */
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-row-saved-link { order:10; flex:1 0 100%; grid-column:1 / -1; justify-self:end; width:auto; min-height:44px; padding:4px 0; border:0; background:transparent; color:#176d60; text-align:right; font-size:13px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-row-saved-link[hidden] { display:none; }
+/** SOFTM-ROW-SAVED END */
