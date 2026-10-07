@@ -90,6 +90,30 @@
   const panel=document.createElement('section');panel.id='careTypePanel';panel.className='care-type-panel';panel.hidden=true;panel.setAttribute('aria-labelledby','careTypeTitle');
   panel.innerHTML='<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header><p class="care-type-intro">필요한 돌봄을 고르면 지도에서 기관을 보여드려요.</p><div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="true">주요 유형만 보기</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>'; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 추가 조작 없이 모든 기관 유형을 먼저 비교할 수 있도록 기본 펼침 상태 제공
   document.querySelector('.results').append(panel);
+  /** SOFTM-TYPE-OVERLAY START 날짜:20261007 : 지도와 광고 사이의 실제 가용 영역 중앙에 유형 선택을 배치 */
+  let overlayFrame=0;
+  function positionPanel(){
+   cancelAnimationFrame(overlayFrame);
+   overlayFrame=requestAnimationFrame(()=>{
+    const isMap=document.body.dataset.careMode==='map';
+    const host=isMap?document.body:document.querySelector('.results');
+    if(panel.parentElement!==host)host.append(panel);
+    panel.classList.toggle('care-type-map-overlay',isMap);
+    if(!isMap||panel.hidden)return;
+    const rect=document.querySelector('#naverMap').getBoundingClientRect();
+    const ad=document.querySelector('.care-list-ad-zone:not([hidden])');
+    const top=Math.max(0,rect.top),bottom=Math.min(root.innerHeight,rect.bottom,ad?ad.getBoundingClientRect().top:root.innerHeight);
+    panel.style.setProperty('--type-center-x',`${rect.left+rect.width/2}px`);
+    panel.style.setProperty('--type-center-y',`${top+(bottom-top)/2}px`);
+    panel.style.setProperty('--type-space',`${Math.max(0,bottom-top-24)}px`);
+    panel.style.setProperty('--type-width',`${Math.max(0,rect.width-24)}px`);
+   });
+  }
+  new MutationObserver(positionPanel).observe(document.body,{attributes:true,attributeFilter:['class','data-care-mode']});
+  if(root.ResizeObserver){const observer=new ResizeObserver(positionPanel);observer.observe(document.querySelector('#naverMap'));}
+  root.addEventListener('resize',positionPanel);
+  positionPanel();
+  /** SOFTM-TYPE-OVERLAY END */
   const list=panel.querySelector('.care-type-options');
   for(const [id,title,official,description,icon,color]of categories){
    const button=document.createElement('button');button.type='button';button.className='care-type-option '+color;button.dataset.type=id;button.hidden=false; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 유형 패널을 열면 9개 기관 유형을 처음부터 모두 표시

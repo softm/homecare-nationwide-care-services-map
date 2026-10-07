@@ -91,3 +91,14 @@
  .care-type-option small{font-size:16px;line-height:1.4;font-weight:800}
 }
 /** SOFTM-MOBILE-CATEGORY-FONT END */
+
+/** SOFTM-TYPE-OVERLAY START 날짜:20261007 : 유형 선택이 지도를 아래로 밀지 않도록 지도 중앙의 독립 스크롤 오버레이로 표시 */
+body.stitch-desktop.care-map-page.care-type-open[data-care-mode="map"][data-care-workspace="search"] .layout { grid-template-rows:minmax(0,1fr)!important; }
+body.stitch-desktop.care-map-page.care-type-open[data-care-mode="map"][data-care-workspace="search"] .layout>.results { display:none!important; }
+body .care-type-panel.care-type-map-overlay { position:fixed; z-index:190; left:var(--type-center-x,50%); top:var(--type-center-y,50%); transform:translate(-50%,-50%); width:min(480px,var(--type-width,calc(100vw - 24px))); height:auto; max-height:min(520px,calc(var(--type-space,70dvh) * .85)); box-sizing:border-box; padding:18px; border:1px solid #d5e3df; border-radius:22px; box-shadow:0 12px 40px #173b3740; }
+body.care-type-expanded .care-type-panel.care-type-map-overlay { max-height:var(--type-space,85dvh); }
+body .care-type-map-overlay header { position:sticky; top:-18px; z-index:1; background:#fff; padding-block:8px; }
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"] { --care-mobile-tab-space:0px; }
+}
+/** SOFTM-TYPE-OVERLAY END */
