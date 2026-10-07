@@ -408,3 +408,14 @@ body.stitch-desktop .care-results-more { display:block; width:calc(100% - 48px);
  body.stitch-desktop .row .care-row-actions > :is(.stitch-phone,.stitch-detail) { min-height:38px; }
 }
 /** SOFTM-SIDEBAR-LIST-DENSITY END */
+
+/** SOFTM-COMPARE-SAVED START 날짜:20261007 : 비교함 이동을 비교표 열기와 구분하고 좁은 팝업에서도 모든 행동을 표시 */
+body.stitch-desktop .stitch-compare-tray [data-stitch-saved] { background:#e5f4f0; color:#004541; border:1px solid #b9d8cf; }
+body.stitch-desktop .compare-actions { flex-wrap:wrap; }
+@media(min-width:1001px) { body.stitch-desktop .stitch-compare-tray:not([hidden]) { bottom:max(24px,calc(var(--care-list-ad-space,0px) + 12px)); } }
+@media(max-width:640px) {
+ body.stitch-desktop .compare-head { gap:8px; }
+ body.stitch-desktop .compare-actions { width:100%; }
+ body.stitch-desktop .compare-actions [data-stitch-saved] { margin-right:auto; }
+}
+/** SOFTM-COMPARE-SAVED END */

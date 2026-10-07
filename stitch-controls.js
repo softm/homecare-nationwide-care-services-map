@@ -61,8 +61,17 @@
         syncFilters();
         /** SOFTM-FILTER-DESIGN END */
         const tray = document.createElement('section'); tray.className = 'stitch-compare-tray'; tray.setAttribute('aria-label', '비교함 요약');
-        tray.innerHTML = '<span class="stitch-tray-icon" aria-hidden="true">⚖</span><div class="stitch-tray-copy"><strong></strong><p></p></div><button type="button" data-basket-open>선택기관 비교표 보기</button><button type="button" data-basket-clear>비우기</button>';
+        tray.innerHTML = '<span class="stitch-tray-icon" aria-hidden="true">⚖</span><div class="stitch-tray-copy"><strong></strong><p></p></div><button type="button" data-stitch-saved>담은 비교함 보기</button><button type="button" data-basket-open>선택기관 비교표 보기</button><button type="button" data-basket-clear>비우기</button>'; // SOFTM-COMPARE-SAVED 날짜:20261007 : 비교표를 열지 않고도 담은 기관을 확인할 수 있도록 바로가기 제공
         document.body.append(tray);
+        /** SOFTM-COMPARE-SAVED START 날짜:20261007 : 비교 안내와 비교표에서 담은 기관 목록으로 곧바로 돌아가도록 같은 작업 전환 사용 */
+        document.querySelectorAll('[data-stitch-saved]').forEach(button => {
+            button.onclick = () => {
+                if (!document.getElementById('compareLayer').hidden) document.getElementById('compareClose').click();
+                document.getElementById('careSavedTab').click();
+                requestAnimationFrame(() => document.querySelector('#careSavedPanel .care-saved-heading h2')?.focus({ preventScroll: true }));
+            };
+        });
+        /** SOFTM-COMPARE-SAVED END */
         const shortcut = document.createElement('button'); shortcut.type = 'button'; shortcut.className = 'stitch-saved-shortcut'; shortcut.dataset.workspace = 'saved';
         document.querySelector('.select-tools').append(shortcut);
         const syncBasket = () => {
