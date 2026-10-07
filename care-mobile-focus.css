@@ -115,9 +115,9 @@
  body.care-mobile-focus-active:is(.care-focus-list,.care-focus-saved) .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 2px); background:#f4f8f599; border-color:#ffffff80; box-shadow:none; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
  body.care-mobile-focus-active:is(.care-focus-list,.care-focus-saved) .care-mobile-focus-dock button[aria-expanded="true"] { background:#dceae4b3; color:#245a50; }
  body.care-mobile-focus-active:is(.care-focus-list,.care-focus-saved) .care-mobile-focus-dock [aria-expanded="true"] svg { color:inherit; }
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list .layout #list { padding-bottom:64px!important; scroll-padding-bottom:64px; }
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] #list > .row { padding-bottom:12px; align-self:flex-start; max-height:100%; box-sizing:border-box; }
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] .layout #list { padding-bottom:64px!important; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list .layout #list { padding-bottom:6px!important; scroll-padding-bottom:64px; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] #list > .row { padding-bottom:68px; align-self:stretch; height:100%; max-height:100%; box-sizing:border-box; }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-sheet="split"] .layout #list { padding-bottom:6px!important; }
  body.care-mobile-focus-active.care-focus-list:is([data-care-sheet="map"],[data-care-sheet="focus"]) .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 68px); }
 }
 /** SOFTM-DOCK-COMPACT END */
@@ -149,3 +149,15 @@
  body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"] .care-saved-heading { display:flex!important; }
 }
 /** SOFTM-SAVED-FULL END */
+
+/** SOFTM-LIST-OVERLAY START 날짜:20261007 : 메뉴용 바깥 여백 없이 카드 위에 겹치고 광고는 기관 카드와 같은 높이 안에서 표시 */
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"].care-focus-list[data-care-workspace][data-care-sheet="split"]:not(.care-sheet-dragging) .layout>.results { height:360px!important; }
+ body.care-mobile-focus-active.care-focus-list .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 8px); }
+ body.care-mobile-focus-active.care-focus-list:is([data-care-sheet="map"],[data-care-sheet="focus"]) .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 68px); }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list > :is(.list-ad-slot,.partner-list-ad) { box-sizing:border-box; align-self:stretch; height:100%; min-height:0; max-height:100%; padding:10px 10px 68px; overflow-y:auto; justify-content:flex-start; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .list-ad-slot > .partner-list-ad { box-sizing:border-box; flex:none; width:100%; margin:0; padding:12px; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .partner-list-ad :is(p,small) { font-size:12px; line-height:1.4; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .list-ad-slot > :is(ins,iframe) { flex-shrink:0; }
+}
+/** SOFTM-LIST-OVERLAY END */
