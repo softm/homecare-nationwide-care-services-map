@@ -419,3 +419,11 @@ body.stitch-desktop .compare-actions { flex-wrap:wrap; }
  body.stitch-desktop .compare-actions [data-stitch-saved] { margin-right:auto; }
 }
 /** SOFTM-COMPARE-SAVED END */
+
+/** SOFTM-PC-BRAND-ICON START 날짜:20261007 : PC 상단 브랜드에 서비스 아이콘을 나란히 표시 */
+.stitch-brand-icon { display:none; }
+@media(min-width:1001px) {
+ body.stitch-desktop .stitch-brand { flex-direction:row; align-items:center; gap:9px; }
+ body.stitch-desktop .stitch-brand-icon { display:block; width:36px; height:36px; flex:none; object-fit:contain; border-radius:8px; }
+}
+/** SOFTM-PC-BRAND-ICON END */
