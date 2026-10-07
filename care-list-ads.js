@@ -29,22 +29,29 @@
         }
     }
 
+    /** SOFTM-ANCHOR-REAL-AD START 날짜:20261007 : 광고 전용 지면에서 미노출을 제휴 안내로 바꾸지 않고 사용 공간을 반환 */
     function showFallback() {
         root.clearTimeout(timeout);
         failed = true;
         if (mountElement) mountElement.remove();
-        fallback.hidden = false;
-        host.dataset.state = 'direct';
+        fallback.hidden = config.mode === 'kakao';
+        host.dataset.state = fallback.hidden ? 'empty' : 'direct';
+        if (fallback.hidden) zone.hidden = true;
         syncSpace();
     }
+    /** SOFTM-ANCHOR-REAL-AD END */
 
     function requestAd() {
         if (attempted || zone.hidden || !isExpanded() || root.document.hidden || config.mode === 'direct') return; // SOFTM-LIST-AD-READING 날짜:20260930 : 자동 접힌 동안에는 광고를 새로 요청하지 않음
         const slot = desktop.matches ? config.kakao?.desktop : config.kakao?.mobile;
         const expected = desktop.matches ? [728, 90] : [320, 100];
         const unit = String(slot?.unit || '').trim();
-        if (!/^DAN-[A-Za-z0-9]+$/.test(unit) || slot.width !== expected[0] || slot.height !== expected[1]) return;
-        if (host.clientWidth < slot.width) return;
+        /** SOFTM-ANCHOR-REAL-AD START 날짜:20261007 : 유효하지 않은 실제 광고 영역을 빈 배너로 남기지 않음 */
+        if (!/^DAN-[A-Za-z0-9]+$/.test(unit) || slot.width !== expected[0] || slot.height !== expected[1] || host.clientWidth < slot.width) {
+            if (config.mode === 'kakao') showFallback();
+            return;
+        }
+        /** SOFTM-ANCHOR-REAL-AD END */
         attempted = true;
         requestedDesktop = desktop.matches;
         slotWidth = slot.width;
@@ -57,6 +64,7 @@
         ad.dataset.adWidth = String(slot.width);
         ad.dataset.adHeight = String(slot.height);
         ad.dataset.adOnfail = 'careListAnchorAdFailed';
+        ad.dataset.adOnload = 'careListAnchorAdLoaded'; // SOFTM-ANCHOR-AD-LOAD 날짜:20261007 : 정상 수신한 광고는 대기 시간과 무관하게 유지
         ad.dataset.adfitReady = '1';
         mountElement.appendChild(ad);
         host.appendChild(mountElement);
@@ -69,7 +77,21 @@
         script.charset = 'utf-8';
         script.src = config.kakao.script;
         script.onerror = showFallback;
-        timeout = root.setTimeout(() => { if (!mountElement.querySelector('iframe')) showFallback(); }, 10000);
+        /** SOFTM-ANCHOR-AD-LOAD START 날짜:20261007 : 느린 SDK 다운로드를 광고 응답 시간에 포함해 조기에 광고를 제거하지 않음 */
+        let loaded = false;
+        root.careListAnchorAdLoaded = loadedAd => {
+            if (loadedAd !== ad || failed) return;
+            loaded = true;
+            root.clearTimeout(timeout);
+        };
+        const waitForAd = () => {
+            root.clearTimeout(timeout);
+            if (loaded || failed) return;
+            timeout = root.setTimeout(() => { if (!mountElement.querySelector('iframe')) showFallback(); }, 30000);
+        };
+        script.onload = waitForAd;
+        waitForAd();
+        /** SOFTM-ANCHOR-AD-LOAD END */
         root.document.body.appendChild(script);
     }
 
@@ -77,7 +99,7 @@
         if (!zone) return;
         const isList = options.isList ? options.isList() : root.document.body.dataset.careMode === 'list';
         /** SOFTM-MAP-ANCHOR-ADS START 날짜:20260930 : 두 모드에서 단일 광고와 접힘 선택을 공유하고 실제 문의 위치를 전달 */
-        zone.hidden = config.enabled === false || config.mode === 'off';
+        zone.hidden = config.enabled === false || config.mode === 'off' || (config.mode === 'kakao' && failed); // SOFTM-ANCHOR-REAL-AD 날짜:20261007 : 모드 전환이 미노출 지면을 다시 펼치지 않도록 유지
         zone.setAttribute('aria-label', isList ? '목록 하단 광고' : '지도 하단 광고');
         inquiry.dataset.partnerPlacement = isList ? '목록모드 하단 고정' : '지도모드 하단 고정';
         /** SOFTM-MAP-ANCHOR-ADS END */
@@ -136,8 +158,9 @@
         panel.id = 'careListAdPanel';
         host = element('div', 'care-list-ad-host');
         host.id = 'careListAdHost';
-        host.dataset.state = 'direct';
+        host.dataset.state = config.mode === 'kakao' ? 'loading' : 'direct'; // SOFTM-ANCHOR-REAL-AD 날짜:20261007 : 요청 전에도 제휴 안내가 잠깐 보이지 않도록 상태 분리
         fallback = element('div', 'care-list-ad-house');
+        fallback.hidden = config.mode === 'kakao'; // SOFTM-ANCHOR-REAL-AD 날짜:20261007 : 하단 광고 전용 설정은 대체 배너를 표시하지 않음
         const copy = element('div', 'care-list-ad-copy');
         copy.appendChild(element('strong', '', '돌봄 서비스를 알려보세요'));
         copy.appendChild(element('span', '', '요양·돌봄 사업자를 위한 광고·제휴 안내'));

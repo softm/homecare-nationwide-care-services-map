@@ -118,6 +118,7 @@
   for(const [id,title,official,description,icon,color]of categories){
    const button=document.createElement('button');button.type='button';button.className='care-type-option '+color;button.dataset.type=id;button.hidden=false; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 유형 패널을 열면 9개 기관 유형을 처음부터 모두 표시
    button.innerHTML=`<span class="care-type-icon" aria-hidden="true">${icon}</span><span><strong>${title}</strong><small>${official}</small><span>${description}</span></span><span aria-hidden="true">›</span>`;
+   button.classList.toggle('care-type-simple',title===official); // SOFTM-TYPE-SPACE 날짜:20261007 : 같은 유형명을 두 줄로 반복하지 않아 선택 목록의 공간을 확보
    button.onclick=()=>selectType(id);list.append(button); // SOFTM-TYPE-MENU 날짜:20260911 : 상단 메뉴와 카드의 유형 전환 동작을 통일
   }
   const expandButton=panel.querySelector('.care-type-expand');panel.querySelector('header').insertBefore(expandButton,panel.querySelector('[data-close]'));
