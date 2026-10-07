@@ -174,3 +174,9 @@
  body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"] .care-saved-more { display:none; }
 }
 /** SOFTM-ROUTE-MAP END */
+
+/** SOFTM-MAP-SHARE START 날짜:20261007 : 지도 변경 위치는 유지하고 공유를 그 위에 독립 배치 */
+@media (max-width:1000px) {
+ .care-mobile-focus-side [data-mobile-focus="share"] { position:absolute; right:0; bottom:calc(100% + 8px); background:#fff; color:#087e78; }
+}
+/** SOFTM-MAP-SHARE END */
