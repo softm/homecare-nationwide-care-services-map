@@ -114,15 +114,45 @@
         if (target) state.open(target.i);
     }, true);
     /** SOFTM-DETAIL-NAV END */
-    /** SOFTM-DETAIL-SWIPE START 날짜:20261005 : 세로 읽기·사진 조작과 구분한 좌우 제스처를 기존 이전·다음 기관 이동에 연결 */
+    /** SOFTM-DETAIL-SWIPE START 날짜:20261007 : 옆 기관의 실제 요약과 손가락을 따라오는 카드로 가로 탐색을 드러냄 */
     function swipeStep(dx, dy, elapsed) {
-        if (elapsed > 900 || Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.6) return null;
+        if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.6) return null;
         return dx < 0 ? 'next' : 'previous';
     }
     let swipe = null, suppressClickUntil = 0, swipeBusyUntil = 0;
     const swipeHost = target => target.closest?.('#detailSheet');
+    function moveCard(host, dx, dragging = false) {
+        host.classList.toggle('care-detail-dragging', dragging);
+        host.style.translate = `${dx}px 0`;
+        document.querySelectorAll('.care-detail-peek').forEach(card => {
+            card.classList.toggle('care-detail-dragging', dragging);
+            card.style.translate = `${dx}px 0`;
+        });
+    }
+    function syncPeeks() {
+        const host = document.querySelector('#detailSheet');
+        if (!host) return;
+        const visible = !host.hidden && getComputedStyle(host).visibility !== 'hidden' && innerWidth <= 1000;
+        const rect = {left:host.offsetLeft, right:host.offsetLeft+host.offsetWidth, top:host.offsetTop, width:host.offsetWidth, height:host.offsetHeight};
+        for (const direction of ['previous','next']) {
+            let card = document.querySelector(`.care-detail-peek[data-direction="${direction}"]`);
+            if (!card) {
+                card = document.createElement('aside');
+                card.className = 'care-detail-peek'; card.dataset.direction = direction;
+                card.setAttribute('aria-hidden','true'); document.body.append(card);
+            }
+            const row = detailNavigation?.[direction];
+            card.hidden = !visible || !row;
+            if (!row) continue;
+            card.innerHTML = `<small>${direction === 'previous' ? '이전 기관' : '다음 기관'}</small><strong>${escape(row.n)}</strong><p>${escape(row.a || '')}</p>`;
+            card.style.width = `${rect.width}px`;
+            card.style.height = `${rect.height}px`;
+            card.style.top = `${rect.top}px`;
+            card.style.left = `${direction === 'previous' ? rect.left - rect.width - 8 : rect.right + 8}px`;
+        }
+    }
     document.addEventListener('pointerdown', event => {
-        if (swipe || event.isPrimary === false) { swipe = null; return; }
+        if (swipe || event.isPrimary === false) { if(swipe) moveCard(swipe.host,0); swipe = null; return; }
         const host = swipeHost(event.target);
         if (!host || host.hidden || event.button !== 0 || Date.now() < swipeBusyUntil || !detailNavigation) return;
         if (event.target.closest('button,a,input,select,textarea,[role="tab"],img,video,canvas,.photo-viewer,[data-photo-index]')) return;
@@ -133,21 +163,33 @@
     }, { passive:true });
     document.addEventListener('pointermove', event => {
         if (!swipe || swipe.pointer !== event.pointerId) return;
-        const dx = Math.abs(event.clientX - swipe.x), dy = Math.abs(event.clientY - swipe.y);
-        if (dy > 16 && dy > dx) swipe = null;
-    }, { passive:true });
+        const dx = event.clientX - swipe.x, dy = event.clientY - swipe.y;
+        if (!swipe.locked && Math.abs(dy) > 16 && Math.abs(dy) > Math.abs(dx)) { moveCard(swipe.host,0); swipe = null; return; }
+        if (!swipe.locked && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)*1.6) {
+            swipe.locked = true;
+            swipe.host.setPointerCapture?.(event.pointerId);
+        }
+        if (!swipe.locked) return;
+        event.preventDefault();
+        const available = swipe.state[dx < 0 ? 'next' : 'previous'];
+        moveCard(swipe.host, available ? dx : dx * .2, true);
+    }, { passive:false });
     document.addEventListener('pointerup', event => {
         const start = swipe; swipe = null;
-        if (!start || start.pointer !== event.pointerId || start.host.hidden || start.state !== detailNavigation) return;
-        const step = swipeStep(event.clientX - start.x, event.clientY - start.y, Date.now() - start.time);
-        if (!step) return;
-        suppressClickUntil = Date.now() + 450;
-        const target = start.state[step];
-        if (!target) return;
-        swipeBusyUntil = Date.now() + 650;
-        start.state.open(target.i);
+        if (!start || start.pointer !== event.pointerId) return;
+        const step = swipeStep(event.clientX-start.x,event.clientY-start.y,Date.now()-start.time);
+        const target = step && start.state[step];
+        if (start.locked) suppressClickUntil = Date.now()+500;
+        if (!start.locked || !target || start.host.hidden || start.state !== detailNavigation) { moveCard(start.host,0); return; }
+        swipeBusyUntil = Date.now()+800;
+        moveCard(start.host,(step === 'next' ? -1 : 1)*(start.host.offsetWidth+8));
+        setTimeout(() => {
+            moveCard(start.host,0,true);
+            if (!start.host.hidden && start.state === detailNavigation) start.state.open(target.i);
+            requestAnimationFrame(() => moveCard(start.host,0));
+        },180);
     }, { passive:true });
-    document.addEventListener('pointercancel', () => { swipe = null; }, { passive:true });
+    document.addEventListener('pointercancel', () => { if(swipe) moveCard(swipe.host,0); swipe = null; }, { passive:true });
     document.addEventListener('click', event => {
         if (Date.now() < suppressClickUntil && swipeHost(event.target)) { event.preventDefault(); event.stopImmediatePropagation(); }
     }, true);
@@ -202,6 +244,14 @@
         if (state && !document.querySelector('dialog[open]')) state.close.focus({ preventScroll: true });
     }
     function installDetailResize() {
+        /** SOFTM-DETAIL-PEEK START 날짜:20261007 : 닫기·크기 변경·기관 전환과 양옆 미리보기의 표시 상태를 동기화 */
+        const detail = document.querySelector('#detailSheet');
+        if (detail) {
+            new MutationObserver(() => { if (!swipe) syncPeeks(); }).observe(detail,{attributes:true,attributeFilter:['hidden','style','data-detail-expanded'],childList:true,subtree:true});
+            new ResizeObserver(() => { if (!swipe) syncPeeks(); }).observe(detail);
+            window.addEventListener('resize',syncPeeks);
+        }
+        /** SOFTM-DETAIL-PEEK END */
         for (const [selector, closeSelector, contentId] of [
             ['#detailSheet', '#detailClose', 'detailBody'],
             ['.mobile-popup-sheet', '#mobilePopupDismiss', 'mobilePopupContent']

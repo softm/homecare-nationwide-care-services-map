@@ -173,3 +173,18 @@ body.care-map-page [data-detail-at-top="false"] .care-detail-scroll-hint { displ
 /** SOFTM-DETAIL-SWIPE START 날짜:20261005 : 가로 기관 넘김은 앱에서 처리하고 세로 스크롤·확대는 브라우저에 유지 */
 #detailSheet .care-detail-scroll, #detailSheet .care-detail-navigation { touch-action:pan-y pinch-zoom; }
 /** SOFTM-DETAIL-SWIPE END */
+
+/** SOFTM-DETAIL-PEEK START 날짜:20261007 : 양옆 카드 끝을 노출해 드래그 방향과 다음 기관의 존재를 알림 */
+.care-detail-peek { position:fixed; z-index:1000; box-sizing:border-box; padding:28px 18px; background:#fff; border:1px solid #dce8e3; border-radius:22px; box-shadow:0 6px 28px #183a3526; pointer-events:none; overflow:hidden; transition:translate 180ms ease-out; }
+.care-detail-peek[hidden] { display:none; }
+.care-detail-peek strong { display:block; margin-top:14px; font-size:20px; color:#164c44; }
+.care-detail-peek small,.care-detail-peek p { color:#64776f; }
+body.care-map-page #detailSheet { transition:translate 180ms ease-out; }
+body.care-map-page #detailSheet.care-detail-dragging,.care-detail-peek.care-detail-dragging { transition:none; user-select:none; cursor:grabbing; }
+@media(max-width:1000px) {
+ body.care-map-page #detailSheet,body.care-map-page #detailSheet[data-detail-expanded="true"] { left:24px; right:auto; bottom:8px; width:calc(100vw - 48px); border-radius:22px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ body.care-map-page #detailSheet,.care-detail-peek { transition:none; }
+}
+/** SOFTM-DETAIL-PEEK END */

@@ -431,7 +431,7 @@ function markerIcon(c,rank,route=false,blink=false){
  const grade=c.g||'U',main=Number.isFinite(c.es)?c.es.toFixed(1):(isNew(c)?'신설':'—');
  const lines=CareDecisionSummary.markerLines(c,TYPE);
  const name=`<span class="care-marker-title">${esc(c.n)}</span><span class="care-marker-fact care-marker-overview">${esc(lines[0])}</span><span class="care-marker-fact care-marker-detail">${esc(lines[1])}</span>`;
- return{content:`<div class="care-named-marker"><div class="marker-name">${name}</div><div class="map-marker grade-${grade} ${route?'route':''} ${blink?'marker-blink':''}"><span>${esc(main)}</span></div></div>`,anchor:new window.naver.maps.Point(16,29)}
+ return{content:`<div class="care-named-marker" data-marker-id="${esc(c.i)}"><div class="marker-name">${name}</div><div class="map-marker grade-${grade} ${route?'route':''} ${blink?'marker-blink':''}"><span>${esc(main)}</span></div></div>`,anchor:new window.naver.maps.Point(16,29)} // SOFTM-LABEL-STABLE 날짜:20261007 : 기관기호로 이름 배치 우선순위를 재검색 뒤에도 연결
 }
 /** SOFTM-MARKER-INSIGHTS END */
 function markerRank(c){if(CareMapExperience.isBasketMap())return CareMapExperience.rows().findIndex(row=>row.i===c.i)+1;/* SOFTM-BASKET-ORDER 날짜:20260904 : 상세 강조 후에도 비교함 방문 번호를 유지 */const index=areaRows.findIndex(x=>x.i===c.i);return index>=0?index+1:1}
