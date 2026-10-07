@@ -542,3 +542,5 @@ ZIP을 다시 만들 때 파일명 앞에 `YYYYMMDD_`를 붙인다.
 - Android 설치 앱은 `/Users/softm/workspace/softm.care.homecare`의 `app` 모듈이며, 대표 아이콘 변경 시 `app/src/main/res/drawable-nodpi/dolbom_brand.png`와 `store/icon-512.png`도 웹 최종 이미지로 맞춘다. `./release.sh`로 lint·서명 APK·AAB를 검증하고 연결 기기가 있으면 설치한다. 이 Android 폴더는 Git 저장소가 아니다. <!-- SOFTM-ANDROID-BRAND 날짜:20261007 : 웹만 교체해 설치 앱과 스토어 아이콘이 이전 디자인으로 남는 누락 방지 -->
 
 - 선택 마커의 기관명은 모든 지도 배율에서 17px·굵기 800과 파란 테두리·밝은 배경으로 일반 이름표보다 강조한다. 이름표 실측 배치와 기존 2줄 표시를 유지한다. <!-- SOFTM-SELECTED-NAME 날짜:20261007 : 선택한 기관명이 일반 이름표 크기로 다시 축소되는 회귀 방지 -->
+
+- 선택 기관명은 마커 위의 최초 위치에 이름만 고정하며 충돌 회피로 옆·아래로 이동하거나 평가 카드로 확장하지 않는다. 일반 이름표가 선택 이름표의 실측 공간을 피한다. <!-- SOFTM-SELECTED-ANCHOR 날짜:20261007 : 선택 직후 지연 재배치로 기관명이 움직이는 현상 방지 -->

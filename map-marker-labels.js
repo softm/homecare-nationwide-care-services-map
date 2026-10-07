@@ -83,7 +83,15 @@
             /** SOFTM-MARKER-PLACEMENT START 날짜:20260930 : 위쪽이 막히면 옆·아래를 찾고 모든 기관 이름을 예약한 뒤 남는 공간에 평가·현황을 확장 */
             const obstacles = item => [...pins,...controls,...[...occupied].filter(([other])=>other!==item).map(([,rect])=>rect)];
             for (const item of candidates) {
-                if (!item.selected && !remaining) continue;
+                /** SOFTM-SELECTED-ANCHOR START 날짜:20261007 : 선택 이름은 최초 CSS 위치에 고정하고 주변 이름만 회피시켜 지연 재배치 점프를 방지 */
+                if (item.selected) {
+                    setLevel(item.label, 0);
+                    occupied.set(item, item.rects[0]);
+                    retained.set(item.key, 'top');
+                    continue;
+                }
+                /** SOFTM-SELECTED-ANCHOR END */
+                if (!remaining) continue;
                 item.placement = root.CareMarkerPlacement.fit(item.rects.slice(0,1),item.pin,bounds,obstacles(item),retained.get(item.key));
                 if (item.placement) {
                     occupied.set(item,item.placement.rect);
@@ -102,7 +110,7 @@
                 item.label.style.translate = `${dx/item.scaleX}px ${dy/item.scaleY}px`;
             }
             /** SOFTM-MARKER-PLACEMENT END */
-            for (const key of retained.keys()) if (!candidates.some(item=>item.key===key && item.placement)) retained.delete(key); // SOFTM-LABEL-STABLE 날짜:20261007 : 화면을 벗어난 기관은 보관하지 않아 메모리와 우선순위 누적을 방지
+            for (const key of retained.keys()) if (!candidates.some(item=>item.key===key && (item.selected || item.placement))) retained.delete(key); // SOFTM-LABEL-STABLE 날짜:20261007 : 화면을 벗어난 기관은 보관하지 않아 메모리와 우선순위 누적을 방지
         }
         const schedule = () => { clearTimeout(timer); timer=setTimeout(layout,100); };
         new MutationObserver(records=>{
