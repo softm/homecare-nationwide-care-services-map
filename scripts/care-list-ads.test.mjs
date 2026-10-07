@@ -396,3 +396,41 @@ test('전체 지도는 광고를 임시로 접고 수동 펼침과 원래 선호
     assert.equal(collapsed.storage.get('careListAd:collapsed:v1'), '1');
 });
 /** SOFTM-MOBILE-FOCUS END */
+
+/** SOFTM-ANCHOR-REAL-AD-TEST START 날짜:20261007 : 실제 광고의 지연 수신과 미노출 뒤 화면 공간 복원을 검증 */
+test('광고 전용 하단은 NOAD·오류·시간 초과·잘못된 설정에서 제휴 안내 없이 공간을 반환한다', () => {
+    for (const failure of ['noad', 'script', 'timeout', 'invalid']) {
+        const state = setup({ mode: 'kakao', unit: failure === 'invalid' ? '' : 'DAN-testAnchorUnit' });
+        const ad = state.host.querySelector('ins');
+        assert.equal(state.fallback.hidden, true);
+        if (failure === 'noad') state.scope.careListAnchorAdFailed(ad);
+        if (failure === 'script') state.scripts()[0].onerror();
+        if (failure === 'timeout') [...state.timers][0]();
+        state.mode('map');
+        state.scope.CareListAds.setExpanded(true);
+        assert.equal(state.zone.hidden, true);
+        assert.equal(state.fallback.hidden, true);
+        assert.equal(state.body.style.getPropertyValue('--care-list-ad-space'), '0px');
+        assert.equal(state.host.querySelector('ins'), null);
+        assert.equal(state.scripts().length, failure === 'invalid' ? 0 : 1);
+    }
+});
+test('SDK 다운로드 후 응답 대기를 새로 시작하고 정상 수신하면 제거 타이머를 취소한다', () => {
+    const state = setup({ mode: 'kakao' });
+    const downloadTimer = [...state.timers][0];
+    state.scripts()[0].onload();
+    assert.equal(state.timers.has(downloadTimer), false);
+    assert.equal(state.timers.size, 1);
+    state.scope.careListAnchorAdLoaded({});
+    assert.equal(state.timers.size, 1);
+    const ad = state.host.querySelector('ins');
+    state.scope.careListAnchorAdLoaded(ad);
+    assert.equal(state.timers.size, 0);
+    state.scripts()[0].onload();
+    assert.equal(state.timers.size, 0, '완료 콜백이 먼저 도착해도 타이머를 다시 만들지 않는다');
+    state.mode('map');
+    assert.equal(state.zone.hidden, false);
+    assert.equal(state.host.querySelector('ins'), ad);
+    assert.equal(state.scripts().length, 1);
+});
+/** SOFTM-ANCHOR-REAL-AD-TEST END */
