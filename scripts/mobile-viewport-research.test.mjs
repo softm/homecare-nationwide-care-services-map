@@ -61,6 +61,20 @@ test('광고 미노출만 제휴 배너로 대체하고 표시 광고·이전 �
     jobs.forEach(fn => fn());
     assert.deepEqual([empty.innerHTML, shown.innerHTML, detached.innerHTML], ['partner', 'ad', 'old']);
 });
+/** SOFTM-AD-DEDUP START 날짜:20261007 : 반복 지면 미노출 시 제휴 두 장과 정상 광고 삭제를 함께 방지 */
+test('인접한 제휴 배너가 있으면 미노출 슬롯만 제거한다', () => {
+    const code = fs.readFileSync(new URL('../map-experience.js', import.meta.url), 'utf8');
+    const jobs = [], context = { root: { setTimeout(fn) { jobs.push(fn); } } };
+    vm.createContext(context); vm.runInContext(code.slice(code.indexOf('    function ensureListAdFallback'), code.indexOf('    function createZoomResearch')), context);
+    const partner = { matches: () => true };
+    const empty = { isConnected: true, previousElementSibling: partner, querySelector: () => null, remove() { this.removed = true; } };
+    const shown = { isConnected: true, previousElementSibling: partner, querySelector: () => ({}), remove() { this.removed = true; } };
+    context.ensureListAdFallback({ querySelectorAll: () => [empty, shown] }, () => { throw new Error('중복 제휴 생성'); });
+    jobs.forEach(fn => fn());
+    assert.equal(empty.removed, true);
+    assert.equal(shown.removed, undefined);
+});
+/** SOFTM-AD-DEDUP END */
 /** SOFTM-SHORT-LIST-AD END */
 /** SOFTM-SEARCH-LIST-SCROLL START 날짜:20260910 : 빠른 끝 스크롤과 광고 간격에서도 가시 기관 강조가 남는지 회귀 검사 */
 function searchListPicker() {
