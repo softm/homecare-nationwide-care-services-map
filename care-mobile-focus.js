@@ -36,6 +36,27 @@
         const savedClose = document.createElement('button');
         savedClose.type = 'button'; savedClose.className = 'care-focus-saved-close'; savedClose.textContent = '지도 계속 보기 ↓';
         saved.prepend(savedClose);
+        /** SOFTM-SAVED-FULL START 날짜:20261007 : 기관 목록을 먼저 읽도록 보조 행동과 브리핑을 더보기로 모음 */
+        const savedMore = document.createElement('details');
+        savedMore.className = 'care-saved-more';
+        savedMore.innerHTML = '<summary>더보기</summary><div class="care-saved-more-content"><div class="care-saved-more-actions"><button type="button" data-saved-extra="photo">사진 비교</button><button type="button" data-saved-extra="share">공유</button><button type="button" data-saved-extra="clear">비우기</button></div></div>';
+        saved.querySelector('.care-saved-heading').after(savedMore);
+        const insights = saved.querySelector('.care-insights');
+        const insightsAnchor = document.createComment('saved insights position');
+        insights.before(insightsAnchor);
+        savedMore.addEventListener('click', event => {
+            const action = event.target.closest('[data-saved-extra]')?.dataset.savedExtra;
+            const selector = {photo:'[data-photo-compare]',share:'[data-basket-share]',clear:'[data-basket-clear]'}[action];
+            if (!selector) return;
+            saved.querySelector(selector)?.click();
+        });
+        function arrangeSaved(active) {
+            savedMore.open = false;
+            savedClose.textContent = active ? '← 지도' : '지도 계속 보기 ↓';
+            if (active) savedMore.querySelector('.care-saved-more-content').append(insights);
+            else insightsAnchor.after(insights);
+        }
+        /** SOFTM-SAVED-FULL END */
         const types = document.createElement('dialog');
         types.className = 'care-focus-types';
         types.setAttribute('aria-label', '돌봄 유형 선택');
@@ -139,9 +160,11 @@
             ui.hidden = !enabled;
             body.classList.toggle('care-mobile-focus-active', enabled);
             root.CareListAds?.setFocus(enabled);
+            arrangeSaved(enabled); // SOFTM-SAVED-FULL 날짜:20261007 : 모바일 진입에서만 보조 정보를 더보기로 이동
             if (enabled) { input.value = original.value; update(); ui.querySelector('button').focus({ preventScroll:true }); }
         }
         function exit() {
+            arrangeSaved(false); // SOFTM-SAVED-FULL 날짜:20261007 : PC 복귀 시 기존 브리핑 위치를 보존
             enabled = false; filterWasOpen = false; ui.hidden = true; types.close();
             body.classList.remove('care-mobile-focus-active','care-focus-saved');
             root.CareListAds?.setFocus(false);
