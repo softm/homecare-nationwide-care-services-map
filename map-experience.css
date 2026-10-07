@@ -889,7 +889,11 @@ dialog.care-location-notice .care-location-actions button { width:100%; }
 .care-map-page .care-mobile-active-marker .marker-name { border-color:#175cb5; color:#175cb5; }
 /** SOFTM-MARKER-NAME END */
 
-/** SOFTM-ROW-SAVED START 날짜:20261007 : 담기 해제와 보기를 구분하면서 카드 높이 증가를 최소화 */
-body.stitch-desktop.care-map-page .row .care-row-actions > .care-row-saved-link { order:10; flex:1 0 100%; grid-column:1 / -1; justify-self:end; width:auto; min-height:44px; padding:4px 0; border:0; background:transparent; color:#176d60; text-align:right; font-size:13px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
-body.stitch-desktop.care-map-page .row .care-row-actions > .care-row-saved-link[hidden] { display:none; }
-/** SOFTM-ROW-SAVED END */
+/** SOFTM-ROW-GROUP START 날짜:20261007 : 담기와 보기를 동일한 폭으로 묶어 카드 아래 탐색 없이 접근 */
+body.stitch-desktop.care-map-page .row .care-row-actions > .care-row-save-group { grid-column:1; grid-row:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); min-width:0; border-radius:8px; background:#e6eeff; }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button { width:100%; min-width:0; min-height:44px; margin:0; padding:8px 3px; border:0; border-radius:0; background:#e6eeff; color:#004541; font-size:13px; font-weight:700; cursor:pointer; }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button:first-child { border-radius:8px 0 0 8px; }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button:last-child { border-left:1px solid #b8cfcf; border-radius:0 8px 8px 0; }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button[aria-pressed="true"] { background:#004541; color:#fff; }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button:focus-visible { outline:2px solid #176d60; outline-offset:-3px; }
+/** SOFTM-ROW-GROUP END */

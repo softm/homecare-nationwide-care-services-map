@@ -222,10 +222,12 @@
         basketFeedbackTimer = setTimeout(() => { reset(); basketFeedbackAnimations.forEach(animation => animation.cancel()); basketFeedbackAnimations = []; }, 1400);
     }
     /** SOFTM-TAB-FEEDBACK END */
-    function button(row) {
+    /** SOFTM-ROW-GROUP START 날짜:20261007 : 목록에서 담기와 보기를 같은 높이에 두기 위해 짧은 버튼을 지원 */
+    function button(row, compact = false) {
         const active = basket?.has(row.i) || false;
-        return `<button type="button" class="care-basket-button" data-care-basket="${escape(row.i)}" aria-pressed="${active}" aria-label="${escape(row.n)} ${active ? '비교함에서 빼기' : '비교에 담기'}">${active ? '✓ 비교에 담음' : '+ 비교에 담기'}</button>`;
+        return `<button type="button" class="care-basket-button" data-care-basket="${escape(row.i)}" ${compact ? 'data-care-basket-compact' : ''} aria-pressed="${active}" aria-label="${escape(row.n)} ${active ? '비교함에서 빼기' : '비교에 담기'}">${compact ? (active ? '담음' : '담기') : (active ? '✓ 비교에 담음' : '+ 비교에 담기')}</button>`;
     }
+    /** SOFTM-ROW-GROUP END */
     function evaluationLabel(row) { const grade = row.g || row.ev?.grade; return ['A', 'B', 'C', 'D', 'E'].includes(grade) ? `기관 평가 ${grade}등급` : grade === 'N' ? '신설·미평가' : '기관 평가 미확인'; }
     function refresh() {
         if (!basket || !bar) return;
@@ -250,12 +252,11 @@
         dock.querySelector('[data-saved-count]').textContent = selected.length; // SOFTM-TAB-FEEDBACK 날짜:20260905 : 반복 갱신에서도 숫자 강조 요소를 유지
         dock.hidden = !selected.length || workspace !== 'search';
         document.body.classList.toggle('has-care-dock', !!selected.length && workspace === 'search');
-        document.querySelectorAll('[data-row-saved]').forEach(node => { node.hidden = !basket.has(node.dataset.rowSaved); }); // SOFTM-ROW-SAVED 날짜:20261007 : 담기·해제와 재렌더 뒤 바로가기 노출을 동기화
         document.querySelectorAll('.care-basket-button[data-care-basket]').forEach(node => {
             const active = basket.has(node.dataset.careBasket), row = rowById.get(node.dataset.careBasket);
             node.setAttribute('aria-pressed', String(active));
             node.setAttribute('aria-label', `${row?.n || '기관'} ${active ? '비교함에서 빼기' : '비교에 담기'}`);
-            node.textContent = active ? '✓ 비교에 담음' : '+ 비교에 담기';
+            node.textContent = node.hasAttribute('data-care-basket-compact') ? (active ? '담음' : '담기') : (active ? '✓ 비교에 담음' : '+ 비교에 담기'); // SOFTM-ROW-GROUP 날짜:20261007 : 담기 상태 갱신 후에도 반쪽 버튼의 짧은 문구 유지
         });
     }
     function remember() { return { top: root.scrollY, list: document.getElementById('list')?.scrollTop || 0, saved: bar?.scrollTop || 0, listLeft: document.getElementById('list')?.scrollLeft || 0, listViewport: root.CareListSticky?.capture() }; } // SOFTM-MOBILE-CAROUSEL 날짜:20261004 : 상세·담은 기관 복귀에 목록의 가로 위치도 보관
