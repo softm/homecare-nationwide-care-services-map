@@ -90,12 +90,13 @@ test('팝업 상태의 지도 공유는 기관 URL만 전달하고 일반 지도
 });
 /** SOFTM-POPUP-SHARE END */
 
-/** SOFTM-DETAIL-SWIPE START 날짜:20261005 : 짧은 탭·세로 읽기·느린 드래그가 기관을 바꾸지 않도록 경계를 검증 */
+/** SOFTM-DETAIL-SWIPE START 날짜:20261007 : 세로 읽기·짧은 탭을 보호하며 천천히 끈 가로 드래그도 이동 */
 test('좌우로 충분히 민 경우만 이전·다음 기관으로 이동한다', () => {
  const step=context.window.CareDetailLayout.swipeStep;
  assert.equal(step(-100,10,250),'next');
  assert.equal(step(100,-10,250),'previous');
- for (const [x,y,time] of [[30,0,100],[70,90,300],[80,60,300],[100,0,1000]]) assert.equal(step(x,y,time),null);
+ for (const [x,y,time] of [[30,0,100],[70,90,300],[80,60,300]]) assert.equal(step(x,y,time),null);
  assert.equal(step(-64,0,900),'next');
+ assert.equal(step(100,0,2000),'previous');
 });
 /** SOFTM-DETAIL-SWIPE END */

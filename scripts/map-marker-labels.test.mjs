@@ -81,3 +81,13 @@ test('모든 배율에서 이름을 허용하고 확대할수록 표시 한도�
     assert.ok(CareMarkerLabels.labelBudget(12,1920,1080) <= 12);
 });
 /** SOFTM-LABEL-DENSITY END */
+
+/** SOFTM-LABEL-STABLE START 날짜:20261007 : 표시 후보 입력 순서가 바뀌어도 선택·기존 이름의 우선순위와 동률 순서를 보존 */
+test('재검색 순서와 무관하게 선택·기존 표시·기관기호 순으로 이름을 배치한다', () => {
+ const rows=[{key:'c',selected:false},{key:'a',selected:false},{key:'b',selected:false},{key:'z',selected:true}];
+ const retained=new Map([['b','left']]);
+ const ordered=values=>values.sort((a,b)=>CareMarkerLabels.compareLabels(a,b,retained)).map(row=>row.key);
+ assert.deepEqual(ordered([...rows]),['z','b','a','c']);
+ assert.deepEqual(ordered([...rows].reverse()),['z','b','a','c']);
+});
+/** SOFTM-LABEL-STABLE END */
