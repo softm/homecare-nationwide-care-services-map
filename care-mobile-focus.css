@@ -161,3 +161,16 @@
  body.stitch-desktop.care-map-page[data-care-mode="map"][data-care-workspace="search"][data-care-sheet="split"] #list .list-ad-slot > :is(ins,iframe) { flex-shrink:0; }
 }
 /** SOFTM-LIST-OVERLAY END */
+
+/** SOFTM-ROUTE-MAP START 날짜:20261007 : 경로 완료 후 지도·요약·모의주행을 목록 가림 없이 표시 */
+.care-mobile-route-nav { display:none; }
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-focus-saved[data-care-mode="map"][data-care-workspace="saved"][data-care-panel="route"][data-care-view="map"] .layout>.care-saved-panel { display:none!important; }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] .care-mobile-route-nav { display:flex; position:fixed; inset:0 0 auto; height:56px; box-sizing:border-box; align-items:center; justify-content:space-between; gap:8px; padding:4px 8px; background:#fff; border-bottom:1px solid #dce7e3; z-index:175; }
+ .care-mobile-route-nav button { min-height:44px; border:0; border-radius:8px; padding:8px; background:#fff; color:#245a50; font:inherit; font-size:14px; }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] .map-card>.care-route-output { position:absolute; top:64px; left:12px; right:12px; z-index:100; max-height:26dvh; overflow:auto; margin:0; padding:10px 12px; background:#fffffff2; box-shadow:0 3px 16px #173b3720; }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] .care-simulation { bottom:var(--care-focus-bottom); }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"] .care-route-editor { padding-top:4px; }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"] .care-saved-more { display:none; }
+}
+/** SOFTM-ROUTE-MAP END */

@@ -66,17 +66,44 @@
         types.addEventListener('click', event => { if (event.target === types) types.close(); });
         let enabled = false, drag = null, filterWasOpen = false;
         function closeSheet() {
+            /** SOFTM-ROUTE-MAP START 날짜:20261007 : Esc도 완료 경로를 지우지 않고 먼저 경로 목록으로 복귀 */
+            if (body.dataset.careWorkspace === 'saved' && body.dataset.carePanel === 'route' && body.dataset.careView === 'map') {
+                document.querySelector('.care-view-switch [data-care-view="list"]').click();
+                return;
+            }
+            /** SOFTM-ROUTE-MAP END */
             const wasSaved = body.dataset.careWorkspace === 'saved';
             if (wasSaved) config.results();
             body.classList.remove('care-focus-list', 'care-focus-saved');
             update();
         }
-        savedClose.onclick = closeSheet;
+        /** SOFTM-ROUTE-MAP START 날짜:20261007 : 완료된 경로를 지우지 않고 지도와 경로 편집 목록을 왕복 */
+        const routeNav = document.createElement('nav');
+        routeNav.className = 'care-mobile-route-nav';
+        routeNav.setAttribute('aria-label', '경로 지도 도구');
+        routeNav.innerHTML = '<button type="button" data-care-view="list">← 담은 기관</button><strong>방문 경로</strong><button type="button" data-saved-fit>전체 경로</button>';
+        document.body.append(routeNav);
+        savedClose.onclick = () => {
+            if (body.dataset.carePanel === 'route' && document.querySelector('.care-route-output')?.dataset.phase === 'success') {
+                document.querySelector('.care-view-switch [data-care-view="map"]').click();
+            } else closeSheet();
+        };
+        /** SOFTM-ROUTE-MAP END */
+        let previousRoutePanel = false; // SOFTM-ROUTE-MAP 날짜:20261007 : 경로 편집 첫 진입에서 출발지 입력을 즉시 노출
         function update() {
             if (!enabled) return;
             const isSaved = body.dataset.careWorkspace === 'saved';
             if (body.classList.contains('care-focus-saved') !== isSaved) body.classList.toggle('care-focus-saved', isSaved);
             if (isSaved) { if (body.classList.contains('care-focus-list')) body.classList.remove('care-focus-list'); saved.inert = false; }
+            /** SOFTM-ROUTE-MAP START 날짜:20261007 : 지도 보기 상태를 전체 목록 가림과 구분하고 경로 복귀 행동을 명시 */
+            const editingRoute = isSaved && body.dataset.carePanel === 'route';
+            if (editingRoute && !previousRoutePanel) saved.scrollTop = 0;
+            previousRoutePanel = editingRoute;
+            const routeMap = isSaved && body.dataset.carePanel === 'route' && body.dataset.careView === 'map';
+            saved.inert = routeMap || !isSaved;
+            const closeLabel = editingRoute && document.querySelector('.care-route-output')?.dataset.phase === 'success' ? '경로 지도' : '← 지도';
+            if (savedClose.textContent !== closeLabel) savedClose.textContent = closeLabel;
+            /** SOFTM-ROUTE-MAP END */
             const listOpen = body.classList.contains('care-focus-list');
             ui.querySelector('[data-mobile-focus="list"]').setAttribute('aria-expanded', String(listOpen));
             ui.querySelector('[data-mobile-focus="saved"]').setAttribute('aria-expanded', String(isSaved));
