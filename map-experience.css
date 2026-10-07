@@ -897,3 +897,11 @@ body.stitch-desktop.care-map-page .row .care-row-save-group > button:last-child 
 body.stitch-desktop.care-map-page .row .care-row-save-group > button[aria-pressed="true"] { background:#004541; color:#fff; }
 body.stitch-desktop.care-map-page .row .care-row-save-group > button:focus-visible { outline:2px solid #176d60; outline-offset:-3px; }
 /** SOFTM-ROW-GROUP END */
+
+/** SOFTM-ROW-ICONS START 날짜:20261007 : 짧은 담기·보기 버튼을 모양으로 구분하고 상태 갱신에도 아이콘 유지 */
+body.stitch-desktop.care-map-page .row .care-row-save-group > button { display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button::before { content:""; width:15px; height:15px; flex:0 0 15px; background:currentColor; mask:center / contain no-repeat var(--care-row-icon); }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button:first-child { --care-row-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v18l-6-4-6 4Z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button[aria-pressed="true"] { --care-row-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v18l-6-4-6 4Z' fill='black'/%3E%3C/svg%3E"); }
+body.stitch-desktop.care-map-page .row .care-row-save-group > button:last-child { --care-row-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"); }
+/** SOFTM-ROW-ICONS END */
