@@ -103,7 +103,7 @@
 <script src="care-decision-summary.js?v=20260930-1"></script> <!-- SOFTM-MARKER-INSIGHTS 날짜:20260930 : 근접 마커와 상세 요약의 공용 근거를 같은 버전으로 적용 -->
 <script src="care-popup-geometry.js?v=20260924-1"></script>
 <!-- SOFTM-POPUP-CONTEXT END -->
-<link rel="stylesheet" href="care-detail-layout.css?v=20261005-swipe1"><script src="care-detail-layout.js?v=20261005-swipe1"></script><!-- SOFTM-DETAIL-SWIPE 날짜:20261005 : 팝업 좌우 기관 탐색을 최신 스크립트와 스타일로 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 통합 지도 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-detail-layout.css?v=20261007-detail-content1"><script src="care-detail-layout.js?v=20261007-detail-content1"></script><!-- SOFTM-DETAIL-CONTENT 날짜:20261007 : 하단 버튼 제거와 스와이프 유지를 최신 스크립트로 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 통합 지도 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT END -->
 <link rel="stylesheet" href="mobile-map-clean.css?v=20260914-sheet-focus1"> <!-- SOFTM-MOBILE-SHEET-FOCUS 날짜:20260914 : 검색창과 작업 탭을 접는 지도 집중 화면을 이전 캐시 없이 적용 -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
@@ -191,7 +191,7 @@
 <!-- SOFTM-MAP-WORDING END -->
  </section>
 </main>
-<section class="detail-sheet" id="detailSheet" hidden aria-live="polite"><div class="detail-head care-compact-head"><small id="detailRegion"></small><h3 id="detailName"></h3><div id="detailDecision"></div><!-- SOFTM-DECISION-SUMMARY 날짜:20260924 : 긴 본문 전에 유형별 판단 근거를 기관명과 함께 표시 --><!-- SOFTM-POPUP-COMPOSITION 날짜:20260911 : 비교 행동을 제목 맥락 안에 두고 탭과 본문을 연속해서 표시 --><div class="care-popup-basket-action" id="detailBasketAction"></div><!-- SOFTM-DETAIL-NAV 날짜:20260917 : 본문 스크롤과 무관하게 기관 이동 버튼을 제공 --><button class="detail-close" id="detailClose" aria-label="상세 닫기">×</button></div><div class="detail-body" id="detailBody"></div><footer class="care-detail-footer" id="detailNavigation"></footer></section><!-- SOFTM-INFO-SHEET 날짜:20260917 : 기관 이동을 본문과 분리한 하단 탐색으로 유지 -->
+<section class="detail-sheet" id="detailSheet" hidden aria-live="polite"><div class="detail-head care-compact-head"><small id="detailRegion"></small><h3 id="detailName"></h3><div id="detailDecision"></div><!-- SOFTM-DECISION-SUMMARY 날짜:20260924 : 긴 본문 전에 유형별 판단 근거를 기관명과 함께 표시 --><!-- SOFTM-POPUP-COMPOSITION 날짜:20260911 : 비교 행동을 제목 맥락 안에 두고 탭과 본문을 연속해서 표시 --><div class="care-popup-basket-action" id="detailBasketAction"></div><button class="detail-close" id="detailClose" aria-label="상세 닫기">×</button></div><div class="detail-body" id="detailBody"></div></section><!-- SOFTM-DETAIL-CONTENT 날짜:20261007 : 이전·다음 하단 영역을 제거해 상세 본문 공간 확보 -->
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급·비교 선택을 혼동하지 않도록 표현 -->
 <section class="compare-modal" id="compareLayer" hidden><div class="compare-dialog" role="dialog" aria-modal="true" aria-labelledby="compareTitle"><header class="compare-head"><h2 id="compareTitle">선택센터 비교표 <span class="compare-count" id="compareCount">0곳</span></h2><div class="compare-actions"><button type="button" class="excel-btn" id="compareExcel">엑셀 다운로드</button><button type="button" class="compare-close" id="compareClose" aria-label="비교표 닫기">×</button></div></header><div class="compare-scroll"><div id="compareBody"></div></div><div class="ad-banner-host" id="careCompareAdHost" hidden></div> <!-- SOFTM-AD-EXPANSION 날짜:20260926 : 비교 결과 확인 중에만 전용 광고를 표시 -->
 <p class="compare-foot">컬럼 제목을 누르면 해당 값으로 오름차순·내림차순 정렬됩니다. 기관 평가점수·등급은 국민건강보험공단 평가 연결 자료이며 미평가 기관은 마지막에 표시됩니다.</p></div></section>
@@ -914,7 +914,7 @@ function mainStaffCount(c){return['s','rn','na','pt','ot','cw'].reduce((sum,key)
 function operationPeriod(value){if(!value)return'미확인';const start=new Date(`${String(value).slice(0,10)}T00:00:00`);if(Number.isNaN(start.getTime()))return'미확인';const today=new Date(),months=Math.max(0,(today.getFullYear()-start.getFullYear())*12+today.getMonth()-start.getMonth()-(today.getDate()<start.getDate()?1:0)),years=Math.floor(months/12),remain=months%12;return years?`${years}년${remain?` ${remain}개월`:''}`:`${Math.max(1,remain)}개월`}
 function openDetail(c,reveal=true){
  CareDetailLayout.beginInstitution($('detailSheet')); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 다음 기관은 기존 창 크기에서 핵심 정보부터 확인
- $('detailNavigation').innerHTML=CareDetailLayout.navigation(c,CareMapExperience.isBasketMap()?CareMapExperience.rows():areaRows,focusCenter); // SOFTM-DETAIL-NAV 날짜:20260917 : 검색 정렬 또는 담은 순서로 이웃 기관을 선택
+ CareDetailLayout.navigation(c,CareMapExperience.isBasketMap()?CareMapExperience.rows():areaRows,focusCenter); // SOFTM-DETAIL-NAV 날짜:20261007 : 하단 버튼 없이 기존 스와이프 기관 순서를 유지
  activeDetail=c;officialDetailToken++;basicInfoToken++;officialActiveTab=11;
  $('detailRegion').textContent=`${c.p} ${c.c} · ${c.tn||CONFIG.label}`;$('detailName').textContent=c.n;
  $('detailDecision').innerHTML=CareDecisionSummary.render(c,TYPE); // SOFTM-DECISION-SUMMARY 날짜:20260924 : 평가연도와 유형별 정원·인력의 근거를 우선 표시

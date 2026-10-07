@@ -93,26 +93,12 @@
             }
         }
     });
-    /** SOFTM-DETAIL-NAV START 날짜:20260924 : 기관 이동을 유지하면서 첫 화면 아래에 판단 자료가 더 있음을 안내 */
+    /** SOFTM-DETAIL-NAV START 날짜:20261007 : 버튼 영역 없이 스와이프 탐색에 필요한 이웃 기관만 유지 */
     let detailNavigation = null;
     function navigation(c, rows, open) {
         const index = rows.findIndex(row => row.i === c.i);
         detailNavigation = { id: c.i, previous: index > 0 ? rows[index - 1] : null, next: index >= 0 ? rows[index + 1] : null, open };
-        const button = (direction, label) => {
-            const target = detailNavigation[direction];
-            return `<button type="button" data-care-detail-step="${direction}" aria-label="${label}" ${target ? `title="${escape(target.n)}"` : 'disabled'}>${direction === 'previous' ? '‹ 이전' : '다음 ›'}</button>`; // SOFTM-POPUP-COMPACT 날짜:20260917 : 기관 이동은 접근성 이름을 유지한 짧은 화살표로 표시
-        };
-        return `<nav class="care-detail-navigation" data-care-detail-current="${escape(c.i)}" aria-label="기관 이동">${button('previous', '← 이전 기관')}<span aria-live="polite">${index >= 0 ? `${(index + 1).toLocaleString()} / ${rows.length.toLocaleString()}` : '목록 외 기관'}<small class="care-detail-scroll-hint">좌우로 밀어 이전·다음 · 아래로 스크롤</small></span>${button('next', '다음 기관 →')}</nav>`; // SOFTM-DETAIL-SWIPE 날짜:20261005 : 이전·다음 스와이프와 세로 읽기 방향을 함께 안내
     }
-    document.addEventListener('click', event => {
-        const button = event.target.closest('[data-care-detail-step]');
-        if (!button) return;
-        event.stopPropagation();
-        const state = detailNavigation;
-        if (button.disabled || !state || button.closest('[data-care-detail-current]')?.dataset.careDetailCurrent !== state.id) return;
-        const target = state[button.dataset.careDetailStep];
-        if (target) state.open(target.i);
-    }, true);
     /** SOFTM-DETAIL-NAV END */
     /** SOFTM-DETAIL-SWIPE START 날짜:20261007 : 옆 기관의 실제 요약과 손가락을 따라오는 카드로 가로 탐색을 드러냄 */
     function swipeStep(dx, dy, elapsed) {
