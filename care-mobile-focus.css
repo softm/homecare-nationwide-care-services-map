@@ -180,3 +180,12 @@
  .care-mobile-focus-side [data-mobile-focus="share"] { position:absolute; right:0; bottom:calc(100% + 8px); background:#fff; color:#087e78; }
 }
 /** SOFTM-MAP-SHARE END */
+
+/** SOFTM-ROUTE-DOCK START 날짜:20261007 : 경로에서도 기존 하단 메뉴로 검색 목록에 복귀하고 모의주행과 겹치지 않도록 배치 */
+@media(max-width:1000px) {
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] .care-mobile-focus { display:block!important; }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] :is(.care-mobile-focus-top,.care-mobile-focus-side) { display:none; }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 8px); }
+ body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] .care-simulation { bottom:calc(var(--care-focus-bottom) + 76px); }
+}
+/** SOFTM-ROUTE-DOCK END */

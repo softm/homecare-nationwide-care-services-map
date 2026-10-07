@@ -82,15 +82,8 @@
         const routeNav = document.createElement('nav');
         routeNav.className = 'care-mobile-route-nav';
         routeNav.setAttribute('aria-label', '경로 지도 도구');
-        routeNav.innerHTML = '<button type="button" data-care-view="list">← 담은 기관</button><button type="button" data-route-search aria-label="경로 화면에서 검색 지도로 돌아가기">검색 지도</button><button type="button" data-saved-fit>전체 경로</button>';
+        routeNav.innerHTML = '<button type="button" data-care-view="list">← 담은 기관</button><strong>방문 경로</strong><button type="button" data-saved-fit>전체 경로</button>';
         document.body.append(routeNav);
-        /** SOFTM-ROUTE-SEARCH START 날짜:20261007 : 경로와 담은 기관 사이에 갇히지 않고 검색 도구와 일반 마커를 복원 */
-        routeNav.querySelector('[data-route-search]').addEventListener('click', () => {
-            root.CareMapExperience.focusSearchMap();
-            body.classList.remove('care-focus-list', 'care-focus-saved');
-            update();
-        });
-        /** SOFTM-ROUTE-SEARCH END */
         savedClose.onclick = () => {
             if (body.dataset.carePanel === 'route' && document.querySelector('.care-route-output')?.dataset.phase === 'success') {
                 document.querySelector('.care-view-switch [data-care-view="map"]').click();
