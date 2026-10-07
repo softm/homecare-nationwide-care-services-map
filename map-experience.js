@@ -37,7 +37,11 @@
         host.querySelectorAll('.list-ad-slot,.daycare-list-ad-slot').forEach(slot => {
             root.setTimeout(() => {
                 if (!slot.isConnected || slot.querySelector('iframe')) return;
+                /** SOFTM-AD-DEDUP START 날짜:20261007 : 같은 위치의 기존 제휴 안내와 미노출 대체 안내가 연속 중복되지 않도록 처리 */
+                const adjacentPartner = [slot.previousElementSibling, slot.nextElementSibling].some(node => node?.matches('.partner-list-ad') || node?.querySelector('.partner-list-ad'));
+                if (adjacentPartner) { slot.remove(); return; }
                 const html = fallback(); if (html) slot.innerHTML = html;
+                /** SOFTM-AD-DEDUP END */
             }, 5200);
         });
     }
