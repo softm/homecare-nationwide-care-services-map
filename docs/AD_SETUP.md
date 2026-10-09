@@ -75,6 +75,19 @@ Google 공식 도움말 기준으로 AdSense 코드는 Auto ads와 기타 기능
 
 <!-- SOFTM-GOOGLE-ADS END -->
 
+<!-- SOFTM-ADMOB-APP-ADS START 날짜:20261010 : AdMob 앱 인증에 필요한 공개 루트 파일과 실제 게시자 ID를 운영 문서에 고정 -->
+## Android AdMob app-ads.txt
+
+Android 앱 `돌봄한눈`(`net.softm.care.homecare`)은 AdMob 앱 ID `ca-app-pub-8852588878852017~4974288714`와 네이티브 광고 단위 `ca-app-pub-8852588878852017/1734805295`를 사용한다. AdMob 앱 인증을 위해 공개 사이트 루트에 `app-ads.txt`를 배포하고 다음 줄을 유지한다.
+
+```text
+google.com, pub-8852588878852017, DIRECT, f08c47fec0942fa0
+```
+
+AdMob 콘솔의 앱 인증이 보류되면 `https://homecare.designboard.net/app-ads.txt`가 위 내용으로 응답하는지 먼저 확인한 뒤 콘솔의 `업데이트 확인`을 실행한다.
+
+<!-- SOFTM-ADMOB-APP-ADS END -->
+
 ## 예상 비용 배너 운영
 
 - `care-cost-ads.js`는 사용자가 하단 200px 근처에 접근했을 때 한 번만 광고를 요청합니다. 계산기 값을 바꾸거나 다시 계산해도 광고를 재생성하지 않습니다.

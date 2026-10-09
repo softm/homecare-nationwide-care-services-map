@@ -547,4 +547,6 @@ ZIP을 다시 만들 때 파일명 앞에 `YYYYMMDD_`를 붙인다.
 
 - Google AdSense는 `google-ads-config.js`의 실제 `ca-pub-...` 승인 ID가 있을 때만 로드한다. Vignette·Anchor 같은 전면/오버레이 광고는 코드에서 임의 호출하지 않고 AdSense Auto ads 설정에서 켜며, publisher ID가 발급되기 전에는 가짜 ID나 ads.txt를 만들지 않는다. <!-- SOFTM-GOOGLE-ADS 날짜:20261010 : 광고 계정 승인 전 빈 요청·잘못된 수익자 선언을 방지 -->
 
+- Android 앱 AdMob 인증은 공개 사이트 루트의 `app-ads.txt`로 관리한다. AdMob 콘솔에서 요구한 `google.com, pub-8852588878852017, DIRECT, f08c47fec0942fa0` 줄을 유지하며, 계정·게시자 ID가 바뀌지 않는 한 임의로 삭제하거나 다른 광고 계정 줄로 교체하지 않는다. <!-- SOFTM-ADMOB-APP-ADS 날짜:20261010 : 앱 수익 광고 인증이 웹 루트 누락으로 제한되지 않도록 고정 -->
+
 - PC 마커 첫 선택은 이전 상세의 선택 고정·예약된 스크롤 복원을 취소하고 새 기관을 고정한다. 실제 강조 마커와 선택 ID가 모두 일치할 때만 재클릭으로 상세를 열며, 늦게 끝난 목록 확장이 최신 선택의 스크롤을 덮지 않게 한다. <!-- SOFTM-PC-SELECTION-RESTORE 날짜:20261010 : 상세 조회 후 이전 기관으로 선택이 되돌아가는 회귀 방지 -->
