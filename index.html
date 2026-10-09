@@ -235,7 +235,7 @@
 <script src="stitch-controls.js?v=20261007-compare-saved1"></script> <!-- SOFTM-COMPARE-SAVED 날짜:20261007 : 비교 안내와 비교표의 담은 비교함 이동을 즉시 반영 -->
 <script src="map-marker-placement.js?v=20260930-1"></script> <!-- SOFTM-MARKER-PLACEMENT 날짜:20260930 : 이름표가 위쪽 충돌만으로 숨지 않도록 주변 배치 계산을 먼저 연결 -->
 <script src="map-marker-labels.js?v=20261007-selected-anchor1"></script> <!-- SOFTM-MARKER-SCALE 날짜:20261005 : 배율과 화면 조작부를 함께 고려한 이름표 배치 -->
-<script src="map-experience.js?v=20261007-optimize-default1"></script> <!-- SOFTM-ROUTE-DEFAULT 날짜:20261007 : 최적경로 기본 선택을 기존 캐시 없이 적용 -->
+<script src="map-experience.js?v=20261010-selection-restore"></script> <!-- SOFTM-PC-SELECTION-RESTORE 날짜:20261010 : 선택 복원 수정이 이전 스크립트 캐시에 막히지 않도록 갱신 -->
 <!-- SOFTM-MAP-EXPERIENCE END -->
 <!-- SOFTM-LIST-MODE START 날짜:20260930 : 기존 지도와 별개인 목록 탐색 모드를 공용 상태에 연결 -->
 <link rel="stylesheet" href="care-list-mode.css?v=20260930-route-controls1"> <!-- SOFTM-ROUTE-CONTROLS 날짜:20260930 : 담은 기관에서 중복 모드 버튼이 주행 조작을 덮지 않도록 반영 -->
@@ -602,16 +602,17 @@ function scrollMarkerSelectionToList(id){
  document.querySelectorAll('#list .care-scroll-active,.care-basket-items .care-scroll-active').forEach(node=>{if(node!==row){node.classList.remove('care-scroll-active');node.removeAttribute('aria-current')}});
  row.classList.add('care-scroll-active');row.setAttribute('aria-current','true');row.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});
 }
-function ensureMarkerSelectionInList(id){const row=markerSelectionRow(id);if(row){scrollMarkerSelectionToList(id);return}const index=areaRows.findIndex(item=>String(item.i)===String(id));if(index>=0)void renderList(null,index+1).then(()=>scrollMarkerSelectionToList(id))} // SOFTM-PC-MARKER-SELECT 날짜:20261010 : 더보기 뒤쪽 마커도 첫 클릭 때 해당 카드까지 목록을 확장
+function ensureMarkerSelectionInList(id){const row=markerSelectionRow(id);if(row){scrollMarkerSelectionToList(id);return}const index=areaRows.findIndex(item=>String(item.i)===String(id));if(index>=0)void renderList(null,index+1).then(()=>{if(String(pcMarkerSelectedId)===String(id))scrollMarkerSelectionToList(id)})} // SOFTM-PC-MARKER-SELECT 날짜:20261010 : 늦게 완료된 목록 확장이 다른 마커의 최신 선택을 덮지 않도록 제한
 function selectMarkerOnly(id){
  const c=DATA.find(x=>x.i===id);if(!c)return;
  clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);restoreBlinkedMarker();closeDetail();
+ CareMapExperience.selectMarker(id); // SOFTM-PC-SELECTION-RESTORE 날짜:20261010 : 상세 종료의 예약된 목록 복원을 취소하고 새 선택을 고정
  focusMobileRow(id,false,true);ensureMarkerSelectionInList(id);
  setStatus('선택 기관',`${c.n} · 한 번 더 누르면 상세정보를 엽니다.`);
 }
 function handleMarkerClick(id){
  if(window.innerWidth<=1000){careMapFocus?.enter();focusCenter(id);return}
- if(String(pcMarkerSelectedId)===String(id)){focusCenter(id);return}
+ if(String(pcMarkerSelectedId)===String(id)&&mobileActiveMarker===markers.get(id)){focusCenter(id);return} // SOFTM-PC-SELECTION-RESTORE 날짜:20261010 : 목록에서 실제 선택이 바뀐 경우 오래된 ID로 상세를 열지 않음
  pcMarkerSelectedId=String(id);selectMarkerOnly(id);
 }
 /** SOFTM-PC-MARKER-SELECT END */

@@ -414,6 +414,13 @@
         });
     }
     /** SOFTM-MARKER-PERSIST END */
+    /** SOFTM-PC-SELECTION-RESTORE START 날짜:20261010 : 새 마커 선택이 이전 상세의 지연 복원과 선택 고정에 덮이지 않도록 함께 전환 */
+    function selectMarker(id) {
+        cancelDetail();
+        detailSelection = { id: String(id), workspace };
+        selectionInteracted = true;
+    }
+    /** SOFTM-PC-SELECTION-RESTORE END */
     function beginDetail(showMap = true, id = null) {
         detailSelection = id == null ? null : { id: String(id), workspace }; // SOFTM-MARKER-PERSIST 날짜:20260915 : 마커와 목록의 명시적인 선택을 같은 기관기호로 보존
         restoreGeneration++;
@@ -1272,7 +1279,7 @@
     function refreshMatch() { matchController?.refresh(); } // SOFTM-CARE-MATCH 날짜:20260910 : 전체 조회 완료와 진행 상태를 공용 설명에 전달
     /** SOFTM-RESULT-SHEET START 날짜:20260911 : 결과 헤더 문구와 펼침 상태를 DOM 없이 회귀검사하도록 공개 */
     // SOFTM-MARKER-PERSIST 날짜:20260915 : 새 검색에서 선택 고정을 해제할 수 있도록 공용 진입점을 제공
-    root.CareMapExperience = Object.freeze({ syncMode, suspendModeMap, resumeModeMap, showResultsSheet, refreshMatch, init, createSheetState, createSheetSummary, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, releaseDetailSelection, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-LIST-MODE 날짜:20260930 : 모드 동기화와 지도 정리·최종 복원 순서를 명시적으로 연결
+    root.CareMapExperience = Object.freeze({ syncMode, suspendModeMap, resumeModeMap, showResultsSheet, refreshMatch, init, createSheetState, createSheetSummary, ensureListAdFallback, createZoomResearch, bindViewportResearch, button, rows, refresh, beginDetail, finishDetail, cancelDetail, selectMarker, releaseDetailSelection, costCard, showDaycareComparison, createBasket, createOrigin, routeBasket, isBasketMap, exitBasketMap, contains, focusSearchMap }); // SOFTM-PC-SELECTION-RESTORE 날짜:20261010 : 상세 복원과 분리한 마커 선택 전환을 지도에 제공
     /** SOFTM-RESULT-SHEET END */
     /** SOFTM-WORKSPACE END */
 })(typeof window === 'undefined' ? globalThis : window);
