@@ -53,6 +53,18 @@
 }
 /** SOFTM-MOBILE-FOCUS END */
 
+/** SOFTM-DETAIL-CHROME START 날짜:20261009 : 기관 상세 확인 중에는 검색·필터·지도 조작 오버레이가 정보를 가리지 않도록 숨김 */
+@media(max-width:1000px) {
+ body.care-map-page.care-detail-active :is(.care-mobile-focus,.care-focus-controls,.care-type-header,.category-nav,.filters,.care-workspace-tabs,.care-mode-toggle,.care-view-switch,.care-menu-trigger,.map-head,.map-controls,.care-region-research,.care-location-state,.map-status,.care-list-ad-zone) {
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+ }
+ body.care-map-page.care-detail-active .layout>.map-card.card { z-index:160; }
+ body.care-map-page.care-detail-active #detailSheet { z-index:190; }
+}
+/** SOFTM-DETAIL-CHROME END */
+
 /** SOFTM-MAP-STYLE START 날짜:20261005 : 지도 위 검색·색상 도구와 목록 위에 겹쳐 표시하는 하단 메뉴로 탐색 공간을 확보 */
 @media(max-width:1000px) {
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] { --care-focus-bottom:calc(var(--care-list-ad-space,0px) + env(safe-area-inset-bottom)); }
