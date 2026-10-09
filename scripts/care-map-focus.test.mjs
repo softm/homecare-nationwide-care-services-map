@@ -31,9 +31,10 @@ test('지도 포인터를 전체보기가 직접 받고 SDK click은 상세 닫�
  assert.match(mapHtml,/Event\.addListener\(map,'click',\(\)=>closeDetail\(\)\)/);
  assert.doesNotMatch(mapHtml,/Event\.addListener\(map,'click',[\s\S]{0,160}mapTap/);
 });
-test('검색 결과와 경로의 기관 마커는 전체보기 진입 후 상세를 연다',()=>{
- assert.match(mapHtml,/Event\.addListener\(marker,'click',\(\)=>\{careMapFocus\?\.enter\(\);focusCenter\(c\.i\)\}\)/);
- assert.match(mapHtml,/Event\.addListener\(marker,'click',\(\)=>\{careMapFocus\?\.enter\(\);focusCenter\(row\.i\)\}\)/);
+test('검색 결과와 경로의 기관 마커는 PC 첫 클릭 선택과 두 번째 상세 열기를 분리한다',()=>{
+ assert.match(mapHtml,/function handleMarkerClick\(id\)[\s\S]+window\.innerWidth<=1000[\s\S]+focusCenter\(id\)[\s\S]+pcMarkerSelectedId[\s\S]+selectMarkerOnly\(id\)/);
+ assert.match(mapHtml,/Event\.addListener\(marker,'click',\(\)=>handleMarkerClick\(c\.i\)\)/);
+ assert.match(mapHtml,/Event\.addListener\(marker,'click',\(\)=>handleMarkerClick\(row\.i\)\)/);
 });
 test('전체보기 목록은 하단 손잡이와 기관 카드만 표시한다',()=>{
  assert.match(focusCss,/care-focus-list \.results>:not\(\.care-sheet-handle\):not\(#list\)\{display:none!important\}/);
