@@ -280,6 +280,8 @@ ${districtPages.map((district) => `        <li data-region-city="${html(district
   <script type="application/ld+json">${json(structuredData)}</script>
   <link rel="stylesheet" href="../seo-landing.css?v=20260904-3">
   <link rel="stylesheet" href="../regional-seo.css?v=20260904-1">
+  <script src="../google-ads-config.js?v=20261010-1"></script>
+  <script defer src="../google-ads.js?v=20261010-1"></script> <!-- SOFTM-GOOGLE-ADS 날짜:20261010 : 지역 검색 유입 페이지에도 AdSense Auto ads를 공통 연결 -->
 </head>
 <body data-region-type="${page.type}" data-region-province="${html(page.province)}" data-region-city="${html(page.city)}">
 <a class="skip-link" href="#main">본문으로 바로가기</a>

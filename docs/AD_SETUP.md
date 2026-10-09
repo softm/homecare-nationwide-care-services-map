@@ -49,6 +49,32 @@
 
 <!-- SOFTM-AD-PLACEMENTS END -->
 
+<!-- SOFTM-GOOGLE-ADS START 날짜:20261010 : AdSense 발급 전에도 코드 연결 범위와 실제 활성화 절차를 명확히 분리 -->
+## Google AdSense 적용 준비
+
+AdSense 계정과 사이트 심사는 운영자 Google 계정에서만 진행할 수 있으므로, 저장소에는 승인된 ID를 넣기 전까지 광고 요청이 나가지 않는 공통 로더를 배치한다.
+
+현재 연결 파일:
+
+| 파일 | 역할 |
+|---|---|
+| `google-ads-config.js` | AdSense publisher ID와 수동 슬롯 사용 여부 설정 |
+| `google-ads.js` | `ca-pub-...` 형식의 승인 ID가 있을 때만 AdSense 스크립트 로드 |
+| 주요 HTML 및 `scripts/build-regional-seo.mjs` | 통합지도·서비스 안내·예상 비용·유형 안내·지역 SEO 페이지에 공통 로더 연결 |
+
+운영 전환 절차:
+
+1. Google AdSense에서 `homecare.designboard.net` 사이트를 추가하고 소유권·정책 심사를 완료한다.
+2. AdSense의 코드 구현 안내에서 publisher ID(`ca-pub-...`)를 확인한다.
+3. `google-ads-config.js`의 `publisherId`에 실제 값을 입력한다.
+4. AdSense 관리화면의 Auto ads에서 Vignette ads와 Anchor ads 등 오버레이 형식을 켠다. 전면광고 성격의 Vignette는 페이지 코드에서 임의 호출하지 않고 Auto ads 설정으로 운영한다.
+5. AdSense가 요청하는 `ads.txt` 줄을 받은 뒤 루트 `ads.txt`에 `google.com, pub-..., DIRECT, f08c47fec0942fa0` 형식으로 추가한다. publisher ID가 나오기 전에는 가짜 ads.txt를 만들지 않는다.
+6. 수동 배너 단위를 추가로 발급한 경우에는 원하는 위치에 `ins.adsbygoogle`와 `data-ad-slot`을 배치하고, 같은 로더의 `renderDisplayAds()`가 처리하도록 한다.
+
+Google 공식 도움말 기준으로 AdSense 코드는 Auto ads와 기타 기능을 위해 사이트 전체 페이지에 배치하는 HTML 조각이며, ads.txt는 권장 사항이지만 수익 손실 방지를 위해 publisher ID를 정확히 포함해야 한다. Multiplex 광고는 콘텐츠 소비가 끝나는 지점이나 사이드바 같은 위치에 어울리므로, 승인 후 지역 목록 끝이나 안내 페이지 하단에 별도 슬롯으로 검토한다.
+
+<!-- SOFTM-GOOGLE-ADS END -->
+
 ## 예상 비용 배너 운영
 
 - `care-cost-ads.js`는 사용자가 하단 200px 근처에 접근했을 때 한 번만 광고를 요청합니다. 계산기 값을 바꾸거나 다시 계산해도 광고를 재생성하지 않습니다.
