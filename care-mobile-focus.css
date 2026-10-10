@@ -235,14 +235,18 @@
   height:22px;
  }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls {
-  top:calc(64px + env(safe-area-inset-top))!important;
-  left:max(10px,env(safe-area-inset-left))!important;
+  top:calc(14px + env(safe-area-inset-top))!important;
+  left:max(12px,env(safe-area-inset-left))!important;
   right:auto!important;
   bottom:auto!important;
+  gap:8px!important;
   width:44px!important;
-  border-radius:12px!important;
-  box-shadow:0 2px 10px #1b2f3f20!important;
- } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 확장 지도 조작부를 동일 크기와 여백으로 정렬해 가장자리 붙음을 완화 */
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+ } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 확장 지도 조작부를 막대형에서 원형 버튼 묶음으로 바꿔 정렬과 시야 부담 완화 */
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls #locateBtn {
   display:flex!important;
  } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 확장 지도에서도 확대·축소 위에 내위치 버튼을 유지 */
@@ -250,8 +254,15 @@
   width:44px!important;
   height:44px!important;
   flex-basis:44px!important;
+  border:1px solid #d8e0e7!important;
+  border-radius:50%!important;
+  background:#fffffff2!important;
+  box-shadow:0 2px 10px #1b2f3f20!important;
   font-size:21px!important;
   color:#3d4a55!important;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-control:not(:last-child) {
+  border-bottom:1px solid #d8e0e7!important;
  }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-control svg {
   width:22px!important;
@@ -284,10 +295,17 @@
   pointer-events:auto!important;
  }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-detail-active[data-care-mode="map"] .map-controls {
-  top:calc(64px + env(safe-area-inset-top))!important;
-  left:max(10px,env(safe-area-inset-left))!important;
+  top:calc(14px + env(safe-area-inset-top))!important;
+  left:max(12px,env(safe-area-inset-left))!important;
   right:auto!important;
   bottom:auto!important;
+  gap:8px!important;
+  width:44px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
   opacity:1!important;
   visibility:visible!important;
   pointer-events:auto!important;
