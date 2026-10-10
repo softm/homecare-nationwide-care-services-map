@@ -235,7 +235,7 @@
   height:22px;
  }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls {
-  top:calc(78px + env(safe-area-inset-top))!important;
+  top:calc(118px + env(safe-area-inset-top))!important;
   left:max(12px,env(safe-area-inset-left))!important;
   right:auto!important;
   bottom:auto!important;
@@ -246,7 +246,7 @@
   background:transparent!important;
   box-shadow:none!important;
   overflow:visible!important;
- } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 상세 지도 확인 시 왼쪽 조작부를 상단에서 내려 마커와 시야 충돌을 완화 */
+ } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 확장 지도 왼쪽 조작부를 지도 상단에서 충분히 내려 시각적 변화를 명확히 함 */
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls #locateBtn {
   display:flex!important;
  } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 확장 지도에서도 확대·축소 위에 내위치 버튼을 유지 */
@@ -295,7 +295,7 @@
   pointer-events:auto!important;
  }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-detail-active[data-care-mode="map"] .map-controls {
-  top:calc(78px + env(safe-area-inset-top))!important;
+  top:calc(118px + env(safe-area-inset-top))!important;
   left:max(12px,env(safe-area-inset-left))!important;
   right:auto!important;
   bottom:auto!important;
