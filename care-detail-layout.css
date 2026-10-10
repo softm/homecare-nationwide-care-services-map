@@ -153,7 +153,7 @@ body.care-map-page .mobile-popup-layer:not([hidden]) { justify-content:flex-end;
 body.care-map-page .mobile-popup-sheet { width:min(480px,calc(100vw - 32px)); height:calc(100dvh - 100px); max-height:820px; border-radius:16px; }
 body.care-map-page .mobile-popup-sheet[data-detail-expanded="true"] { width:min(760px,calc(100vw - 32px)); }
 @media(max-width:1000px) {
- body.care-map-page :is(#detailSheet,.mobile-popup-sheet) { height:54dvh; max-height:54dvh; min-height:0; box-sizing:border-box; border-radius:18px 18px 0 0; padding-bottom:0; width:100%; }
+ body.care-map-page :is(#detailSheet,.mobile-popup-sheet) { height:64dvh; max-height:64dvh; min-height:0; box-sizing:border-box; border-radius:18px 18px 0 0; padding-bottom:0; width:100%; } /* SOFTM-DETAIL-HEIGHT 날짜:20261011 : 기본 모바일 상세가 핵심 정보를 더 넓게 보여주도록 하단 시트 높이를 확대 */
  body.care-map-page :is(#detailSheet,.mobile-popup-sheet)[data-detail-expanded="true"] { height:84dvh; max-height:84dvh; width:100%; }
  body.care-map-page #detailSheet { left:0; right:0; bottom:0; }
  body.care-map-page .care-detail-scroll > .care-compact-head h3 { font-size:18px; }

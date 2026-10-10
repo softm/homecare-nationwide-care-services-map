@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const context={window:{},document:{readyState:"loading",addEventListener(){}},navigator:{userAgent:'desktop'},URLSearchParams}; // SOFTM-DETAIL-SWIPE 날짜:20261005 : 순수 기능 검사에서는 실제 DOM 초기화를 대기시킴
+const detailLayoutCss=readFileSync(new URL('../care-detail-layout.css',import.meta.url),'utf8');
+const mapHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 vm.runInNewContext(readFileSync(new URL('../care-detail-layout.js',import.meta.url),'utf8'),context);
 const {links,address}=context.window.CareDetailLayout;
 const c={n:'센터 & 분원',a:'서울시 테스트로 3'},point={lat:37.5,lng:127.1};
@@ -100,3 +102,11 @@ test('좌우로 충분히 민 경우만 이전·다음 기관으로 이동한다
  assert.equal(step(100,0,2000),'previous');
 });
 /** SOFTM-DETAIL-SWIPE END */
+
+/** SOFTM-DETAIL-HEIGHT START 날짜:20261011 : 모바일 기본 상세 팝업 높이와 캐시 버전을 검증 */
+test('모바일 기본 상세 팝업은 확장 전에도 지도와 함께 더 크게 표시한다',()=>{
+ assert.match(detailLayoutCss,/body\.care-map-page :is\(#detailSheet,\.mobile-popup-sheet\) \{ height:64dvh; max-height:64dvh;/);
+ assert.match(detailLayoutCss,/data-detail-expanded="true"\] \{ height:84dvh; max-height:84dvh; width:100%; \}/);
+ assert.match(mapHtml,/care-detail-layout\.css\?v=20261011-popup-height1/);
+});
+/** SOFTM-DETAIL-HEIGHT END */
