@@ -45,19 +45,22 @@ test('전체보기 목록은 하단 손잡이와 기관 카드만 표시한다',
 /** SOFTM-MOBILE-IMMERSIVE START 날짜:20261010 : 카카오맵처럼 모바일 전체 지도에서 주변 오버레이를 접는 토글 회귀검사 */
 test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 축소 토글과 확대축소만 남긴다',()=>{
  assert.match(mobileFocusSource,/data-mobile-focus="fullscreen"/);
+ assert.match(mapHtml,/function syncDetailOverlayChrome\(open\)[\s\S]+detailForcedImmersive[\s\S]+fullscreen\?\.click\(\)/);
  assert.match(mobileFocusSource,/function setImmersive\(active\)/);
  assert.match(mobileFocusSource,/care-mobile-map-immersive/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-mobile-focus-top/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-mobile-focus-dock/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-region-research/);
- assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-controls #locateBtn[\s\S]+display:none!important/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive:not\(\.care-detail-active\)[\s\S]+\.map-controls #locateBtn[\s\S]+display:none!important/);
+ assert.match(mobileFocusCss,/care-detail-active[\s\S]+\.care-mobile-focus-side \[data-mobile-focus="fullscreen"\][\s\S]+pointer-events:auto!important/);
+ assert.match(mobileFocusCss,/care-detail-active[\s\S]+\.map-controls #locateBtn[\s\S]+display:flex!important/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-control/);
 });
 /** SOFTM-MOBILE-IMMERSIVE END */
 /** SOFTM-MOBILE-CHIPS START 날짜:20261010 : 모바일 전체 지도 칩 문구·크기 축소 회귀검사 */
 test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을 사용한다',()=>{
- assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-layer-under-zoom1/);
- assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-layer-under-zoom1/);
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-detail-expanded1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-detail-expanded1/);
  assert.match(mobileFocusSource,/>필터<\/span>/);
  assert.match(mobileFocusSource,/`필터 · \$\{filterCount \|\| '설정됨'\}`/);
  assert.doesNotMatch(mobileFocusSource,/상세필터/);
@@ -72,7 +75,7 @@ test('모바일 전체 지도는 지도변경을 확대·축소 아래에 두고
  assert.match(mobileFocusCss,/\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important; left:max\(12px,env\(safe-area-inset-left\)\)!important; right:auto!important/);
  assert.match(mobileFocusCss,/max-height:760px[\s\S]+\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important/);
  assert.match(mobileFocusCss,/max-height:760px[\s\S]+\.care-mobile-focus-side \{ top:calc\(278px \+ env\(safe-area-inset-top\)\); \}/);
- assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-controls #locateBtn[\s\S]+display:none!important/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive:not\(\.care-detail-active\)[\s\S]+\.map-controls #locateBtn[\s\S]+display:none!important/);
 });
 /** SOFTM-MOBILE-CONTROLS END */
 /** SOFTM-DETAIL-MAP-PERSIST START 날짜:20260914 : 팝업 닫기가 선택 전 기준점으로 지도를 되돌리는 회귀를 방지 */

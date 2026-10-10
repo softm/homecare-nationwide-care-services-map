@@ -257,8 +257,8 @@
 <script src="care-list-sticky.js?v=20261003-reading1"></script> <!-- SOFTM-LIST-READING 날짜:20261003 : 읽기 도구 펼침과 스크롤 복귀 동작을 함께 반영 -->
 <!-- SOFTM-LIST-STICKY END -->
 <!-- SOFTM-MAP-STYLE START 날짜:20261005 : 목록 드래그 접힘 높이와 하단 메뉴 배치를 최신 캐시로 적용 -->
-<link rel="stylesheet" href="care-mobile-focus.css?v=20261010-layer-under-zoom1"> <!-- SOFTM-MOBILE-CONTROLS 날짜:20261010 : 모바일 전체지도 지도 변경 버튼의 확대·축소 아래 배치를 즉시 적용 -->
-<script src="care-mobile-focus.js?v=20261010-layer-under-zoom1"></script> <!-- SOFTM-MOBILE-CONTROLS 날짜:20261010 : 모바일 전체지도 조작부 캐시를 위치 변경과 함께 갱신 -->
+<link rel="stylesheet" href="care-mobile-focus.css?v=20261010-detail-expanded1"> <!-- SOFTM-DETAIL-EXPANDED 날짜:20261010 : 모바일 상세 중 확장 지도 조작부 표시를 즉시 적용 -->
+<script src="care-mobile-focus.js?v=20261010-detail-expanded1"></script> <!-- SOFTM-DETAIL-EXPANDED 날짜:20261010 : 모바일 상세 진입 시 확장 상태 동기화를 즉시 적용 -->
 <!-- SOFTM-MAP-STYLE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -940,12 +940,26 @@ function switchDetailView(c,view){
 /** SOFTM-POPUP-TOP END */
 function mainStaffCount(c){return['s','rn','na','pt','ot','cw'].reduce((sum,key)=>sum+(Number(c[key])||0),0)}
 function operationPeriod(value){if(!value)return'미확인';const start=new Date(`${String(value).slice(0,10)}T00:00:00`);if(Number.isNaN(start.getTime()))return'미확인';const today=new Date(),months=Math.max(0,(today.getFullYear()-start.getFullYear())*12+today.getMonth()-start.getMonth()-(today.getDate()<start.getDate()?1:0)),years=Math.floor(months/12),remain=months%12;return years?`${years}년${remain?` ${remain}개월`:''}`:`${Math.max(1,remain)}개월`}
-function syncDetailOverlayChrome(open){document.body.classList.toggle('care-detail-active',open);if(open&&document.body.classList.contains('care-mobile-filters-open'))document.querySelector('.care-filter-panel-close')?.click()} // SOFTM-DETAIL-CHROME 날짜:20261009 : 기관 상세를 읽는 동안 검색·필터 조작부가 내용을 가리지 않도록 상태를 동기화
+/** SOFTM-DETAIL-EXPANDED START 날짜:20261010 : 모바일 상세는 확장 지도 상태로 보고 축소·내위치·확대·축소 조작을 유지 */
+function syncDetailOverlayChrome(open){
+ const body=document.body,fullscreen=document.querySelector('[data-mobile-focus="fullscreen"]');
+ if(open&&body.classList.contains('care-mobile-focus-active')&&!body.classList.contains('care-mobile-map-immersive')){
+  body.dataset.detailForcedImmersive='true';
+  fullscreen?.click();
+ }
+ body.classList.toggle('care-detail-active',open);
+ if(!open&&body.dataset.detailForcedImmersive==='true'){
+  delete body.dataset.detailForcedImmersive;
+  if(body.classList.contains('care-mobile-map-immersive'))fullscreen?.click();
+ }
+ if(open&&body.classList.contains('care-mobile-filters-open'))document.querySelector('.care-filter-panel-close')?.click();
+}
+/** SOFTM-DETAIL-EXPANDED END */
 function openDetail(c,reveal=true){
  CareDetailLayout.beginInstitution($('detailSheet')); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 다음 기관은 기존 창 크기에서 핵심 정보부터 확인
  CareDetailLayout.navigation(c,CareMapExperience.isBasketMap()?CareMapExperience.rows():areaRows,focusCenter); // SOFTM-DETAIL-NAV 날짜:20261007 : 하단 버튼 없이 기존 스와이프 기관 순서를 유지
  activeDetail=c;officialDetailToken++;basicInfoToken++;officialActiveTab=11;
- syncDetailOverlayChrome(true); // SOFTM-DETAIL-CHROME 날짜:20261009 : 팝업 호출 즉시 모바일 지도 위 보조 아이콘을 숨김
+ syncDetailOverlayChrome(true); // SOFTM-DETAIL-EXPANDED 날짜:20261010 : 팝업 호출 즉시 모바일 상세를 확장 지도 조작 상태로 동기화
  $('detailRegion').textContent=`${c.p} ${c.c} · ${c.tn||CONFIG.label}`;$('detailName').textContent=c.n;
  $('detailDecision').innerHTML=CareDecisionSummary.render(c,TYPE); // SOFTM-DECISION-SUMMARY 날짜:20260924 : 평가연도와 유형별 정원·인력의 근거를 우선 표시
  const distance=Number.isFinite(c._distance)?c._distance.toFixed(1)+'km':'—',officialLabel=CONFIG.source==='hira'?'심평원 정보':'공단 원문',staff=mainStaffCount(c),capacity=Number(c.z)||0,staffRatio=!c.staffMissing&&capacity&&staff?`${(capacity/staff).toFixed(1)}명당 1명`:'—',evaluation=c.g?`${esc(c.et||CONFIG.label)} · ${c.ey||'-'}년 · ${esc(c.ed||'-')}`:CONFIG.source==='hira'?'장기요양기관 공단평가 대상과 다른 의료기관 자료입니다.':'공식 세부평가 미연결'; // SOFTM-DATA-UNIFIED 날짜:20260904 : 일부 인력 미수집일 때 정원 대비 비율을 확정값으로 계산하지 않음
