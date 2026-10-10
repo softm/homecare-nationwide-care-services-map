@@ -22,7 +22,7 @@
  .care-mobile-focus-search input { min-width:0; width:100%; flex:1; height:48px; padding:0 2px; border:0; border-radius:8px; background:#fff; color:#163a32; font-size:16px; }
  .care-mobile-focus-chips { display:flex; gap:8px; margin-top:10px; }
  .care-mobile-focus-chips button { max-width:65%; min-width:0; padding:0 14px; border-radius:24px; font-size:13px; font-weight:650; box-shadow:0 2px 10px #173b3720; }
- .care-mobile-focus-side { position:absolute; left:max(12px,env(safe-area-inset-left)); right:auto; top:calc(278px + env(safe-area-inset-top)); display:grid; gap:8px; } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 지도 변경 버튼을 확대·축소 조작 아래로 내려 조작 흐름을 세로로 맞춤 */
+ .care-mobile-focus-side { position:absolute; left:auto; right:max(12px,env(safe-area-inset-right)); top:calc(138px + env(safe-area-inset-top)); display:grid; gap:8px; } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 지도변경·확장·공유 묶음을 지도 오른쪽으로 정렬 */
  .care-mobile-focus-side button { width:46px; height:46px; border-radius:50%; box-shadow:0 2px 12px #173b3724; }
  .care-mobile-focus-dock { position:absolute; left:50%; bottom:calc(var(--care-list-ad-space,0px) + 12px + env(safe-area-inset-bottom)); transform:translateX(-50%); display:flex; gap:2px; padding:5px; width:max-content; max-width:calc(100% - 24px); box-sizing:border-box; background:#fffffff5; border:1px solid #d7e5df; border-radius:32px; box-shadow:0 4px 20px #173b3728; pointer-events:auto; }
  .care-mobile-focus-dock button { gap:5px; min-height:48px; padding:0 12px; border-radius:26px; font-size:13px; white-space:nowrap; background:transparent; }
@@ -98,7 +98,7 @@
 
 /** SOFTM-MAP-STYLE START 날짜:20261005 : 낮은 모바일에서도 지도 확대 버튼과 목록 위 메뉴의 겹침을 방지 */
 @media(max-width:1000px) and (max-height:760px) {
- .care-mobile-focus-side { top:calc(278px + env(safe-area-inset-top)); } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 낮은 화면에서도 지도 변경을 확대·축소 아래에 유지 */
+ .care-mobile-focus-side { top:calc(130px + env(safe-area-inset-top)); } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 낮은 화면에서도 지도변경 묶음을 오른쪽 상단 흐름에 유지 */
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active[data-care-mode="map"] .map-controls { top:calc(126px + env(safe-area-inset-top))!important; } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 낮은 화면에서도 돌봄 선택 아래 위치를 유지 */
 }
 /** SOFTM-MAP-STYLE END */
@@ -236,16 +236,16 @@
  }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls {
   top:calc(66px + env(safe-area-inset-top))!important;
-  left:max(8px,env(safe-area-inset-left))!important;
+  left:max(0px,env(safe-area-inset-left))!important;
   right:auto!important;
   bottom:auto!important;
   width:38px!important;
   border-radius:8px!important;
   box-shadow:0 2px 10px #1b2f3f20!important;
  }
- body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive:not(.care-detail-active)[data-care-mode="map"] .map-controls #locateBtn {
-  display:none!important;
- }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls #locateBtn {
+  display:flex!important;
+ } /* SOFTM-MOBILE-CONTROLS 날짜:20261010 : 확장 지도에서도 확대·축소 위에 내위치 버튼을 유지 */
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-control {
   width:38px!important;
   height:38px!important;
