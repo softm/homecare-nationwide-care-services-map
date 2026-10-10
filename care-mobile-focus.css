@@ -71,8 +71,8 @@
  .care-mobile-focus-dock { bottom:calc(var(--care-focus-bottom) + 12px); box-shadow:0 4px 20px #143e3b38; border:2px solid #fff; }
  .care-mobile-focus-search { border:1px solid #e4eae8; box-shadow:0 4px 20px #12362e30; }
  .care-mobile-focus-search button[type="submit"] { color:#fff; background:#087e74; }
- .care-mobile-focus-chips button { padding:6px 12px 6px 7px; max-width:70%; font-size:14px; border:1px solid #ffffffb3; }
- .care-mobile-focus-chips svg { width:24px; height:24px; padding:6px; border-radius:50%; box-sizing:content-box; }
+ .care-mobile-focus-chips button { min-height:38px; padding:4px 10px 4px 5px; max-width:70%; font-size:13px; border:1px solid #ffffffb3; } /* SOFTM-MOBILE-CHIPS 날짜:20261010 : 모바일 지도 위 유형·필터 칩이 지도를 덜 가리도록 높이와 패딩 축소 */
+ .care-mobile-focus-chips svg { width:20px; height:20px; padding:5px; border-radius:50%; box-sizing:content-box; } /* SOFTM-MOBILE-CHIPS 날짜:20261010 : 칩 아이콘 박스를 줄여 상단 오버레이 밀도 완화 */
  .care-mobile-focus-chips [data-mobile-focus="type"] svg { color:#fff; background:linear-gradient(145deg,#20b79a,#07856d); }
  .care-mobile-focus-chips [data-mobile-focus="filter"] svg { color:#fff; background:linear-gradient(145deg,#a775e7,#7548bf); }
  .care-mobile-focus-chips span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
