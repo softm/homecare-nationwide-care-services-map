@@ -21,13 +21,15 @@
             back: '<path d="m15 5-7 7 7 7"/>', search: '<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',
             voice: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/>',
             share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.2M8.7 13.3l6.6 4.2"/>', // SOFTM-MAP-SHARE 날짜:20261007 : 현재 지도의 공유 행동을 아이콘으로 구분
+            fullscreen: '<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/><path d="M9 9 3 3M15 9l6-6M9 15l-6 6M15 15l6 6"/>',
+            minimize: '<path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6"/><path d="M3 9l6-6M21 9l-6-6M3 15l6 6M21 15l-6 6"/>',
             layers: '<path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5"/>',
             list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1"/>',
             saved: '<path d="M6 3h12v18l-6-4-6 4Z"/>', more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
         };
         const svg = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name]}</svg>`;
         /** SOFTM-MAP-STYLE START 날짜:20261005 : 기본 실사지도와 아이콘별 기능을 접근성 이름에도 반영 */
-        ui.innerHTML = `<div class="care-mobile-focus-top"><form class="care-mobile-focus-search" role="search" aria-label="전체 지도 검색"><button type="button" data-mobile-focus="exit" aria-label="전체 지도 닫기">${svg('back')}</button><input type="search" aria-label="지도에서 지역·기관 검색" placeholder="지역·기관명 검색" autocomplete="off"><button type="button" data-mobile-focus="voice" aria-label="음성검색">${svg('voice')}</button><button type="submit" aria-label="검색">${svg('search')}</button></form><div class="care-mobile-focus-chips"><button type="button" data-mobile-focus="type" aria-haspopup="dialog">${svg('type')}<span data-focus-type>유형 선택 ▾</span></button><button type="button" data-mobile-focus="filter" aria-expanded="false">${svg('filter')}<span data-focus-filter>상세필터</span></button></div></div><div class="care-mobile-focus-side"><!-- SOFTM-MAP-SHARE 날짜:20261007 : 지도 종류 변경 위에서 현재 화면을 바로 공유 --><button type="button" data-mobile-focus="share" aria-label="현재 지도 공유" title="현재 지도 공유">${svg('share')}</button><button type="button" data-mobile-focus="layers" aria-label="일반지도 보기" aria-pressed="true">${svg('layers')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
+        ui.innerHTML = `<div class="care-mobile-focus-top"><form class="care-mobile-focus-search" role="search" aria-label="전체 지도 검색"><button type="button" data-mobile-focus="exit" aria-label="전체 지도 닫기">${svg('back')}</button><input type="search" aria-label="지도에서 지역·기관 검색" placeholder="지역·기관명 검색" autocomplete="off"><button type="button" data-mobile-focus="voice" aria-label="음성검색">${svg('voice')}</button><button type="submit" aria-label="검색">${svg('search')}</button></form><div class="care-mobile-focus-chips"><button type="button" data-mobile-focus="type" aria-haspopup="dialog">${svg('type')}<span data-focus-type>유형 선택 ▾</span></button><button type="button" data-mobile-focus="filter" aria-expanded="false">${svg('filter')}<span data-focus-filter>상세필터</span></button></div></div><div class="care-mobile-focus-side"><!-- SOFTM-MAP-SHARE 날짜:20261007 : 지도 종류 변경 위에서 현재 화면을 바로 공유 --><button type="button" data-mobile-focus="share" aria-label="현재 지도 공유" title="현재 지도 공유">${svg('share')}</button><button type="button" data-mobile-focus="layers" aria-label="일반지도 보기" aria-pressed="true">${svg('layers')}</button><!-- SOFTM-MOBILE-IMMERSIVE 날짜:20261010 : 모바일 전체 지도 안에서 카카오맵처럼 오버레이를 줄이는 토글 --><button type="button" data-mobile-focus="fullscreen" aria-label="지도만 크게 보기" aria-pressed="false" title="지도만 크게 보기">${svg('fullscreen')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
         /** SOFTM-MAP-STYLE END */
         document.body.append(ui); // SOFTM-DOCK-OVERLAY 날짜:20261005 : 지도 겹침 영역 밖에 두어 메뉴가 목록 위에 실제로 떠 있게 함
         const input = ui.querySelector('input');
@@ -66,6 +68,18 @@
         types.querySelector('header button').onclick = () => types.close();
         types.addEventListener('click', event => { if (event.target === types) types.close(); });
         let enabled = false, drag = null, filterWasOpen = false;
+        /** SOFTM-MOBILE-IMMERSIVE START 날짜:20261010 : 지도만 볼 때 검색·목록 등 주변 오버레이를 접고 토글 하나로 복귀 */
+        const fullscreenButton = ui.querySelector('[data-mobile-focus="fullscreen"]');
+        function setImmersive(active) {
+            body.classList.toggle('care-mobile-map-immersive', active);
+            fullscreenButton.setAttribute('aria-pressed', String(active));
+            fullscreenButton.setAttribute('aria-label', active ? '전체 지도 도구 보이기' : '지도만 크게 보기');
+            fullscreenButton.title = fullscreenButton.getAttribute('aria-label');
+            fullscreenButton.innerHTML = svg(active ? 'minimize' : 'fullscreen');
+            if (active) closeSheet();
+            root.setTimeout(config.resize, 0);
+        }
+        /** SOFTM-MOBILE-IMMERSIVE END */
         function closeSheet() {
             /** SOFTM-ROUTE-MAP START 날짜:20261007 : Esc도 완료 경로를 지우지 않고 먼저 경로 목록으로 복귀 */
             if (body.dataset.careWorkspace === 'saved' && body.dataset.carePanel === 'route' && body.dataset.careView === 'map') {
@@ -144,6 +158,7 @@
             else if (action === 'voice') document.querySelector('.care-voice-trigger')?.click();
             else if (action === 'share') document.getElementById('shareBtn')?.click(); // SOFTM-MAP-SHARE 날짜:20261007 : 기존 위치·배율·조건 공유 처리를 재사용
             else if (action === 'more') document.querySelector('.care-menu-trigger')?.click();
+            else if (action === 'fullscreen') setImmersive(!body.classList.contains('care-mobile-map-immersive'));
             else if (action === 'filter') {
                 if (body.dataset.careWorkspace === 'saved') closeSheet();
                 document.querySelector('.care-mobile-filter-toggle')?.click();
@@ -195,7 +210,7 @@
         function exit() {
             arrangeSaved(false); // SOFTM-SAVED-FULL 날짜:20261007 : PC 복귀 시 기존 브리핑 위치를 보존
             enabled = false; filterWasOpen = false; ui.hidden = true; types.close();
-            body.classList.remove('care-mobile-focus-active','care-focus-saved');
+            body.classList.remove('care-mobile-focus-active','care-focus-saved','care-mobile-map-immersive');
             root.CareListAds?.setFocus(false);
             document.querySelector('.care-mobile-filters-open .care-filter-panel-close')?.click();
         }

@@ -201,3 +201,56 @@
  body.care-mobile-focus-active.care-focus-saved[data-care-panel="route"][data-care-view="map"] .care-simulation { bottom:calc(var(--care-focus-bottom) + 76px); }
 }
 /** SOFTM-ROUTE-DOCK END */
+
+/** SOFTM-MOBILE-IMMERSIVE START 날짜:20261010 : 모바일 전체 지도 확장 시 검색·필터·하단 메뉴를 접고 지도와 축소 토글만 남김 */
+@media(max-width:1000px) {
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] {
+  --care-focus-bottom:env(safe-area-inset-bottom);
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] :is(.care-mobile-focus-top,.care-mobile-focus-dock,.care-mobile-focus-side [data-mobile-focus="share"],.care-mobile-focus-side [data-mobile-focus="layers"],.care-region-research,.care-location-state,.map-status,.care-list-ad-zone,.layout>.results,.layout>.care-saved-panel) {
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .care-mobile-focus-side {
+  top:calc(12px + env(safe-area-inset-top));
+  right:max(10px,env(safe-area-inset-right));
+  display:block;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .care-mobile-focus-side [data-mobile-focus="fullscreen"] {
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  width:42px;
+  height:42px;
+  border:1px solid #d8e0e7;
+  border-radius:50%;
+  color:#3d4a55;
+  background:#fffffff2;
+  box-shadow:0 2px 10px #1b2f3f24;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .care-mobile-focus-side [data-mobile-focus="fullscreen"] svg {
+  width:21px;
+  height:21px;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls {
+  top:calc(66px + env(safe-area-inset-top))!important;
+  left:max(8px,env(safe-area-inset-left))!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:38px!important;
+  border-radius:8px!important;
+  box-shadow:0 2px 10px #1b2f3f20!important;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-controls #locateBtn {
+  display:none!important;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-immersive[data-care-mode="map"] .map-control {
+  width:38px!important;
+  height:38px!important;
+  flex-basis:38px!important;
+  font-size:21px!important;
+  color:#3d4a55!important;
+ }
+}
+/** SOFTM-MOBILE-IMMERSIVE END */

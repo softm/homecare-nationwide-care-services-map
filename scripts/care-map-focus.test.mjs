@@ -5,6 +5,8 @@ import {readFileSync} from 'node:fs';
 import '../care-map-focus.js';
 const mapHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const focusCss=readFileSync(new URL('../care-map-focus.css',import.meta.url),'utf8');
+const mobileFocusSource=readFileSync(new URL('../care-mobile-focus.js',import.meta.url),'utf8');
+const mobileFocusCss=readFileSync(new URL('../care-mobile-focus.css',import.meta.url),'utf8');
 /** SOFTM-MOBILE-FOCUS START 날짜:20261003 : 모바일 배경 탭 유지와 데스크톱 기존 복귀를 구분해 검증 */
 test('모바일 지도 배경은 전체보기를 유지하고 데스크톱은 기존 복귀를 유지한다',()=>{
  assert.equal(CareMapFocus.focusAction(false,false),null);
@@ -40,6 +42,20 @@ test('전체보기 목록은 하단 손잡이와 기관 카드만 표시한다',
  assert.match(focusCss,/care-focus-list \.results>:not\(\.care-sheet-handle\):not\(#list\)\{display:none!important\}/);
  assert.match(focusCss,/care-focus-list \.results #list\{flex:1!important/);
 });
+/** SOFTM-MOBILE-IMMERSIVE START 날짜:20261010 : 카카오맵처럼 모바일 전체 지도에서 주변 오버레이를 접는 토글 회귀검사 */
+test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 축소 토글과 확대축소만 남긴다',()=>{
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-immersive1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-immersive1/);
+ assert.match(mobileFocusSource,/data-mobile-focus="fullscreen"/);
+ assert.match(mobileFocusSource,/function setImmersive\(active\)/);
+ assert.match(mobileFocusSource,/care-mobile-map-immersive/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-mobile-focus-top/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-mobile-focus-dock/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-region-research/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-controls #locateBtn[\s\S]+display:none!important/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-control/);
+});
+/** SOFTM-MOBILE-IMMERSIVE END */
 /** SOFTM-DETAIL-MAP-PERSIST START 날짜:20260914 : 팝업 닫기가 선택 전 기준점으로 지도를 되돌리는 회귀를 방지 */
 test('기관 상세를 닫아도 현재 중심과 배율을 변경하지 않는다',()=>{
  const careClose=mapHtml.match(/function closeDetail\([\s\S]*?\n\}/)?.[0]||'';
