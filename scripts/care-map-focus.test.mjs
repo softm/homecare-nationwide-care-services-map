@@ -56,8 +56,8 @@ test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 
 /** SOFTM-MOBILE-IMMERSIVE END */
 /** SOFTM-MOBILE-CHIPS START 날짜:20261010 : 모바일 전체 지도 칩 문구·크기 축소 회귀검사 */
 test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을 사용한다',()=>{
- assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-chip-compact1/);
- assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-chip-compact1/);
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-control-position1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-control-position1/);
  assert.match(mobileFocusSource,/>필터<\/span>/);
  assert.match(mobileFocusSource,/`필터 · \$\{filterCount \|\| '설정됨'\}`/);
  assert.doesNotMatch(mobileFocusSource,/상세필터/);
@@ -65,6 +65,14 @@ test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을
  assert.match(mobileFocusCss,/care-mobile-focus-chips svg \{ width:20px; height:20px; padding:5px/);
 });
 /** SOFTM-MOBILE-CHIPS END */
+/** SOFTM-MOBILE-CONTROLS START 날짜:20261010 : 모바일 전체 지도 조작 아이콘 위치·순서 회귀검사 */
+test('모바일 전체 지도는 지도변경 아래 확장 토글을 두고 지도 조작은 돌봄 선택 아래에 둔다',()=>{
+ assert.match(mobileFocusSource,/data-mobile-focus="layers"[\s\S]+data-mobile-focus="fullscreen"[\s\S]+data-mobile-focus="share"/);
+ assert.match(mobileFocusCss,/\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important; left:max\(12px,env\(safe-area-inset-left\)\)!important; right:auto!important/);
+ assert.match(mobileFocusCss,/max-height:760px[\s\S]+\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-controls #locateBtn[\s\S]+display:none!important/);
+});
+/** SOFTM-MOBILE-CONTROLS END */
 /** SOFTM-DETAIL-MAP-PERSIST START 날짜:20260914 : 팝업 닫기가 선택 전 기준점으로 지도를 되돌리는 회귀를 방지 */
 test('기관 상세를 닫아도 현재 중심과 배율을 변경하지 않는다',()=>{
  const careClose=mapHtml.match(/function closeDetail\([\s\S]*?\n\}/)?.[0]||'';
