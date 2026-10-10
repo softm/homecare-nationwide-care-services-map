@@ -59,8 +59,8 @@ test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 
 /** SOFTM-MOBILE-IMMERSIVE END */
 /** SOFTM-MOBILE-CHIPS START 날짜:20261010 : 모바일 전체 지도 칩 문구·크기 축소 회귀검사 */
 test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을 사용한다',()=>{
- assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-control-round1/);
- assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-control-round1/);
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-control-drop1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-control-drop1/);
  assert.match(mobileFocusSource,/>필터<\/span>/);
  assert.match(mobileFocusSource,/`필터 · \$\{filterCount \|\| '설정됨'\}`/);
  assert.doesNotMatch(mobileFocusSource,/상세필터/);
@@ -75,7 +75,7 @@ test('모바일 전체 지도는 지도변경 묶음을 오른쪽에 두고 확�
  assert.match(mobileFocusCss,/\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important; left:max\(12px,env\(safe-area-inset-left\)\)!important; right:auto!important/);
  assert.match(mobileFocusCss,/max-height:760px[\s\S]+\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important/);
  assert.match(mobileFocusCss,/max-height:760px[\s\S]+\.care-mobile-focus-side \{ top:calc\(130px \+ env\(safe-area-inset-top\)\); \}/);
- assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-controls \{[\s\S]+top:calc\(14px \+ env\(safe-area-inset-top\)\)!important;[\s\S]+left:max\(12px,env\(safe-area-inset-left\)\)!important[\s\S]+gap:8px!important[\s\S]+background:transparent!important/);
+ assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-controls \{[\s\S]+top:calc\(78px \+ env\(safe-area-inset-top\)\)!important;[\s\S]+left:max\(12px,env\(safe-area-inset-left\)\)!important[\s\S]+gap:7px!important[\s\S]+background:transparent!important/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-control \{[\s\S]+width:44px!important[\s\S]+border-radius:50%!important/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-mobile-focus-side \[data-mobile-focus="fullscreen"\][\s\S]+width:44px[\s\S]+height:44px/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive\[data-care-mode="map"\] \.map-controls #locateBtn[\s\S]+display:flex!important/);
