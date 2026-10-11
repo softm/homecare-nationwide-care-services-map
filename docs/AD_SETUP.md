@@ -75,13 +75,13 @@ Google 공식 도움말 기준으로 AdSense 코드는 Auto ads와 기타 기능
 
 <!-- SOFTM-GOOGLE-ADS END -->
 
-<!-- SOFTM-ADMOB-APP-ADS START 날짜:20261010 : AdMob 앱 인증에 필요한 공개 루트 파일과 실제 게시자 ID를 운영 문서에 고정 -->
+<!-- SOFTM-ADMOB-APP-ADS START 날짜:20261012 : autorunnavi AdMob 앱 인증에 필요한 공개 루트 파일과 실제 게시자 ID를 운영 문서에 고정 -->
 ## Android AdMob app-ads.txt
 
-Android 앱 `돌봄한눈`(`net.softm.care.homecare`)은 AdMob 앱 ID `ca-app-pub-8852588878852017~4974288714`와 네이티브 광고 단위 `ca-app-pub-8852588878852017/1734805295`를 사용한다. AdMob 앱 인증을 위해 공개 사이트 루트에 `app-ads.txt`를 배포하고 다음 줄을 유지한다.
+Android 앱 `돌봄한눈`(`net.softm.care.homecare`)은 autorunnavi AdMob 앱 ID `ca-app-pub-4219853075548260~6852837399`, 네이티브 광고 단위 `ca-app-pub-4219853075548260/8791595868`, 전면광고 단위 `ca-app-pub-4219853075548260/5300082578`, 종료 다이얼로그 사각 배너 단위 `ca-app-pub-4219853075548260/3748161904`를 사용한다. AdMob 앱 인증을 위해 공개 사이트 루트에 `app-ads.txt`를 배포하고 다음 줄을 유지한다.
 
 ```text
-google.com, pub-8852588878852017, DIRECT, f08c47fec0942fa0
+google.com, pub-4219853075548260, DIRECT, f08c47fec0942fa0
 ```
 
 AdMob 콘솔의 앱 인증이 보류되면 `https://homecare.designboard.net/app-ads.txt`가 위 내용으로 응답하는지 먼저 확인한 뒤 콘솔의 `업데이트 확인`을 실행한다.
