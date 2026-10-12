@@ -36,9 +36,20 @@ def province(value):
 def token(value):
     return re.sub(r'[^가-힣a-zA-Z0-9]', '', clean(value)).lower()
 
-def support_tags(programs):
+def support_evidence(programs):
     text = clean(programs)
-    return [tag for tag, patterns in SUPPORT_RULES if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns)]
+    evidence = {}
+    for tag, patterns in SUPPORT_RULES:
+        matches = []
+        for pattern in patterns:
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                phrase = clean(match.group(0))
+                if phrase and phrase not in matches: matches.append(phrase)
+        if matches: evidence[tag] = matches
+    return evidence
+
+def support_tags(programs):
+    return list(support_evidence(programs))
 
 def coord(lat, lng):
     try:
@@ -132,7 +143,8 @@ def reconcile(rows, registry):
         if any(math.hypot((a['lat']-b['lat'])*111.2,(a['lng']-b['lng'])*88.8)>1 for a in locations for b in locations): item['conflicts'].append('location')
         if item['conflicts']: conflicts.append({'id':id,'fields':item['conflicts'],'records':group})
         item['programTags']=[label for label,words in [('검사·상담',['검진','검사','상담']),('가족지원',['가족','보호자']),('예방·쉼터',['예방','쉼터'])] if any(w in item['programs'] for w in words)]
-        item['supportTags']=support_tags(item['programs'])
+        item['supportEvidence']=support_evidence(item['programs'])
+        item['supportTags']=list(item['supportEvidence'])
         centers.append(item)
     return sorted(centers,key=lambda r:(r['province'],r['city'],r['name'])),conflicts
 
@@ -167,7 +179,7 @@ def build(root=ROOT):
     for old in (out/'details').glob('*.json'):
         if old.stem not in {r['id'] for r in centers}: old.unlink()
     revision=public_revision(out)
-    write_json(out/'manifest.json',{'schemaVersion':2,'count':len(centers),'file':'centers.json.gz','revision':revision,
+    write_json(out/'manifest.json',{'schemaVersion':3,'count':len(centers),'file':'centers.json.gz','revision':revision,
         'types':dict(Counter(r['type'] for r in centers)),'withoutCoordinates':sum(not r['location'] for r in centers),
         'sourceCounts':{'standard':len(standard),'nmc':len(nmc)},'sources':meta,'conflictCount':len(conflicts)})
     write_json(source/'comparison.json',{'mergedCount':len(rows)-len(centers),'singleSourceCenters':[{'id':r['id'],'name':r['name'],'source':r['sources'][0]['key']} for r in centers if len({s['key'] for s in r['sources']})==1],'conflicts':conflicts})
