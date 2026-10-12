@@ -7,7 +7,7 @@ const daycare = render(base, 'daycare');
 assert.match(daycare, /A등급/);
 assert.match(daycare, /2023년 평가/);
 assert.match(daycare, /등록 정원/);
-assert.match(daycare, /잔여 자리가 아닙니다/);
+assert.doesNotMatch(daycare, /잔여 자리가 아닙니다/); // SOFTM-DECISION-NOTE 날짜:20261012 : 상세 상단에서 정원 주의 문구를 제거한 상태를 검증
 assert.doesNotMatch(render(base, 'home-care'), /등록 정원/);
 assert.match(render({ ...base, staffMissing: true }, 'home-care'), /9명 확인/);
 assert.match(render({ staffMissing: true }, 'daycare'), /미확인/);

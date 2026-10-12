@@ -103,10 +103,11 @@ test('좌우로 충분히 민 경우만 이전·다음 기관으로 이동한다
 });
 /** SOFTM-DETAIL-SWIPE END */
 
-/** SOFTM-DETAIL-HEIGHT START 날짜:20261011 : 모바일 기본 상세 팝업 높이와 캐시 버전을 검증 */
+/** SOFTM-DETAIL-HEIGHT START 날짜:20261012 : 모바일 기본 상세 팝업 높이와 캐시 버전을 검증 */
 test('모바일 기본 상세 팝업은 확장 전에도 지도와 함께 더 크게 표시한다',()=>{
- assert.match(detailLayoutCss,/body\.care-map-page :is\(#detailSheet,\.mobile-popup-sheet\) \{ height:64dvh; max-height:64dvh;/);
- assert.match(detailLayoutCss,/data-detail-expanded="true"\] \{ height:84dvh; max-height:84dvh; width:100%; \}/);
- assert.match(mapHtml,/care-detail-layout\.css\?v=20261011-popup-height1/);
+ assert.match(detailLayoutCss,/body\.care-map-page :is\(#detailSheet,\.mobile-popup-sheet\) \{ height:70dvh; max-height:70dvh;/);
+ assert.match(detailLayoutCss,/data-detail-expanded="true"\] \{ height:88dvh; max-height:88dvh; width:100%; \}/);
+ assert.match(detailLayoutCss,/SOFTM-OFFICIAL-TABS START 날짜:20261012/);
+ assert.match(mapHtml,/care-detail-layout\.css\?v=20261012-popup-height2/);
 });
 /** SOFTM-DETAIL-HEIGHT END */
