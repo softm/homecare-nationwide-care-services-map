@@ -1,8 +1,8 @@
-import gzip, importlib.util, json, sys, unittest
+import gzip, importlib.util, json, sys, tempfile, unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
-from build_dementia import normalize,reconcile,province,coord,compatible
+from build_dementia import SUPPORT_RULES,normalize,reconcile,province,coord,compatible,public_revision,support_tags
 
 def row(name='서울특별시종로구치매안심센터',source='nmc',date='2026-01-28',address='서울특별시 종로구 율곡로 1',location=None,type='center'):
     return dict(name=name,source=source,sourceDate=date,address=address,province='서울특별시',city='종로구',type=type,location=location,phone='02-123-4567',website='',programs='',operator='',facilities='',opened='')
@@ -33,13 +33,27 @@ class ReconciliationTests(unittest.TestCase):
         self.assertEqual(len(data),1);self.assertEqual(data[0]['type'],'center');self.assertIn('type',data[0]['conflicts'])
     def test_invalid_coordinates_remain_missing(self):
         self.assertIsNone(coord('',''));self.assertIsNone(coord('0','0'));self.assertIsNone(coord('127','37'))
+    def test_support_tags_are_conservative_and_cover_five_services(self):
+        text='무료 치매검사+치매 치료관리비 지원+조호 물품 제공+배회 인식표 및 지문 사전 등록+치매 공공 후견 사업'
+        self.assertEqual(support_tags(text),[tag for tag,_ in SUPPORT_RULES])
+        self.assertEqual(support_tags('가족지원+인지프로그램+치매 약물 치료 관리'),[])
+        self.assertEqual(support_tags('검사 안내+조호물품 보관'),[])
+    def test_detail_only_change_updates_public_revision(self):
+        with tempfile.TemporaryDirectory() as temp:
+            out=Path(temp);(out/'details').mkdir();(out/'centers.json.gz').write_bytes(b'index')
+            detail=out/'details/dc-test.json';detail.write_text('{"supportTags":[]}')
+            before=public_revision(out);detail.write_text('{"supportTags":["treatment-cost"]}')
+            self.assertNotEqual(before,public_revision(out))
     def test_complete_real_dataset_provenance(self):
         manifest=json.loads((ROOT/'data/dementia/manifest.json').read_text());rows=json.loads(gzip.decompress((ROOT/'data/dementia/centers.json.gz').read_bytes()))
+        self.assertEqual(manifest['schemaVersion'],2);self.assertEqual(manifest['revision'],public_revision(ROOT/'data/dementia'))
         self.assertEqual(len(rows),manifest['count']);self.assertEqual(len({r['id'] for r in rows}),len(rows))
+        self.assertTrue(all('supportTags' not in r for r in rows))
         sources=[]
         for r in rows:
             detail=json.loads((ROOT/'data/dementia/details'/f"{r['id']}.json").read_text());sources.extend(s['key'] for s in detail['sources'])
             self.assertTrue(r['province']);self.assertTrue(r['address'])  # 새 행정구역 명칭은 원자료 그대로 허용
+            self.assertTrue(set(detail['supportTags'])<=set(tag for tag,_ in SUPPORT_RULES))
         for key,count in manifest['sourceCounts'].items():self.assertEqual(sources.count(key),count)
 
 if __name__=='__main__':unittest.main()
