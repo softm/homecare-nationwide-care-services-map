@@ -2,7 +2,7 @@ import gzip, importlib.util, json, sys, tempfile, unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
-from build_dementia import SUPPORT_RULES,normalize,reconcile,province,coord,compatible,public_revision,support_tags
+from build_dementia import SUPPORT_RULES,normalize,reconcile,province,coord,compatible,public_revision,support_evidence,support_tags
 
 def row(name='서울특별시종로구치매안심센터',source='nmc',date='2026-01-28',address='서울특별시 종로구 율곡로 1',location=None,type='center'):
     return dict(name=name,source=source,sourceDate=date,address=address,province='서울특별시',city='종로구',type=type,location=location,phone='02-123-4567',website='',programs='',operator='',facilities='',opened='')
@@ -36,6 +36,13 @@ class ReconciliationTests(unittest.TestCase):
     def test_support_tags_are_conservative_and_cover_five_services(self):
         text='무료 치매검사+치매 치료관리비 지원+조호 물품 제공+배회 인식표 및 지문 사전 등록+치매 공공 후견 사업'
         self.assertEqual(support_tags(text),[tag for tag,_ in SUPPORT_RULES])
+        evidence=support_evidence(text)
+        self.assertEqual(set(evidence),set(support_tags(text)))
+        self.assertIn('무료 치매검사',evidence['screening-cost'])
+        self.assertIn('치료관리비 지원',evidence['treatment-cost'])
+        self.assertIn('조호 물품 제공',evidence['care-supplies'])
+        self.assertIn('지문 사전 등록',evidence['missing-prevention'])
+        self.assertIn('공공 후견',evidence['public-guardianship'])
         self.assertEqual(support_tags('가족지원+인지프로그램+치매 약물 치료 관리'),[])
         self.assertEqual(support_tags('검사 안내+조호물품 보관'),[])
     def test_detail_only_change_updates_public_revision(self):
@@ -46,7 +53,7 @@ class ReconciliationTests(unittest.TestCase):
             self.assertNotEqual(before,public_revision(out))
     def test_complete_real_dataset_provenance(self):
         manifest=json.loads((ROOT/'data/dementia/manifest.json').read_text());rows=json.loads(gzip.decompress((ROOT/'data/dementia/centers.json.gz').read_bytes()))
-        self.assertEqual(manifest['schemaVersion'],2);self.assertEqual(manifest['revision'],public_revision(ROOT/'data/dementia'))
+        self.assertEqual(manifest['schemaVersion'],3);self.assertEqual(manifest['revision'],public_revision(ROOT/'data/dementia'))
         self.assertEqual(len(rows),manifest['count']);self.assertEqual(len({r['id'] for r in rows}),len(rows))
         self.assertTrue(all('supportTags' not in r for r in rows))
         sources=[]
@@ -54,6 +61,8 @@ class ReconciliationTests(unittest.TestCase):
             detail=json.loads((ROOT/'data/dementia/details'/f"{r['id']}.json").read_text());sources.extend(s['key'] for s in detail['sources'])
             self.assertTrue(r['province']);self.assertTrue(r['address'])  # 새 행정구역 명칭은 원자료 그대로 허용
             self.assertTrue(set(detail['supportTags'])<=set(tag for tag,_ in SUPPORT_RULES))
+            self.assertEqual(detail['supportTags'],list(detail['supportEvidence']))
+            self.assertTrue(all(phrase in detail['programs'] for phrases in detail['supportEvidence'].values() for phrase in phrases))
         for key,count in manifest['sourceCounts'].items():self.assertEqual(sources.count(key),count)
 
 if __name__=='__main__':unittest.main()
