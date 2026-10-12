@@ -31,7 +31,7 @@
                 const partial = !!c.staffMissing || first === null || second === null;
                 const total = (first ?? 0) + (second ?? 0);
                 add(nursing ? '간호인력' : '요양보호사', partial ? (total > 0 ? `${total}명 확인` : '미확인') : `${total}명`, nursing ? '간호사·간호조무사 합계' : partial ? '일부 자료 미확인' : '수집 인력 기준');
-                note = capacityType ? '정원은 잔여 자리가 아닙니다. 실제 이용 가능 여부·근무인원은 기관에 문의하세요.' : '수집 인력 현황입니다. 실제 서비스 가능 여부·근무인원은 기관에 문의하세요.';
+                note = capacityType ? '' : '수집 인력 현황입니다. 실제 서비스 가능 여부·근무인원은 기관에 문의하세요.'; // SOFTM-DECISION-NOTE 날짜:20261012 : 상세 팝업 상단에서 정원 주의 문구가 공간을 차지하지 않도록 제거
             }
         }
         return { cells, note };
