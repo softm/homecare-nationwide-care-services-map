@@ -10,6 +10,19 @@ SOURCES = {
     'nmc': {'name': '국립중앙의료원 치매안심센터 정보', 'url': 'https://www.data.go.kr/data/15138421/fileData.do'},
 }
 PROVINCES = {'서울':'서울특별시','부산':'부산광역시','대구':'대구광역시','인천':'인천광역시','광주':'광주광역시','대전':'대전광역시','울산':'울산광역시','세종':'세종특별자치시','경기':'경기도','강원':'강원특별자치도','충북':'충청북도','충남':'충청남도','전북':'전북특별자치도','전남':'전라남도','경북':'경상북도','경남':'경상남도','제주':'제주특별자치도'}
+SUPPORT_RULES = [
+    ('screening-cost', [
+        r'(?:검사|검진|진단|감별)\s*(?:비|비용)[^+\n]{0,8}(?:지원|무료)',
+        r'무료\s*(?:치매)?\s*(?:검사|검진)',
+    ]),
+    ('treatment-cost', [r'(?:치료\s*관리비|치료비|약제비|의료비)[^+\n]{0,8}(?:지원|제공)?']),
+    ('care-supplies', [
+        r'(?:조호\s*물품|돌봄\s*물품|위생용품)[^+\n]{0,20}(?:지원|제공)',
+        r'(?:지원|제공)[^+\n]{0,20}(?:조호\s*물품|돌봄\s*물품|위생용품)',
+    ]),
+    ('missing-prevention', [r'실종', r'배회', r'지문\s*(?:등\s*)?(?:사전)?\s*등록', r'인식표', r'GPS']),
+    ('public-guardianship', [r'공공\s*후견', r'후견인']),
+]
 
 def clean(value):
     return re.sub(r'\s+', ' ', str(value or '')).strip()
@@ -22,6 +35,10 @@ def province(value):
 
 def token(value):
     return re.sub(r'[^가-힣a-zA-Z0-9]', '', clean(value)).lower()
+
+def support_tags(programs):
+    text = clean(programs)
+    return [tag for tag, patterns in SUPPORT_RULES if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns)]
 
 def coord(lat, lng):
     try:
@@ -115,6 +132,7 @@ def reconcile(rows, registry):
         if any(math.hypot((a['lat']-b['lat'])*111.2,(a['lng']-b['lng'])*88.8)>1 for a in locations for b in locations): item['conflicts'].append('location')
         if item['conflicts']: conflicts.append({'id':id,'fields':item['conflicts'],'records':group})
         item['programTags']=[label for label,words in [('검사·상담',['검진','검사','상담']),('가족지원',['가족','보호자']),('예방·쉼터',['예방','쉼터'])] if any(w in item['programs'] for w in words)]
+        item['supportTags']=support_tags(item['programs'])
         centers.append(item)
     return sorted(centers,key=lambda r:(r['province'],r['city'],r['name'])),conflicts
 
@@ -122,6 +140,15 @@ def write_json(path,value):
     path.parent.mkdir(parents=True,exist_ok=True)
     raw=json.dumps(value,ensure_ascii=False,separators=(',',':')).encode()
     path.write_bytes(gzip.compress(raw,mtime=0) if path.suffix=='.gz' else raw+b'\n')
+
+def public_revision(out):
+    digest=hashlib.sha256()
+    paths=[out/'centers.json.gz',*sorted((out/'details').glob('*.json'))]
+    for path in paths:
+        digest.update(path.relative_to(out).as_posix().encode())
+        digest.update(b'\0')
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
 
 def build(root=ROOT):
     source=root/'source-data/dementia'; out=root/'data/dementia'
@@ -139,8 +166,8 @@ def build(root=ROOT):
     for r in centers: write_json(out/'details'/f"{r['id']}.json",r)
     for old in (out/'details').glob('*.json'):
         if old.stem not in {r['id'] for r in centers}: old.unlink()
-    revision=hashlib.sha256((out/'centers.json.gz').read_bytes()).hexdigest()
-    write_json(out/'manifest.json',{'schemaVersion':1,'count':len(centers),'file':'centers.json.gz','revision':revision,
+    revision=public_revision(out)
+    write_json(out/'manifest.json',{'schemaVersion':2,'count':len(centers),'file':'centers.json.gz','revision':revision,
         'types':dict(Counter(r['type'] for r in centers)),'withoutCoordinates':sum(not r['location'] for r in centers),
         'sourceCounts':{'standard':len(standard),'nmc':len(nmc)},'sources':meta,'conflictCount':len(conflicts)})
     write_json(source/'comparison.json',{'mergedCount':len(rows)-len(centers),'singleSourceCenters':[{'id':r['id'],'name':r['name'],'source':r['sources'][0]['key']} for r in centers if len({s['key'] for s in r['sources']})==1],'conflicts':conflicts})
