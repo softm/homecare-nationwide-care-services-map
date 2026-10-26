@@ -112,7 +112,7 @@ npm run check
 |---|---|---|
 | `services/firebase-api` | directions | `asia-northeast3-softm-hannun-api.cloudfunctions.net/directions` |
 
-길찾기는 Firebase 프로젝트 `softm-hannun-api`의 서울 리전 함수에서 돌봄한눈·주유한눈이 공용으로 사용합니다. 실제 네이버 Client Secret은 Google Secret Manager에만 저장하며, 운영·배포 절차는 `services/firebase-api/README.md`를 따릅니다. 기존 Vercel 프록시는 전환 후 제거합니다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 공용 길찾기 런타임과 비밀값 저장 위치를 단일화 -->
+길찾기는 Firebase 프로젝트 `softm-hannun-api`의 서울 리전 함수에서 돌봄한눈·주유한눈이 공용으로 사용합니다. 실제 네이버 Client Secret은 Google Secret Manager에만 저장하며, 운영·배포 절차는 `services/firebase-api/README.md`를 따릅니다. 기존 Vercel 프록시는 모든 공개 화면의 전환을 확인한 뒤 제거했습니다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 공용 길찾기 런타임과 비밀값 저장 위치를 단일화 -->
 
 주소→좌표와 좌표→주소 변환은 두 지도에서 `naver-geocoder.js`를 공유하며, 네이버 Maps JavaScript SDK의 `geocoder` 서브모듈을 브라우저에서 사용합니다. 기존 기관별 `daycareCoord`·`careCoord` 캐시는 계속 호환됩니다.
 
