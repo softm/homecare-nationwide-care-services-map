@@ -99,6 +99,7 @@
 - 전국 요양 SDK는 신규 통합 Maps Application Key ID `etfcybk8vf`를 `ncpKeyId`로 사용한다. 기존 `p4sjps53pa`는 구형 Web Dynamic Map Client ID이므로 다시 사용하지 않는다.
 - 두 지도는 `naverGeocoder:v1:*` 주소 캐시와 기존 `daycareCoord`·`careCoord` 기관 좌표 캐시 호환성을 유지한다.
 - Firebase 길찾기 함수의 허용 Origin을 바꾸면 `services/firebase-api/directions-core.js`와 실서비스 검사를 함께 수정한다.
+- Firebase 길찾기는 네이버 경로 코드 1~5처럼 사용자 위치 수정이 필요한 실패를 자동 재시도하지 않고, 속도 제한·5xx·연결 실패처럼 일시적인 장애만 짧게 한 번 재시도한다. 공개 응답은 사용자가 다시 선택해야 하는 위치 문제와 잠시 후 재시도할 서버 문제를 구분하고 네이버 내부 응답을 그대로 노출하지 않는다. <!-- SOFTM-DIRECTIONS-RETRY 날짜:20261026 : 원인을 알 수 없는 API 실패 반복과 불필요한 재호출을 함께 방지 -->
 - 공단 공개 사진 페이지 구조가 바뀌면 `scripts/sync_nhis_static.py`의 사진 매니페스트 파서와 직접 이미지 표시를 함께 회귀검사한다.
 - 공단 상세·사진은 브라우저 실시간 API를 만들지 않고 GitHub Actions에서 정적 JSON으로 수집한다. Client Secret이 필요한 길찾기만 Firebase Functions에 유지한다.
 - 프런트 API 주소를 변경할 때 전국 요양 통합 지도를 기준으로 연결을 확인한다.
