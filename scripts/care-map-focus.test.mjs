@@ -57,10 +57,10 @@ test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-control/);
 });
 /** SOFTM-MOBILE-IMMERSIVE END */
-/** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261026 : 모바일 전체 지도 칩과 접히는 검색·메뉴 상태를 함께 검증 */
+/** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261027 : 모바일 전체 지도 칩과 검색어를 보존하는 접힘 상태를 함께 검증 */
 test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을 사용한다',()=>{
- assert.match(mapHtml,/care-mobile-focus\.css\?v=20261026-search-menu1/);
- assert.match(mapHtml,/care-mobile-focus\.js\?v=20261026-search-menu1/);
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261027-query-status1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261027-query-status1/);
  assert.match(mobileFocusSource,/>필터<\/span>/);
  assert.match(mobileFocusSource,/`필터 · \$\{filterCount \|\| '설정됨'\}`/);
  assert.doesNotMatch(mobileFocusSource,/상세필터/);
@@ -76,13 +76,25 @@ test('검색은 유형·필터 옆 버튼으로 열리고 영역 포커스를 �
  assert.match(mobileFocusCss,/\.care-mobile-focus-search\[hidden\][\s\S]+display:none!important/);
  assert.match(mobileFocusCss,/care-mobile-search-open[\s\S]+\.map-controls \{ top:calc\(126px/);
 });
-test('닫기는 지도 도구를 왼쪽 위 메뉴 하나로 접고 메뉴는 같은 상태에서 복원한다',()=>{
+test('닫기는 지도 도구를 왼쪽 위 메뉴로 접고 메뉴는 같은 상태에서 복원한다',()=>{
  assert.match(mobileFocusSource,/class="care-mobile-focus-menu" data-mobile-focus="menu"/);
  assert.match(mobileFocusSource,/function setMenuCollapsed\(active\)[\s\S]+care-mobile-map-menu-collapsed/);
  assert.match(mobileFocusSource,/action === 'close'\) setMenuCollapsed\(true\)[\s\S]+action === 'menu'\) setMenuCollapsed\(false\)/);
  assert.match(mobileFocusCss,/care-mobile-map-menu-collapsed[\s\S]+\.care-mobile-focus-top[\s\S]+\.care-mobile-focus-dock[\s\S]+\.map-controls/);
  assert.match(mobileFocusCss,/care-mobile-map-menu-collapsed[\s\S]+\.care-mobile-focus-menu \{[\s\S]+display:inline-flex!important/);
  assert.match(mobileFocusCss,/\.care-mobile-focus-menu \{ position:absolute; top:calc\(12px[\s\S]+left:max\(12px/);
+});
+test('검색어는 검색창과 전체 도구를 닫아도 활성 칩과 접힌 상태 표식에 남는다',()=>{
+ assert.match(mobileFocusSource,/data-focus-search>검색<\/span>/);
+ assert.match(mobileFocusSource,/class="care-mobile-focus-query-status" data-mobile-focus="query-status"/);
+ assert.match(mobileFocusSource,/const query = original\.value\.trim\(\)[\s\S]+searchToggle\.classList\.toggle\('has-active-query', hasQuery\)/);
+ assert.match(mobileFocusSource,/setText\('\[data-focus-search\]', hasQuery \? '검색 중' : '검색'\)/);
+ assert.match(mobileFocusSource,/queryStatus\.hidden = !\(hasQuery && collapsed\)/);
+ assert.match(mobileFocusSource,/setText\('\[data-focus-query-status\]', `검색어 · \$\{query\}`\)/);
+ assert.match(mobileFocusSource,/const syncQuery = \(\) => \{[\s\S]+update\(\); \}/);
+ assert.match(mobileFocusSource,/action === 'query-status'[\s\S]+setMenuCollapsed\(false\)[\s\S]+setSearchOpen\(true/);
+ assert.match(mobileFocusCss,/data-mobile-focus="search"\]\.has-active-query[\s\S]+background:#e7f1ff/);
+ assert.match(mobileFocusCss,/care-mobile-map-menu-collapsed[\s\S]+\.care-mobile-focus-query-status:not\(\[hidden\]\)[\s\S]+display:inline-flex!important/);
 });
 /** SOFTM-MOBILE-SEARCH-MENU END */
 /** SOFTM-INITIAL-LOADING START 날짜:20261026 : 초기 위치와 기관 조회가 끝나기 전 0건으로 보이는 회귀를 방지 */
