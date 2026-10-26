@@ -57,17 +57,34 @@ test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-control/);
 });
 /** SOFTM-MOBILE-IMMERSIVE END */
-/** SOFTM-MOBILE-CHIPS START 날짜:20261026 : 모바일 전체 지도 칩과 초기 조회 진행 표시의 캐시 갱신을 함께 검증 */
+/** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261026 : 모바일 전체 지도 칩과 접히는 검색·메뉴 상태를 함께 검증 */
 test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을 사용한다',()=>{
- assert.match(mapHtml,/care-mobile-focus\.css\?v=20261026-initial-loading1/);
- assert.match(mapHtml,/care-mobile-focus\.js\?v=20261026-initial-loading1/);
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261026-search-menu1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261026-search-menu1/);
  assert.match(mobileFocusSource,/>필터<\/span>/);
  assert.match(mobileFocusSource,/`필터 · \$\{filterCount \|\| '설정됨'\}`/);
  assert.doesNotMatch(mobileFocusSource,/상세필터/);
  assert.match(mobileFocusCss,/care-mobile-focus-chips button \{ min-height:38px; padding:4px 10px 4px 5px/);
  assert.match(mobileFocusCss,/care-mobile-focus-chips svg \{ width:20px; height:20px; padding:5px/);
 });
-/** SOFTM-MOBILE-CHIPS END */
+test('검색은 유형·필터 옆 버튼으로 열리고 영역 포커스를 벗어나면 다시 숨는다',()=>{
+ assert.match(mobileFocusSource,/data-mobile-focus="type"[\s\S]+data-mobile-focus="filter"[\s\S]+data-mobile-focus="search"[\s\S]+data-mobile-focus="close"/);
+ assert.match(mobileFocusSource,/id="careMobileFocusSearch"[\s\S]+aria-hidden="true" hidden/);
+ assert.match(mobileFocusSource,/function setSearchOpen\(active/);
+ assert.match(mobileFocusSource,/searchForm\.addEventListener\('focusout'[\s\S]+!searchForm\.contains\(document\.activeElement\)[\s\S]+setSearchOpen\(false\)/);
+ assert.match(mobileFocusSource,/action === 'search'[\s\S]+setSearchOpen\(searchForm\.hidden/);
+ assert.match(mobileFocusCss,/\.care-mobile-focus-search\[hidden\][\s\S]+display:none!important/);
+ assert.match(mobileFocusCss,/care-mobile-search-open[\s\S]+\.map-controls \{ top:calc\(126px/);
+});
+test('닫기는 지도 도구를 왼쪽 위 메뉴 하나로 접고 메뉴는 같은 상태에서 복원한다',()=>{
+ assert.match(mobileFocusSource,/class="care-mobile-focus-menu" data-mobile-focus="menu"/);
+ assert.match(mobileFocusSource,/function setMenuCollapsed\(active\)[\s\S]+care-mobile-map-menu-collapsed/);
+ assert.match(mobileFocusSource,/action === 'close'\) setMenuCollapsed\(true\)[\s\S]+action === 'menu'\) setMenuCollapsed\(false\)/);
+ assert.match(mobileFocusCss,/care-mobile-map-menu-collapsed[\s\S]+\.care-mobile-focus-top[\s\S]+\.care-mobile-focus-dock[\s\S]+\.map-controls/);
+ assert.match(mobileFocusCss,/care-mobile-map-menu-collapsed[\s\S]+\.care-mobile-focus-menu \{[\s\S]+display:inline-flex!important/);
+ assert.match(mobileFocusCss,/\.care-mobile-focus-menu \{ position:absolute; top:calc\(12px[\s\S]+left:max\(12px/);
+});
+/** SOFTM-MOBILE-SEARCH-MENU END */
 /** SOFTM-INITIAL-LOADING START 날짜:20261026 : 초기 위치와 기관 조회가 끝나기 전 0건으로 보이는 회귀를 방지 */
 test('초기 위치·기관 조회는 중앙 진행 표시와 하단 확인 중 상태를 함께 유지한다',()=>{
  assert.match(mapHtml,/id="mapLoading" role="status" aria-live="polite"/);
@@ -82,10 +99,10 @@ test('초기 위치·기관 조회는 중앙 진행 표시와 하단 확인 중 
 /** SOFTM-MOBILE-CONTROLS START 날짜:20261010 : 모바일 전체 지도 조작 아이콘 위치·순서 회귀검사 */
 test('모바일 전체 지도는 지도변경 묶음을 오른쪽에 두고 확장 지도 왼쪽 조작에 내위치를 포함한다',()=>{
  assert.match(mobileFocusSource,/data-mobile-focus="layers"[\s\S]+data-mobile-focus="fullscreen"[\s\S]+data-mobile-focus="share"/);
- assert.match(mobileFocusCss,/\.care-mobile-focus-side \{ position:absolute; left:auto; right:max\(12px,env\(safe-area-inset-right\)\); top:calc\(138px \+ env\(safe-area-inset-top\)\); display:grid; gap:8px; \}/);
- assert.match(mobileFocusCss,/\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important; left:max\(12px,env\(safe-area-inset-left\)\)!important; right:auto!important/);
- assert.match(mobileFocusCss,/max-height:760px[\s\S]+\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important/);
- assert.match(mobileFocusCss,/max-height:760px[\s\S]+\.care-mobile-focus-side \{ top:calc\(130px \+ env\(safe-area-inset-top\)\); \}/);
+ assert.match(mobileFocusCss,/\.care-mobile-focus-side \{ position:absolute; left:auto; right:max\(12px,env\(safe-area-inset-right\)\); top:calc\(66px \+ env\(safe-area-inset-top\)\); display:grid; gap:8px; \}/);
+ assert.match(mobileFocusCss,/\.map-controls \{ top:calc\(62px \+ env\(safe-area-inset-top\)\)!important; left:max\(12px,env\(safe-area-inset-left\)\)!important; right:auto!important/);
+ assert.match(mobileFocusCss,/care-mobile-search-open[\s\S]+\.care-mobile-focus-side \{ top:calc\(132px \+ env\(safe-area-inset-top\)\); \}/);
+ assert.match(mobileFocusCss,/max-height:760px[\s\S]+care-mobile-search-open[\s\S]+\.map-controls \{ top:calc\(126px \+ env\(safe-area-inset-top\)\)!important/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-mobile-focus-side \{[\s\S]+display:grid;[\s\S]+gap:8px/);
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-controls \{[\s\S]+top:calc\(126px \+ env\(safe-area-inset-top\)\)!important;[\s\S]+left:max\(12px,env\(safe-area-inset-left\)\)!important[\s\S]+bottom:auto!important/);
  assert.doesNotMatch(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.care-mobile-focus-side \{[\s\S]+top:calc\(14px \+ env\(safe-area-inset-top\)\)/);
