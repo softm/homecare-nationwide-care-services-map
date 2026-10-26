@@ -54,7 +54,7 @@ npm run serve
 ├── data/nhis/                      # GitHub Pages가 제공하는 정적 공단 JSON
 ├── nhis-static-data.js             # 두 지도의 상세·사진 공용 로더
 ├── scripts/                        # 데이터 재생성·검증
-├── services/vercel-api/            # Client Secret이 필요한 길찾기 전용 API
+├── services/firebase-api/          # Client Secret이 필요한 공용 Firebase 길찾기 API
 └── docs/reference-images/          # 최근 UI·광고 검수 참고 이미지
 ```
 
@@ -110,9 +110,9 @@ npm run check
 
 | 위치 | 주요 API | 현재 프런트 연결 |
 |---|---|---|
-| `services/vercel-api` | directions | `daycare-directions-proxy.vercel.app` |
+| `services/firebase-api` | directions | `asia-northeast3-softm-hannun-api.cloudfunctions.net/directions` |
 
-Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.md`와 `MIGRATION.md`를 따릅니다. 공단 상세·사진용 Vercel 함수와 ChatGPT Sites Worker는 정적 데이터 전환 후 제거했습니다. Client Secret이 필요한 `/api/directions`만 서버 호출로 유지합니다.
+길찾기는 Firebase 프로젝트 `softm-hannun-api`의 서울 리전 함수에서 돌봄한눈·주유한눈이 공용으로 사용합니다. 실제 네이버 Client Secret은 Google Secret Manager에만 저장하며, 운영·배포 절차는 `services/firebase-api/README.md`를 따릅니다. 기존 Vercel 프록시는 전환 후 제거합니다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 공용 길찾기 런타임과 비밀값 저장 위치를 단일화 -->
 
 주소→좌표와 좌표→주소 변환은 두 지도에서 `naver-geocoder.js`를 공유하며, 네이버 Maps JavaScript SDK의 `geocoder` 서브모듈을 브라우저에서 사용합니다. 기존 기관별 `daycareCoord`·`careCoord` 캐시는 계속 호환됩니다.
 
@@ -120,7 +120,7 @@ Vercel API를 별도 프로젝트로 옮길 때는 `services/vercel-api/README.m
 
 정적 파일은 저장소 루트 구조 그대로 게시할 수 있습니다. 새 프로젝트 저장소에서 Pages 주소가 `/nationwide-care-maps/`처럼 하위 경로가 되더라도 내부 데이터 파일은 상대경로라 동작합니다. 다만 `index.html`의 canonical·OG URL은 실제 공개 주소로 변경해야 합니다.
 
-현재 공식 공개 주소와 검색 대표 Origin은 `https://homecare.designboard.net`입니다. `CNAME`, 세 HTML의 canonical·OG·구조화 데이터, `robots.txt`, `sitemap.xml`, 네이버 Maps Web 서비스 URL과 Vercel `ALLOWED_ORIGINS`를 함께 맞춰야 합니다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 도메인 변경 때 검색 대표 주소와 브라우저 호출 허용 출처가 분리되지 않도록 확인 범위를 명시 -->
+현재 공식 공개 주소와 검색 대표 Origin은 `https://homecare.designboard.net`입니다. `CNAME`, 세 HTML의 canonical·OG·구조화 데이터, `robots.txt`, `sitemap.xml`, 네이버 Maps Web 서비스 URL과 Firebase `ALLOWED_ORIGINS`를 함께 맞춰야 합니다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 도메인 변경 때 검색 대표 주소와 공용 함수 호출 출처를 함께 유지 -->
 
 ## 검색엔진 등록
 

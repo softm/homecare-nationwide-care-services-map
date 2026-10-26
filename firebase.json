@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "source": "services/firebase-api",
+    "codebase": "shared-api",
+    "runtime": "nodejs22",
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run check"
+    ]
+  }
+}

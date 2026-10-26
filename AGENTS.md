@@ -41,7 +41,7 @@
 1. `README.md`를 읽는다.
 2. `npm run check`를 실행해 현재 묶음의 기준 상태를 확인한다.
 3. 변경할 프로젝트의 HTML, 광고 설정, 데이터 매니페스트만 우선 읽는다.
-4. 서버 변경은 `services/vercel-api/api/directions.js`와 정적 `data/nhis` 중 실제 호출 경로를 먼저 확인한다.
+4. 서버 변경은 `services/firebase-api`와 정적 `data/nhis` 중 실제 호출 경로를 먼저 확인한다.
 
 ## 중요한 동작 기준
 
@@ -69,7 +69,7 @@
 - 제휴 문의는 `partner-inquiry.js`의 공통 오버레이에서 Web3Forms로 전송한다. `partner-inquiry-config.js`의 공개 Access Key는 수신 이메일로 발급한 값을 사용하며 빈 값이면 미연결 안내를 표시한다. 실제 전송 성공 응답 전에는 접수 완료로 표시하지 않는다. <!-- SOFTM-PARTNER-FORM 날짜:20260904 : 두 지도에서 수신처와 실패 처리 정책을 일치 -->
 - 제휴 문의는 성공 응답 후 팝업을 자동으로 닫고 화면 중앙에 큰 `접수되었습니다.` 토스트를 4.5초 표시한다. 실패하면 문의창과 입력 내용을 유지한다. <!-- SOFTM-PARTNER-SUCCESS 날짜:20260904 : 접수 결과를 놓치거나 중복으로 제출하지 않도록 완료 동작을 고정 -->
 - `index.html`은 전국 요양 통합 지도 자체를 제공하는 실제 홈페이지다. 이전 `nationwide-care-services-map.html`은 공유 링크 호환을 위해 같은 지도 URL로 이동하며, 인덱스 전용 광고 설정은 운영하지 않는다. <!-- SOFTM-ROOT-MAP 날짜:20260925 : 숨겨진 설명형 홈과 실제 지도 홈의 광고·운영 기준을 분리 -->
-- 검색 대표 Origin은 `https://homecare.designboard.net`이며 canonical·OG·구조화 데이터·`robots.txt`·`sitemap.xml`과 Vercel CORS 허용 Origin을 함께 유지한다. 검색엔진 등록에는 루트의 단일 `sitemap.xml`만 제출한다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 검색 신호와 공개 서비스 호출 출처가 예전 GitHub 주소로 갈라지지 않도록 운영 기준을 고정 -->
+- 검색 대표 Origin은 `https://homecare.designboard.net`이며 canonical·OG·구조화 데이터·`robots.txt`·`sitemap.xml`과 Firebase 길찾기 함수의 CORS 허용 Origin을 함께 유지한다. 검색엔진 등록에는 루트의 단일 `sitemap.xml`만 제출한다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 검색 대표 주소와 공용 함수 호출 출처를 함께 유지 -->
 - 공개 사이트 브랜드는 `돌봄한눈`으로 통일하고 유형별 정적 검색 대표 페이지와 `index.html?type=...` 지도 도구를 분리한다. 주야간보호 검색 대표는 `daycare-map.html`이며 지도 도구 쿼리 URL을 사이트맵에 다시 넣지 않는다. <!-- SOFTM-SEO-LANDING 날짜:20260904 : 브랜드 신호와 동일 데이터 페이지의 검색 순위가 분산되지 않도록 색인 경계를 고정 -->
 - `index.html`의 robots 메타는 사용자 요청에 따라 `index,follow`로 유지하고 `noindex`를 다시 추가하지 않는다. 기존 canonical·사이트맵 대표 페이지 연결은 유지한다. <!-- SOFTM-SEO-INDEX 날짜:20260904 : 지도 주소의 검색 등록을 코드에서 차단하지 않도록 사용자 변경 지시를 기록 -->
 - `장기요양기관 찾기`는 홈페이지의 대표 검색 구문으로 사용하고 요양병원을 제외한 8개 공단 장기요양 유형의 설명·구조화 데이터·보이는 첫 문구에 자연스럽게 연결한다. 유형별 title·H1의 세부 검색어는 유지하고, 요양병원은 심평원 의료기관으로 구분하며 `meta keywords`나 반복 키워드 나열을 사용하지 않는다. <!-- SOFTM-LTC-KEYWORD 날짜:20260914 : 정확한 검색 구문 강화 과정에서 세부 검색어와 의료기관 구분이 흐려지지 않도록 기준 고정 -->
@@ -98,9 +98,9 @@
 - 주소 좌표 변환과 역주소 변환은 `naver-geocoder.js`의 네이버 Maps JavaScript SDK `geocoder` 서브모듈을 사용하며 `/api/geocode`·`/api/reverse-geocode` 서버 프록시를 다시 추가하지 않는다.
 - 전국 요양 SDK는 신규 통합 Maps Application Key ID `etfcybk8vf`를 `ncpKeyId`로 사용한다. 기존 `p4sjps53pa`는 구형 Web Dynamic Map Client ID이므로 다시 사용하지 않는다.
 - 두 지도는 `naverGeocoder:v1:*` 주소 캐시와 기존 `daycareCoord`·`careCoord` 기관 좌표 캐시 호환성을 유지한다.
-- Vercel API의 허용 Origin을 바꾸면 모든 핸들러를 동일하게 수정한다.
+- Firebase 길찾기 함수의 허용 Origin을 바꾸면 `services/firebase-api/directions-core.js`와 실서비스 검사를 함께 수정한다.
 - 공단 공개 사진 페이지 구조가 바뀌면 `scripts/sync_nhis_static.py`의 사진 매니페스트 파서와 직접 이미지 표시를 함께 회귀검사한다.
-- 공단 상세·사진은 브라우저 실시간 API를 만들지 않고 GitHub Actions에서 정적 JSON으로 수집한다. Client Secret이 필요한 길찾기만 Vercel 서버에 유지한다.
+- 공단 상세·사진은 브라우저 실시간 API를 만들지 않고 GitHub Actions에서 정적 JSON으로 수집한다. Client Secret이 필요한 길찾기만 Firebase Functions에 유지한다.
 - 프런트 API 주소를 변경할 때 전국 요양 통합 지도를 기준으로 연결을 확인한다.
 
 ## 인프라 구조
@@ -109,12 +109,12 @@
 
 - 상세 구성표와 데이터 흐름은 `docs/INFRASTRUCTURE.md`를 단일 인수인계 문서로 사용하고 인프라 변경 시 코드와 함께 갱신한다.
 - 공개 화면은 GitHub Pages 정적 호스팅, 로컬 화면은 저장소 루트의 `npm run serve`(`http://localhost:3000`)로 실행한다.
-- 브라우저의 서비스 외부 호출은 네이버 Maps JavaScript SDK, Vercel `/api/directions`, 사용자가 제휴 문의를 제출할 때의 Web3Forms `https://api.web3forms.com/submit`을 사용한다. 주소 변환은 SDK, 공단 상세·사진은 정적 JSON이 담당하고 광고는 기존 카카오 AdFit을 유지한다. <!-- SOFTM-PARTNER-INFRA 날짜:20260904 : 승인된 문의 메일 전송 경로를 기존 정적 서비스 구조에 반영 -->
+- 브라우저의 서비스 외부 호출은 네이버 Maps JavaScript SDK, Firebase `directions` 함수, 사용자가 제휴 문의를 제출할 때의 Web3Forms `https://api.web3forms.com/submit`을 사용한다. 주소 변환은 SDK, 공단 상세·사진은 정적 JSON이 담당하고 광고는 기존 카카오 AdFit을 유지한다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 길찾기 런타임을 공용 Firebase 함수로 전환 -->
 - 공단 수집은 GitHub Actions의 `refresh-nhis-static.yml`과 `scripts/sync_nhis_static.py`가 담당하며 결과를 `source-data`와 `data/nhis`에 커밋한다.
 - 공단 수집 종류·주기·명령·완료 판정은 `docs/DATA_COLLECTION.md`를 기준으로 하며 워크플로, 수집 범위, 호출 한도, 체크포인트 방식이 바뀌면 같은 작업에서 문서를 갱신한다. <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 실행 방식 변경 후 오래된 명령이 남지 않도록 문서 동기화를 필수화 -->
 - 전체 수집의 다음 회차는 이전 Actions 실행과 `github-actions[bot]` 커밋이 완료된 뒤 호출한다. 실행 중 미리 큐에 넣으면 이전 SHA를 사용해 체크포인트를 이어받지 못할 수 있다. <!-- SOFTM-NHIS-RUN-SEQUENCE 날짜:20260903 : 동일 구간 중복 수집과 push 충돌을 방지 -->
-- 비밀값은 공공데이터 `DATA_GO_KR_SERVICE_KEY`와 Vercel의 `NAVER_MAPS_API_SECRET`이며 HTML·정적 JSON·로그·문서에 실제 값을 남기지 않는다.
-- 정적 서버와 Vercel 로컬 개발 서버는 기본 포트가 겹칠 수 있으므로 동시에 검증할 때 한쪽 포트를 명시적으로 변경한다.
+- 비밀값은 공공데이터 `DATA_GO_KR_SERVICE_KEY`와 Google Secret Manager의 `NAVER_MAPS_API_SECRET`이며 HTML·정적 JSON·로그·문서에 실제 값을 남기지 않는다.
+- Firebase 에뮬레이터와 정적 서버를 동시에 검증할 때는 각 포트를 명시하고 운영 Secret을 로컬 파일에 복사하지 않는다.
 
 <!-- SOFTM-INFRA-MEMORY END -->
 
