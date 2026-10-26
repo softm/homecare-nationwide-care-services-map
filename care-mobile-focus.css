@@ -1,5 +1,6 @@
 /** SOFTM-MOBILE-FOCUS START 날짜:20261003 : 모바일 전체 지도는 화면을 채우고 검색·하단 시트·광고의 실제 영역만 조작부에서 피함 */
 .care-mobile-focus,.care-mobile-focus-menu,.care-focus-saved-close { display:none; }
+.care-mobile-focus-query-status { display:none; } /* SOFTM-MOBILE-QUERY-STATE 날짜:20261027 : 모바일 전체 지도가 아닐 때 검색어 표식을 노출하지 않음 */
 .care-focus-types { width:min(440px,calc(100vw - 32px)); max-height:80dvh; box-sizing:border-box; border:0; border-radius:22px; padding:20px; color:#123c36; background:#fff; }
 .care-focus-types::backdrop { background:#102c3755; }
 .care-focus-types header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -18,16 +19,19 @@
  .care-mobile-focus svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:none; }
  .care-mobile-focus-top { position:absolute; top:calc(12px + env(safe-area-inset-top)); left:max(12px,env(safe-area-inset-left)); right:max(12px,env(safe-area-inset-right)); }
  .care-mobile-focus-search { display:flex; align-items:center; height:56px; margin-top:10px; border-radius:18px; background:#fff; box-shadow:0 3px 18px #173b3724; pointer-events:auto; padding:0 4px; }
- .care-mobile-focus-search[hidden],.care-mobile-focus-menu[hidden] { display:none!important; }
+ .care-mobile-focus-search[hidden],.care-mobile-focus-menu[hidden],.care-mobile-focus-query-status[hidden] { display:none!important; }
  .care-mobile-focus-search button { width:44px; flex:none; padding:0; border-radius:14px; }
  .care-mobile-focus-search input { min-width:0; width:100%; flex:1; height:48px; padding:0 2px; border:0; border-radius:8px; background:#fff; color:#163a32; font-size:16px; }
- /** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261026 : 유형·필터·검색·닫기를 한 행에 맞추고 검색창은 그 아래에서만 펼침 */
+ /** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261027 : 검색어가 남은 접힘 상태에도 메뉴 옆 복귀 표식을 배치 */
  .care-mobile-focus-chips { display:flex; align-items:center; gap:6px; width:100%; }
  .care-mobile-focus-chips button { min-width:0; padding:0 10px 0 5px; border-radius:24px; font-size:13px; font-weight:650; box-shadow:0 2px 10px #173b3720; }
  .care-mobile-focus-chips [data-mobile-focus="type"] { flex:1 1 auto; max-width:none; }
  .care-mobile-focus-chips :is([data-mobile-focus="filter"],[data-mobile-focus="search"]) { flex:0 0 auto; }
  .care-mobile-focus-chips [data-mobile-focus="close"] { flex:0 0 40px; width:40px; padding:0; border-radius:50%; color:#526a64; }
  .care-mobile-focus-menu { position:absolute; top:calc(12px + env(safe-area-inset-top)); left:max(12px,env(safe-area-inset-left)); width:48px; height:48px; padding:0; border:2px solid #fff!important; border-radius:50%; color:#087e74!important; background:#fffffff2!important; box-shadow:0 4px 18px #143e3b38; }
+ .care-mobile-focus-query-status { position:absolute; top:calc(12px + env(safe-area-inset-top)); left:calc(max(12px,env(safe-area-inset-left)) + 58px); max-width:calc(100% - 94px); height:48px; min-height:48px; padding:0 14px 0 11px; border:2px solid #fff!important; border-radius:24px; color:#185fba!important; background:#fffffff2!important; box-shadow:0 4px 18px #143e3b38; }
+ .care-mobile-focus-query-status svg { width:20px; height:20px; }
+ .care-mobile-focus-query-status span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; font-weight:700; }
  /** SOFTM-MOBILE-SEARCH-MENU END */
  .care-mobile-focus-side { position:absolute; left:auto; right:max(12px,env(safe-area-inset-right)); top:calc(66px + env(safe-area-inset-top)); display:grid; gap:8px; } /* SOFTM-MOBILE-SEARCH-MENU 날짜:20261026 : 접힌 검색창 아래부터 지도변경 조작을 시작 */
  .care-mobile-focus-side button { width:46px; height:46px; border-radius:50%; box-shadow:0 2px 12px #173b3724; }
@@ -93,6 +97,10 @@ body.care-map-page.care-initial-location-loading #mapLoading small { display:blo
  .care-mobile-focus-chips span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
  .care-mobile-focus-chips [aria-expanded="true"] { background:#f0e7ff; color:#6536a2; }
  body.care-mobile-search-open .care-mobile-focus-chips [data-mobile-focus="search"] { background:#e7f1ff; color:#185fba; }
+ /** SOFTM-MOBILE-QUERY-STATE START 날짜:20261027 : 검색창이 닫혀도 파란 활성색과 점으로 입력된 검색어를 구분 */
+ .care-mobile-focus-chips [data-mobile-focus="search"].has-active-query { position:relative; border-color:#b7d4f7; background:#e7f1ff; color:#185fba; }
+ .care-mobile-focus-chips [data-mobile-focus="search"].has-active-query::after,.care-mobile-focus-menu.has-active-query::after { content:""; position:absolute; top:3px; right:3px; width:8px; height:8px; border:2px solid #fff; border-radius:50%; background:#176bd3; box-shadow:0 1px 4px #173b3740; }
+ /** SOFTM-MOBILE-QUERY-STATE END */
  .care-mobile-focus-side button { color:#2473ee; border:2px solid #fff; }
  .care-mobile-focus-side button[aria-pressed="true"] { background:#eaf2ff; }
  .care-mobile-focus-dock [data-mobile-focus="saved"] svg { color:#bd7420; }
@@ -223,7 +231,7 @@ body.care-map-page.care-initial-location-loading #mapLoading small { display:blo
 }
 /** SOFTM-ROUTE-DOCK END */
 
-/** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261026 : 닫기는 모든 지도 도구를 접고 같은 왼쪽 위 자리의 메뉴 버튼 하나로 복귀 경로를 남김 */
+/** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261027 : 닫힌 지도에는 메뉴와 입력된 검색어 표식을 함께 남겨 검색 맥락을 보존 */
 @media(max-width:1000px) {
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-menu-collapsed[data-care-mode="map"] {
   --care-focus-bottom:env(safe-area-inset-bottom);
@@ -234,6 +242,12 @@ body.care-map-page.care-initial-location-loading #mapLoading small { display:blo
   pointer-events:none!important;
  }
  body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-menu-collapsed[data-care-mode="map"] .care-mobile-focus-menu {
+  display:inline-flex!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+ }
+ body.stitch-desktop.care-map-page.care-map-focus.care-mobile-focus-active.care-mobile-map-menu-collapsed[data-care-mode="map"] .care-mobile-focus-query-status:not([hidden]) {
   display:inline-flex!important;
   opacity:1!important;
   visibility:visible!important;

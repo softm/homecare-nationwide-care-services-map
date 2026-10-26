@@ -29,12 +29,12 @@
             saved: '<path d="M6 3h12v18l-6-4-6 4Z"/>', more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
         };
         const svg = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name]}</svg>`;
-        /** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261026 : 지도는 짧은 도구 한 행으로 시작하고 검색·전체 도구는 요청할 때만 펼쳐 지도 가림을 줄임 */
+        /** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261027 : 검색창과 도구를 접어도 입력한 검색어의 존재와 복귀 경로를 잃지 않음 */
         ui.innerHTML = `<div class="care-mobile-focus-top">
             <div class="care-mobile-focus-chips" role="toolbar" aria-label="지도 검색 도구">
                 <button type="button" data-mobile-focus="type" aria-haspopup="dialog">${svg('type')}<span data-focus-type>유형 선택 ▾</span></button>
                 <button type="button" data-mobile-focus="filter" aria-expanded="false">${svg('filter')}<span data-focus-filter>필터</span></button>
-                <button type="button" data-mobile-focus="search" aria-expanded="false" aria-controls="careMobileFocusSearch">${svg('search')}<span>검색</span></button>
+                <button type="button" data-mobile-focus="search" aria-expanded="false" aria-controls="careMobileFocusSearch">${svg('search')}<span data-focus-search>검색</span></button>
                 <button type="button" data-mobile-focus="close" aria-label="지도 도구 숨기기" title="지도 도구 숨기기">${svg('close')}</button>
             </div>
             <form id="careMobileFocusSearch" class="care-mobile-focus-search" role="search" aria-label="전체 지도 검색" aria-hidden="true" hidden>
@@ -45,12 +45,14 @@
             </form>
         </div>
         <button type="button" class="care-mobile-focus-menu" data-mobile-focus="menu" aria-label="지도 메뉴 열기" title="지도 메뉴 열기" hidden>${svg('menu')}</button>
+        <button type="button" class="care-mobile-focus-query-status" data-mobile-focus="query-status" aria-controls="careMobileFocusSearch" hidden>${svg('search')}<span data-focus-query-status></span></button>
         <div class="care-mobile-focus-side"><button type="button" data-mobile-focus="layers" aria-label="일반지도 보기" aria-pressed="true">${svg('layers')}</button><!-- SOFTM-MOBILE-IMMERSIVE 날짜:20261010 : 지도변경 바로 아래에 확장·축소를 두어 카카오맵식 조작 흐름을 맞춤 --><button type="button" data-mobile-focus="fullscreen" aria-label="지도만 크게 보기" aria-pressed="false" title="지도만 크게 보기">${svg('fullscreen')}</button><button type="button" data-mobile-focus="share" aria-label="현재 지도 공유" title="현재 지도 공유">${svg('share')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
         /** SOFTM-MOBILE-SEARCH-MENU END */
         document.body.append(ui); // SOFTM-DOCK-OVERLAY 날짜:20261005 : 지도 겹침 영역 밖에 두어 메뉴가 목록 위에 실제로 떠 있게 함
         const searchForm = ui.querySelector('.care-mobile-focus-search');
         const searchToggle = ui.querySelector('[data-mobile-focus="search"]');
         const menuButton = ui.querySelector('[data-mobile-focus="menu"]');
+        const queryStatus = ui.querySelector('[data-mobile-focus="query-status"]'); // SOFTM-MOBILE-QUERY-STATE 날짜:20261027 : 전체 도구가 접혀도 검색어 상태를 지도 위에 남김
         const input = searchForm.querySelector('input');
         const original = document.getElementById('q');
         const results = document.querySelector('.results');
@@ -104,6 +106,7 @@
             body.classList.toggle('care-mobile-map-menu-collapsed', collapsed);
             menuButton.hidden = !collapsed;
             if (collapsed) closeSheet();
+            update(); // SOFTM-MOBILE-QUERY-STATE 날짜:20261027 : 접힘 전환 즉시 검색어 표식의 노출 상태를 동기화
             root.setTimeout(() => {
                 config.resize();
                 (collapsed ? menuButton : ui.querySelector('[data-mobile-focus="type"]')).focus({ preventScroll:true });
@@ -181,6 +184,25 @@
             const loading = body.classList.contains('care-map-loading'); // SOFTM-INITIAL-LOADING 날짜:20261026 : 첫 조회의 0건을 확정 결과처럼 표시하지 않음
             const count = loading ? '확인 중' : document.querySelector('#areaCount,#filteredCount')?.textContent.trim() || '0곳'; // SOFTM-INITIAL-LOADING 날짜:20261026 : 지도 진행 표시와 하단 목록 상태를 같은 시점에 전환
             const setText = (selector, value) => { const node = ui.querySelector(selector); if (node.textContent !== value) node.textContent = value; };
+            /** SOFTM-MOBILE-QUERY-STATE START 날짜:20261027 : 닫힌 검색 버튼과 전체 도구 접힘 상태에서도 현재 입력어를 명시 */
+            const query = original.value.trim();
+            const hasQuery = Boolean(query);
+            const collapsed = body.classList.contains('care-mobile-map-menu-collapsed');
+            searchToggle.classList.toggle('has-active-query', hasQuery);
+            setText('[data-focus-search]', hasQuery ? '검색 중' : '검색');
+            const searchLabel = hasQuery ? `검색어 ${query} 입력됨. 검색창 열기` : '검색창 열기';
+            searchToggle.setAttribute('aria-label', searchLabel);
+            searchToggle.title = searchLabel;
+            menuButton.classList.toggle('has-active-query', hasQuery);
+            menuButton.setAttribute('aria-label', hasQuery ? '지도 메뉴 열기, 검색어 입력됨' : '지도 메뉴 열기');
+            menuButton.title = menuButton.getAttribute('aria-label');
+            queryStatus.hidden = !(hasQuery && collapsed);
+            if (hasQuery) {
+                setText('[data-focus-query-status]', `검색어 · ${query}`);
+                queryStatus.setAttribute('aria-label', `검색어 ${query}. 검색창 열기`);
+                queryStatus.title = `검색어 ${query}`;
+            }
+            /** SOFTM-MOBILE-QUERY-STATE END */
             setText('[data-focus-count]', loading ? count : count.replace(/\s*곳$/, '')); // SOFTM-INITIAL-LOADING 날짜:20261026 : 조회 중에는 숫자 대신 명확한 진행 문구를 유지
             ui.querySelector('[data-mobile-focus="list"]').setAttribute('aria-label', loading ? '검색 결과 확인 중' : `검색 결과 ${count} 목록`); // SOFTM-INITIAL-LOADING 날짜:20261026 : 보조기기에도 미완료 상태를 0건과 구분
             setText('[data-focus-saved]', String(root.CareMapExperience?.rows().length || 0));
@@ -196,7 +218,7 @@
             filterWasOpen = filterOpen;
         }
         input.addEventListener('input', () => { original.value = input.value; original.dispatchEvent(new Event('input', { bubbles: true })); });
-        const syncQuery = () => { if (enabled && document.activeElement !== input) input.value = original.value; };
+        const syncQuery = () => { if (enabled && document.activeElement !== input) input.value = original.value; update(); }; // SOFTM-MOBILE-QUERY-STATE 날짜:20261027 : 입력·삭제 즉시 닫힌 상태의 검색어 표식도 갱신
         original.addEventListener('input', syncQuery);
         document.getElementById('careNavigationMenu')?.addEventListener('close', () => { if (enabled && !document.querySelector('dialog[open]')) ui.querySelector('[data-mobile-focus="more"]').focus({ preventScroll:true }); });
         document.querySelector('.care-voice-dialog')?.addEventListener('close', () => {
@@ -217,6 +239,7 @@
             else if (action === 'search') setSearchOpen(searchForm.hidden, { focus:searchForm.hidden, returnFocus:!searchForm.hidden });
             else if (action === 'close') setMenuCollapsed(true);
             else if (action === 'menu') setMenuCollapsed(false);
+            else if (action === 'query-status') { setMenuCollapsed(false); setSearchOpen(true, { focus:true }); } // SOFTM-MOBILE-QUERY-STATE 날짜:20261027 : 접힌 검색어 표식에서 바로 입력창으로 복귀
             else if (action === 'list') { if (body.classList.contains('care-focus-list')) closeSheet(); else { config.results(); body.classList.add('care-focus-list'); update(); } }
             else if (action === 'saved') { if (body.dataset.careWorkspace === 'saved') closeSheet(); else { config.saved(); update(); } }
             else if (action === 'voice') { voiceFromMobileSearch = true; document.querySelector('.care-voice-trigger')?.click(); }
