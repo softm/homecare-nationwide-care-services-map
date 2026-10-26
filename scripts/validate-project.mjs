@@ -179,8 +179,10 @@ if (!careMapSource.includes('const LANDING_URLS=') || !careMapSource.includes('c
 for (const [category, landingPage] of Object.entries(categoryLandingPages)) {
   if (!careMapSource.includes(`${category}:'${landingPage}'`) && !careMapSource.includes(`'${category}':'${landingPage}'`)) fail(`전국 요양 지도: ${category} 검색 대표 페이지 연결 누락`);
 }
-const directionsSource = read('services/vercel-api/api/directions.js');
+const directionsSource = read('services/firebase-api/directions-core.js'); // SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 폐기한 Vercel 구현 대신 공용 Firebase 핵심 핸들러를 검증
 if (!directionsSource.includes(`"${publicOrigin}"`)) fail('길찾기 API의 공식 공개 Origin 허용 누락');
+if (!careMapSource.includes('https://asia-northeast3-softm-hannun-api.cloudfunctions.net/directions')) fail('전국 요양 지도: 공용 Firebase 길찾기 주소 누락');
+if (careMapSource.includes('daycare-directions-proxy.vercel.app')) fail('전국 요양 지도: 폐기한 Vercel 길찾기 주소가 남아 있습니다.');
 if (['index.html', 'index.html', ...landingPages, 'robots.txt', 'sitemap.xml'].some(file => read(file).includes('https://softm.github.io'))) fail('검색 설정에 예전 GitHub Pages 대표 주소가 남아 있습니다.');
 /** SOFTM-SEO-LANDING-CHECK END */
 
@@ -195,7 +197,7 @@ for (const html of ['index.html']) {
   if (!/[?&]ncpKeyId=etfcybk8vf(?:&|$)/.test(sdkUrl)) fail(`${html}: Geocoding 권한이 연결된 네이버 Maps API Key ID가 아닙니다.`); // SOFTM-MAPS-KEY 날짜:20260902 : 잘못된 구형 Client ID가 다시 배포되지 않도록 신규 Key ID를 고정 검증
   if (!/[?&]submodules=[^&]*\bgeocoder\b/.test(sdkUrl)) fail(`${html}: 네이버 SDK geocoder 서브모듈 누락`);
 }
-if (exists('services/vercel-api/api/geocode.js') || exists('services/vercel-api/api/reverse-geocode.js')) fail('삭제 대상 주소 변환 서버 API 파일이 남아 있습니다.');
+if (exists('services/firebase-api/geocode.js') || exists('services/firebase-api/reverse-geocode.js')) fail('삭제 대상 주소 변환 서버 API 파일이 남아 있습니다.');
 
 /** SOFTM-NHIS-DETAIL-FALLBACK-CHECK START 날짜:20260903 : 상세 수집 진행 중에도 두 지도에서 공단 기준자료가 오류 대신 표시되도록 검사 */
 const careSource = read('index.html');
@@ -310,7 +312,7 @@ if (!indexSource.includes('요양원·공동생활가정') || !indexSource.inclu
 
 
 for (const file of ['nationwide-care-ad-config.js', 'partner-inquiry-config.js', 'partner-inquiry.js']) new vm.Script(read(file), { filename: file }); // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 전용 광고 설정 제거 후 통합 지도 광고·문의 설정만 검사
-for (const file of ['naver-geocoder.js', 'nhis-static-data.js', 'services/vercel-api/api/directions.js']) { // SOFTM-NHIS-STATIC-CHECK 날짜:20260902 : 폐기한 공단 프록시 대신 공용 정적 데이터 모듈을 검사
+for (const file of ['naver-geocoder.js', 'nhis-static-data.js', 'services/firebase-api/index.js', 'services/firebase-api/directions-core.js']) { // SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 정적 데이터와 공용 Firebase 길찾기 진입점·핵심 핸들러를 함께 검사
   execFileSync(process.execPath, ['--check', path.join(root, file)], { stdio: 'pipe' });
 }
 

@@ -105,7 +105,7 @@ def main():
         for value in forbidden:
             assert value not in text, f"{filename}에 제거 대상 브라우저 호출이 남았습니다: {value}"
     care = (ROOT / "index.html").read_text(encoding="utf-8")
-    assert "/api/directions" in care, "유지해야 할 directions 호출이 누락됐습니다."
+    assert "asia-northeast3-softm-hannun-api.cloudfunctions.net/directions" in care, "유지해야 할 Firebase directions 호출이 누락됐습니다."  # SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 폐기한 Vercel 경로 대신 공용 함수 주소 검증
     print(f"공단 정적 데이터 검사 완료: catalog {len(institutions):,}곳 · 상세 {manifest.get('detailCount', 0):,}곳 · 사진 매니페스트 {len(photo_files):,}곳")
 
 

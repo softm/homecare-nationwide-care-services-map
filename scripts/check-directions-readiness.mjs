@@ -1,5 +1,5 @@
 /** SOFTM-DIRECTIONS-READINESS START 날짜:20260905 : 실제 공개 Origin의 CORS·경로 응답을 함께 확인해 코드와 배포 불일치를 탐지 */
-const endpoint = process.argv[2] || 'https://daycare-directions-proxy.vercel.app/api/directions';
+const endpoint = process.argv[2] || 'https://asia-northeast3-softm-hannun-api.cloudfunctions.net/directions'; // SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 운영 기본 검사를 공용 Firebase 함수로 전환
 const origin = 'https://homecare.designboard.net';
 const controller = new AbortController();
 const timer = setTimeout(() => controller.abort(), 15000);
