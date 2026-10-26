@@ -1,0 +1,18 @@
+{
+  "name": "softm-hannun-firebase-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "description": "돌봄한눈과 주유한눈이 함께 사용하는 Firebase 길찾기 API",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "check": "node --check index.js && node --check directions-core.js && node --test test/*.test.js"
+  },
+  "dependencies": {
+    "firebase-functions": "^7.0.3"
+  },
+  "_softmComment": "SOFTM-FIREBASE-API 날짜:20261026 : 종료 임박 런타임을 피하고 공용 Google 런타임을 장기 운영"
+}
