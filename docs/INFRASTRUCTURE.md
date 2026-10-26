@@ -15,7 +15,7 @@
 | 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/details/**/*.json.gz`, 기타 `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 파일 | 브라우저 인증정보 없음 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 상세 압축 파일과 그 외 JSON의 배포 형식을 구분 -->
 | 데이터 수집 현황 | GitHub Pages 정적 파일·GitHub 공개 API | `data-status.html`, `data-status.js`, 수집 매니페스트, Actions 최근 실행 API | 공개된 수집률·변경 경과·유형별 기준일과 실행 상태 표시 | 정적 JSON과 공개 Actions 상태 조회 | 인증정보 없음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 비밀키 없이 공개 수집 결과와 진행 중 실행을 구분해 확인 -->
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py`, 로컬 사진 전용 `scripts/collect_missing_nhis_photos.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | OpenAPI는 `DATA_GO_KR_SERVICE_KEY`, 공개 사진 페이지는 키 불필요 | <!-- SOFTM-NHIS-MISSING-PHOTOS 날짜:20260904 : 로컬 사진 전용 실행 위치와 공개 페이지 인증 경계를 명시 -->
-| 길찾기 서버 | Vercel Functions | `services/vercel-api/api/directions.js` | 네이버 Directions 15 자동차 경로 중계 | `POST /api/directions`만 호출 | `NAVER_MAPS_API_KEY_ID`, `NAVER_MAPS_API_SECRET` |
+| 길찾기 서버 | Firebase Functions v2 | `services/firebase-api` | 네이버 Directions 15 자동차 경로 중계 | `POST /directions`만 호출 | Google Secret Manager의 `NAVER_MAPS_API_SECRET` |
 | 광고 설정 | GitHub Pages 정적 파일 및 광고 사업자 | `category-landing-ad-config.js`, `category-landing-ads.js`, 두 지도 광고 설정 | 화면별 PC·모바일·목록 광고 슬롯 설정 | 예 | 광고 설정 파일의 공개 클라이언트 값만 사용 | <!-- SOFTM-INDEX-AD-UNIT 날짜:20260904 : 인덱스 승인 단위가 다른 지도 광고와 섞이지 않도록 인프라 경계를 명시 -->
 | 광고·제휴 문의 | 사용자 브라우저→Web3Forms | `partner-inquiry-config.js`, `partner-inquiry.js`, `partner-inquiry.css` | 두 지도와 9개 안내의 공통 오버레이에서 이메일 문의 접수 | 제출할 때만 `POST https://api.web3forms.com/submit` | 수신 주소로 발급한 공개 Access Key | <!-- SOFTM-PARTNER-INFRA 날짜:20260904 : 제휴 메일 접수에 별도 런타임 서버가 필요하지 않도록 브라우저 호출을 명시 -->
 | 로컬 정적 서버 | 개발자 PC | `npm run serve` → `python3 -m http.server 3000` | HTML을 `file://`이 아닌 HTTP Origin으로 검증 | `http://localhost:3000` | 없음 |
@@ -33,7 +33,7 @@
 | 공단 사진 | 브라우저 | `data/nhis/photos/{기관기호 앞 2자리}/{기관기호}.json` | 사진 탭을 열 때 정적 사진 매니페스트 로드 | 원본 이미지는 공단 공개 URL 사용 가능 |
 | 수집 현황 | 브라우저 | `data/nhis/manifest.json`, `changes.json`, `checkpoints/*.json`, `data/care/manifest.json` | 공개된 수집률·최근 변경·유형별 기준일·샤드 완료 경과 표시 | 원본 수집 파일이나 비밀키는 읽지 않음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 화면에 공개할 운영 지표와 비공개 수집 자격정보의 경계를 고정 -->
 | 최근 Actions 실행 | 브라우저→GitHub 공개 API | `api.github.com/repos/softm/homecare-nationwide-care-services-map/actions/workflows/refresh-nhis-static.yml/runs` | 최근 8회와 진행 중 상태 표시, 실행 중일 때만 90초 후 재확인 | 인증 없이 공개 저장소의 실행 메타정보만 조회 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 정적 매니페스트 반영 전에도 현재 실행 여부를 확인 -->
-| 자동차 길찾기 | 브라우저→Vercel | `https://daycare-directions-proxy.vercel.app/api/directions` | Vercel이 Secret을 붙여 네이버 Directions 15 호출 | 유일하게 유지하는 런타임 서버 API |
+| 자동차 길찾기 | 브라우저→Firebase | `https://asia-northeast3-softm-hannun-api.cloudfunctions.net/directions` | 서울 리전 함수가 Secret을 붙여 네이버 Directions 15 호출 | 돌봄한눈·주유한눈 공용 런타임 API |
 | 공단 원천 수집 | GitHub Actions→공공데이터 | 기관검색·시설상세 API, 시설현황·평가 파일 | Python 수집기가 재시도·호출 예산·샤드 체크포인트를 적용 | 키를 HTML·JSON·로그에 기록하지 않음 |
 | 공단 화면 보완 수집 | GitHub Actions→공단 공개 상세 페이지 | 기본정보(11)·인력/근속(14)·CCTV(19) 탭 | 공개 표의 항목·셀 구조를 상세 JSON에 병합 | 브라우저 실시간 호출 금지 |
 | 공단 사진 수집 | GitHub Actions→공단 공개 페이지 | `longtermcare.or.kr` 상세·썸네일 | 공개 페이지에서 사진 키와 메타데이터만 정규화 | 페이지 구조 변경 시 파서와 화면을 함께 검사 |
@@ -83,13 +83,13 @@
 | 이름 | 저장 위치 | 공개 가능 여부 | 사용처 | 삭제 조건 |
 |---|---|---:|---|---|
 | `DATA_GO_KR_SERVICE_KEY` | 로컬 루트 `.env.local`, GitHub Actions Repository Secret | 아니오 | `scripts/sync_nhis_static.py` | 공공데이터 수집을 완전히 폐기할 때만 |
-| `NAVER_MAPS_API_KEY_ID` | Vercel 환경변수 | ID 자체는 클라이언트 식별자이나 서버 설정으로 관리 | `/api/directions` | Directions 서버 폐기 시 |
-| `NAVER_MAPS_API_SECRET` | Vercel 환경변수 | 아니오 | `/api/directions` | Directions 서버 폐기 시 |
+| `NAVER_MAPS_API_KEY_ID` | Firebase 함수 소스의 공개 식별자 | 예 | `/directions` | Maps Application 교체 시 |
+| `NAVER_MAPS_API_SECRET` | Google Secret Manager | 아니오 | `/directions` | Directions 서버 폐기 시 |
 | `ncpKeyId=etfcybk8vf` | 두 지도 HTML | 예 | Maps JavaScript SDK 및 geocoder 서브모듈 | Maps Application 교체 시 두 지도·검증기를 함께 변경 |
 | `NHIS_MAX_PHOTOS_PER_INSTITUTION` | GitHub Actions job env | 예 | 기관별 사진 수 상한 | 수집 정책 변경 시 |
 | `NHIS_PHOTO_MODE` | GitHub Actions job env | 예 | 공개 사진을 원격 URL 방식으로 기록 | 사진 저장 정책 변경 시 |
 
-네이버 Maps Application의 Web 서비스 URL에는 최소 `https://homecare.designboard.net`, 레거시 `https://softm.github.io`, `http://localhost:3000`을 등록한다. `http://127.0.0.1:3000`은 별도 Origin이므로 이 주소로 브라우저 검증하려면 별도로 등록해야 한다. Vercel Directions 함수의 CORS 허용 Origin도 같은 공개·로컬 주소를 포함한다. <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 공식 공개 도메인에서 지도와 길찾기가 모두 허용되도록 Origin 기준을 동기화 -->
+네이버 Maps Application의 Web 서비스 URL에는 최소 `https://homecare.designboard.net`, 레거시 `https://softm.github.io`, `http://localhost:3000`을 등록한다. `http://127.0.0.1:3000`은 별도 Origin이므로 이 주소로 브라우저 검증하려면 별도로 등록해야 한다. Firebase Directions 함수의 CORS 허용 Origin도 같은 공개·로컬 주소를 포함한다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 공식 공개 도메인과 공용 함수 호출 출처를 동기화 -->
 
 ## 로컬 실행 표
 
@@ -99,16 +99,16 @@
 | 전체 검사 | 저장소 루트 | `npm run check` | 두 지도 데이터 정합성과 NHIS 정적 스키마 검사 |
 | 지도용 데이터 재생성 | 저장소 루트의 Python 가상환경 | `python scripts/build_nationwide_care_services.py` | `data/nhis`·`data/hira`에서 `data/care` 검색 자료와 안내 수치 생성 |
 | NHIS 특정 기관 수집 | 저장소 루트의 Python 가상환경 | `python scripts/sync_nhis_static.py --mode institution ...` | `data/nhis`의 해당 기관 자료 갱신 |
-| Vercel API 검사 | `services/vercel-api` | `npm run check` | `api/directions.js` 구문 검사 |
-| Vercel 로컬 개발 | `services/vercel-api` | `npm run dev` | Vercel CLI 개발 서버; 정적 서버와 포트 충돌 시 다른 포트 사용 |
+| Firebase API 검사 | `services/firebase-api` | `npm run check` | 진입점·핵심 핸들러 구문 및 요청 회귀검사 |
+| Firebase 배포 | 저장소 루트 | `npx -y firebase-tools@latest deploy --only functions:shared-api:directions --project softm-hannun-api` | 서울 리전 Node.js 22 함수 갱신 |
 
 ## 변경 시 지켜야 할 경계
 
 | 변경 대상 | 함께 확인할 항목 |
 |---|---|
-| 프런트 공개 Origin | `CNAME`, 네이버 Web 서비스 URL, Vercel `ALLOWED_ORIGINS`, canonical·OG·구조화 데이터, `robots.txt`, `sitemap.xml` | <!-- SOFTM-SEO-DOMAIN 날짜:20260903 : 도메인 변경 시 검색엔진 제출 정보까지 함께 점검 -->
-| 네이버 Maps Key ID | 두 HTML의 SDK URL, `services/vercel-api` 환경변수, `scripts/validate-project.mjs` |
-| Directions 배포 주소 | 두 HTML의 `DIRECTIONS_PROXY`, Vercel CORS, `/api/directions` 회귀검사 |
+| 프런트 공개 Origin | `CNAME`, 네이버 Web 서비스 URL, Firebase `ALLOWED_ORIGINS`, canonical·OG·구조화 데이터, `robots.txt`, `sitemap.xml` | <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 도메인 변경 시 공용 함수와 검색 설정을 함께 점검 -->
+| 네이버 Maps Key ID | 지도 HTML의 SDK URL, `services/firebase-api/directions-core.js`, `scripts/validate-project.mjs` |
+| Directions 배포 주소 | 지도 HTML의 `DIRECTIONS_PROXY`, Firebase CORS, `/directions` 회귀검사 |
 | 공단 정적 스키마 | 수집기, `nhis-static-data.js`, 두 지도 상세 UI, `validate_nhis_static.py` |
 | 기관 원본 데이터 | 수집기·검색 인덱스 생성기, JSON 매니페스트, 통합 지도 `daycare` 기관기호 |
 | 사진 페이지 구조 | 사진 파서, 정적 사진 JSON, 두 지도의 사진 탭 |
