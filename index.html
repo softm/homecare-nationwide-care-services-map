@@ -185,7 +185,7 @@
 <div class="map-head-actions"><button type="button" class="small-btn" onclick="showAllMarkerLocations()" aria-label="선택한 기관의 전체 위치 보기">전체 위치</button><button class="icon-btn" id="shareBtn" aria-label="현재 조회상태 공유" title="지도 공유"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.2M8.7 13.3l6.6 4.2"></path></svg><span>지도 공유</span></button></div>
 <!-- SOFTM-REGION-SPACING END -->
 </div>
-   <div class="map-wrap"><div class="map-shell" id="naverMap"></div><div class="map-controls" aria-label="지도 조작"><button class="map-control" id="locateBtn" aria-label="내 주변 기관 찾기" title="내 주변"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v4m0 12v4M2 12h4m12 0h4"></path></svg></button><button class="map-control" id="zoomInBtn" aria-label="지도 확대">+</button><button class="map-control" id="zoomOutBtn" aria-label="지도 축소">−</button></div><div class="map-status" id="mapStatus" hidden><b>현재 위치 모드</b><br>위치 권한을 확인하고 있습니다.</div><div class="loading" id="mapLoading"><div><div class="spinner"></div><b id="loadingTitle">기관을 조회하고 있습니다</b><small id="loadingText"></small></div></div></div>
+   <div class="map-wrap"><div class="map-shell" id="naverMap"></div><div class="map-controls" aria-label="지도 조작"><button class="map-control" id="locateBtn" aria-label="내 주변 기관 찾기" title="내 주변"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v4m0 12v4M2 12h4m12 0h4"></path></svg></button><button class="map-control" id="zoomInBtn" aria-label="지도 확대">+</button><button class="map-control" id="zoomOutBtn" aria-label="지도 축소">−</button></div><div class="map-status" id="mapStatus" hidden><b>현재 위치 모드</b><br>위치 권한을 확인하고 있습니다.</div><div class="loading" id="mapLoading" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true"><div><div class="spinner" aria-hidden="true"></div><b id="loadingTitle">기관을 조회하고 있습니다</b><small id="loadingText"></small></div></div></div> <!-- SOFTM-INITIAL-LOADING 날짜:20261026 : 긴 초기 위치 대기와 주변 조회 단계를 보조기기에도 진행 상태로 안내 -->
    <p class="route-note">지역 선택 시 기관이 모인 곳을 확대합니다. ‘전체 위치’에서 외곽까지 확인할 수 있습니다. 지도를 움직이면 현재 화면을 자동 조회합니다.</p> <!-- SOFTM-REGION-SPACING 날짜:20260904 : 확대 화면 밖 기관도 전체 위치 버튼으로 확인할 수 있음을 안내 -->
   </div>
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급·비교 선택을 혼동하지 않도록 표현 -->
@@ -257,8 +257,8 @@
 <script src="care-list-sticky.js?v=20261003-reading1"></script> <!-- SOFTM-LIST-READING 날짜:20261003 : 읽기 도구 펼침과 스크롤 복귀 동작을 함께 반영 -->
 <!-- SOFTM-LIST-STICKY END -->
 <!-- SOFTM-MAP-STYLE START 날짜:20261005 : 목록 드래그 접힘 높이와 하단 메뉴 배치를 최신 캐시로 적용 -->
-<link rel="stylesheet" href="care-mobile-focus.css?v=20261010-control-stay1"> <!-- SOFTM-MOBILE-CONTROLS 날짜:20261010 : 모바일 확장 토글과 왼쪽 지도 조작부의 자리 유지 기준을 즉시 적용 -->
-<script src="care-mobile-focus.js?v=20261010-control-stay1"></script> <!-- SOFTM-MOBILE-CONTROLS 날짜:20261010 : 모바일 조작부 캐시를 자리 유지 기준과 함께 갱신 -->
+<link rel="stylesheet" href="care-mobile-focus.css?v=20261026-initial-loading1"> <!-- SOFTM-INITIAL-LOADING 날짜:20261026 : 초기 위치·기관 조회 진행 표시를 이전 캐시 없이 적용 -->
+<script src="care-mobile-focus.js?v=20261026-initial-loading1"></script> <!-- SOFTM-INITIAL-LOADING 날짜:20261026 : 조회 전 0건 대신 진행 상태를 하단 메뉴에 즉시 반영 -->
 <!-- SOFTM-MAP-STYLE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지
@@ -295,8 +295,10 @@ let DATA=[],filtered=[],areaRows=[],selected=new Set(),gradeFilters=new Set(),sc
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function categoryUrl(type){const url=new URL(location.href);url.search='';url.searchParams.set('type',type);if(CareListMode.isList())url.searchParams.set('mode','list');return url.pathname+url.search} // SOFTM-LIST-MODE 날짜:20260930 : 유형 링크에서도 현재 목록 탐색 모드를 유지
 function renderNav(){$('categoryNav').innerHTML=CATEGORY_ORDER.map(type=>`<a href="${categoryUrl(type)}" class="${type===TYPE?'active':''}">${esc(MANIFEST[type].label)}</a>`).join('')}
-function showLoading(title,text=''){$('loadingTitle').textContent=title;$('loadingText').textContent=text;$('mapLoading').classList.add('show')}
-function hideLoading(){$('mapLoading').classList.remove('show')}
+/** SOFTM-INITIAL-LOADING START 날짜:20261026 : 위치와 기관 조회가 끝나기 전 0건 화면을 완료 상태로 오인하지 않도록 지도·하단 메뉴에 진행 상태를 공유 */
+function showLoading(title,text='',initial=false){const loading=$('mapLoading');$('loadingTitle').textContent=title;$('loadingText').textContent=text;loading.classList.add('show');loading.setAttribute('aria-hidden','false');document.body.classList.add('care-map-loading');if(initial)document.body.classList.add('care-initial-location-loading')}
+function hideLoading(){const loading=$('mapLoading');loading.classList.remove('show');loading.setAttribute('aria-hidden','true');document.body.classList.remove('care-map-loading','care-initial-location-loading')}
+/** SOFTM-INITIAL-LOADING END */
 let toastTimer;function toast(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,3200)}
 NaverGeocoder.setErrorHandler(message=>{setStatus('주소 변환 모듈 확인 필요',message);if(!activeCareQuery?.feedback)toast(message)}); // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 상세조회 위치 오류는 최종 결과 알림에서 한 번만 안내
 function setStatus(title,text=''){$('mapStatus').hidden=!/오류|실패/.test(title);/* SOFTM-COMPACT-STATUS 날짜:20260914 : 정상 조회와 선택 안내는 마커를 가리지 않고 오류만 지도에서 표시 */$('mapStatus').innerHTML=`<b>${esc(title)}</b>${text?`<br>${esc(text)}`:''}`}
@@ -843,11 +845,14 @@ function setBase(v,label,pan=true,isCurrent=false){basePoint=v;if(baseMarker)bas
 async function useCurrentLocation(initial=false,fallbackToMap=false,grantedPoint=null){ // SOFTM-LOCATION-FOLLOW 날짜:20260924 : 권한 허용으로 얻은 좌표를 재요청 없이 주변 조회에 사용
  const button=$('locateBtn');if(!mapReady||button.disabled)return;
  const query=beginCareQuery();globalThis.CareRegionEntry?.automatic();button.disabled=true;button.setAttribute('aria-busy','true');CareLocation.hideNotice();
- if(initial){initialLocationViewport=careViewportKey();clearTimeout(refreshTimer);hideLoading();setStatus('현재 위치 확인 중','지도에서 지역을 이동하거나 바로 검색할 수 있습니다.')}else showLoading('현재 위치를 확인하는 중','공식 데이터 목록은 이미 사용할 수 있습니다.'); // SOFTM-LOCATION-PREVIEW 날짜:20260913 : 위치 확인과 거절 이후에도 첫 전국 화면의 자동 조회를 보류
+ /** SOFTM-INITIAL-LOADING START 날짜:20261026 : 첫 위치 확인부터 주변 기관 목록 완성까지 하나의 연속된 진행 상태로 표시 */
+ if(initial){initialLocationViewport=careViewportKey();clearTimeout(refreshTimer);showLoading('현재 위치를 확인하는 중','위치를 확인한 뒤 주변 기관을 조회합니다.',true);setStatus('현재 위치 확인 중','지도에서 지역을 이동하거나 바로 검색할 수 있습니다.')}else showLoading('현재 위치를 확인하는 중','공식 데이터 목록은 이미 사용할 수 있습니다.');
+ /** SOFTM-INITIAL-LOADING END */
  try{
   const point=grantedPoint||await CareLocation.request({isCurrent:()=>query.current()}); // SOFTM-LOCATION-FOLLOW 날짜:20260924 : 초기 허용 좌표를 기존 현위치 조회 경로에 전달
   if(!query.current())return;
-  hideLoading();globalThis.CareRegionEntry?.hide();globalThis.CareRegionEntry?.automatic();initialLocationViewport=null;setBase(point,'현재 위치',true,true); // SOFTM-LOCATION-PREVIEW 날짜:20260913 : 위치 성공 시 주변 조회를 정상 재개
+  if(initial)showLoading('현재 위치를 찾았습니다','주변 기관을 조회하고 있습니다.',true);else hideLoading(); // SOFTM-INITIAL-LOADING 날짜:20261026 : 위치 성공 직후 0건 화면이 다시 보이지 않도록 기관 조회 단계로 이어서 표시
+  globalThis.CareRegionEntry?.hide();globalThis.CareRegionEntry?.automatic();initialLocationViewport=null;setBase(point,'현재 위치',true,true); // SOFTM-LOCATION-PREVIEW 날짜:20260913 : 위치 성공 시 주변 조회를 정상 재개
   await new Promise(r=>setTimeout(r,500));if(!query.current())return;
   skipIdleUntil=0;return await refreshFromMap(query);
  }catch(error){
@@ -1119,7 +1124,7 @@ function followInitialCareLocation(point){
  if(!TYPE){if(neutralInitialView&&(neutralInitialView.used||neutralInitialView.token!==refreshToken||neutralInitialView.view!==careViewportKey()))return;if(neutralInitialView)neutralInitialView.used=true;neutralViewportChosen=true;setBase(point,'현재 위치',true,true);setStatus('내 주변','필요한 돌봄 유형을 선택해 주세요.');return;} // SOFTM-MAP-ENTRY-LOCATION 날짜:20260930 : 초기 허용 대기 중 바뀐 지도는 보존하고 명시 공유 진입의 기존 허용 정책은 유지
  if(CareMapExperience.isBasketMap())CareMapExperience.exitBasketMap();
  clearTimeout(refreshTimer);closeDetail(false);
- return useCurrentLocation(false,false,point);
+ return useCurrentLocation(true,false,point); // SOFTM-INITIAL-LOADING 날짜:20261026 : 초기 권한 응답도 수동 위치 조회로 오인하지 않고 완료까지 진행 표시를 유지
 }
 /** SOFTM-LOCATION-FOLLOW END */
 /** SOFTM-MAP-ENTRY-LOCATION START 날짜:20260930 : 이미 위치를 허용한 유형 미선택 지도도 내 주변에서 시작하고 대기 중의 직접 탐색은 보존 */

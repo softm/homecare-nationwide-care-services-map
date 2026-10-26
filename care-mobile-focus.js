@@ -122,10 +122,11 @@
             const listOpen = body.classList.contains('care-focus-list');
             ui.querySelector('[data-mobile-focus="list"]').setAttribute('aria-expanded', String(listOpen));
             ui.querySelector('[data-mobile-focus="saved"]').setAttribute('aria-expanded', String(isSaved));
-            const count = document.querySelector('#areaCount,#filteredCount')?.textContent.trim() || '0곳';
+            const loading = body.classList.contains('care-map-loading'); // SOFTM-INITIAL-LOADING 날짜:20261026 : 첫 조회의 0건을 확정 결과처럼 표시하지 않음
+            const count = loading ? '확인 중' : document.querySelector('#areaCount,#filteredCount')?.textContent.trim() || '0곳'; // SOFTM-INITIAL-LOADING 날짜:20261026 : 지도 진행 표시와 하단 목록 상태를 같은 시점에 전환
             const setText = (selector, value) => { const node = ui.querySelector(selector); if (node.textContent !== value) node.textContent = value; };
-            setText('[data-focus-count]', count.replace(/\s*곳$/, ''));
-            ui.querySelector('[data-mobile-focus="list"]').setAttribute('aria-label', `검색 결과 ${count} 목록`);
+            setText('[data-focus-count]', loading ? count : count.replace(/\s*곳$/, '')); // SOFTM-INITIAL-LOADING 날짜:20261026 : 조회 중에는 숫자 대신 명확한 진행 문구를 유지
+            ui.querySelector('[data-mobile-focus="list"]').setAttribute('aria-label', loading ? '검색 결과 확인 중' : `검색 결과 ${count} 목록`); // SOFTM-INITIAL-LOADING 날짜:20261026 : 보조기기에도 미완료 상태를 0건과 구분
             setText('[data-focus-saved]', String(root.CareMapExperience?.rows().length || 0));
             /* SOFTM-MAP-STYLE START 날짜:20261005 : 조건 갱신으로 아이콘이 사라지지 않도록 문구만 변경 */
             setText('[data-focus-type]', (document.querySelector('.care-type-menu-item[aria-current="true"]')?.textContent || '유형 선택') + ' ▾');
