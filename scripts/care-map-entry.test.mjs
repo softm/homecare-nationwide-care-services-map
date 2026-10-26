@@ -12,7 +12,7 @@ const point = { lat: 37.4712481, lng: 126.8096277 };
 
 function setup({ search = '', province = '', ready = false, deferMap = false } = {}) {
     let config, listMode = true, locationResolve, locationReject, activeTransition = true;
-    const calls = [], elements = {
+    const calls = [], loading = [], elements = {
         q: { value: search }, province: { value: province }, city: { value: '' },
         list: { innerHTML: '', scrollTop: 0 }, sort: { value: 'rating' },
         locateBtn: { disabled: false, setAttribute() {}, removeAttribute() {} }
@@ -22,7 +22,7 @@ function setup({ search = '', province = '', ready = false, deferMap = false } =
         careMapFocus: null, careListLocation: null, careViewportResearch: null, advancedSearch: null,
         refreshTimer: null, refreshToken: 0, careListVersion: 0, initialLocationViewport: null,
         skipIdleUntil: 0, setTimeout: callback => { callback(); }, clearTimeout() {},
-        $: id => elements[id], closeDetail() {}, hideLoading() {}, showLoading() {}, setStatus() {}, toast() {},
+        $: id => elements[id], closeDetail() {}, hideLoading() { loading.push({ visible:false }); }, showLoading(title, text, initial) { loading.push({ visible:true, title, text, initial:Boolean(initial) }); }, setStatus() {}, toast() {},
         clearMapOnlyCareAds() {}, initCareAds() {}, initExpandedCareAds() {}, syncCareListSort() {}, renderNav() {},
         CareListView: { sync() {} }, CareListAds: { sync() {} },
         CareListMode: { isList: () => listMode, mount(value) { config = value; } },
@@ -48,7 +48,7 @@ function setup({ search = '', province = '', ready = false, deferMap = false } =
     vm.runInContext(currentLocation + '\n' + modeEntry, context);
     context.initCareListMode();
     return {
-        context, calls, elements,
+        context, calls, elements, loading,
         enter() {
             config.beforeChange('map'); listMode = false;
             return config.change('map', 'list', { current: () => activeTransition });
@@ -62,9 +62,14 @@ function setup({ search = '', province = '', ready = false, deferMap = false } =
 test('목록에서 첫 지도 진입은 현재 위치를 요청하고 그 좌표의 주변 조회까지 기다린다', async () => {
     const s = setup(), pending = s.enter();
     assert.deepEqual(s.calls, ['sdk', 'location']);
+    assert.deepEqual(s.loading.at(-1), { visible:true, title:'현재 위치를 확인하는 중', text:'위치를 확인한 뒤 주변 기관을 조회합니다.', initial:true });
     assert.equal(s.elements.locateBtn.disabled, true);
     s.succeed(); await pending;
     assert.deepEqual(s.calls, ['sdk', 'location', ['center', point, '현재 위치', true, true], 'nearby', 'resume']);
+    assert.deepEqual(s.loading.slice(-2), [
+        { visible:true, title:'현재 위치를 확인하는 중', text:'위치를 확인한 뒤 주변 기관을 조회합니다.', initial:true },
+        { visible:true, title:'현재 위치를 찾았습니다', text:'주변 기관을 조회하고 있습니다.', initial:true }
+    ]);
     assert.equal(s.elements.locateBtn.disabled, false);
     assert.equal(s.context.careListMapStarting, false);
 });
@@ -79,6 +84,7 @@ test('목록에서 직접 정한 지역·기관 검색은 첫 지도에서도 �
 test('첫 지도 위치 거절은 기존 최근 지역·기본 지도 복구 경로를 사용한다', async () => {
     const s = setup(), pending = s.enter(); s.fail(); await pending;
     assert.deepEqual(s.calls, ['sdk', 'location', 'fallback', 'resume']);
+    assert.deepEqual(s.loading.at(-1), { visible:false });
     assert.equal(s.elements.locateBtn.disabled, false);
 });
 

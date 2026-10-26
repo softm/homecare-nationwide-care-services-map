@@ -57,10 +57,10 @@ test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 
  assert.match(mobileFocusCss,/care-mobile-map-immersive[\s\S]+\.map-control/);
 });
 /** SOFTM-MOBILE-IMMERSIVE END */
-/** SOFTM-MOBILE-CHIPS START 날짜:20261010 : 모바일 전체 지도 칩 문구·크기 축소 회귀검사 */
+/** SOFTM-MOBILE-CHIPS START 날짜:20261026 : 모바일 전체 지도 칩과 초기 조회 진행 표시의 캐시 갱신을 함께 검증 */
 test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을 사용한다',()=>{
- assert.match(mapHtml,/care-mobile-focus\.css\?v=20261010-control-stay1/);
- assert.match(mapHtml,/care-mobile-focus\.js\?v=20261010-control-stay1/);
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261026-initial-loading1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261026-initial-loading1/);
  assert.match(mobileFocusSource,/>필터<\/span>/);
  assert.match(mobileFocusSource,/`필터 · \$\{filterCount \|\| '설정됨'\}`/);
  assert.doesNotMatch(mobileFocusSource,/상세필터/);
@@ -68,6 +68,17 @@ test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을
  assert.match(mobileFocusCss,/care-mobile-focus-chips svg \{ width:20px; height:20px; padding:5px/);
 });
 /** SOFTM-MOBILE-CHIPS END */
+/** SOFTM-INITIAL-LOADING START 날짜:20261026 : 초기 위치와 기관 조회가 끝나기 전 0건으로 보이는 회귀를 방지 */
+test('초기 위치·기관 조회는 중앙 진행 표시와 하단 확인 중 상태를 함께 유지한다',()=>{
+ assert.match(mapHtml,/id="mapLoading" role="status" aria-live="polite"/);
+ assert.match(mapHtml,/showLoading\('현재 위치를 확인하는 중','위치를 확인한 뒤 주변 기관을 조회합니다\.',true\)/);
+ assert.match(mapHtml,/showLoading\('현재 위치를 찾았습니다','주변 기관을 조회하고 있습니다\.',true\)/);
+ assert.match(mobileFocusSource,/body\.classList\.contains\('care-map-loading'\)/);
+ assert.match(mobileFocusSource,/loading \? '검색 결과 확인 중'/);
+ assert.match(mobileFocusCss,/care-initial-location-loading #mapLoading \{ top:50%; left:50%/);
+ assert.match(mobileFocusCss,/care-initial-location-loading #mapLoading small \{ display:block/);
+});
+/** SOFTM-INITIAL-LOADING END */
 /** SOFTM-MOBILE-CONTROLS START 날짜:20261010 : 모바일 전체 지도 조작 아이콘 위치·순서 회귀검사 */
 test('모바일 전체 지도는 지도변경 묶음을 오른쪽에 두고 확장 지도 왼쪽 조작에 내위치를 포함한다',()=>{
  assert.match(mobileFocusSource,/data-mobile-focus="layers"[\s\S]+data-mobile-focus="fullscreen"[\s\S]+data-mobile-focus="share"/);
