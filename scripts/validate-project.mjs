@@ -183,7 +183,8 @@ const directionsSource = read('services/firebase-api/directions-core.js'); // SO
 if (!directionsSource.includes(`"${publicOrigin}"`)) fail('길찾기 API의 공식 공개 Origin 허용 누락');
 if (!careMapSource.includes('https://asia-northeast3-softm-hannun-api.cloudfunctions.net/directions')) fail('전국 요양 지도: 공용 Firebase 길찾기 주소 누락');
 if (careMapSource.includes('daycare-directions-proxy.vercel.app')) fail('전국 요양 지도: 폐기한 Vercel 길찾기 주소가 남아 있습니다.');
-if (['index.html', 'index.html', ...landingPages, 'robots.txt', 'sitemap.xml'].some(file => read(file).includes('https://softm.github.io'))) fail('검색 설정에 예전 GitHub Pages 대표 주소가 남아 있습니다.');
+// SOFTM-COMMON-VAULT 날짜:20261028 : 공통 계정 모듈 의존성은 검색 대표 주소와 구분하며 기존 대표 Origin 검사는 유지
+if (['index.html', 'index.html', ...landingPages, 'robots.txt', 'sitemap.xml'].some(file => read(file).replaceAll('https://softm.github.io/shared/platform/v1/boot.mjs?site=homecare&amp;v=20261028','').includes('https://softm.github.io'))) fail('검색 설정에 예전 GitHub Pages 대표 주소가 남아 있습니다.');
 /** SOFTM-SEO-LANDING-CHECK END */
 
 /** SOFTM-GEOCODER-CHECK START 날짜:20260902 : 서버 주소 API 재유입과 SDK·캐시 응답 형식 회귀를 자동 검증 */
