@@ -54,7 +54,11 @@
 .map-marker .marker-rank{right:-8px;top:-8px;width:18px;height:18px;font-size:8px;font-style:normal}
 /* SOFTM-MAP-TYPE 날짜:20261105 : 분할 지도에만 전환 버튼을 제공하고 전체 지도에서는 기존 도구를 사용 */
 #splitMapType{display:none}
-@media(min-width:1001px){body.stitch-desktop:not(.care-map-focus) #splitMapType{display:inline-flex;align-items:center;justify-content:center;min-height:48px}}
+@media(min-width:1001px){
+ body.stitch-desktop:not(.care-map-focus,.care-region-pending) #splitMapType{position:absolute;right:max(12px,env(safe-area-inset-right));top:254px;z-index:70;display:grid;place-items:center;width:48px;height:48px;padding:0;border:1px solid #d3dfed;border-radius:50%;background:#fff;color:#173f6b;box-shadow:0 3px 14px #173f6b26;cursor:pointer}
+ #splitMapType svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+ #splitMapType:hover{background:#edf5ff}
+}
 .map-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .map-head-actions .small-btn{min-height:36px;white-space:nowrap}
 @media(max-width:600px){.map-head{flex-wrap:wrap;gap:8px}.map-head-actions{margin-left:auto}}
@@ -1119,11 +1123,12 @@ function initCareMapFocus(){
  results:initialState=>{CareMapExperience.showResultsSheet(initialState)},saved:()=>{$('careSavedTab').click()}, // SOFTM-MAP-INITIAL 날짜:20261005 : 초기 접힘과 목록 버튼의 펼침을 공용 시트로 연결
  layers:toggleCareMapType});
  /** SOFTM-MAP-TYPE START 날짜:20261105 : 지도 초기화 후 도구를 연결하고 모든 보기의 전환 대상을 일치 */
- const split=document.createElement('button');split.type='button';split.className='small-btn';split.id='splitMapType';split.onclick=toggleCareMapType;
- document.querySelector('.care-focus-entry').before(split);
+ const split=document.createElement('button');split.type='button';split.id='splitMapType';split.onclick=toggleCareMapType;
+ split.append(document.querySelector('[data-focus="layers"] svg').cloneNode(true));
+ document.querySelector('.map-controls').after(split);
  function syncType(){
   const satellite=map.getMapTypeId()===window.naver.maps.MapTypeId.HYBRID;
-  split.textContent=satellite?'기본지도':'실사지도';split.setAttribute('aria-label',split.textContent+'로 전환');
+  split.title=satellite?'기본지도로 전환':'실사지도로 전환';split.setAttribute('aria-label',split.title);
   const label=satellite?'일반지도 보기':'위성지도 보기';
   for(const control of document.querySelectorAll('[data-focus="layers"],[data-mobile-focus="layers"]')){
    control.setAttribute('aria-label',label);control.title=label;control.setAttribute('aria-pressed',String(satellite));
