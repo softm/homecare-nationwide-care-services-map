@@ -52,6 +52,9 @@
 .map-marker{width:36px;height:36px;border-width:2px;border-radius:12px 12px 12px 3px;box-shadow:0 2px 6px rgba(20,40,62,.28)}
 .map-marker span{font-size:10px}
 .map-marker .marker-rank{right:-8px;top:-8px;width:18px;height:18px;font-size:8px;font-style:normal}
+/* SOFTM-MAP-TYPE 날짜:20261105 : 분할 지도에만 전환 버튼을 제공하고 전체 지도에서는 기존 도구를 사용 */
+#splitMapType{display:none}
+@media(min-width:1001px){body.stitch-desktop:not(.care-map-focus) #splitMapType{display:inline-flex;align-items:center;justify-content:center;min-height:48px}}
 .map-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .map-head-actions .small-btn{min-height:36px;white-space:nowrap}
 @media(max-width:600px){.map-head{flex-wrap:wrap;gap:8px}.map-head-actions{margin-left:auto}}
@@ -1114,7 +1117,23 @@ function initCareMapFocus(){
  cities:province=>['',...[...new Set(DATA.filter(c=>!province||c.p===province).map(c=>c.c).filter(Boolean))].sort()],
  search:(q,p,c)=>{$('q').value=q;$('province').value=p;updateCities();$('city').value=c;void searchByControls(true)},
  results:initialState=>{CareMapExperience.showResultsSheet(initialState)},saved:()=>{$('careSavedTab').click()}, // SOFTM-MAP-INITIAL 날짜:20261005 : 초기 접힘과 목록 버튼의 펼침을 공용 시트로 연결
- layers:()=>{const types=window.naver.maps.MapTypeId,satellite=map.getMapTypeId()!==types.HYBRID;map.setMapTypeId(satellite?types.HYBRID:types.NORMAL);return satellite}});
+ layers:toggleCareMapType});
+ /** SOFTM-MAP-TYPE START 날짜:20261105 : 지도 초기화 후 도구를 연결하고 모든 보기의 전환 대상을 일치 */
+ const split=document.createElement('button');split.type='button';split.className='small-btn';split.id='splitMapType';split.onclick=toggleCareMapType;
+ document.querySelector('.care-focus-entry').before(split);
+ function syncType(){
+  const satellite=map.getMapTypeId()===window.naver.maps.MapTypeId.HYBRID;
+  split.textContent=satellite?'기본지도':'실사지도';split.setAttribute('aria-label',split.textContent+'로 전환');
+  const label=satellite?'일반지도 보기':'위성지도 보기';
+  for(const control of document.querySelectorAll('[data-focus="layers"],[data-mobile-focus="layers"]')){
+   control.setAttribute('aria-label',label);control.title=label;control.setAttribute('aria-pressed',String(satellite));
+   const caption=control.querySelector('span');if(caption)caption.textContent=label;
+  }
+  return satellite;
+ }
+ function toggleCareMapType(){const types=window.naver.maps.MapTypeId;map.setMapTypeId(map.getMapTypeId()===types.HYBRID?types.NORMAL:types.HYBRID);return syncType()}
+ syncType();
+ /** SOFTM-MAP-TYPE END */
 }
 /** SOFTM-MAP-FOCUS END */
 /** SOFTM-TYPE-MAP START 날짜:20260914 : 유형 선택 후 기본 지도는 서울시청 줌 12로 표시하고 실제 위치 확인 결과를 우선 적용 */
