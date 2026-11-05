@@ -59,9 +59,9 @@
  #splitMapType svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 }
-/* SOFTM-MAP-TYPE 날짜:20261105 : 모든 지도 보기에서 실사 선택만 연한 파랑 배경으로 표시 */
+/* SOFTM-MAP-TYPE 날짜:20261105 : 모든 지도 보기에서 실사 선택은 짙은 파랑과 흰 선으로 구분 */
 body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="layers"])[aria-pressed]{background-color:#fff}
-body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="layers"])[aria-pressed="true"]{background-color:#eaf2ff}
+body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="layers"])[aria-pressed="true"]{background-color:#245888;color:#fff}
 .map-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .map-head-actions .small-btn{min-height:36px;white-space:nowrap}
 @media(max-width:600px){.map-head{flex-wrap:wrap;gap:8px}.map-head-actions{margin-left:auto}}
