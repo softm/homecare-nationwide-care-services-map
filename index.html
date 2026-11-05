@@ -57,8 +57,11 @@
 @media(min-width:1001px){
  body.stitch-desktop:not(.care-map-focus,.care-region-pending) #splitMapType{position:absolute;right:max(12px,env(safe-area-inset-right));top:254px;z-index:70;display:grid;place-items:center;width:48px;height:48px;padding:0;border:1px solid #d3dfed;border-radius:50%;background:#fff;color:#173f6b;box-shadow:0 3px 14px #173f6b26;cursor:pointer}
  #splitMapType svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
- #splitMapType:hover{background:#edf5ff}
+
 }
+/* SOFTM-MAP-TYPE 날짜:20261105 : 모든 지도 보기에서 실사 선택만 연한 파랑 배경으로 표시 */
+body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="layers"])[aria-pressed]{background-color:#fff}
+body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="layers"])[aria-pressed="true"]{background-color:#eaf2ff}
 .map-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .map-head-actions .small-btn{min-height:36px;white-space:nowrap}
 @media(max-width:600px){.map-head{flex-wrap:wrap;gap:8px}.map-head-actions{margin-left:auto}}
@@ -1134,10 +1137,7 @@ function initCareMapFocus(){
    control.setAttribute('aria-label',label);control.title=label;control.setAttribute('aria-pressed',String(satellite));
    const caption=control.querySelector('span');if(caption)caption.textContent=label;
   }
-  /** SOFTM-MAP-GLYPH START 날짜:20261105 : 누르면 열릴 지도 종류를 모든 전환 버튼의 그림으로도 구분 */
-  const glyph=satellite?'<path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5"/>':'<rect x="2.5" y="3.5" width="19" height="17" rx="3"/><circle cx="16.5" cy="8.5" r="1.5"/><path d="m3 17 6-7 6 7 3-3 3 3"/>';
-  for(const icon of document.querySelectorAll('#splitMapType svg,[data-focus="layers"] svg,[data-mobile-focus="layers"] svg'))icon.innerHTML=glyph;
-  /** SOFTM-MAP-GLYPH END */
+  split.setAttribute('aria-pressed',String(satellite)); // SOFTM-MAP-TYPE 날짜:20261105 : 레이어 그림을 유지하고 실사지도 선택을 배경으로 표시
   return satellite;
  }
  function toggleCareMapType(){const types=window.naver.maps.MapTypeId;map.setMapTypeId(map.getMapTypeId()===types.HYBRID?types.NORMAL:types.HYBRID);return syncType()}
