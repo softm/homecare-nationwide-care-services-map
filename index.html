@@ -1134,6 +1134,10 @@ function initCareMapFocus(){
    control.setAttribute('aria-label',label);control.title=label;control.setAttribute('aria-pressed',String(satellite));
    const caption=control.querySelector('span');if(caption)caption.textContent=label;
   }
+  /** SOFTM-MAP-GLYPH START 날짜:20261105 : 누르면 열릴 지도 종류를 모든 전환 버튼의 그림으로도 구분 */
+  const glyph=satellite?'<path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5"/>':'<rect x="2.5" y="3.5" width="19" height="17" rx="3"/><circle cx="16.5" cy="8.5" r="1.5"/><path d="m3 17 6-7 6 7 3-3 3 3"/>';
+  for(const icon of document.querySelectorAll('#splitMapType svg,[data-focus="layers"] svg,[data-mobile-focus="layers"] svg'))icon.innerHTML=glyph;
+  /** SOFTM-MAP-GLYPH END */
   return satellite;
  }
  function toggleCareMapType(){const types=window.naver.maps.MapTypeId;map.setMapTypeId(map.getMapTypeId()===types.HYBRID?types.NORMAL:types.HYBRID);return syncType()}
