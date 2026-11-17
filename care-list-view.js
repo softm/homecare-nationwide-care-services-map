@@ -4,8 +4,14 @@
     const storageKey = 'careListView:v1';
     const views = ['cards', 'rows', 'compact'];
     const resolveView = value => views.includes(value) ? value : 'cards';
-    let view = 'cards', toolbar = null;
-    try { view = resolveView(root.sessionStorage?.getItem(storageKey)); } catch {}
+    /** SOFTM-COMPETITIVE-LIST START 날짜:20261118 : 넓은 목록의 첫 진입은 기관별 공개 근거를 한 행에서 비교하는 목록형을 사용하고 모바일 카드형은 유지 */
+    const defaultView = root.matchMedia?.('(min-width:1001px)').matches ? 'rows' : 'cards';
+    let view = defaultView, toolbar = null;
+    try {
+        const savedView = root.sessionStorage?.getItem(storageKey);
+        view = savedView === null || savedView === undefined ? defaultView : resolveView(savedView);
+    } catch {}
+    /** SOFTM-COMPETITIVE-LIST END */
 
     function sync() {
         if (!toolbar) return;
