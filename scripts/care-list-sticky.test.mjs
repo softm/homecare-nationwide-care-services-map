@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const source = readFileSync(new URL('../care-list-sticky.js', import.meta.url), 'utf8');
+const stickyCss = readFileSync(new URL('../care-list-sticky.css', import.meta.url), 'utf8');
 const logic = vm.createContext({});
 vm.runInContext(source, logic);
 const { createProgression } = logic.CareListSticky;
@@ -59,8 +60,8 @@ test('기관 복원의 큰 좌표 이동은 사용자 위스크롤로 오인하�
     assert.equal(state.update(732, dimensions), 'reading');
 });
 
-function environment({ locationInsideFilters = false } = {}) { // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 위치 도구의 필터 내부·외부 배치를 같은 회귀 환경에서 비교
-    let listMode = true, rowHeight = 100, frames = [];
+function environment({ locationInsideFilters = false, rail = false } = {}) { // SOFTM-FILTER-RAIL 날짜:20261118 : 넓은 PC 레일과 기존 상단 필터를 같은 회귀 환경에서 비교
+    let listMode = true, rowHeight = 100, frames = [], railMatches = rail;
     const classes = new Set(), listeners = new Map();
     function node() {
         const attributes = new Map();
@@ -74,9 +75,9 @@ function environment({ locationInsideFilters = false } = {}) { // SOFTM-LIST-LOC
             getBoundingClientRect: () => ({ top: 0, bottom: 0, height: 0 })
         };
     }
-    const body = node(); body.dataset.careMode = 'list';
+    const body = node(); body.dataset.careMode = 'list'; body.dataset.careWorkspace = 'search';
     body.classList = { contains: value => classes.has(value) };
-    body.style = { setProperty() {} };
+    const style = new Map(); body.style = { setProperty(name,value) { style.set(name,value); } };
     const viewport = node(); viewport.scrollTop = 0;
     viewport.getBoundingClientRect = () => ({ top: 120, bottom: 720, height: 600 });
     const filters = node(), input = { tagName: 'INPUT', focus() { document.activeElement = input; } }, head = node(), list = node();
@@ -114,14 +115,17 @@ function environment({ locationInsideFilters = false } = {}) { // SOFTM-LIST-LOC
         querySelectorAll: selector => selector === '#list .row' ? rows : [],
         getElementById: id => ({ list, q: input, careListLocation: location, careListSummary: summary })[id] || null
     };
-    const context = vm.createContext({ document, CareListMode: { isList: () => listMode },
+    const media={get matches(){return railMatches},addEventListener(){}};
+    const context = vm.createContext({ document, CareListMode: { isList: () => listMode }, matchMedia:()=>media,
         requestAnimationFrame(callback) { frames.push(callback); return frames.length; }, addEventListener() {},
         MutationObserver: class { observe() {} }, ResizeObserver: class { observe() {} }
     });
     vm.runInContext(source, context);
     const api = context.CareListSticky;
-    return { api, body, filters, viewport, head, list, rows, input, location, locationButton, document, // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 위치 도구 포함 관계와 키보드 포커스를 직접 검증
+    return { api, body, filters, viewport, head, list, rows, input, location, locationButton, document, style, // SOFTM-LIST-LOCATION-TEST 날짜:20260930 : 위치 도구 포함 관계와 키보드 포커스를 직접 검증
         mode(value) { listMode = value; body.dataset.careMode = value ? 'list' : 'map'; },
+        rail(value) { railMatches=value; },
+        workspace(value) { body.dataset.careWorkspace=value; },
         scroll(top) { viewport.scrollTop = top; api.sync(); },
         density(value) { rowHeight = value; },
         open(value) { if (value) classes.add('care-mobile-filters-open'); else classes.delete('care-mobile-filters-open'); },
@@ -153,6 +157,35 @@ test('입력 포커스 또는 열린 상세조건은 읽기 위치에서도 검�
     env.open(true); env.api.sync();
     assert.equal(env.body.dataset.careListStage, 'search'); assert.equal(env.filters.inert, false);
 });
+
+/** SOFTM-FILTER-RAIL START 날짜:20261118 : 넓은 PC 레일은 읽기 중에도 보조기기·키보드에서 계속 조작 가능해야 함 */
+test('넓은 검색 화면의 필터 레일은 읽기 중에도 숨기거나 inert 처리하지 않는다', () => {
+    const env=environment({locationInsideFilters:true,rail:true});env.api.mount();env.scroll(900);
+    assert.equal(env.api.isRail(),true);
+    assert.equal(env.body.dataset.careFilterRail,'true');
+    assert.equal(env.style.get('--care-sticky-filter-height'),'0px');
+    assert.equal(env.filters.inert,false);
+    assert.equal(env.filters.getAttribute('aria-hidden'),'false');
+    assert.equal(env.head.querySelector('[data-list-search-return]').hidden,true);
+});
+
+test('담은 기관 화면이나 좁아진 화면은 기존 상단 필터 읽기 동작으로 복귀한다', () => {
+    const env=environment({rail:true});env.api.mount();env.scroll(900);
+    env.workspace('saved');env.api.sync();
+    assert.equal(env.api.isRail(),false);
+    assert.equal(env.body.dataset.careFilterRail,'false');
+    assert.equal(env.filters.inert,true);
+    env.workspace('search');env.rail(false);env.api.sync();
+    assert.equal(env.api.isRail(),false);
+    assert.equal(env.filters.inert,true);
+    assert.equal(env.style.get('--care-sticky-filter-height'),`${dimensions.filterHeight}px`);
+});
+test('필터 레일 CSS는 넓고 충분히 높은 검색 목록에만 적용한다',()=>{
+    assert.match(stickyCss,/@media \(min-width:1280px\) and \(min-height:701px\)/);
+    assert.match(stickyCss,/\[data-care-workspace="search"\]\[data-care-filter-rail="true"\]/);
+    assert.match(stickyCss,/grid-template-columns:260px minmax\(0,1fr\)/);
+});
+/** SOFTM-FILTER-RAIL END */
 
 /** SOFTM-LIST-LOCATION-TEST START 날짜:20260930 : 위치 도구를 검색 보조줄로 옮겨도 스크롤 임계값과 키보드 접근성이 유지되어야 함 */
 test('필터 안의 위치 도구 높이를 읽기 전환 임계값에 이중으로 더하지 않는다', () => {

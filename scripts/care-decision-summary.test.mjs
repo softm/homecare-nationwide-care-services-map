@@ -1,7 +1,7 @@
 /** SOFTM-DECISION-SUMMARY START 날짜:20260924 : 판단 요약에서 급여에 맞지 않는 지표와 미확인 자료의 단정 표시를 방지 */
 import assert from 'node:assert/strict';
 import '../care-decision-summary.js';
-const { render } = globalThis.CareDecisionSummary;
+const { render, review, renderReview } = globalThis.CareDecisionSummary;
 const base = { g: 'A', ey: 2023, z: 49, cw: 9, rn: 2, na: 1, d: '2019-09-03' };
 const daycare = render(base, 'daycare');
 assert.match(daycare, /A등급/);
@@ -29,6 +29,35 @@ assert.equal(globalThis.CareDecisionSummary.staffText({cw:0,staffMissing:true}, 
 assert.equal(globalThis.CareDecisionSummary.staffText({}, 'cw'), '미확인');
 console.log('care-decision-summary: 유형별 판단 요약 검증 통과');
 /** SOFTM-DECISION-SUMMARY END */
+
+/** SOFTM-DETAIL-REVIEW START 날짜:20261118 : 공개 강점·기관 확인·실제 누락을 오해 없이 분류하는지 검증 */
+const reviewed = review(base, 'daycare');
+assert.match(JSON.stringify(reviewed.confirmed), /A등급/);
+assert.match(JSON.stringify(reviewed.confirmed), /간호사 2명|물리·작업치료사/);
+assert.doesNotMatch(JSON.stringify(reviewed.confirmed), /충분|추천|이용 가능|자리 있음|보장/);
+assert.match(JSON.stringify(reviewed.verify), /송영/);
+assert.doesNotMatch(JSON.stringify(reviewed.confirmed), /등록 정원/);
+assert.equal(review({ ...base, g: 'C' }, 'daycare').confirmed.some(item => item.label === '공단 평가'), false);
+assert.match(JSON.stringify(review({ ...base, ey: null }, 'daycare').unknown), /평가연도/);
+assert.match(JSON.stringify(review({ ...base, staffMissing: true }, 'daycare').unknown), /요양보호사/);
+assert.doesNotMatch(JSON.stringify(review({ ...base, cw: 0, rn: 0, pt: 0, ot: 0 }, 'home-care').unknown), /요양보호사/);
+assert.doesNotMatch(JSON.stringify(review({ ...base, t: 'B03,C01' }, 'daycare').confirmed), /등록 인력/);
+assert.match(JSON.stringify(review({ ...base, t: 'B03,C01' }, 'daycare').verify), /급여별 인력/);
+assert.doesNotMatch(JSON.stringify((({ confirmed, unknown }) => ({ confirmed, unknown }))(review(base, 'welfare-equipment'))), /등록 정원|등록 인력|요양보호사/);
+assert.doesNotMatch(JSON.stringify((({ confirmed, unknown }) => ({ confirmed, unknown }))(review(base, 'nursing-hospital'))), /공단 평가|등록 정원|요양보호사/);
+assert.match(review(base, 'welfare-equipment').note, /현재 품목 재고/);
+assert.match(review(base, 'nursing-hospital').note, /현재 입원 가능 여부/);
+assert.match(review(base, 'home-care').note, /실제 배정 가능한 인력/);
+assert.match(JSON.stringify(review({ ...base, d: '' }, 'nursing-hospital').unknown), /개설일/);
+for (const type of ['facility', 'daycare', 'short-stay', 'dementia', 'home-care', 'home-bath', 'home-nursing', 'welfare-equipment', 'nursing-hospital']) {
+    assert.ok(review(base, type).verify.length >= 2, `${type}: 기관 확인 질문 제공`);
+}
+const reviewHtml = renderReview({ ...base, n: '<img>' }, 'daycare', { source: '<script>', sourceDate: '<2026>' });
+for (const title of ['확인된 강점', '기관 확인 필요', '미확인']) assert.equal((reviewHtml.match(new RegExp(`<dt>${title}</dt>`, 'g')) || []).length, 1);
+assert.doesNotMatch(reviewHtml, /<script>|<2026>/);
+assert.match(reviewHtml, /&lt;script&gt;.*&lt;2026&gt;/s);
+console.log('care-decision-summary: 상세 선택 확인 요약 검증 통과');
+/** SOFTM-DETAIL-REVIEW END */
 
 /** SOFTM-MARKER-INSIGHT-TEST START 날짜:20260930 : 근접 지도에서 유형에 맞는 판단 근거와 수집 누락을 일관되게 안내하도록 검증 */
 const { markerLines } = globalThis.CareDecisionSummary;

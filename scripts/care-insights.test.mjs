@@ -15,7 +15,7 @@ test('기관을 중복 제거하고 담은 순서를 보존하며 입력을 변�
 });
 test('서로 다른 평가연도는 순위 없이 안내하고 같은 급여의 정원 범위만 설명한다', () => {
     const summary = analyze([a,b]).summary.join(' ');
-    assert.match(summary, /2023·2024/); assert.match(summary, /30~50명/);
+    assert.match(summary, /2023년·2024년/); assert.match(summary, /30~50명/);
     assert.match(summary, /현재 이용 가능한 자리/);
     assert.doesNotMatch(analyze([a,{...b,t:'H31'}]).summary.join(' '), /30~50명/);
 });
@@ -33,7 +33,7 @@ test('일부 인력 누락은 합계를 설명하지 않으며 실제 프로그�
 });
 test('병원에는 공단평가·요양 인력·정원을 적용하지 않고 복지용구도 인력·정원을 제외한다', () => {
     const hospital = analyze([a],{type:'nursing-hospital'});
-    assert.equal(hospital.source,'심평원 개설현황');
+    assert.equal(hospital.source,'건강보험심사평가원 요양기관 개설현황');
     assert.doesNotMatch(hospital.cards[0].facts.join(' '), /공단 평가|공개 정원|공개 인력/);
     assert.doesNotMatch(analyze([a],{type:'welfare-equipment'}).cards[0].facts.join(' '), /공개 정원|공개 인력/);
 });
