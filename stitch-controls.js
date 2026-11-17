@@ -23,6 +23,7 @@
         const placeToggle = () => { if (document.body.dataset.careMode === 'list') toolbar.prepend(toggle); else grid.append(toggle); };
         /** SOFTM-PC-FILTER-ACTIONS END */
         desktop.addEventListener('change', placeToggle); placeToggle();
+        requestAnimationFrame(placeToggle); // SOFTM-PC-FILTER-ACTIONS 날짜:20261118 : 뒤이어 복원되는 최종 지도·목록 모드로 상세필터 위치를 한 번 더 동기화
         new MutationObserver(placeToggle).observe(document.body, { attributes: true, attributeFilter: ['data-care-mode'] });
         /** SOFTM-LOCATION-TOOLBAR END */
         reset.onclick = () => {
