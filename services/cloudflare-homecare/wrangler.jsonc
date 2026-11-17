@@ -1,0 +1,37 @@
+/** SOFTM-HOMECARE-PILOT START 날짜:20261118 : 기관 시범운영 Worker의 D1·R2·계정 서비스 바인딩을 고정 */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "softm-homecare-pilot",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-11-18",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "softm-homecare-pilot",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "softm-homecare-pilot-photos"
+    }
+  ],
+  "services": [
+    {
+      "binding": "ACCOUNT",
+      "service": "softm-hannun-account"
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://homecare.designboard.net,https://softm.github.io",
+    "MAX_PHOTO_BYTES": "5242880",
+    "MAX_PHOTOS_PER_INSTITUTION": "10"
+  },
+  "triggers": {
+    "crons": ["17 18 * * *"]
+  }
+}
+/** SOFTM-HOMECARE-PILOT END */
