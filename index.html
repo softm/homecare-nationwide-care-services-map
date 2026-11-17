@@ -1109,14 +1109,13 @@ async function openInitialPhotoInstitution(){
  finally{if(skipIdleUntil===Infinity)skipIdleUntil=Date.now()+1500}
 }
 /** SOFTM-PHOTO-SELECT END */
-/** SOFTM-SEO-REGION-ENTRY START 날짜:20260904 : 지역 검색에서 고른 기관·지역을 현재 위치 조회가 덮어쓰지 않도록 최초 검색을 우선 적용 */
+/** SOFTM-INITIAL-CURRENT-LOCATION START 날짜:20261118 : 일반 첫 화면은 남아 있는 검색조건보다 현재 위치 중심의 주변 조회를 우선 적용 */
 async function openInitialRegionSearch(){
- clearTimeout(refreshTimer);skipIdleUntil=Infinity;
- try{await searchByControls(false,false)}
- catch(error){showDataPreview(filtered,'조회조건');setStatus('지역 목록 표시',error.message)}
- finally{if(skipIdleUntil===Infinity)skipIdleUntil=Date.now()+1500}
+ /** SOFTM-INITIAL-CURRENT-LOCATION START 날짜:20261118 : 남아 있는 검색조건이 있어도 첫 화면을 현위치 버튼과 같은 중심·배율·주변 조회로 시작 */
+ return useCurrentLocation(true);
+ /** SOFTM-INITIAL-CURRENT-LOCATION END */
 }
-/** SOFTM-SEO-REGION-ENTRY END */
+/** SOFTM-INITIAL-CURRENT-LOCATION END */
 /** SOFTM-MAP-RESTORE START 날짜:20260904 : 비교함 지도는 자동검색에서 제외하고 직접 이동이 이전 상세 화면으로 되돌아가지 않도록 복귀 기록 해제 */
 /** SOFTM-VIEWPORT-RESEARCH START 날짜:20260909 : 사용자 확대와 수동 재검색은 내부 이동 대기를 해제하고 현재 화면 조건을 조회 */
 let careViewportResearch=null;
