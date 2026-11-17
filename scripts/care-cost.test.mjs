@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../care-cost-rates.js';
 import '../care-cost-engine.js';
+import '../care-cost-preview.js';
 const rates = globalThis.CareCostRates;
 const { calculate, normalizeNonCovered, nonCoveredTotal } = globalThis.CareCostEngine;
 const facility = { service: 'facility', grade: '3', facilityEligible: true, quantity: 30, burden: 'general' };
@@ -91,4 +92,23 @@ test('상급침실의 서로 다른 요금은 별도 확인 전 합산에서 제
   const result = calculate({ ...facility, burden: 'exempt', nonCovered: [room] });
   assert.equal(result.low.total, 150000);
 });
+/** SOFTM-LIST-COST START 날짜:20261118 : 목록 기본값이 상세 계산기와 같은 수가를 쓰고 미확인 비급여를 합산하지 않는지 고정 */
+test('목록은 3등급 일반부담의 표준 월비용을 서비스별로 즉시 표시', () => {
+  const preview = globalThis.CareCostPreview;
+  assert.deepEqual([preview.build('facility', { t: 'A03' }).low, preview.build('facility', { t: 'A03' }).high], [465240, 489240]);
+  assert.equal(preview.build('facility', { t: 'A03' }).amount, '46만~48만원');
+  assert.equal(preview.build('facility', { t: 'A04' }).amount, '38만원');
+  assert.equal(preview.build('daycare').amount, '19만원');
+  assert.equal(preview.build('home-care').amount, '18만원');
+});
+test('목록 비용은 비급여 별도와 계산 전제를 표시하고 미지원 유형에는 만들지 않는다', () => {
+  const preview = globalThis.CareCostPreview;
+  const html = preview.render('facility', { t: 'A03' });
+  assert.match(html, /월 예상 본인부담/);
+  assert.match(html, /3등급 · 일반 20% · 30일/);
+  assert.match(html, /급여 본인부담만 · 식비 등 비급여 별도/);
+  assert.equal(preview.build('nursing-hospital'), null);
+  assert.equal(preview.render('welfare-equipment'), '');
+});
+/** SOFTM-LIST-COST END */
 /** SOFTM-CARE-COST-TEST END */
