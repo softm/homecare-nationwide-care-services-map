@@ -13,6 +13,9 @@
 | 지도 화면영역 판별 | GitHub Pages 정적 파일·사용자 브라우저 | `region-bounds.js`, `viewport-regions.js` | 화면과 겹치는 시군구를 모두 후보로 조회한 뒤 실제 기관 좌표로 판별 | 로컬 정적 자료, 역주소 표본 조회 없음 | 없음 | <!-- SOFTM-VIEWPORT-REGIONS 날짜:20260904 : 지도 화면의 검색 누락을 막는 경계 자료의 책임과 호출 경로를 명시 -->
 | 기관 기본 데이터 | GitHub Pages 정적 파일 | `data/care/*.json.gz`, `data/care/manifest.json`, `care-data.js` | 지도 목록·마커·필터의 기본 자료 | 예, 상대경로 정적 파일 | 없음 |
 | 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/details/**/*.json.gz`, 기타 `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 파일 | 브라우저 인증정보 없음 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 상세 압축 파일과 그 외 JSON의 배포 형식을 구분 -->
+| 기관 직접 제공 화면 | GitHub Pages 또는 로컬 정적 서버 | `institution-content.js`, `institution-content.css`, `institution-portal.html` | 승인된 기관의 운영정보·프로그램·사진 표시와 담당자 관리 화면 | 예 | 공통 계정의 1시간 site 전용 bearer, `sessionStorage`에만 보관 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 공단 정적 자료와 기관 직접 제공 작업본의 책임을 분리 -->
+| 기관 시범운영 API | Cloudflare Workers + D1 + R2 | `services/cloudflare-homecare` · `softm-homecare-pilot` | 기관 신청·권한·작업본·명시 게시·사진·익명 일별 통계 | 예 | `ACCOUNT` 서비스 바인딩, `EVENT_HASH_SECRET` | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 결제 기능 없는 기관용 쓰기 경로와 사진 저장소를 독립 운영 -->
+| 공통 계정 인증 | Cloudflare Workers + D1 | `softm-hannun-account`의 `/api/apps/homecare/session` | site·Origin·bearer 검증 후 불투명 UID만 기관 API에 전달 | 기관 API가 서비스 바인딩으로 호출 | OAuth 제공자 Secret은 공통 계정 Worker에만 보관 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 로그인과 기관 관리 권한 승인을 별도 계층으로 유지 -->
 | 데이터 수집 현황 | GitHub Pages 정적 파일·GitHub 공개 API | `data-status.html`, `data-status.js`, 수집 매니페스트, Actions 최근 실행 API | 공개된 수집률·변경 경과·유형별 기준일과 실행 상태 표시 | 정적 JSON과 공개 Actions 상태 조회 | 인증정보 없음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 비밀키 없이 공개 수집 결과와 진행 중 실행을 구분해 확인 -->
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py`, 로컬 사진 전용 `scripts/collect_missing_nhis_photos.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | OpenAPI는 `DATA_GO_KR_SERVICE_KEY`, 공개 사진 페이지는 키 불필요 | <!-- SOFTM-NHIS-MISSING-PHOTOS 날짜:20260904 : 로컬 사진 전용 실행 위치와 공개 페이지 인증 경계를 명시 -->
 | 길찾기 서버 | Firebase Functions v2 | `services/firebase-api` | 네이버 Directions 15 자동차 경로 중계 | `POST /directions`만 호출 | Google Secret Manager의 `NAVER_MAPS_API_SECRET` |
@@ -31,6 +34,10 @@
 | 기관 기본 목록 | 브라우저 | `data/care/manifest.json`, 유형별 `.json.gz` | 공용 `care-data.js`가 수집 JSON에서 생성한 검색 자료를 로드 | 생성물 직접 수정 금지 | <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 실제 지도 입력을 수집 데이터로 통일 -->
 | 공단 상세 | 브라우저 | `data/nhis/details/{기관기호 앞 2자리}/{기관기호}.json.gz` | `nhis-static-data.js`가 필요한 기관 파일만 받아 gzip 해제 후 로드 | 실시간 공단 API 프록시 금지 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 브라우저의 실제 압축 상세 요청 경로를 기록 -->
 | 공단 사진 | 브라우저 | `data/nhis/photos/{기관기호 앞 2자리}/{기관기호}.json` | 사진 탭을 열 때 정적 사진 매니페스트 로드 | 원본 이미지는 공단 공개 URL 사용 가능 |
+| 기관 직접 운영정보 | 브라우저→Cloudflare Worker | `GET /api/public/institutions/:id` | `published` 상태의 기관 확인 정보만 상세 화면에 별도 표시 | 공단 정적 상세를 덮어쓰거나 검색순위에 반영하지 않음 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 기관 입력과 공식 공개자료를 화면·데이터 양쪽에서 분리 -->
+| 기관 관리 | 담당자 브라우저→공통 계정→기관 Worker | `/connect`, `/api/institutions/*` | PKCE 1회 코드로 site 전용 세션을 만든 뒤 승인된 UID↔기관 멤버십을 다시 확인 | 로그인만으로 수정권한을 부여하지 않고 일반 신청은 `pending` 유지 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 기관 사칭과 클라이언트 UID 신뢰를 방지 -->
+| 기관 사진 | 담당자 브라우저→Worker→R2 | `/api/institutions/:id/photos`, 공개 사진 API | JPEG·PNG·WebP 실제 시그니처·5 MiB·10장 상한 검증 후 저장 | 공개 기관·공개 사진일 때만 스트리밍, SVG 불허 |
+| 기관 이용 현황 | 브라우저→Worker→D1 | `POST /api/public/events`, `GET /api/institutions/:id/stats` | 세션 난수를 날짜·기관·행동별 HMAC으로 변환해 중복 제거 후 합계 제공 | IP·User-Agent·bearer·난수 원문을 D1에 저장하지 않음 |
 | 수집 현황 | 브라우저 | `data/nhis/manifest.json`, `changes.json`, `checkpoints/*.json`, `data/care/manifest.json` | 공개된 수집률·최근 변경·유형별 기준일·샤드 완료 경과 표시 | 원본 수집 파일이나 비밀키는 읽지 않음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 화면에 공개할 운영 지표와 비공개 수집 자격정보의 경계를 고정 -->
 | 최근 Actions 실행 | 브라우저→GitHub 공개 API | `api.github.com/repos/softm/homecare-nationwide-care-services-map/actions/workflows/refresh-nhis-static.yml/runs` | 최근 8회와 진행 중 상태 표시, 실행 중일 때만 90초 후 재확인 | 인증 없이 공개 저장소의 실행 메타정보만 조회 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 정적 매니페스트 반영 전에도 현재 실행 여부를 확인 -->
 | 자동차 길찾기 | 브라우저→Firebase | `https://asia-northeast3-softm-hannun-api.cloudfunctions.net/directions` | 서울 리전 함수가 Secret을 붙여 네이버 Directions 15 호출 | 돌봄한눈·주유한눈 공용 런타임 API |
@@ -88,6 +95,9 @@
 | `ncpKeyId=etfcybk8vf` | 두 지도 HTML | 예 | Maps JavaScript SDK 및 geocoder 서브모듈 | Maps Application 교체 시 두 지도·검증기를 함께 변경 |
 | `NHIS_MAX_PHOTOS_PER_INSTITUTION` | GitHub Actions job env | 예 | 기관별 사진 수 상한 | 수집 정책 변경 시 |
 | `NHIS_PHOTO_MODE` | GitHub Actions job env | 예 | 공개 사진을 원격 URL 방식으로 기록 | 사진 저장 정책 변경 시 |
+| `EVENT_HASH_SECRET` | Cloudflare Worker Secret | 아니오 | 기관 이용 행동의 일별 HMAC 중복 제거 | 기관 시범운영 통계를 폐기하고 잔여 해시를 파기할 때 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 익명 난수 원문 대신 비가역 일별 해시만 저장 -->
+| `ALLOWED_ORIGINS` | `services/cloudflare-homecare/wrangler.jsonc` | 예 | 기관 Worker의 정확한 CORS Origin 목록 | 공식 공개 Origin 변경 시 공통 계정 허용 목록과 함께 변경 |
+| `DEV_ALLOWED_ORIGIN` | 커밋하지 않는 `.dev.vars` | 예 | 로컬 기관 화면의 단일 허용 Origin | 운영 배포 변수에는 넣지 않음 |
 
 네이버 Maps Application의 Web 서비스 URL에는 최소 `https://homecare.designboard.net`, 레거시 `https://softm.github.io`, `http://localhost:3000`을 등록한다. `http://127.0.0.1:3000`은 별도 Origin이므로 이 주소로 브라우저 검증하려면 별도로 등록해야 한다. Firebase Directions 함수의 CORS 허용 Origin도 같은 공개·로컬 주소를 포함한다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 공식 공개 도메인과 공용 함수 호출 출처를 동기화 -->
 
@@ -101,6 +111,8 @@
 | NHIS 특정 기관 수집 | 저장소 루트의 Python 가상환경 | `python scripts/sync_nhis_static.py --mode institution ...` | `data/nhis`의 해당 기관 자료 갱신 |
 | Firebase API 검사 | `services/firebase-api` | `npm run check` | 진입점·핵심 핸들러 구문 및 요청 회귀검사 |
 | Firebase 배포 | 저장소 루트 | `npx -y firebase-tools@latest deploy --only functions:shared-api:directions --project softm-hannun-api` | 서울 리전 Node.js 22 함수 갱신 |
+| 기관 API 검사 | `services/cloudflare-homecare` | `npm test` | 인증·권한·입력·사진·게시·익명 집계 회귀검사 |
+| 기관 API 로컬 DB | `services/cloudflare-homecare` | `npm run db:migrate:local` | D1 로컬 마이그레이션 적용 |
 
 ## 변경 시 지켜야 할 경계
 
@@ -113,6 +125,9 @@
 | 기관 원본 데이터 | 수집기·검색 인덱스 생성기, JSON 매니페스트, 통합 지도 `daycare` 기관기호 |
 | 사진 페이지 구조 | 사진 파서, 정적 사진 JSON, 두 지도의 사진 탭 |
 | 자동 수집 일정·예산 | 세 cron 합계, 일일 API 한도, 샤드 체크포인트 지속성, `DATA_COLLECTION.md` 동기화 | <!-- SOFTM-NHIS-COLLECTION-DOC 날짜:20260903 : 워크플로 변경 시 운영 문서가 누락되지 않도록 점검 범위를 고정 -->
+| 기관 API 공개 주소 | `institution-content.js`, `institution-portal.mjs`, Worker `workers_dev` 또는 route, 공통 계정 homecare Origin, CORS 허용 목록 |
+| 기관 프로필·사진 스키마 | 담당자 폼, 공개 렌더러, Worker 검증·D1 migration, `privacy.html`, 기관 API 테스트 |
+| 기관 게시 상태 | 모든 쓰기 작업의 `draft` 전환, 협약 철회, `/submit`, 공개 API의 `published` 필터 |
 
 <!-- SOFTM-INFRA-DOC END -->
 

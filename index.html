@@ -114,6 +114,9 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
 <!-- SOFTM-POPUP-CONTEXT START 날짜:20260924 : 유형별 판단 요약과 팝업 방향에 맞는 마커 위치를 두 지도에 공용 적용 -->
 <link rel="stylesheet" href="care-decision-summary.css?v=20261118-review1">
+<!-- SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 기관 직접 제공 운영정보·사진을 공단 자료와 구분해 상세에 표시 -->
+<link rel="stylesheet" href="institution-content.css?v=20261118-1">
+<!-- SOFTM-INSTITUTION-CONTENT END -->
 <script src="care-compare-evidence.js?v=20261118-policy1"></script><!-- SOFTM-COMPARE-EVIDENCE 날짜:20261118 : 비교표·인사이트가 같은 출처와 평가연도 정책을 사용 -->
 <script src="care-decision-summary.js?v=20261118-review1"></script> <!-- SOFTM-DETAIL-REVIEW 날짜:20261118 : 상세 상단에서 공개 강점·기관 확인·누락을 분리 -->
 <script src="care-popup-geometry.js?v=20260924-1"></script>
@@ -230,6 +233,9 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <script src="naver-geocoder.js?v=20260905-3"></script> <!-- SOFTM-INSTITUTION-ADDRESS 날짜:20260905 : 두 지도에 법정동 상세주소 보완을 함께 적용 -->
 <script src="nhis-static-data.js?v=20260904-2"></script><!-- SOFTM-PHOTO-COLLECTED 날짜:20260904 : 기존 사진 화면에서 전체 수집된 기관별 JSON을 읽도록 로더 캐시 갱신 -->
 <script src="photo-viewer.js?v=20260910-photos1"></script> <!-- SOFTM-PHOTO-VIEWER 날짜:20260910 : 공용 확대창에서 비교 중인 사진의 소속 기관도 표시 -->
+<!-- SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 공개 프로필 렌더링과 익명 이용 집계를 토큰 없는 모듈로 연결 -->
+<script type="module" src="institution-content.js?v=20261118-1"></script>
+<!-- SOFTM-INSTITUTION-CONTENT END -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <script src="advanced-search.js?v=20260917-filter-reload1"></script><!-- SOFTM-FILTER-RELOAD 날짜:20260917 : 조건 초기화 URL 동기화를 이전 캐시 없이 적용 --><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공단 제공 서비스와 설립주체의 공통 판정을 로드 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 특화 판정 연결을 최신 버전으로 함께 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 공식 수가 계산과 세션 비교함을 같은 공용 모듈로 연결 -->
@@ -1003,6 +1009,21 @@ function syncDetailOverlayChrome(open){
  if(open&&body.classList.contains('care-mobile-filters-open'))document.querySelector('.care-filter-panel-close')?.click();
 }
 /** SOFTM-DETAIL-EXPANDED END */
+/** SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 현재 상세 기관의 직접 제공 정보만 비동기로 표시하고 전화·문의·길찾기를 익명 집계 */
+function mountInstitutionContent(c){
+ const detailBody=$('detailBody'),host=detailBody.querySelector('[data-institution-content]');
+ if(!host)return;
+ const mount=()=>{
+  if(activeDetail?.i!==c.i)return;
+  const content=globalThis.InstitutionContent;
+  if(!content)return;
+  content.bindDetailActions(detailBody,c.i,TYPE);
+  void content.mount({host,institution:{id:c.i,name:c.n},institutionType:TYPE});
+ };
+ if(globalThis.InstitutionContent)mount();
+ else window.addEventListener('care:institution-content-ready',mount,{once:true});
+}
+/** SOFTM-INSTITUTION-CONTENT END */
 function openDetail(c,reveal=true){
  CareDetailLayout.beginInstitution($('detailSheet')); // SOFTM-POPUP-CONTEXT 날짜:20260924 : 다음 기관은 기존 창 크기에서 핵심 정보부터 확인
  CareDetailLayout.navigation(c,CareMapExperience.isBasketMap()?CareMapExperience.rows():areaRows,focusCenter); // SOFTM-DETAIL-NAV 날짜:20261007 : 하단 버튼 없이 기존 스와이프 기관 순서를 유지
@@ -1038,10 +1059,13 @@ function openDetail(c,reveal=true){
  basic=basic.slice(metricEnd);
  basic=`<section class="care-detail-group"><h3>위치·연락처</h3>${CareDetailLayout.address(c,cachedCoord(c),TYPE)}${live}</section><section class="care-detail-group"><h3>${CONFIG.source==='hira'?'기관 현황':'공단 평가·기관 현황'}</h3>${metrics}${CONFIG.source==='hira'?'':evaluationBlock}</section><section class="care-detail-group"><h3>이용·기관 정보</h3>${basic}</section>${CareMapExperience.costCard(c,TYPE)}`;
  /** SOFTM-DETAIL-LAYOUT END */
+ /** SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 공개자료 영역 뒤에 기관이 직접 확인한 운영정보 전용 자리를 둠 */
+ basic+=`<div data-institution-content data-institution-id="${esc(c.i)}" hidden></div>`;
+ /** SOFTM-INSTITUTION-CONTENT END */
  $('detailBasketAction').innerHTML=CareMapExperience.button(c)+`<button type="button" class="care-popup-saved" data-popup-saved>담은 기관 <span data-popup-saved-count>${CareMapExperience.rows().length}</span> →</button>`; // SOFTM-POPUP-SAVED 날짜:20260917 : 팝업 안에서 담은 목록으로 바로 이동 // SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 단위 공유와 길안내를 오른쪽 행동 묶음으로 제공
  /** SOFTM-MAP-EXPERIENCE END */
  $('detailBody').innerHTML=CONFIG.source==='nhis'?`<div class="detail-main-tabs" role="tablist" aria-label="기관 정보 구분"><button type="button" class="detail-main-tab active" data-detail-view="basic" role="tab" aria-selected="true">기본정보</button><button type="button" class="detail-main-tab" data-detail-view="official" role="tab" aria-selected="false">상세정보</button></div><section class="detail-view" id="detailBasic" role="tabpanel">${basic}</section><section class="detail-view detail-view-official" id="detailOfficial" role="tabpanel" hidden>${officialTabsHtml()}</section>`:`<section class="detail-view">${basic}</section>`;
- $('detailSheet').style.visibility=reveal?'':'hidden';$('detailSheet').hidden=false;CareDetailLayout.beginInstitution($('detailSheet'));$('copyName').onclick=()=>copy(c.n,'목적지명을 복사했습니다.');$('copyAddress').onclick=()=>copy(c.a,'주소를 복사했습니다.');document.querySelectorAll('[data-detail-view]').forEach(button=>button.onclick=()=>switchDetailView(c,button.dataset.detailView));document.querySelectorAll('[data-official-tab]').forEach(button=>button.onclick=()=>loadOfficialTab(c,Number(button.dataset.officialTab)));if(CONFIG.source==='nhis')void loadBasicInfo(c)
+ $('detailSheet').style.visibility=reveal?'':'hidden';$('detailSheet').hidden=false;CareDetailLayout.beginInstitution($('detailSheet'));$('copyName').onclick=()=>copy(c.n,'목적지명을 복사했습니다.');$('copyAddress').onclick=()=>copy(c.a,'주소를 복사했습니다.');document.querySelectorAll('[data-detail-view]').forEach(button=>button.onclick=()=>switchDetailView(c,button.dataset.detailView));document.querySelectorAll('[data-official-tab]').forEach(button=>button.onclick=()=>loadOfficialTab(c,Number(button.dataset.officialTab)));mountInstitutionContent(c);if(CONFIG.source==='nhis')void loadBasicInfo(c)
 }
 /** SOFTM-DETAIL-MAP-PERSIST START 날짜:20260914 : 상세 종료 시 화면 단계와 포커스만 복원하고 지도 위치는 현재 상태로 유지 */
 function closeDetail(finishView=true){

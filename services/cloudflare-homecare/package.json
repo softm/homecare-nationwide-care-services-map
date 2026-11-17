@@ -1,0 +1,21 @@
+{
+  "name": "@softm/cloudflare-homecare-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/core.mjs && node --check src/index.mjs && node --check scripts/generate-invite.mjs && node --check scripts/approve-claim.mjs",
+    "test": "npm run check && node --test test/*.test.mjs",
+    "dev": "wrangler dev",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "invite": "node scripts/generate-invite.mjs",
+    "claim:approve": "node scripts/approve-claim.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.47.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

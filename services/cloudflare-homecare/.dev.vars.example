@@ -1,0 +1,6 @@
+# 로컬에서만 복사해 사용하고 실제 비밀값은 커밋하지 않습니다.
+EVENT_HASH_SECRET=replace-with-at-least-32-random-characters
+DEV_ALLOWED_ORIGIN=http://localhost:3000
+
+# ACCOUNT 서비스 바인딩을 로컬에서 사용할 수 없을 때만 설정합니다.
+ACCOUNT_API=http://localhost:8788

@@ -1,0 +1,139 @@
+<!doctype html>
+<!-- SOFTM-INSTITUTION-PORTAL START 날짜:20261118 : 시범운영 기관이 운영정보·사진·조회 현황을 직접 관리하는 전용 화면 -->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#173f6b">
+  <meta name="robots" content="noindex,nofollow">
+  <title>기관 운영정보 관리 | 돌봄한눈</title>
+  <meta name="description" content="돌봄한눈 시범운영 기관이 운영정보와 사진을 등록하고 조회 현황을 확인하는 관리 화면입니다.">
+  <link rel="icon" href="favicon.svg">
+  <link rel="stylesheet" href="pretendard-fonts.css?v=1.3.9">
+  <link rel="stylesheet" href="institution-portal.css?v=20261118-1">
+</head>
+<body>
+  <a class="skip-link" href="#portalMain">본문으로 바로가기</a>
+  <header class="portal-header">
+    <a class="portal-brand" href="./"><img src="favicon.svg" alt=""><span>돌봄한눈</span></a>
+    <div class="portal-header-actions"><a href="./">기관 찾기</a><button id="logoutButton" type="button" hidden>로그아웃</button></div>
+  </header>
+
+  <main id="portalMain" class="portal-main">
+    <section class="portal-hero" aria-labelledby="portalTitle">
+      <p class="portal-eyebrow">기관 시범운영 전용</p>
+      <h1 id="portalTitle">우리 기관 정보를 직접 관리하세요</h1>
+      <p>운영정보와 사진을 등록하고, 돌봄한눈에서 우리 기관을 확인한 이용 현황을 살펴볼 수 있습니다.</p>
+      <div class="pilot-notice" role="note"><strong>무료 시범운영</strong><span>이용료·결제수단·자동결제·자동갱신 약정이 없습니다. 정식 유료 서비스 전환은 별도의 서면 동의 없이는 이루어지지 않습니다.</span></div>
+    </section>
+
+    <p id="globalStatus" class="global-status" role="status" aria-live="polite">로그인 상태를 확인하고 있습니다.</p>
+
+    <section id="authPanel" class="portal-card auth-card" aria-labelledby="authTitle" hidden>
+      <div><p class="portal-kicker">담당자 확인</p><h2 id="authTitle">공통 계정으로 시작하기</h2><p>Google·카카오·네이버 계정 중 하나로 로그인합니다. SNS 게시물이나 사진을 가져오지 않습니다.</p></div>
+      <button id="loginButton" class="primary-button" type="button">SNS 계정으로 로그인</button>
+    </section>
+
+    <section id="claimPanel" class="portal-card" aria-labelledby="claimTitle" hidden>
+      <p class="portal-kicker">기관 연결 신청</p>
+      <h2 id="claimTitle">담당 기관을 확인해 주세요</h2>
+      <p>다른 기관의 정보를 수정하지 못하도록 기관기호와 업무 연락처를 운영자가 확인한 뒤 관리 권한을 연결합니다.</p>
+      <form id="claimForm" class="portal-form">
+        <div class="field-grid">
+          <label>기관기호 <input name="institutionId" inputmode="numeric" autocomplete="off" maxlength="11" pattern="[0-9]{11}" required placeholder="공단 기관기호 11자리"></label>
+          <label>기관명 <input name="institutionName" maxlength="120" required></label>
+          <label>담당자명 <input name="contactName" maxlength="80" autocomplete="name" required></label>
+          <label>업무 이메일 <input name="contactEmail" type="email" maxlength="254" autocomplete="email" required></label>
+          <label>업무 연락처 <input name="contactPhone" type="tel" maxlength="40" autocomplete="tel" required></label>
+          <label class="wide">확인 참고사항 <textarea name="note" rows="3" maxlength="500" placeholder="담당 업무 또는 확인에 필요한 내용을 적어 주세요. 민감정보는 입력하지 마세요."></textarea></label>
+        </div>
+        <label class="check-line"><input name="truthful" type="checkbox" required><span>기관 담당자로서 사실에 맞는 정보를 입력했으며 담당자 확인 절차에 동의합니다.</span></label>
+        <button class="primary-button" type="submit">기관 연결 신청</button>
+        <p id="claimStatus" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="claimPendingPanel" class="portal-card state-card" aria-labelledby="claimPendingTitle" hidden>
+      <span class="state-icon" aria-hidden="true">✓</span><div><p class="portal-kicker">확인 대기</p><h2 id="claimPendingTitle">기관 연결 신청을 확인하고 있습니다</h2><p id="claimPendingText">승인되면 같은 계정으로 로그인해 운영정보를 관리할 수 있습니다.</p></div>
+    </section>
+
+    <section id="agreementPanel" class="portal-card" aria-labelledby="agreementTitle" hidden>
+      <p class="portal-kicker">시범운영 협약 확인</p>
+      <h2 id="agreementTitle">무료 시범운영 범위를 확인해 주세요</h2>
+      <div class="agreement-copy">
+        <p>기관이 운영정보·사진을 직접 등록하고 조회 현황을 확인하는 기능을 함께 시험합니다.</p>
+        <ul><li>시범운영 기간의 서비스 이용료는 무료입니다.</li><li>결제수단을 등록하지 않으며 자동결제·자동갱신되지 않습니다.</li><li>정식 운영 또는 유료 전환이 필요할 경우 조건을 별도로 안내하고 다시 동의받습니다.</li><li>기관이 등록한 정보와 사진의 공개 권한·정확성을 기관이 확인합니다.</li></ul>
+      </div>
+      <form id="agreementForm" class="portal-form">
+        <label class="check-line"><input name="freePilot" type="checkbox" required><span>무료 시범운영임을 확인했습니다.</span></label>
+        <label class="check-line"><input name="noPayment" type="checkbox" required><span>결제 약정, 자동결제 및 자동 유료 전환이 없음을 확인했습니다.</span></label>
+        <label class="check-line"><input name="contentAuthority" type="checkbox" required><span>등록하는 운영정보와 사진의 공개 권한 및 정확성을 확인하겠습니다.</span></label>
+        <button class="primary-button" type="submit">확인하고 시범운영 시작</button>
+        <p id="agreementStatus" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="workspace" class="portal-workspace" hidden>
+      <header class="workspace-head">
+        <div><p class="portal-kicker">연결된 기관</p><h2 id="workspaceInstitution">기관 정보를 불러오는 중입니다</h2><p id="workspaceMeta"></p></div>
+        <span id="publishStatus" class="publish-status">상태 확인 중</span>
+      </header>
+      <!-- SOFTM-INSTITUTION-REVISION START 날짜:20261118 : 다른 담당자의 최신 변경을 자동으로 덮지 않고 명시적인 재조회 동선을 제공 -->
+      <section id="revisionConflict" class="revision-conflict" role="alert" hidden>
+        <div><strong>다른 담당자가 기관 정보를 변경했습니다.</strong><p>현재 입력 내용은 이 화면에 그대로 남아 있습니다. 서버 최신 내용을 확인하려면 아래 버튼을 눌러 새로 불러오세요.</p></div>
+        <button id="reloadWorkspaceButton" class="secondary-button" type="button">서버 최신 내용 새로 불러오기</button>
+      </section>
+      <!-- SOFTM-INSTITUTION-REVISION END -->
+      <nav class="workspace-tabs" role="tablist" aria-label="기관 관리 메뉴">
+        <button id="profileTab" type="button" role="tab" data-tab="profile" aria-controls="profilePanel" aria-selected="true">운영정보</button>
+        <button id="photosTab" type="button" role="tab" data-tab="photos" aria-controls="photosPanel" aria-selected="false" tabindex="-1">사진 <span id="photoTabCount">0</span></button>
+        <button id="statsTab" type="button" role="tab" data-tab="stats" aria-controls="statsPanel" aria-selected="false" tabindex="-1">조회 현황</button>
+      </nav>
+
+      <section id="profilePanel" class="workspace-panel" role="tabpanel" data-panel="profile" aria-labelledby="profileTab profilePanelTitle">
+        <div class="panel-heading"><div><p class="portal-kicker">기관 직접 제공</p><h3 id="profilePanelTitle">운영정보</h3></div><p>공단 공개정보와 별도로 표시되며, 기관이 확인한 정보임을 이용자에게 명시합니다.</p></div>
+        <form id="profileForm" class="portal-form">
+          <div class="field-grid">
+            <label class="wide">공개 기관명 <input name="displayName" maxlength="120" required placeholder="이용자에게 표시할 기관명"></label>
+            <label class="wide">기관 소개 <textarea name="summary" rows="6" maxlength="2000" placeholder="기관의 돌봄 방향과 특징을 소개해 주세요."></textarea><small><span data-count-for="summary">0</span>/2,000자</small></label>
+          </div>
+          <div class="field-grid">
+            <label>운영시간 <input name="operatingHours" maxlength="200" placeholder="예: 평일 09:00~18:00"></label>
+            <label>대표 전화 <input name="phone" type="tel" maxlength="40" autocomplete="tel"></label>
+            <label>업무 이메일 <input name="email" type="email" maxlength="254" autocomplete="email"></label>
+            <label>홈페이지 <input name="website" type="url" maxlength="500" placeholder="https://"></label>
+            <label class="wide">기관 주소 <input name="address" maxlength="300" autocomplete="street-address" placeholder="기관에서 확인한 방문 주소"></label>
+            <label class="wide">교통·방문 안내 <textarea name="transportation" rows="3" maxlength="500" placeholder="대중교통, 주차, 출입 방법 등을 안내해 주세요."></textarea></label>
+            <label>정원 <input name="capacity" type="number" min="0" max="100000" step="1" inputmode="numeric" placeholder="명"></label>
+            <label>기관 확인 가능 인원 <input name="availableSlots" type="number" min="0" max="100000" step="1" inputmode="numeric" placeholder="명"></label>
+          </div>
+          <fieldset class="program-fieldset"><legend>프로그램 안내 <span>최대 10개</span></legend><div id="programList"></div><button id="addProgramButton" class="secondary-button" type="button">프로그램 추가</button></fieldset>
+          <div class="form-actions"><button id="saveProfileButton" class="secondary-button" type="submit">임시 저장</button><button id="submitProfileButton" class="primary-button" type="button">공개하기</button></div>
+          <p id="profileStatus" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="photosPanel" class="workspace-panel" role="tabpanel" data-panel="photos" aria-labelledby="photosTab photoPanelTitle" hidden>
+        <div class="panel-heading"><div><p class="portal-kicker">기관 직접 제공</p><h3 id="photoPanelTitle">사진 관리</h3></div><p>JPG·PNG·WebP, 파일당 5MB 이하, 최대 10장입니다. 사람의 얼굴·차량번호·문서 개인정보가 보이는 사진은 올리지 마세요.</p></div>
+        <form id="photoUploadForm" class="photo-upload">
+          <label for="photoFiles">사진 선택</label><input id="photoFiles" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+          <button class="primary-button" type="submit">선택한 사진 올리기</button>
+          <p id="photoUploadStatus" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+        <div id="photoManager" class="photo-manager"></div>
+      </section>
+
+      <section id="statsPanel" class="workspace-panel" role="tabpanel" data-panel="stats" aria-labelledby="statsTab statsPanelTitle" hidden>
+        <div class="panel-heading"><div><p class="portal-kicker">최근 30일</p><h3 id="statsPanelTitle">조회 현황</h3></div><p>기관 상세 조회와 전화·문의·길찾기 이용을 일자별 합계로 보여드립니다. 같은 이용환경의 중복을 완화한 참고 지표로, 고유 이용자 수가 아니며 이용 성과를 의미하거나 보장하지 않습니다. 개인의 검색어나 위치는 제공하지 않습니다.</p></div>
+        <button id="refreshStatsButton" class="secondary-button" type="button">현황 새로고침</button>
+        <div id="statsSummary" class="stats-summary" aria-live="polite"></div>
+        <div class="stats-table-wrap"><table class="stats-table"><caption>최근 30일 기관 이용 현황</caption><thead><tr><th scope="col">날짜</th><th scope="col">상세 조회</th><th scope="col">전화</th><th scope="col">문의</th><th scope="col">길찾기</th></tr></thead><tbody id="statsBody"></tbody></table></div>
+        <p id="statsStatus" class="form-status" role="status" aria-live="polite"></p>
+      </section>
+    </section>
+  </main>
+  <footer class="portal-footer"><a href="privacy.html">개인정보처리방침</a><span>기관 시범운영 문의: <a href="mailto:softm@nate.com">softm@nate.com</a></span></footer>
+  <script type="module" src="institution-portal.mjs?v=20261118-1"></script>
+</body>
+</html>
+<!-- SOFTM-INSTITUTION-PORTAL END -->
