@@ -55,6 +55,7 @@ npm run serve
 ├── nhis-static-data.js             # 두 지도의 상세·사진 공용 로더
 ├── scripts/                        # 데이터 재생성·검증
 ├── services/firebase-api/          # Client Secret이 필요한 공용 Firebase 길찾기 API
+├── services/cloudflare-homecare/   # 기관 직접 정보·사진·조회 현황 무료 시범운영 API
 └── docs/reference-images/          # 최근 UI·광고 검수 참고 이미지
 ```
 
@@ -111,10 +112,21 @@ npm run check
 | 위치 | 주요 API | 현재 프런트 연결 |
 |---|---|---|
 | `services/firebase-api` | directions | `asia-northeast3-softm-hannun-api.cloudfunctions.net/directions` |
+| `services/cloudflare-homecare` | 기관 신청·운영정보·프로그램·사진·게시·조회 현황 | `softm-homecare-pilot.softm.workers.dev` | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 기관 직접 제공 자료의 쓰기 API를 공단 정적 수집과 분리 -->
 
 길찾기는 Firebase 프로젝트 `softm-hannun-api`의 서울 리전 함수에서 돌봄한눈·주유한눈이 공용으로 사용합니다. 실제 네이버 Client Secret은 Google Secret Manager에만 저장하며, 운영·배포 절차는 `services/firebase-api/README.md`를 따릅니다. 기존 Vercel 프록시는 모든 공개 화면의 전환을 확인한 뒤 제거했습니다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 공용 길찾기 런타임과 비밀값 저장 위치를 단일화 -->
 
 주소→좌표와 좌표→주소 변환은 두 지도에서 `naver-geocoder.js`를 공유하며, 네이버 Maps JavaScript SDK의 `geocoder` 서브모듈을 브라우저에서 사용합니다. 기존 기관별 `daycareCoord`·`careCoord` 캐시는 계속 호환됩니다.
+
+<!-- SOFTM-INSTITUTION-PILOT START 날짜:20261118 : 기관 담당자용 무료 시범운영의 기능·권한·게시 경계를 인수인계 -->
+## 기관 운영정보 무료 시범운영
+
+`institution-portal.html`은 기관 담당자가 운영정보·프로그램·사진을 임시 저장하고 명시적으로 공개한 뒤 최근 조회 현황을 확인하는 화면입니다. 로그인은 기존 Cloudflare 공통 계정의 1시간짜리 `homecare` 전용 세션을 사용하지만, 로그인만으로 기관 수정권한을 주지 않습니다. 일반 신청은 `pending`으로 저장하고 운영자가 확인한 `UID ↔ 기관기호` 멤버십 또는 1회 초대가 있어야 관리할 수 있습니다.
+
+공개 상세의 `기관 직접 제공` 영역은 `institution-content.js`가 별도 Worker에서 `published` 자료만 읽어 표시합니다. 국민건강보험공단·심평원 정적 자료를 덮어쓰지 않으며 공단 평가와 검색순위에도 반영하지 않습니다. 프로필·프로그램·사진을 바꾸면 기관 직접 제공 영역은 다시 `draft`가 되고, 무료 시범운영 협약 동의 상태에서 `공개하기`를 눌러야 확인일과 함께 노출됩니다.
+
+시범운영에는 결제수단 등록, 결제·구독 API, 자동결제·자동갱신·자동 유료 전환이 없습니다. 운영 절차, D1/R2 구성, API 계약, 초대·신청 승인과 검사는 [`services/cloudflare-homecare/README.md`](services/cloudflare-homecare/README.md)를 따릅니다.
+<!-- SOFTM-INSTITUTION-PILOT END -->
 
 ## GitHub Pages
 

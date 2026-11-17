@@ -2,6 +2,9 @@
 .env.*
 !.env.example
 .vercel/
+# SOFTM-INSTITUTION-PILOT 날짜:20261118 : 기관 Worker 로컬 비밀값과 D1/R2 개발 상태를 저장소에 포함하지 않음
+**/.dev.vars
+**/.wrangler/
 # SOFTM-NHIS-STATIC 날짜:20260902 : 로컬 공공데이터 수집 의존성을 저장소에 포함하지 않음
 .venv/
 node_modules/

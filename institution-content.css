@@ -1,0 +1,39 @@
+/** SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 기관 직접 제공 정보의 출처·확인일·사진을 공단 정보와 시각적으로 구분 */
+[data-institution-content][hidden]{display:none!important}
+.care-institution-profile{margin-top:16px;padding:18px;border:1px solid #9fc8b8;border-radius:16px;background:linear-gradient(145deg,#f4fbf8,#fff);color:#183a34;box-shadow:0 7px 20px rgba(22,92,71,.07)}
+.care-institution-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:13px;border-bottom:1px solid #d7e9e2}
+.care-institution-head h3{margin:7px 0 0;font-size:18px;color:#173f37}
+.care-institution-badge{display:inline-flex;align-items:center;min-height:25px;padding:3px 8px;border-radius:999px;background:#087650;color:#fff;font-size:11px;font-weight:900;letter-spacing:.02em}
+.care-institution-date{flex:none;margin:2px 0 0;color:#527068;font-size:12px;font-weight:700}
+.care-institution-notice{margin:14px 0 0;padding:13px 14px;border-left:4px solid #df8c1d;border-radius:8px;background:#fff7e9}
+.care-institution-notice strong{display:block;color:#88510c;font-size:12px}
+.care-institution-notice p,.care-institution-introduction{margin:6px 0 0;white-space:pre-line;line-height:1.65;font-size:14px}
+.care-institution-introduction{margin-top:15px;color:#314f49}
+.care-institution-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0 0}
+.care-institution-grid>div{min-width:0;padding:11px 12px;border:1px solid #dbe9e4;border-radius:10px;background:#fff}
+.care-institution-grid dt{color:#617972;font-size:11px;font-weight:800}
+.care-institution-grid dd{margin:4px 0 0;color:#1c4038;font-size:13px;font-weight:750;white-space:pre-line;overflow-wrap:anywhere}
+.care-institution-grid a{color:#096b56;text-underline-offset:3px}
+.care-institution-section{margin-top:18px;padding-top:15px;border-top:1px solid #d7e9e2}
+.care-institution-section h4{margin:0 0 10px;font-size:15px;color:#173f37}
+.care-institution-services{display:flex;flex-wrap:wrap;gap:7px;margin:0;padding:0;list-style:none}
+.care-institution-services li{padding:6px 9px;border:1px solid #b7d8cb;border-radius:999px;background:#fff;color:#285b4f;font-size:12px;font-weight:750}
+.care-institution-programs{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.care-institution-programs article{min-width:0;padding:12px;border:1px solid #d7e7e1;border-radius:10px;background:#fff}
+.care-institution-programs strong,.care-institution-programs small{display:block}
+.care-institution-programs small{margin-top:4px;color:#617972;font-size:11px}
+.care-institution-programs p{margin:7px 0 0;color:#38554f;font-size:12px;line-height:1.55;white-space:pre-line}
+.care-institution-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.care-institution-section-title small{color:#617972;font-size:11px}
+.care-institution-photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.care-institution-photos figure{min-width:0;margin:0}
+.care-institution-photos button{display:block;width:100%;aspect-ratio:4/3;padding:0;overflow:hidden;border:1px solid #c8ddd5;border-radius:10px;background:#e9f2ef;cursor:zoom-in}
+.care-institution-photos img{display:block;width:100%;height:100%;object-fit:cover}
+.care-institution-photos figcaption{margin-top:5px;color:#536f68;font-size:11px;line-height:1.4}
+.care-institution-photos figure.is-error button{display:none}
+.care-institution-photos figure.is-error:before{content:'사진을 불러오지 못했습니다.';display:grid;place-items:center;min-height:90px;padding:8px;border-radius:10px;background:#edf2f0;color:#657872;font-size:11px;text-align:center}
+.care-institution-source{margin:18px 0 0;padding-top:13px;border-top:1px solid #d7e9e2;color:#617972;font-size:11px;line-height:1.55}
+.care-institution-profile :focus-visible{outline:3px solid rgba(8,118,80,.3);outline-offset:3px}
+@media(max-width:560px){.care-institution-profile{padding:15px}.care-institution-head{display:block}.care-institution-date{margin-top:8px}.care-institution-grid,.care-institution-programs{grid-template-columns:1fr}.care-institution-photos{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.care-institution-profile *{scroll-behavior:auto!important}}
+/** SOFTM-INSTITUTION-CONTENT END */
