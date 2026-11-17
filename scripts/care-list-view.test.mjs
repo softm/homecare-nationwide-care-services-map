@@ -8,7 +8,7 @@ const source = fs.readFileSync(new URL('../care-list-view.js', import.meta.url),
 const storageKey = 'careListView:v1';
 const supportedViews = ['cards', 'rows', 'compact'];
 
-function setup({ saved, mode = 'list', storageError = false, propertyError = false } = {}) {
+function setup({ saved, mode = 'list', storageError = false, propertyError = false, desktop = false } = {}) {
     const values = new Map(saved === undefined ? [] : [[storageKey, saved]]), writes = [], frames = [];
     let document;
     const dataKey = name => name.slice(5).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
@@ -135,6 +135,9 @@ function setup({ saved, mode = 'list', storageError = false, propertyError = fal
     };
     const window = {
         document, location, innerHeight: 800,
+        matchMedia(query) {
+            return { matches: query.includes('min-width:1001px') ? desktop : !desktop && query.includes('max-width:1000px') };
+        },
         CareListMode: { isList: () => body.dataset.careMode === 'list' },
         history: { replaceState() { assert.fail('보기 변경은 공유 주소를 다시 쓰면 안 됩니다.'); } },
         fetch() { assert.fail('보기 변경은 검색 자료를 다시 요청하면 안 됩니다.'); },
@@ -160,6 +163,15 @@ test('지원하는 세 가지 보기만 허용하고 잘못된 값은 카드형�
     for (const value of [undefined, null, '', 'table', 'ROWS', {}, []]) assert.equal(s.api.resolveView(value), 'cards');
     assert.equal(s.api.getView(), 'cards');
 });
+
+/** SOFTM-COMPETITIVE-LIST START 날짜:20261118 : 신규 PC는 근거 비교형 목록으로 시작하되 모바일과 사용자가 고른 보기를 덮지 않는지 검증 */
+test('신규 PC는 목록형, 모바일은 카드형으로 시작하고 저장한 선택을 우선한다', () => {
+    assert.equal(setup({ desktop: true }).api.getView(), 'rows');
+    assert.equal(setup({ desktop: false }).api.getView(), 'cards');
+    assert.equal(setup({ desktop: true, saved: 'compact' }).api.getView(), 'compact');
+    assert.equal(setup({ desktop: false, saved: 'rows' }).api.getView(), 'rows');
+});
+/** SOFTM-COMPETITIVE-LIST END */
 
 test('세션에 저장한 보기를 복원하고 새 선택은 다른 유형에서도 이어진다', () => {
     for (const view of supportedViews) {
