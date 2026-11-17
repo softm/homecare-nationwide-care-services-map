@@ -372,6 +372,7 @@ body.stitch-desktop .care-filter-state-badge { min-width:20px; min-height:20px; 
  body.stitch-desktop .stitch-filter-icon { display:inline-flex; }
  .stitch-filter-icon svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
  body.stitch-desktop .stitch-filter-toolbar .stitch-reset { border:0; background:transparent; color:#61716c; padding:8px 0; font:inherit; font-size:12px; cursor:pointer; }
+ body.stitch-desktop .stitch-filter-toolbar .stitch-reset[hidden] { display:none!important; } /** SOFTM-RESET-VISIBILITY 날짜:20261118 : 공용 버튼 표시 규칙보다 조건 없는 초기화 숨김을 우선 */
  body.stitch-desktop .stitch-filter-toolbar .stitch-reset:disabled { opacity:.45; cursor:default; }
  body.stitch-desktop:not(.care-mobile-filters-open) .filters > .stitch-filter-summary:not([hidden]) { top:202px; }
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:calc(258px + var(--stitch-filter-summary-height))!important; height:calc(100% - 258px - var(--stitch-filter-summary-height))!important; }

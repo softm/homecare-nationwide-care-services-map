@@ -12,7 +12,7 @@
         const toggle = filters.querySelector('.care-mobile-filter-toggle');
         const grid = filters.querySelector('.filter-grid');
         const toolbar = document.createElement('div'); toolbar.className = 'stitch-filter-toolbar';
-        const reset = document.createElement('button'); reset.type = 'button'; reset.className = 'stitch-reset'; reset.textContent = '↻ 조건 초기화';
+        const reset = document.createElement('button'); reset.type = 'button'; reset.className = 'stitch-reset'; reset.textContent = '↻ 조건 초기화'; reset.hidden = true; // SOFTM-RESET-VISIBILITY 날짜:20261118 : 조건을 집계하기 전 초기화 버튼이 잠깐 노출되지 않도록 기본 숨김
         toolbar.append(reset); summary.before(toolbar);
         const icon = document.createElement('span'); icon.className = 'stitch-filter-icon'; icon.setAttribute('aria-hidden', 'true');
         icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6"/></svg>';
@@ -54,6 +54,7 @@
             toggle.dataset.filterCount = String(conditions.length);
             toggle.dispatchEvent(new Event('care-filter-count'));
             reset.disabled = !conditions.length;
+            reset.hidden = !conditions.length; // SOFTM-RESET-VISIBILITY 날짜:20261118 : 실제 기본·상세조건이 있을 때만 전체 초기화 행동 표시
             summary.hidden = !conditions.length;
             document.body.style.setProperty('--stitch-filter-summary-height', `${summary.hidden ? 0 : summary.getBoundingClientRect().height}px`);
         };
