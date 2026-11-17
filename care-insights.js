@@ -1,21 +1,22 @@
 /** SOFTM-CARE-INSIGHTS START 날짜:20260910 : 담은 기관의 공개 근거와 상담 질문을 분리해 자료 누락이나 인원수를 품질 순위로 오인하지 않도록 설명 */
+import './care-compare-evidence.js';
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const number = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const format = value => value.toLocaleString('ko-KR');
 const staff = [['rn', '간호사'], ['na', '간호조무사'], ['pt', '물리치료사'], ['ot', '작업치료사'], ['cw', '요양보호사']];
 const residential = new Set(['facility', 'daycare', 'short-stay', 'dementia']);
 
-export function analyze(rows, { type = 'daycare', sourceDate = '' } = {}) {
+export function analyze(rows, { type = 'daycare', source = '', sourceDate = '' } = {}) {
     const selected = [...new Map(rows.map(row => [String(row.i), row])).values()];
     const hospital = type === 'nursing-hospital', equipment = type === 'welfare-equipment';
     const evaluated = selected.filter(row => /^[A-E]$/.test(row.g || row.ev?.grade || ''));
-    const years = [...new Set(evaluated.map(row => row.ey || row.ev?.year).filter(Boolean))];
+    const policy = globalThis.CareCompareEvidence.build(selected, { source: source || (hospital ? 'hira' : 'nhis'), sourceDate });
     const summary = [];
-    if (!selected.length) return { summary: ['기관 찾기에서 관심 있는 기관을 담아 주세요.'], cards: [], sourceDate, source: hospital ? '심평원 개설현황' : '공단 수집 자료' };
+    if (!selected.length) return { summary: ['기관 찾기에서 관심 있는 기관을 담아 주세요.'], cards: [], sourceDate, source: policy.sourceLabel };
     summary.push(selected.length === 1 ? '1곳의 공개정보를 정리했습니다. 다른 기관을 담으면 차이도 확인할 수 있습니다.' : `담은 ${selected.length}곳을 같은 항목으로 살펴봤습니다. 방문 순서대로 표시합니다.`);
     if (!hospital) {
         summary.push(`공단 평가등급 확인 ${evaluated.length}곳 · 미확인 ${selected.length - evaluated.length}곳. 미확인은 낮은 평가를 뜻하지 않습니다.`);
-        if (years.length > 1) summary.push(`평가연도가 ${years.sort().join('·')}년으로 다릅니다. 점수의 높고 낮음으로 순위를 정하지 않았습니다.`);
+        if (policy.mixedYears || policy.missingYearCount) summary.push(policy.message);
     }
     if (residential.has(type) && selected.length > 1) {
         const capacities = selected.filter(row => number(row.z) && row.z > 0).map(row => row.z);
@@ -67,7 +68,7 @@ export function analyze(rows, { type = 'daycare', sourceDate = '' } = {}) {
         questions.push(equipment ? '급여 적용 여부와 실제 본인부담금은 얼마인가요?' : '우리 이용조건에서 추가 비용까지 포함한 총비용과 항목별 내역을 받을 수 있나요?');
         return { id: String(row.i), name: row.n || '기관명 미확인', facts, questions };
     });
-    return { summary, cards, sourceDate, source: hospital ? '심평원 개설현황' : '공단 수집 자료' };
+    return { summary, cards, sourceDate, source: policy.sourceLabel };
 }
 
 /** SOFTM-BRIEF-READABILITY START 날짜:20260910 : 항목명과 값을 구분해 긴 기관 정보를 빠르게 비교하도록 구성 */

@@ -3,6 +3,8 @@
     'use strict';
     let viewport, filters, head, spacer, mounted = false, frame = 0, filterHeight = 0, viewportSize = '', toolsButton; // SOFTM-LIST-READING 날짜:20261003 : 읽기 단계의 보조 조작 펼침 버튼을 함께 관리
     const isList = () => Boolean(root.CareListMode?.isList());
+    const railMedia = root.matchMedia ? root.matchMedia('(min-width:1280px) and (min-height:701px)') : { matches: false, addEventListener() {} };
+    const isRail = () => isList() && railMedia.matches && root.document?.body?.dataset?.careWorkspace !== 'saved'; // SOFTM-FILTER-RAIL 날짜:20261118 : 넓고 충분히 높은 검색 목록에서만 기존 필터를 왼쪽 레일로 재사용
     const scroller = () => isList() ? root.document?.querySelector('main.wrap') : root.document?.getElementById('list');
     function createProgression() {
         let top = 0, travel = 0, stage = 'expanded';
@@ -58,13 +60,15 @@
     }
     function sync() {
         if (!mounted) return;
-        if (!isList()) { if (toolsButton) toolsButton.hidden = true; delete root.document.body.dataset.careListStage; filters.inert = false; filters.removeAttribute('aria-hidden'); head.querySelector('[data-list-search-return]').hidden = true; root.CareListAds?.setReading?.(false); return; } // SOFTM-LIST-READING 날짜:20261003 : 지도 전환 시 목록 전용 펼침 버튼을 남기지 않음
-        const body = root.document.body, open = body.classList.contains('care-mobile-filters-open');
+        if (!isList()) { if (toolsButton) toolsButton.hidden = true; delete root.document.body.dataset.careListStage; delete root.document.body.dataset.careFilterRail; filters.inert = false; filters.removeAttribute('aria-hidden'); head.querySelector('[data-list-search-return]').hidden = true; root.CareListAds?.setReading?.(false); return; } // SOFTM-LIST-READING 날짜:20261003 : 지도 전환 시 목록 전용 펼침 버튼을 남기지 않음
+        const body = root.document.body, open = body.classList.contains('care-mobile-filters-open'), rail = isRail();
+        body.dataset.careFilterRail=rail?'true':'false';
         const size = `${viewport.clientWidth}:${viewport.clientHeight}`;
         if (viewportSize && size !== viewportSize) progression.rebase(viewport.scrollTop, body.dataset.careListStage);
         viewportSize = size;
         if (!open && filters.getBoundingClientRect().height) filterHeight = filters.getBoundingClientRect().height;
-        body.style.setProperty('--care-sticky-filter-height', `${filterHeight}px`);
+        const effectiveFilterHeight=rail?0:filterHeight;
+        body.style.setProperty('--care-sticky-filter-height', `${effectiveFilterHeight}px`);
         /** SOFTM-LOCATION-TOOLBAR START 날짜:20260930 : 검색 안으로 옮긴 위치 도구를 높이에 중복 계산하거나 키보드 조작 중 숨기지 않음 */
         const location = root.document.getElementById('careListLocation');
         const locationHeight = location && !filters.contains(location) ? location.getBoundingClientRect().height : 0;
@@ -72,7 +76,7 @@
         const active = root.document.activeElement;
         const focused = filters.contains(active) && (/^(INPUT|SELECT|TEXTAREA)$/.test(active?.tagName || '') || active?.tagName === 'BUTTON' && active.matches(':focus-visible'));
         /** SOFTM-LOCATION-TOOLBAR END */
-        const stage = progression.update(viewport.scrollTop, { locationHeight, filterHeight, summaryHeight, locked: open || focused });
+        const stage = progression.update(viewport.scrollTop, { locationHeight, filterHeight:effectiveFilterHeight, summaryHeight, locked: open || focused });
         /** SOFTM-LIST-READING START 날짜:20261003 : 읽기 전환마다 보조 조작을 접되 사용자가 펼친 동안에는 스크롤에도 유지 */
         if (body.dataset.careListStage !== stage) {
             body.dataset.careListStage = stage;
@@ -82,10 +86,10 @@
         if (toolsButton) toolsButton.hidden = stage !== 'reading';
         /** SOFTM-LIST-READING END */
         root.CareListAds?.setReading?.((stage === 'reading' || root.innerHeight <= 700) && body.dataset.careWorkspace !== 'saved');
-        const hidden = stage === 'reading' && !open;
+        const hidden = !rail && stage === 'reading' && !open;
         filters.inert = hidden;
         filters.setAttribute('aria-hidden', String(hidden));
-        head.querySelector('[data-list-search-return]').hidden = stage !== 'reading';
+        head.querySelector('[data-list-search-return]').hidden = rail || stage !== 'reading';
     }
     function schedule() {
         if (!frame) frame = root.requestAnimationFrame(() => { frame = 0; sync(); });
@@ -121,6 +125,7 @@
         viewport.addEventListener('scroll', schedule, { passive: true });
         filters.addEventListener('focusin', schedule); filters.addEventListener('focusout', schedule);
         root.addEventListener('resize', schedule, { passive: true });
+        railMedia.addEventListener?.('change', schedule);
         new root.MutationObserver(schedule).observe(root.document.body, { attributes: true, attributeFilter: ['class', 'data-care-mode', 'data-care-workspace'] });
         if (root.ResizeObserver) {
             const observer = new root.ResizeObserver(schedule);
@@ -128,6 +133,6 @@
         }
         sync();
     }
-    root.CareListSticky = Object.freeze({ createProgression, scroller, visibleTop, capture, restore, reset, mount, sync });
+    root.CareListSticky = Object.freeze({ createProgression, isRail, scroller, visibleTop, capture, restore, reset, mount, sync });
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-LIST-STICKY END */

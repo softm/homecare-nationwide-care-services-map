@@ -8,4 +8,22 @@
 .care-decision-cell .care-decision-context{display:block;margin-top:2px;color:#52665c;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
 .care-decision-note{margin:5px 0 0;color:#607168;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 @media(max-width:380px){.care-decision-cell{padding:7px 6px}.care-decision-grid{gap:4px}.care-decision-cell dd{font-size:17px}}
+/** SOFTM-DETAIL-REVIEW START 날짜:20261118 : 상세 상단에서 공개 근거·상담 확인·누락을 색상과 제목으로 함께 구분 */
+#detailDecision .care-decision-review{margin:10px 0 2px;padding-top:10px;border-top:1px solid #dce7e2;color:#203c35}
+#detailDecision .care-decision-review>h4{margin:0 0 7px;font-size:13px;line-height:1.4;font-weight:800}
+#detailDecision .care-decision-review dl{display:grid;gap:5px;margin:0}
+#detailDecision .care-review-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px;align-items:start;padding:7px 9px;border:1px solid #dce7e2;border-radius:9px;background:#f6f8f7}
+#detailDecision .care-review-row[data-status="confirmed"]{border-color:#c9e3d8;background:#edf7f2}
+#detailDecision .care-review-row[data-status="verify"]{border-color:#eadcb9;background:#fff8e9}
+#detailDecision .care-review-row dt{margin:0;padding-top:1px;font-size:12px;line-height:1.45;font-weight:800}
+#detailDecision .care-review-row dd{min-width:0;margin:0}
+#detailDecision .care-review-row ul{display:flex;flex-wrap:wrap;gap:4px 12px;margin:0;padding:0;list-style:none}
+#detailDecision .care-review-row li{display:flex;min-width:0;gap:5px;font-size:11px;line-height:1.45}
+#detailDecision .care-review-row li b{flex:none;color:#36594e}
+#detailDecision .care-review-row li span,#detailDecision .care-review-empty{color:#53675f;overflow-wrap:anywhere}
+#detailDecision .care-decision-review>p{margin:6px 1px 0;color:#607168;font-size:10px;line-height:1.45}
+#detailDecision .care-decision-review>p span{display:block}
+@media(max-width:640px){#detailDecision .care-review-row{grid-template-columns:92px minmax(0,1fr);padding:6px 8px}#detailDecision .care-review-row ul{display:grid;gap:3px}}
+@media(max-width:380px){#detailDecision .care-review-row{grid-template-columns:1fr;gap:3px}#detailDecision .care-review-row dt{padding:0}}
+/** SOFTM-DETAIL-REVIEW END */
 /** SOFTM-DECISION-SUMMARY END */

@@ -7,6 +7,7 @@
         const value = count(c[key]);
         return value === null || (c.staffMissing && value === 0) ? '미확인' : `${value}명${c.staffMissing ? ' 확인' : ''}`;
     }
+    const capacityType = (c, type) => ['facility', 'daycare', 'short-stay'].includes(type) || (type === 'dementia' && String(c.t || '').split(',').some(code => /^(?:[BC]0[34]|A0[1-5]|S41|[GHIM][3-9][1-9])$/.test(code.trim())));
     /** SOFTM-MARKER-INSIGHTS START 날짜:20260930 : 지도와 상세가 같은 유형별 지표와 누락 기준을 사용하도록 요약 근거를 공유 */
     function summary(c, type) {
         const cells = [];
@@ -19,8 +20,8 @@
             const grade = /^[A-E]$/.test(String(c.g || '')) ? c.g : null;
             const year = /^\d{4}$/.test(String(c.ey || c.ev?.year || '')) ? String(c.ey || c.ev.year) : '';
             add('공단 평가', grade ? `${grade}등급` : '미확인', grade ? (year ? `${year}년 평가` : '평가연도 미확인') : '수집 자료 기준');
-            const capacityType = ['facility', 'daycare', 'short-stay'].includes(type) || (type === 'dementia' && String(c.t || '').split(',').some(code => /^(?:[BC]0[34]|A0[1-5]|S41|[GHIM][3-9][1-9])$/.test(code.trim())));
-            if (capacityType) {
+            const hasCapacity = capacityType(c, type);
+            if (hasCapacity) {
                 const capacity = count(c.z);
                 add('등록 정원', capacity > 0 ? `${capacity}명` : '미확인');
             }
@@ -31,11 +32,80 @@
                 const partial = !!c.staffMissing || first === null || second === null;
                 const total = (first ?? 0) + (second ?? 0);
                 add(nursing ? '간호인력' : '요양보호사', partial ? (total > 0 ? `${total}명 확인` : '미확인') : `${total}명`, nursing ? '간호사·간호조무사 합계' : partial ? '일부 자료 미확인' : '수집 인력 기준');
-                note = capacityType ? '' : '수집 인력 현황입니다. 실제 서비스 가능 여부·근무인원은 기관에 문의하세요.'; // SOFTM-DECISION-NOTE 날짜:20261012 : 상세 팝업 상단에서 정원 주의 문구가 공간을 차지하지 않도록 제거
+                note = hasCapacity ? '' : '수집 인력 현황입니다. 실제 서비스 가능 여부·근무인원은 기관에 문의하세요.'; // SOFTM-DECISION-NOTE 날짜:20261012 : 상세 팝업 상단에서 정원 주의 문구가 공간을 차지하지 않도록 제거
             }
         }
         return { cells, note };
     }
+    /** SOFTM-DETAIL-REVIEW START 날짜:20261118 : 공개자료의 강점·누락과 현재 기관에 물어볼 내용을 단정 없이 분리 */
+    function verification(type) {
+        if (type === 'daycare') return [
+            { label: '송영', detail: '우리 집까지 가능한 범위와 시간' },
+            { label: '이용', detail: '가능한 요일·시간과 현재 대기 절차' },
+            { label: '비용', detail: '본인부담·비급여를 포함한 예상 총액' }
+        ];
+        if (['home-care', 'home-bath', 'home-nursing'].includes(type)) return [
+            { label: '방문', detail: '우리 주소로 방문 가능한 요일과 시간' },
+            { label: '인력', detail: '희망 시간대에 실제 배정 가능한 담당 인력' },
+            { label: '비용', detail: '본인부담과 추가 비용을 포함한 예상 금액' }
+        ];
+        if (type === 'welfare-equipment') return [
+            { label: '품목', detail: '현재 재고와 대여·구입 가능 여부' },
+            { label: '관리', detail: '배송·설치·회수·A/S 조건' },
+            { label: '비용', detail: '급여 적용 여부와 실제 본인부담금' }
+        ];
+        if (type === 'nursing-hospital') return [
+            { label: '입원', detail: '필요한 진료·병실의 현재 가능 여부와 대기' },
+            { label: '간병', detail: '간병 방식과 보호자 부담 범위' },
+            { label: '비용', detail: '간병·비급여를 포함한 예상 총액' }
+        ];
+        return [
+            { label: '이용', detail: '현재 자리와 대기 절차' },
+            { label: '근무', detail: '이용 시간대의 실제 근무 인원과 담당 방식' },
+            { label: '비용', detail: '본인부담·비급여를 포함한 예상 총액' }
+        ];
+    }
+    function review(c, type) {
+        const confirmed = [], unknown = [], rawGrade = c.g || c.ev?.grade || '', grade = /^[A-E]$/.test(String(rawGrade)) ? String(rawGrade) : '';
+        const year = /^\d{4}$/.test(String(c.ey || c.ev?.year || '')) ? String(c.ey || c.ev.year) : '';
+        const multipleServices = String(c.t || '').split(',').filter(Boolean).length > 1;
+        if (type === 'nursing-hospital') {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(String(c.d || ''))) unknown.push({ label: '개설일', detail: '심평원 공개자료에서 미확인' });
+        } else {
+            if (['A', 'B'].includes(grade)) confirmed.push({ label: '공단 평가', detail: `${grade}등급${year ? ` · ${year}년 평가` : ''}` });
+            if (!grade) unknown.push({ label: '공단 평가', detail: '평가등급 미확인' });
+            else if (!year) unknown.push({ label: '평가연도', detail: `${grade}등급의 평가연도 미확인` });
+            if (capacityType(c, type) && !(count(c.z) > 0)) unknown.push({ label: '등록 정원', detail: '공개자료에서 미확인' });
+            if (type !== 'welfare-equipment') {
+                const nursing = type === 'home-nursing', primary = count(c[nursing ? 'rn' : 'cw']), secondary = nursing ? count(c.na) : 0;
+                if (c.staffMissing || primary === null || secondary === null) unknown.push({ label: nursing ? '간호인력' : '요양보호사', detail: '일부 또는 전체 인원 미확인' });
+                if (!multipleServices && !c.staffMissing) {
+                    if (count(c.rn) > 0) confirmed.push({ label: '등록 인력', detail: `간호사 ${count(c.rn)}명` });
+                    const rehab = (count(c.pt) ?? 0) + (count(c.ot) ?? 0);
+                    if (rehab > 0) confirmed.push({ label: '등록 인력', detail: `물리·작업치료사 합계 ${rehab}명` });
+                }
+            }
+        }
+        const verify = verification(type);
+        if (multipleServices && !['welfare-equipment', 'nursing-hospital'].includes(type)) verify.unshift({ label: '급여별 인력', detail: '복수 급여 합계가 아닌 실제 배치 인원' });
+        const note = type === 'nursing-hospital'
+            ? '개설일은 현재 입원 가능 여부를 뜻하지 않습니다.'
+            : type === 'welfare-equipment'
+                ? '공개 등록정보는 현재 품목 재고·대여 가능 여부를 뜻하지 않습니다.'
+                : ['home-care', 'home-bath', 'home-nursing'].includes(type)
+                    ? '등록 인력은 희망 시간대에 실제 배정 가능한 인력을 뜻하지 않습니다.'
+                    : '등록 정원은 빈자리, 등록 인력은 실제 근무조를 뜻하지 않습니다.';
+        return { confirmed, verify, unknown, note };
+    }
+    function renderReview(c, type, context = {}) {
+        const data = review(c, type);
+        const item = value => `<li><b>${escape(value.label)}</b><span>${escape(value.detail)}</span></li>`;
+        const row = (status, title, values, empty) => `<div class="care-review-row" data-status="${status}"><dt>${escape(title)}</dt><dd><ul>${values.length ? values.map(item).join('') : `<li class="care-review-empty">${escape(empty)}</li>`}</ul></dd></div>`;
+        const source = context.source || (type === 'nursing-hospital' ? '건강보험심사평가원 요양기관 개설현황' : '국민건강보험공단 공개 수집 자료');
+        const sourceDate = context.sourceDate || '미확인';
+        return `${render(c, type)}<section class="care-decision-review" aria-label="기관 선택 확인 요약"><h4>선택 전에 확인할 3가지</h4><dl>${row('confirmed', '확인된 강점', data.confirmed, '이 요약 기준에서 확인된 강점 항목이 없습니다. 강점이 없다는 뜻은 아닙니다.')}${row('verify', '기관 확인 필요', data.verify, '현재 운영정보는 기관에 직접 확인해 주세요.')}${row('unknown', '미확인', data.unknown, '이 요약 기준에서 별도로 분류된 미확인 항목 없음')}</dl><p>${escape(data.note)} <span>${escape(source)} · 검색자료 기준일 ${escape(sourceDate)}</span></p></section>`;
+    }
+    /** SOFTM-DETAIL-REVIEW END */
     function markerLines(c, type) {
         const { cells } = summary(c, type);
         if (type === 'nursing-hospital') {
@@ -52,7 +122,7 @@
         const html = cells.map(({ label, value, detail }) => `<div class="care-decision-cell"><dt>${escape(label)}</dt><dd>${escape(value)}</dd>${detail ? `<span class="care-decision-context">${escape(detail)}</span>` : ''}</div>`).join('');
         return `<section class="care-decision-summary" aria-label="기관 판단 요약"><dl class="care-decision-grid" style="--care-decision-columns:${cells.length}">${html}</dl>${note ? `<p class="care-decision-note">${escape(note)}</p>` : ''}</section>`;
     }
-    globalThis.CareDecisionSummary = { render, staffText, markerLines };
+    globalThis.CareDecisionSummary = { render, review, renderReview, staffText, markerLines };
     /** SOFTM-MARKER-INSIGHTS END */
 })();
 /** SOFTM-DECISION-SUMMARY END */

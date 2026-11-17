@@ -106,3 +106,87 @@ body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-stage="r
     body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-stage="reading"]:not([data-care-workspace="saved"]) .care-type-header { visibility:hidden; pointer-events:none; }
 }
 /** SOFTM-LIST-READING END */
+
+/** SOFTM-FILTER-RAIL START 날짜:20261118 : 넓은 PC에서는 검색조건을 왼쪽에 유지해 결과 목록이 화면 높이를 충분히 사용 */
+@media (min-width:1280px) and (min-height:701px) {
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] .wrap {
+        display:grid;
+        grid-template-columns:260px minmax(0,1fr);
+        grid-template-rows:auto;
+        align-items:start;
+        column-gap:20px;
+        padding:0 max(20px,calc((100vw - 1520px)/2));
+        box-sizing:border-box;
+        scroll-padding-top:60px;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"]:not(.care-mobile-filters-open) .filters {
+        grid-column:1;
+        grid-row:1;
+        position:sticky;
+        top:0!important;
+        left:auto;
+        right:auto;
+        align-self:start;
+        width:auto;
+        min-width:0;
+        min-height:0;
+        max-height:calc(100dvh - var(--care-list-controls-top,120px) - var(--care-list-ad-space,0px) - 12px);
+        margin:0;
+        padding:14px;
+        overflow:auto;
+        overscroll-behavior:contain;
+        border:1px solid #d6e4de;
+        border-radius:14px;
+        background:#fff;
+        box-shadow:0 5px 18px #173b370b;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] .layout {
+        grid-column:2;
+        grid-row:1;
+        min-width:0;
+        width:100%;
+        margin:0;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] .layout > .results:not([hidden]) {
+        width:100%;
+        max-width:none;
+        padding:0;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"]:not(.care-mobile-filters-open) .filters .filter-grid {
+        grid-template-columns:minmax(0,1fr) 64px;
+        gap:8px;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"]:not(.care-mobile-filters-open) .filter-grid .care-voice-input { grid-column:1; grid-row:1; min-width:0; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"]:not(.care-mobile-filters-open) .filter-grid .search-btn { grid-column:2; grid-row:1; padding:0 8px; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"]:not(.care-mobile-filters-open) .filter-grid #province { grid-column:1/-1; grid-row:2; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"]:not(.care-mobile-filters-open) .filter-grid #city { grid-column:1/-1; grid-row:3; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"]:not(.care-mobile-filters-open) .filters > .stitch-filter-toolbar {
+        display:grid!important;
+        grid-template-columns:minmax(0,1fr) auto;
+        gap:8px;
+        align-items:stretch;
+        margin-top:10px;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] #careListLocation {
+        grid-column:1/-1;
+        width:100%;
+        max-width:none;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] #careListLocation > [data-list-location-help] { max-width:none; min-width:0; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] .stitch-filter-toolbar > .stitch-reset { margin-left:0; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] .filters > .stitch-filter-summary:not([hidden]) {
+        display:flex!important;
+        position:static;
+        width:100%;
+        margin-top:8px;
+        padding:0;
+        gap:5px;
+        flex-wrap:wrap;
+        overflow:visible;
+        background:transparent;
+    }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] .results .list-head,
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"][data-care-list-stage="reading"] .results .list-head { top:0; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="search"][data-care-filter-rail="true"] [data-list-search-return] { display:none!important; }
+}
+/** SOFTM-FILTER-RAIL END */

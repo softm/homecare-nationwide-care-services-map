@@ -232,7 +232,7 @@
         return `<button type="button" class="care-basket-button" data-care-basket="${escape(row.i)}" ${compact ? 'data-care-basket-compact' : ''} aria-pressed="${active}" aria-label="${escape(row.n)} ${active ? '비교함에서 빼기' : '비교에 담기'}">${compact ? (active ? '담음' : '담기') : (active ? '✓ 비교에 담음' : '+ 비교에 담기')}</button>`;
     }
     /** SOFTM-ROW-GROUP END */
-    function evaluationLabel(row) { const grade = row.g || row.ev?.grade; return ['A', 'B', 'C', 'D', 'E'].includes(grade) ? `기관 평가 ${grade}등급` : grade === 'N' ? '신설·미평가' : '기관 평가 미확인'; }
+    function evaluationLabel(row) { if(options?.source==='hira'||options?.type==='nursing-hospital')return '심평원 의료기관 개설현황';const grade=row.g||row.ev?.grade,year=row.ey||row.ev?.year,yearText=year?`${year}년`:'평가연도 미확인';return ['A','B','C','D','E'].includes(grade)?`기관 평가 ${grade}등급 · ${yearText}`:grade==='N'?'신설·미평가':'기관 평가 미확인'; } // SOFTM-COMPARE-EVIDENCE 날짜:20261118 : 비교함 목록에서도 평가연도와 심평원 자료 구분을 유지
     function refresh() {
         if (!basket || !bar) return;
         matchController?.refresh(); // SOFTM-CARE-MATCH 날짜:20260910 : 목록 재렌더와 페이지 변경에도 선택 근거를 다시 연결
@@ -448,7 +448,7 @@
     let insightRevision = 0, insightAttempt = 0, insightTask;
     function loadInsights() {
         // SOFTM-CARE-MATCH 날짜:20260910 : 중요 조건 판정과 비교 설명이 같은 엔진 버전을 사용
-        if (!insightTask) insightTask = import(`./care-insights.js?v=20260910-match1${insightAttempt ? `&retry=${insightAttempt}` : ''}`).catch(error => {
+        if (!insightTask) insightTask = import(`./care-insights.js?v=20261118-evidence1${insightAttempt ? `&retry=${insightAttempt}` : ''}`).catch(error => {
             insightTask = null; insightAttempt++; throw error;
         });
         return insightTask;
@@ -463,7 +463,8 @@
         try {
             const [insights, manifest] = await Promise.all([loadInsights(), root.CareData.manifest()]);
             if (revision !== insightRevision || !panel.open) return;
-            host.innerHTML = insights.render(rows(), { type: options.type, sourceDate: manifest[options.type]?.sourceDate, match: matchController?.context() }); // SOFTM-CARE-MATCH 날짜:20260910 : 담기·삭제 때 현재 중요 조건으로 비교 근거를 갱신
+            const config=manifest[options.type]||{};
+            host.innerHTML = insights.render(rows(), { type: options.type, source: options.source||config.source, sourceDate: options.sourceDate||config.sourceDate, match: matchController?.context() }); // SOFTM-COMPARE-EVIDENCE 날짜:20261118 : 인사이트에도 표와 같은 출처·검색자료 기준일을 전달
         } catch {
             if (revision !== insightRevision || !panel.open) return;
             host.innerHTML = '<p>기관 설명을 불러오지 못했습니다. 기존 비교표는 계속 이용할 수 있습니다.</p><button type="button" data-insight-retry>다시 시도</button>';
@@ -1229,18 +1230,21 @@
     function showDaycareComparison() {
         const selected = rows();
         if (!selected.length) return;
+        const policy = root.CareCompareEvidence.build(selected, { source: options.source || 'nhis', sourceDate: options.sourceDate });
         const columns = [
-            ['기관명', row => row.n], ['주소', row => row.a], ['평가연도', row => row.ev?.year], ['기관 평가', row => row.ev?.grade],
-            ['공단 평가점수', row => row.ev?.score], ['기관운영', row => row.ev?.operation], ['환경·안전', row => row.ev?.safety],
+            ['기관명', row => row.n], ['주소', row => row.a], ['평가연도', row => row.ey || row.ev?.year], ['기관 평가', row => row.g || row.ev?.grade],
+            ['공단 평가점수', row => Number.isFinite(row.es) ? row.es : row.ev?.score], ['기관운영', row => row.ev?.operation], ['환경·안전', row => row.ev?.safety],
             ['권리보장', row => row.ev?.rights], ['제공과정', row => row.ev?.process], ['제공결과', row => row.ev?.result],
             ['정원', row => row.z], ['간호인력', row => row.staffMissing ? null : Number(row.rn || 0) + Number(row.na || 0)],
             ['재활인력', row => row.staffMissing ? null : Number(row.pt || 0) + Number(row.ot || 0)], ['요양보호사', row => row.staffMissing ? null : row.cw],
             ['기준지 거리(km)', row => row._distance]
         ];
-        let sort = 4, ascending = false;
+        const evaluationColumns = new Set([3, 4, 5, 6, 7, 8, 9]);
+        let sort = policy.canRankEvaluation ? 4 : 0, ascending = !policy.canRankEvaluation;
         const missing = value => value === null || value === undefined || value === '' || typeof value === 'number' && !Number.isFinite(value);
         const sorted = () => [...selected].sort((a, b) => {
-            const av = columns[sort][1](a), bv = columns[sort][1](b);
+            const activeSort = evaluationColumns.has(sort) && !policy.canRankEvaluation ? 0 : sort;
+            const av = columns[activeSort][1](a), bv = columns[activeSort][1](b);
             if (missing(av) !== missing(bv)) return missing(av) ? 1 : -1;
             if (missing(av)) return String(a.n).localeCompare(String(b.n), 'ko');
             const result = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv), 'ko', { numeric: true });
@@ -1248,14 +1252,19 @@
         });
         const host = document.getElementById('compareBody');
         function render() {
-            host.innerHTML = `<div class="care-compare-toolbar"><p>비교함에 담은 ${selected.length}곳 · 항목 제목을 눌러 정렬하세요.</p><button type="button" data-daycare-excel>엑셀 다운로드</button></div><div class="care-compare-scroll"><table class="compare-table"><thead><tr>${columns.map((col, index) => `<th scope="col" aria-sort="${index === sort ? ascending ? 'ascending' : 'descending' : 'none'}"><button type="button" data-daycare-sort="${index}">${escape(col[0])}${index === sort ? ascending ? ' ↑' : ' ↓' : ''}</button></th>`).join('')}</tr></thead><tbody>${sorted().map(row => `<tr>${columns.map(col => { const value = col[1](row); return `<td>${missing(value) ? '미확인' : escape(typeof value === 'number' ? Math.round(value * 100) / 100 : value)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div><p>기관 평가는 공단 공개자료입니다. 이용자의 장기요양등급과 다릅니다.</p>`;
-            host.querySelectorAll('[data-daycare-sort]').forEach(node => node.onclick = () => { const next = Number(node.dataset.daycareSort); ascending = next === sort ? !ascending : true; sort = next; render(); });
+            const evidence=document.getElementById('compareEvidence');if(evidence){evidence.dataset.tone=policy.tone;evidence.innerHTML=root.CareCompareEvidence.render(policy)}
+            const foot=document.getElementById('compareFoot');if(foot)foot.textContent='기관 평가 세부점수는 국민건강보험공단 공개자료입니다. 미확인은 낮은 평가를 뜻하지 않습니다.';
+            host.innerHTML = `<div class="care-compare-toolbar"><p>비교함에 담은 ${selected.length}곳 · 항목 제목을 눌러 정렬하세요.</p><button type="button" data-daycare-excel>엑셀 다운로드</button></div><div class="care-compare-scroll"><table class="compare-table" aria-describedby="compareEvidence"><thead><tr>${columns.map((col, index) => {const blocked=evaluationColumns.has(index)&&!policy.canRankEvaluation;return`<th scope="col" aria-sort="${!blocked&&index === sort ? ascending ? 'ascending' : 'descending' : 'none'}"><button type="button" data-daycare-sort="${index}"${blocked?' aria-disabled="true" aria-describedby="compareEvidence"':''}>${escape(col[0])}${!blocked&&index === sort ? ascending ? ' ↑' : ' ↓' : ''}</button></th>`}).join('')}</tr></thead><tbody>${sorted().map(row => `<tr>${columns.map((col,index) => { const value = col[1](row),year=row.ey||row.ev?.year,yearNote=[3,4].includes(index)?`<small class="compare-evaluation-year">${year?`${escape(year)}년 평가`:'평가연도 미확인'}</small>`:''; return `<td>${missing(value) ? '미확인' : escape(typeof value === 'number' ? Math.round(value * 100) / 100 : value)}${yearNote}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
+            host.querySelectorAll('[data-daycare-sort]').forEach(node => node.onclick = () => { const next = Number(node.dataset.daycareSort);if(evaluationColumns.has(next)&&!policy.canRankEvaluation)return; ascending = next === sort ? !ascending : true; sort = next; render(); });
             host.querySelector('[data-daycare-excel]').onclick = () => {
                 if (!root.XLSX) { host.querySelector('.care-compare-toolbar p').textContent = '엑셀 기능을 불러오는 중입니다. 잠시 후 다시 눌러 주세요.'; return; }
                 const sheet = root.XLSX.utils.aoa_to_sheet([columns.map(col => col[0]), ...sorted().map(row => columns.map(col => { const value = col[1](row); return missing(value) ? '미확인' : value; }))]);
                 sheet['!autofilter'] = { ref: sheet['!ref'] };
                 sheet['!cols'] = columns.map((_, index) => ({ wch: index < 2 ? 32 : 16 }));
                 const book = root.XLSX.utils.book_new();
+                const info = root.XLSX.utils.aoa_to_sheet([['비교 안내','내용'],['자료 출처',policy.sourceLabel],['검색 자료 기준일',policy.sourceDate],['평가연도 현황',policy.yearLabel],['등급·총점 직접 비교',policy.canRankEvaluation?'같은 평가연도 안에서 정렬 가능':'순위 제공하지 않음'],['비교 주의',policy.message]]);
+                info['!cols']=[{wch:22},{wch:88}];
+                root.XLSX.utils.book_append_sheet(book, info, '비교 안내');
                 root.XLSX.utils.book_append_sheet(book, sheet, '관심기관 비교');
                 const now = new Date(), stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
                 root.XLSX.writeFileXLSX(book, `돌봄한눈_주야간보호_비교_${stamp}.xlsx`, { compression: true });
