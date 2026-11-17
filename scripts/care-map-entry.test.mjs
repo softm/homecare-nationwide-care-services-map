@@ -87,6 +87,16 @@ test('지도 새로고침은 남아 있는 검색조건에서도 현위치 조�
     assert.match(initialRegion, /return useCurrentLocation\(true\);/);
 });
 
+test('일반 탐색 좌표는 초기 현위치보다 우선하지 않고 명시적 지도 공유 좌표만 복원한다', () => {
+    const start = html.indexOf('function restoreState()');
+    const restore = html.slice(start, html.indexOf('/** SOFTM-LIST-LOCATION END */', start));
+    assert.match(restore, /params\.get\('share'\)!=='map'/);
+    assert.match(restore, /\['lat','lng','z'\]/);
+    const shareStart = html.indexOf('function shareState()');
+    const share = html.slice(shareStart, html.indexOf('function multiFilterSet', shareStart));
+    assert.match(share, /url\.searchParams\.set\('share','map'\)/);
+});
+
 test('첫 지도 위치 거절은 기존 최근 지역·기본 지도 복구 경로를 사용한다', async () => {
     const s = setup(), pending = s.enter(); s.fail(); await pending;
     assert.deepEqual(s.calls, ['sdk', 'location', 'fallback', 'resume']);
