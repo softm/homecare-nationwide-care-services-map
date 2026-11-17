@@ -19,7 +19,9 @@
         toggle.prepend(icon);
         const desktop = matchMedia('(min-width:1001px)');
         /** SOFTM-LOCATION-TOOLBAR START 날짜:20260930 : 목록에서는 위치 찾기와 상세필터를 같은 행으로 묶고 지도 복귀 시 기존 배치를 복원 */
-        const placeToggle = () => { if (desktop.matches || document.body.dataset.careMode === 'list') toolbar.prepend(toggle); else grid.append(toggle); };
+        /** SOFTM-PC-FILTER-ACTIONS START 날짜:20261118 : PC 지도 분할 화면에서는 상세필터를 검색어·조회와 같은 행에 두고 목록 전용 모드만 위치 도구막대를 유지 */
+        const placeToggle = () => { if (document.body.dataset.careMode === 'list') toolbar.prepend(toggle); else grid.append(toggle); };
+        /** SOFTM-PC-FILTER-ACTIONS END */
         desktop.addEventListener('change', placeToggle); placeToggle();
         new MutationObserver(placeToggle).observe(document.body, { attributes: true, attributeFilter: ['data-care-mode'] });
         /** SOFTM-LOCATION-TOOLBAR END */
