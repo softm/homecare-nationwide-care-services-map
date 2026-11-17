@@ -81,6 +81,12 @@ test('목록에서 직접 정한 지역·기관 검색은 첫 지도에서도 �
     }
 });
 
+test('지도 새로고침은 남아 있는 검색조건에서도 현위치 조회를 사용한다', () => {
+    const start = html.indexOf('async function openInitialRegionSearch()');
+    const initialRegion = html.slice(start, html.indexOf('/** SOFTM-INITIAL-CURRENT-LOCATION END */', start));
+    assert.match(initialRegion, /return useCurrentLocation\(true\);/);
+});
+
 test('첫 지도 위치 거절은 기존 최근 지역·기본 지도 복구 경로를 사용한다', async () => {
     const s = setup(), pending = s.enter(); s.fail(); await pending;
     assert.deepEqual(s.calls, ['sdk', 'location', 'fallback', 'resume']);
