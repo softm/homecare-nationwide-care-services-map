@@ -1,0 +1,48 @@
+/** SOFTM-LIST-COST START 날짜:20261118 : 목록 높이를 과도하게 늘리지 않으면서 예상 비용과 계산 전제를 함께 읽게 함 */
+.care-list-cost {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 2px 12px;
+  margin: 4px 0;
+  padding: 9px 11px;
+  border: 1px solid #cfe2dc;
+  border-radius: 10px;
+  background: #f1f8f6;
+  color: #234b43;
+  line-height: 1.35;
+}
+.care-list-cost-copy { min-width: 0; }
+.care-list-cost-copy > span {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+}
+.care-list-cost-copy > small {
+  display: block;
+  margin-top: 2px;
+  color: #61736f;
+  font-size: 10px;
+}
+.care-list-cost > strong {
+  color: #004541;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.care-list-cost > strong b {
+  font-size: 18px;
+  letter-spacing: -.035em;
+}
+.care-list-cost > p {
+  grid-column: 1/-1;
+  margin: 2px 0 0 !important;
+  color: #6d7774 !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+@media (max-width: 640px) {
+  .care-list-cost { padding: 8px 9px; }
+  .care-list-cost > strong b { font-size: 16px; }
+}
+/** SOFTM-LIST-COST END */
