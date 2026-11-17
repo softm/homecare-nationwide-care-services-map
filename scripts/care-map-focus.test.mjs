@@ -7,6 +7,8 @@ const mapHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const focusCss=readFileSync(new URL('../care-map-focus.css',import.meta.url),'utf8');
 const mobileFocusSource=readFileSync(new URL('../care-mobile-focus.js',import.meta.url),'utf8');
 const mobileFocusCss=readFileSync(new URL('../care-mobile-focus.css',import.meta.url),'utf8');
+const stitchControlsSource=readFileSync(new URL('../stitch-controls.js',import.meta.url),'utf8');
+const stitchDesktopCss=readFileSync(new URL('../stitch-desktop.css',import.meta.url),'utf8');
 /** SOFTM-MOBILE-FOCUS START 날짜:20261003 : 모바일 배경 탭 유지와 데스크톱 기존 복귀를 구분해 검증 */
 test('모바일 지도 배경은 전체보기를 유지하고 데스크톱은 기존 복귀를 유지한다',()=>{
  assert.equal(CareMapFocus.focusAction(false,false),null);
@@ -67,6 +69,13 @@ test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을
  assert.match(mobileFocusCss,/care-mobile-focus-chips button \{ min-height:38px; padding:4px 10px 4px 5px/);
  assert.match(mobileFocusCss,/care-mobile-focus-chips svg \{ width:20px; height:20px; padding:5px/);
 });
+/** SOFTM-RESET-VISIBILITY START 날짜:20261118 : 비활성 초기화가 빈 화면에서 계속 보이는 회귀를 방지 */
+test('조건 초기화는 적용 조건이 있을 때만 표시한다',()=>{
+ assert.match(stitchControlsSource,/reset\.hidden = true/);
+ assert.match(stitchControlsSource,/reset\.hidden = !conditions\.length/);
+ assert.match(stitchDesktopCss,/\.stitch-reset\[hidden\] \{ display:none!important; \}/);
+});
+/** SOFTM-RESET-VISIBILITY END */
 test('검색은 유형·필터 옆 버튼으로 열리고 영역 포커스를 벗어나면 다시 숨는다',()=>{
  assert.match(mobileFocusSource,/data-mobile-focus="type"[\s\S]+data-mobile-focus="filter"[\s\S]+data-mobile-focus="search"[\s\S]+data-mobile-focus="close"/);
  assert.match(mobileFocusSource,/id="careMobileFocusSearch"[\s\S]+aria-hidden="true" hidden/);
