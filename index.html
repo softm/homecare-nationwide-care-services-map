@@ -94,7 +94,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <link rel="stylesheet" href="result-sort.css?v=20260910-1"> <!-- SOFTM-SORT-ORIGIN 날짜:20260910 : 거리 기준 위치의 적용 여부와 차이를 이전 캐시 없이 표시 -->
 <link rel="stylesheet" href="voice-search.css?v=20260911-clear1"> <!-- SOFTM-SEARCH-CLEAR 날짜:20260911 : 검색어 지우기 버튼을 이전 캐시 없이 적용 -->
 <link rel="stylesheet" href="care-match.css?v=20260911-match-clear1"> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문과 기관별 선택 근거의 공용 화면을 연결 --> <!-- SOFTM-MATCH-PANEL-ACTION 날짜:20260911 : 조건 패널의 축약 배치와 명확한 설정 버튼을 이전 캐시 없이 적용 --> <!-- SOFTM-MATCH-CLEAR 날짜:20260911 : 맞춤 조건 지우기 화면을 이전 캐시 없이 적용 -->
-<link rel="stylesheet" href="map-experience.css?v=20261007-row-icons1"> <!-- SOFTM-ROW-SAVED 날짜:20261007 : 담기·보기 아이콘을 기존 방문자에게도 반영 -->
+<link rel="stylesheet" href="map-experience.css?v=20261118-saved-action-label1"> <!-- SOFTM-ROW-SAVED 날짜:20261118 : 담은 기관 보기 문구와 담기 축소 폭을 기존 방문자에게도 반영 -->
 <!-- SOFTM-MOBILE-PULL-REFRESH START 날짜:20260910 : 내부 목록 스크롤에서도 당겨서 최신 화면을 다시 불러오도록 공용 화면을 연결 -->
 <link rel="stylesheet" href="mobile-pull-refresh.css?v=20260910-1">
 <!-- SOFTM-MOBILE-PULL-REFRESH END -->
@@ -255,7 +255,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <link rel="stylesheet" href="care-basket-share.css?v=20260911"> <!-- SOFTM-BASKET-SHARE 날짜:20260911 : 모바일에서도 공유 링크와 확인 조작을 제공 -->
 <script src="map-share-state.js?v=20260916-view1"></script> <!-- SOFTM-SHARE-VIEW 날짜:20260916 : 초기 좌표 해석 전에 기존 공유 주소의 안내 문구를 분리 -->
 <script src="care-basket-share.js?v=20260915-text1"></script> <!-- SOFTM-SHARE-URL 날짜:20260915 : 안내 문구가 섞인 기존 공유 링크 복원을 즉시 적용 -->
-<script src="stitch-controls.js?v=20261118-reset-visibility1"></script> <!-- SOFTM-RESET-VISIBILITY 날짜:20261118 : 실제 적용 조건에 따른 초기화 버튼 표시를 이전 캐시 없이 적용 -->
+<script src="stitch-controls.js?v=20261118-phone-feedback1"></script> <!-- SOFTM-PHONE-FEEDBACK 날짜:20261118 : 전화번호 확인 진행과 완료 결과를 기존 방문자에게도 즉시 표시 -->
 <script src="map-marker-placement.js?v=20260930-1"></script> <!-- SOFTM-MARKER-PLACEMENT 날짜:20260930 : 이름표가 위쪽 충돌만으로 숨지 않도록 주변 배치 계산을 먼저 연결 -->
 <script src="map-marker-labels.js?v=20261007-selected-anchor1"></script> <!-- SOFTM-MARKER-SCALE 날짜:20261005 : 배율과 화면 조작부를 함께 고려한 이름표 배치 -->
 <script src="map-experience.js?v=20261118-evidence1"></script> <!-- SOFTM-COMPARE-EVIDENCE 날짜:20261118 : 비교함 출처·평가연도 정합성과 엑셀 안내를 즉시 반영 -->
@@ -564,7 +564,7 @@ async function renderList(query=null,visibleLimit=PAGE_LIMIT){
   ${globalThis.CareCostPreview?.render(TYPE,c)||''}<!-- SOFTM-LIST-COST 날짜:20261118 : 기관 품질 정보와 섞지 않고 공식 수가 예상비용을 별도 행으로 표시 -->
   ${careListEvidenceHtml(c)}
   <!-- SOFTM-LIST-MODE END -->
-  <div class="care-row-actions"><div class="care-row-save-group" role="group" aria-label="${esc(c.n)} 담기와 보기">${CareMapExperience.button(c,true)}<button type="button" data-popup-saved aria-label="담은 기관 보기">보기</button></div><!-- SOFTM-ROW-GROUP 날짜:20261007 : 아래로 가려지던 보기를 담기 옆에 항상 표시 -->${CONFIG.source==='nhis'?`<button type="button" class="stitch-phone" data-stitch-phone="${esc(c.i)}" aria-label="${esc(c.n)} 전화번호 확인">☎ 전화</button>`:''}<button type="button" class="stitch-detail" data-saved-detail="${esc(c.i)}" aria-label="${esc(c.n)} ${careListDetailLabel()}">ⓘ ${careListDetailLabel()}</button>${CareDetailLayout.listButton(c,cachedCoord(c))}<label class="care-map-display"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 지도 표시"><span>지도에 표시</span></label></div>
+  <div class="care-row-actions"><div class="care-row-save-group" role="group" aria-label="${esc(c.n)} 담기와 담은 기관 보기">${CareMapExperience.button(c,true)}<button type="button" data-popup-saved aria-label="담은 기관 보기">담은 기관 보기</button></div><!-- SOFTM-ROW-GROUP 날짜:20261118 : 담기 옆 버튼이 담은 기관 목록을 여는 동작임을 명확히 표시 -->${CONFIG.source==='nhis'?`<button type="button" class="stitch-phone" data-stitch-phone="${esc(c.i)}" aria-label="${esc(c.n)} 전화번호 확인">☎ 전화</button>`:''}<button type="button" class="stitch-detail" data-saved-detail="${esc(c.i)}" aria-label="${esc(c.n)} ${careListDetailLabel()}">ⓘ ${careListDetailLabel()}</button>${CareDetailLayout.listButton(c,cachedCoord(c))}<label class="care-map-display"><input type="checkbox" ${selected.has(c.i)?'checked':''} aria-label="${esc(c.n)} 지도 표시"><span>지도에 표시</span></label></div>
   <p class="stitch-phone-result" data-phone-result hidden role="status"></p>
   <!-- SOFTM-STITCH-CARD END -->
  </article>${listAdHtml(i,rows.length)}`}).join('');

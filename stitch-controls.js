@@ -93,7 +93,8 @@
             const button = event.target.closest('[data-stitch-phone]');
             if (!button || button.disabled) return;
             const output = button.closest('.row').querySelector('[data-phone-result]');
-            output.hidden = false; output.textContent = '전화번호 확인 중…'; button.disabled = true;
+            const originalLabel = button.textContent;
+            output.hidden = false; output.textContent = '전화번호 확인 중…'; button.disabled = true; button.textContent = '☎ 확인 중…';
             try {
                 const phone = String(await options.phone(button.dataset.stitchPhone) || '');
                 if (!output.isConnected) return;
@@ -103,7 +104,10 @@
                     const link = document.createElement('a'); link.href = `tel:${number}`; link.textContent = `${phone} · 전화 걸기`; output.append(link);
                 } else output.textContent = '공개된 전화번호가 없습니다. 상세정보에서 공단 원문을 확인해 주세요.';
             } catch (_) { output.textContent = '전화번호를 불러오지 못했습니다. 전화 버튼을 눌러 다시 확인해 주세요.'; }
-            finally { button.disabled = false; }
+            finally {
+                button.disabled = false; button.textContent = originalLabel;
+                if (output.isConnected) requestAnimationFrame(() => output.scrollIntoView({block:'nearest', behavior:'smooth'}));
+            } // SOFTM-PHONE-FEEDBACK 날짜:20261118 : 버튼에 즉시 로딩 상태를 표시하고 완료된 번호 안내가 카드 아래에서 가려지지 않도록 이동
         });
     }
     root.StitchControls = Object.freeze({mount});
