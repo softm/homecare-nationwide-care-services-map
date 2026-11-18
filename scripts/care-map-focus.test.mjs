@@ -75,6 +75,11 @@ test('조건 초기화는 적용 조건이 있을 때만 표시한다',()=>{
  assert.match(stitchControlsSource,/reset\.hidden = !conditions\.length/);
  assert.match(stitchDesktopCss,/\.stitch-reset\[hidden\] \{ display:none!important; \}/);
 });
+test('조건 없는 분할 지도는 숨은 초기화 행의 검색 결과 위 공간을 남기지 않는다',()=>{
+ assert.match(stitchControlsSource,/filters\.classList\.toggle\('has-active-filter-conditions', conditions\.length > 0\)/);
+ assert.match(stitchDesktopCss,/data-care-mode="map"[\s\S]+\.filters:not\(\.has-active-filter-conditions\)[\s\S]+height:108px/);
+ assert.match(stitchDesktopCss,/\.filters:not\(\.has-active-filter-conditions\)~\.layout>\.results \{ top:160px!important; height:calc\(100% - 160px\)!important; \}/);
+});
 /** SOFTM-RESET-VISIBILITY END */
 test('검색은 유형·필터 옆 버튼으로 열리고 영역 포커스를 벗어나면 다시 숨는다',()=>{
  assert.match(mobileFocusSource,/data-mobile-focus="type"[\s\S]+data-mobile-focus="filter"[\s\S]+data-mobile-focus="search"[\s\S]+data-mobile-focus="close"/);
