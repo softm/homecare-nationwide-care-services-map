@@ -62,6 +62,7 @@
             toggle.dispatchEvent(new Event('care-filter-count'));
             reset.disabled = !conditions.length;
             reset.hidden = !conditions.length; // SOFTM-RESET-VISIBILITY 날짜:20261118 : 실제 기본·상세조건이 있을 때만 전체 초기화 행동 표시
+            filters.classList.toggle('has-active-filter-conditions', conditions.length > 0); // SOFTM-RESULT-GAP 날짜:20261118 : 조건 없는 빈 도구 행만 결과 위 공간에서 제외
             summary.hidden = !conditions.length;
             document.body.style.setProperty('--stitch-filter-summary-height', `${summary.hidden ? 0 : summary.getBoundingClientRect().height}px`);
         };
