@@ -1,6 +1,13 @@
 /** SOFTM-STITCH-CONTROLS START 날짜:20260915 : 시안의 필터 해제·전화·비교 요약을 기존 상태와 정적 자료에 연결 */
 (function (root) {
     'use strict';
+    async function copyPhone(value) {
+        if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(value);
+        const field = document.createElement('textarea'); field.value = value; field.setAttribute('readonly', ''); field.style.position = 'fixed'; field.style.opacity = '0';
+        document.body.append(field); field.select();
+        try { if (!document.execCommand('copy')) throw new Error('copy failed'); }
+        finally { field.remove(); }
+    }
     function mount(options) {
         if (document.querySelector('.stitch-compare-tray')) return;
         const filters = document.querySelector('.filters');
@@ -101,7 +108,11 @@
                 output.replaceChildren();
                 const number = phone.replace(/[^0-9+]/g, '');
                 if (number.length >= 8) {
-                    const link = document.createElement('a'); link.href = `tel:${number}`; link.textContent = `${phone} · 전화 걸기`; output.append(link);
+                    const link = document.createElement('a'); link.href = `tel:${number}`; link.textContent = `${phone} · 전화 걸기`;
+                    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'stitch-phone-copy'; copy.setAttribute('aria-label', `${phone} 복사`); copy.title = '전화번호 복사';
+                    copy.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg>';
+                    copy.onclick = async () => { try { await copyPhone(phone); copy.setAttribute('aria-label', `${phone} 복사됨`); copy.title = '복사됨'; } catch (_) { copy.setAttribute('aria-label', `${phone} 복사 실패`); copy.title = '복사 실패'; } };
+                    output.append(link, copy); // SOFTM-PHONE-COPY 날짜:20261118 : 전화번호 옆 복사 아이콘으로 번호를 클립보드에 저장
                 } else output.textContent = '공개된 전화번호가 없습니다. 상세정보에서 공단 원문을 확인해 주세요.';
             } catch (_) { output.textContent = '전화번호를 불러오지 못했습니다. 전화 버튼을 눌러 다시 확인해 주세요.'; }
             finally {
