@@ -75,6 +75,10 @@
         const tray = document.createElement('section'); tray.className = 'stitch-compare-tray'; tray.setAttribute('aria-label', '비교함 요약');
         tray.innerHTML = '<span class="stitch-tray-icon" aria-hidden="true">⚖</span><div class="stitch-tray-copy"><strong></strong><p></p></div><button type="button" data-stitch-saved>담은 비교함 보기</button><button type="button" data-basket-open>선택기관 비교표 보기</button><button type="button" data-basket-clear>비우기</button>'; // SOFTM-COMPARE-SAVED 날짜:20261007 : 비교표를 열지 않고도 담은 기관을 확인할 수 있도록 바로가기 제공
         document.body.append(tray);
+        /** SOFTM-GUIDED-COMPARE START 날짜:20261119 : 화면 하단 요약 버튼도 실제 담은 기관 패널의 검증된 비교·비우기 동작을 재사용 */
+        tray.querySelector('[data-basket-open]').onclick = () => document.querySelector('#careSavedPanel [data-basket-open]')?.click();
+        tray.querySelector('[data-basket-clear]').onclick = () => document.querySelector('#careSavedPanel [data-basket-clear]')?.click();
+        /** SOFTM-GUIDED-COMPARE END */
         /** SOFTM-COMPARE-SAVED START 날짜:20261007 : 비교 안내와 비교표에서 담은 기관 목록으로 곧바로 돌아가도록 같은 작업 전환 사용 */
         document.querySelectorAll('[data-stitch-saved]').forEach(button => {
             button.onclick = () => {
@@ -91,8 +95,8 @@
             tray.hidden = !rows.length || document.body.dataset.careWorkspace !== 'search';
             tray.querySelector('strong').textContent = `비교함에 ${rows.length}개 기관이 담겼습니다`;
             tray.querySelector('p').textContent = rows.map((row, i) => `${i+1}. ${row.n}`).join(' · ');
-            tray.querySelector('[data-basket-open]').textContent = `선택기관 비교표 보기 (${rows.length}) ›`;
-            shortcut.textContent = `담은 비교함 ${rows.length}곳 보기 ›`;
+            tray.querySelector('[data-basket-open]').textContent = rows.length < 2 ? '비교하려면 2곳 이상 담기' : `선택기관 비교표 보기 (${rows.length})`; tray.querySelector('[data-basket-open]').disabled = rows.length < 2; // SOFTM-GUIDED-COMPARE 날짜:20261119 : 여러 후보 중 세 곳 비교 진입 조건을 고정 트레이에서도 동일하게 표시
+            shortcut.textContent = `담은 비교함 ${rows.length}곳 보기`;
         };
         new MutationObserver(syncBasket).observe(document.querySelector('#careSavedTab [data-saved-count]'), {childList:true, subtree:true, characterData:true});
         new MutationObserver(syncBasket).observe(document.body, {attributes:true, attributeFilter:['data-care-workspace']});

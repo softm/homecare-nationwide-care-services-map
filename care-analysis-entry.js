@@ -6,7 +6,7 @@ if (heading && !document.querySelector('.care-analysis-entry')) {
     const type = new URLSearchParams(location.search).get('type') || 'daycare'; // SOFTM-DAYCARE-REDIRECT 날짜:20260924 : 전용 지도 제거 후 통합 지도 유형만 분석 화면에 전달
     const link = document.createElement('a'); link.className = 'care-analysis-entry';
     link.href = `care-analysis.html?type=${encodeURIComponent(type)}`;
-    link.textContent = '주변 분석'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 짧은 기능명으로 탐색 도구를 같은 크기로 표시
+    link.textContent = '맞춤 비교 시작'; // SOFTM-GUIDED-COMPARE 날짜:20261119 : 지도 검색 이용자가 조건·후보·세 곳 비교 흐름을 바로 이해하도록 진입 목적을 표시
     /** SOFTM-ANALYSIS-ORIGIN START 날짜:20260911 : 클릭 시점의 실제 지도 중심을 주소 입력 없이 분석할 수 있도록 전달 */
     const bindLocation = () => {
         const url = new URL('care-analysis.html', location.href); url.searchParams.set('type', type);

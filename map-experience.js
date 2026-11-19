@@ -240,7 +240,7 @@
         tabs.querySelector('[data-saved-count]').textContent = selected.length;
         document.querySelectorAll('[data-popup-saved-count]').forEach(node => { node.textContent = selected.length; }); // SOFTM-INFO-SHEET 날짜:20260917 : 팝업에서 담은 결과와 바로가기 기관 수를 즉시 연결
         bar.querySelector('.care-basket-count').textContent = `${selected.length}곳`;
-        bar.querySelector('[data-basket-open]').disabled = !selected.length;
+        bar.querySelector('[data-basket-open]').disabled = selected.length < 2; // SOFTM-GUIDED-COMPARE 날짜:20261119 : 비교가 의미 있는 두 곳부터 세 곳 선택 화면을 열도록 안내
         bar.querySelector('[data-route-edit]').disabled = !selected.length;
         bar.querySelector('[data-basket-clear]').hidden = !selected.length;
         bar.querySelector('.care-saved-empty').hidden = !!selected.length;
