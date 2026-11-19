@@ -52,6 +52,12 @@
     stroke-linejoin:round;
 }
 body.stitch-desktop.care-map-page .care-type-header { right:212px; }
+/** SOFTM-ACCOUNT-VISIBLE START 날짜:20261119 : 공통 계정 로그인 버튼의 오른쪽 48px 공간을 비워 목록·지도 전환 버튼과 겹치지 않게 배치 */
+@media (min-width:1001px) {
+    body.stitch-desktop.care-map-page .care-mode-toggle { right:66px; }
+    body.stitch-desktop.care-map-page .care-type-header { right:262px; }
+}
+/** SOFTM-ACCOUNT-VISIBLE END */
 body.care-map-page:not([data-care-mode="list"]) #careListSummary { display:none; }
 /** SOFTM-MODE-ICONS END */
 
@@ -305,7 +311,7 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] .mobile-popup-layer:not
     .care-mode-toggle [data-care-mode-choice] { min-width:72px; min-height:44px; gap:6px; padding:7px 10px; border-radius:999px; font-size:13px; } /* SOFTM-MODE-ICONS 날짜:20260930 : 모바일에서도 아이콘·이름과 충분한 터치 높이를 함께 확보 */
     body.stitch-desktop.care-map-page .care-type-header { right:4px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] { --care-list-controls-top:100px; }
-    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle { top:2px; right:10px; bottom:auto; border-radius:10px; box-shadow:none; } /* SOFTM-MODE-ICONS 날짜:20260930 : 커진 터치 영역을 56px 헤더 안에 맞춰 유형 메뉴와 겹침 방지 */
+    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle { top:2px; right:60px; bottom:auto; border-radius:10px; box-shadow:none; } /* SOFTM-ACCOUNT-VISIBLE 날짜:20261119 : 우측 로그인 버튼 48px 공간을 남기고 목록·지도 전환을 배치 */
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle [data-care-mode-choice] { border-radius:7px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .stitch-app-header { display:flex; height:56px; padding:0 12px 0 58px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-type-header { top:56px!important; left:0; right:0; width:100%; height:44px; padding:4px 10px; background:#fff; border-bottom:1px solid #dce7e3; }
@@ -353,7 +359,7 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] .mobile-popup-layer:not
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-basket-items { grid-template-columns:minmax(0,1fr); }
 }
 @media (max-width:360px) {
-    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle { right:6px; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle { right:56px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-mode-toggle [data-care-mode-choice] { gap:3px; padding:7px 8px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .stitch-brand strong { font-size:14px; }
 }
