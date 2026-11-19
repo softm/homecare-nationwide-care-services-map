@@ -3,11 +3,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import '../care-compare-evidence.js';
+import '../care-comparison-workspace.js'; // SOFTM-GUIDED-COMPARE 날짜:20261119 : 공통 세 곳 비교 모델의 선택 한도와 유형별 지표를 함께 회귀검사
 
 const { build, render } = globalThis.CareCompareEvidence;
 const row = (i, year, grade = 'A', score = 90) => ({ i, n: `${i}기관`, ey: year, g: grade, es: score });
 const indexHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const mapExperience=readFileSync(new URL('../map-experience.js',import.meta.url),'utf8');
+const analysisHtml=readFileSync(new URL('../care-analysis.html',import.meta.url),'utf8');
+const analysisJs=readFileSync(new URL('../care-analysis.js',import.meta.url),'utf8');
 
 test('같은 평가연도 두 곳만 등급·총점 정렬을 허용한다', () => {
     const policy = build([row('1', 2025), row('2', 2025, 'B', 85)], { source: 'nhis', sourceDate: '2026-11-18' });
@@ -71,4 +74,45 @@ test('실제 비교표·엑셀·상세 화면이 공통 근거 정책을 사용�
     assert.match(mapExperience,/CareCompareEvidence\.build\(selected/);
     assert.match(mapExperience,/evaluationColumns\.has\(next\)&&!policy\.canRankEvaluation/);
 });
+
+/** SOFTM-GUIDED-COMPARE START 날짜:20261119 : 후보 보관과 세 곳 비교를 분리하고 미확인 실시간 정보를 추정하지 않는지 검증 */
+test('보관 후보는 여러 곳이어도 실제 비교 선택은 세 곳으로 제한한다',()=>{
+    const values=new Map(),storage={getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)};
+    const selection=globalThis.CareComparisonWorkspace.createSelection(storage,'daycare',3);
+    assert.deepEqual(selection.sync(['1','2','3','4']),['1','2','3']);
+    assert.equal(selection.toggle('4',['1','2','3','4']).reason,'limit');
+    assert.equal(selection.toggle('2',['1','2','3','4']).changed,true);
+    assert.deepEqual(selection.toggle('4',['1','2','3','4']).ids,['1','3','4']);
+    assert.deepEqual(selection.sync(['3','4'],false),['3','4']);
+});
+
+test('유형별 비교 지표는 병원 평가와 복지용구 시설 인력을 만들지 않는다',()=>{
+    const hospital=globalThis.CareComparisonWorkspace.metricsFor('nursing-hospital','hira').map(item=>item.key);
+    const equipment=globalThis.CareComparisonWorkspace.metricsFor('welfare-equipment','nhis').map(item=>item.key);
+    assert.equal(hospital.includes('evaluation'),false);assert.equal(hospital.includes('caregiver'),false);
+    assert.equal(equipment.includes('nursing'),false);assert.equal(equipment.includes('capacity'),false);
+    assert.equal(equipment.includes('availability'),true);
+});
+
+test('비교 화면은 빈자리와 비용을 기관 확인으로 남기고 HTML을 실행하지 않는다',()=>{
+    const html=globalThis.CareComparisonWorkspace.render({type:'daycare',source:'nhis',sourceDate:'2026-11-19',allRows:[{i:'1',n:'<img>',a:'주소'}],activeIds:['1'],rows:[{i:'1',n:'<img>',a:'주소'},{i:'2',n:'둘',a:'주소'}]});
+    assert.match(html,/기관 확인 필요/);assert.match(html,/본인부담·비급여 별도 확인/);
+    assert.match(html,/&lt;img&gt;/);assert.doesNotMatch(html,/<img>/);
+});
+
+test('간호 인력 두 항목이 모두 비어 있으면 0명으로 추정하지 않는다',()=>{
+    const metric=globalThis.CareComparisonWorkspace.metricsFor('daycare').find(item=>item.key==='nursing');
+    const result=globalThis.CareComparisonWorkspace.metricValue({rn:null,na:undefined},metric,{type:'daycare',source:'nhis'});
+    assert.equal(result.value,'미확인');assert.match(result.note,/현재 배치 확인/);
+}); // SOFTM-STAFF-UNKNOWN 날짜:20261120 : 누락 인력을 실제 0명으로 표시하는 회귀 방지
+
+test('맞춤분석은 네 단계와 세 곳 비교·세션 상담 준비를 제공한다',()=>{
+    assert.match(analysisHtml,/data-analysis-step="conditions"/);assert.match(analysisHtml,/data-analysis-step="candidates"/);assert.match(analysisHtml,/data-analysis-step="compare"/);assert.match(analysisHtml,/data-analysis-step="prepare"/);
+    assert.match(analysisJs,/CareComparisonWorkspace\.createSelection\(storage, input\.type, 3\)/);
+    assert.match(analysisJs,/careConsultation:v1:/);assert.match(analysisJs,/CareBasketShare\.createUrl/);
+    assert.doesNotMatch(analysisJs,/추천\s*[1-9]위/);
+    assert.match(indexHtml,/CareComparisonWorkspace\.render/);assert.match(indexHtml,/compareCandidates\.length<2/);
+    assert.match(indexHtml,/compareFullOpen=.*\.care-full-compare/); // SOFTM-COMPARE-TABLE-OPEN 날짜:20261120 : 정렬 뒤 전체 표 펼침 상태를 유지하는 회귀 방지
+});
+/** SOFTM-GUIDED-COMPARE END */
 /** SOFTM-COMPARE-EVIDENCE END */
