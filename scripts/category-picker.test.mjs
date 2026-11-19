@@ -41,6 +41,14 @@ test('category changes retain region and map but clear incompatible constraints'
  for(const key of ['cap','staff','grades','scores','conf','institution','basket'])assert.equal(url.searchParams.has(key),false);
  assert.equal(url.hash,'');assert.throws(()=>api.destination(value,'invalid'));
 });
+test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실제 링크를 제공한다',()=>{
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ assert.match(source,/document\.createElement\('a'\)/);
+ assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
+ assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
+ assert.match(index,/care-category-picker\.js\?v=20261119-link1/);
+});
 test('첫 유형 선택은 손대지 않은 전국 지도를 넘기지 않고 일반 진입은 현재 위치를 우선한다',()=>{
  const source=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const picker=source.slice(source.indexOf('function mountCategoryPicker()'),source.indexOf('function bootUnselected()'));
