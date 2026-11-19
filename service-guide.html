@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="dcterms.modified" content="2026-09-25"> <!-- SOFTM-SEO-LASTMOD 날짜:20260914 : 장기요양기관 찾기 구문 변경일을 사이트맵과 일치 -->
+  <meta name="dcterms.modified" content="2026-11-19"> <!-- SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 원스톱 심리스 이용 여정 반영일을 공개 문서에 표시 -->
   <!-- SOFTM-LTC-KEYWORD START 날짜:20260914 : 고유 브랜드와 장기요양기관 찾기 검색 구문을 반복 없이 함께 전달 -->
   <title>돌봄한눈 서비스 안내 | 장기요양기관 찾기</title> <!-- SOFTM-SERVICE-GUIDE 날짜:20260925 : 지도 홈 전환 뒤 기존 설명형 인덱스 콘텐츠를 별도 안내 주소로 보존 -->
   <meta name="description" content="돌봄한눈은 전국 장기요양기관 찾기와 요양병원 위치 확인, 공단·심평원 공개정보의 지역별 비교를 돕는 독립 정보 서비스입니다.">
@@ -130,6 +130,7 @@
     /** SOFTM-AD-FIT END */
   .home-nav:has(a[href="care-photos.html"]){flex-wrap:wrap;column-gap:16px;row-gap:0} /* SOFTM-PHOTO-NAV 날짜:20260910 : 사진 탐색 메뉴가 작은 화면에서도 겹치지 않도록 줄바꿈 허용 */
 </style>
+<link rel="stylesheet" href="care-seamless-journey.css?v=20261119-3"> <!-- SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 안내·소개의 4단계와 지도 첫 유형 선택 안내에 공용 브랜드 서식을 사용 -->
 <link rel="stylesheet" href="seo-entrypoints.css?v=20260904-1"> <!-- SOFTM-SEO-ENTRYPOINTS 날짜:20260904 : 지역 탐색 링크를 작은 화면에서도 읽고 선택할 수 있도록 전용 서식을 연결 -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 64x64">
@@ -152,21 +153,41 @@
   <!-- SOFTM-HOME-NAV END -->
   <main class="wrap" id="main">
     <!-- SOFTM-HOME-INTRO START 날짜:20260904 : 처음 방문한 보호자가 기관 탐색과 비용 확인의 순서를 이해하도록 안내 -->
+    <!-- SOFTM-SEAMLESS-JOURNEY START 날짜:20261119 : 처음 돌봄을 찾는 보호자가 검색부터 상담 준비까지 전체 흐름을 먼저 이해하도록 안내 -->
     <section class="hero" aria-labelledby="home-title">
       <div class="hero-copy">
         <!-- SOFTM-LTC-KEYWORD START 날짜:20260914 : 첫 화면에서 장기요양기관 찾기 구문과 요양병원 구분을 바로 이해하도록 안내 -->
+        <p class="care-seamless-badge">원스톱 심리스</p>
         <p class="eyebrow">전국 장기요양기관 찾기 · 요양병원 찾기</p>
-        <h1 id="home-title">전국 장기요양기관 찾기부터 요양병원 비교까지,<br>돌봄한눈에서 시작하세요</h1>
-        <p class="hero-description">요양원·주야간보호·방문요양 등 장기요양기관 찾기와 요양병원 비교를 지역별로 시작하고, 공개정보와 예상 비용을 확인해 보세요.</p>
+        <h1 id="home-title">부모님 돌봄, 찾기부터 비교·비용·상담 준비까지<br>한 흐름으로</h1>
+        <p class="hero-description">요양원·주야간보호·방문요양 등 필요한 돌봄 방식을 고르고, 가까운 기관의 공개정보를 비교한 뒤 예상 비용과 상담·방문 준비까지 이어가세요.</p>
         <!-- SOFTM-LTC-KEYWORD END -->
-        <div class="hero-actions"><a class="primary-link" href="#categories">돌봄기관 찾기 <span aria-hidden="true">→</span></a><a class="secondary-link" href="#cost-guide">예상 비용 알아보기</a></div>
+        <div class="hero-actions"><a class="primary-link" href="#categories">돌봄 유형부터 고르기 <span aria-hidden="true">→</span></a><a class="secondary-link" href="#cost-guide">예상 비용 알아보기</a></div>
       </div>
-      <aside class="journey" aria-label="처음 방문한 분을 위한 이용 순서">
-        <p class="journey-label">처음 알아보는 돌봄도 차근차근</p>
-        <h2>이렇게 시작해 보세요</h2>
-        <ol><li><span class="journey-number" aria-hidden="true">1</span><div><strong>필요한 돌봄 방식 고르기</strong><small>집에서, 센터에서, 시설에서</small></div></li><li><span class="journey-number" aria-hidden="true">2</span><div><strong>가까운 기관 찾아 비교하기</strong><small>위치 · 공개 평가 · 기관 정보</small></div></li><li><span class="journey-number" aria-hidden="true">3</span><div><strong>비용 확인하고 상담 준비하기</strong><small>예상 부담액 · 기관에 물어볼 내용</small></div></li></ol>
+      <aside class="care-seamless-panel" id="seamless-journey" aria-label="돌봄한눈 원스톱 심리스 4단계 이용 여정">
+        <p class="care-seamless-badge">한 번에 이어지는 4단계</p>
+        <h2>처음 알아보는 부모님 돌봄도 차근차근</h2>
+        <ol class="care-seamless-journey care-seamless-journey--hero">
+          <li>
+            <span class="care-seamless-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="10" cy="18" r="1.5"/></svg></span>
+            <span class="care-seamless-step-copy"><span class="care-seamless-step-meta">1단계</span><strong class="care-seamless-step-title">돌봄 방식 정하기</strong><span class="care-seamless-step-description">집·센터·시설 중 부모님 상황에 맞는 유형 선택</span></span>
+          </li>
+          <li>
+            <span class="care-seamless-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+            <span class="care-seamless-step-copy"><span class="care-seamless-step-meta">2단계</span><strong class="care-seamless-step-title">가까운 기관 찾기</strong><span class="care-seamless-step-description">현재 위치 또는 지역을 기준으로 후보 확인</span></span>
+          </li>
+          <li>
+            <span class="care-seamless-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h6v14H4zM14 5h6v14h-6zM6.5 9h1M6.5 13h1M16.5 9h1M16.5 13h1"/></svg></span>
+            <span class="care-seamless-step-copy"><span class="care-seamless-step-meta">3단계</span><strong class="care-seamless-step-title">공개정보 비교하기</strong><span class="care-seamless-step-description">평가·정원·인력·사진·특화서비스 비교</span></span>
+          </li>
+          <li>
+            <span class="care-seamless-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4h10v16H7zM9 2h6v4H9zM10 10l1.5 1.5L15 8M10 16h5"/></svg></span>
+            <span class="care-seamless-step-copy"><span class="care-seamless-step-meta">4단계</span><strong class="care-seamless-step-title">비용·동선·상담 준비</strong><span class="care-seamless-step-description">예상 부담액·담은 기관 비교·길찾기·상담 질문 확인</span></span>
+          </li>
+        </ol>
       </aside>
     </section>
+    <!-- SOFTM-SEAMLESS-JOURNEY END -->
     <!-- SOFTM-HOME-INTRO END -->
     <!-- /** SOFTM-INDEX-CATEGORY-ADS START 날짜:20260903 : 광고 뒤에서 검색용 기관 유형별 대표 페이지와 실제 지도로 이동할 수 있게 구성 */ -->
     <aside class="ad-zone" id="indexAdZone" aria-label="광고" hidden>
@@ -294,8 +315,8 @@
     <!-- SOFTM-BRAND-IDENTITY START 날짜:20260904 : 정부 서비스와의 혼동을 줄이고 자료 제공 범위를 방문자에게 직접 설명 -->
     <section class="service-identity" aria-labelledby="serviceIdentityTitle">
       <h2 id="serviceIdentityTitle">돌봄한눈은 어떤 서비스인가요?</h2>
-      <p>돌봄한눈은 국민건강보험공단과 건강보험심사평가원의 공개자료를 바탕으로 요양·돌봄기관의 위치와 정보를 한곳에서 비교하도록 돕습니다. 정부·공단·심평원이 운영하는 공식 서비스가 아닙니다.</p>
-      <p>장기요양기관의 공개 평가·정원·인력과 요양병원의 개설현황을 구분해 제공합니다. 자료 기준일과 실제 운영 현황은 다를 수 있으므로 이용 가능 여부와 비용은 해당 기관에 확인해 주세요.</p>
+      <p>돌봄한눈은 국민건강보험공단과 건강보험심사평가원의 공개자료를 일관된 기준으로 연결해 요양·돌봄기관의 위치와 정보를 비교하도록 돕습니다. 정부·공단·심평원이 운영하는 공식 서비스가 아닙니다.</p>
+      <p>출처와 기준일을 밝히고 공공자료·기관 직접 제공 정보·광고를 구분합니다. 확인되지 않은 정보는 추정하거나 특정 기관의 순위로 만들지 않으며, 실제 이용 가능 여부와 비용은 해당 기관에 확인해 주세요.</p>
       <a href="about.html">돌봄한눈 소개 · 자료 출처와 이용 안내 →</a>
     </section>
     <!-- SOFTM-BRAND-IDENTITY END -->

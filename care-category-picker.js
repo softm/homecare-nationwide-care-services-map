@@ -88,7 +88,14 @@
   document.fonts?.ready.then(revealSelectedCategory);
   /** SOFTM-CATEGORY-VISIBLE END */
   const panel=document.createElement('section');panel.id='careTypePanel';panel.className='care-type-panel';panel.hidden=true;panel.setAttribute('aria-labelledby','careTypeTitle');
-  panel.innerHTML='<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header><p class="care-type-intro">필요한 돌봄을 고르면 지도에서 기관을 보여드려요.</p><div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="true">주요 유형만 보기</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>'; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 추가 조작 없이 모든 기관 유형을 먼저 비교할 수 있도록 기본 펼침 상태 제공
+  /** SOFTM-SEAMLESS-JOURNEY START 날짜:20261119 : 위저드처럼 보이는 진행 단계를 만들지 않고 유형 선택 후 지도·목록으로 바로 진입함을 안내 */
+  panel.innerHTML=`<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header>
+    <div class="care-seamless-entry">
+      <div class="care-seamless-entry-copy"><span class="care-seamless-entry-label">원스톱 심리스</span><strong>돌봄 유형을 먼저 선택해 주세요</strong><span>선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다.</span></div>
+      <a class="care-seamless-entry-link" href="service-guide.html#seamless-journey">전체 이용 흐름 보기</a>
+    </div>
+    <div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="true">주요 유형만 보기</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>`; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 추가 조작 없이 모든 기관 유형을 먼저 비교할 수 있도록 기본 펼침 상태 제공
+  /** SOFTM-SEAMLESS-JOURNEY END */
   document.querySelector('.results').append(panel);
   /** SOFTM-TYPE-OVERLAY START 날짜:20261007 : 지도와 광고 사이의 실제 가용 영역 중앙에 유형 선택을 배치 */
   let overlayFrame=0;
@@ -116,10 +123,12 @@
   /** SOFTM-TYPE-OVERLAY END */
   const list=panel.querySelector('.care-type-options');
   for(const [id,title,official,description,icon,color]of categories){
-   const button=document.createElement('button');button.type='button';button.className='care-type-option '+color;button.dataset.type=id;button.hidden=false; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 유형 패널을 열면 9개 기관 유형을 처음부터 모두 표시
+   /** SOFTM-TYPE-LINK START 날짜:20261119 : 스크립트 실행 오류나 오래된 캐시에서도 유형 카드가 실제 유형 URL로 진입하도록 링크를 기본 동작으로 제공 */
+   const button=document.createElement('a');button.href=destination(location.href,id).href;button.className='care-type-option '+color;button.dataset.type=id;button.hidden=false; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 유형 패널을 열면 9개 기관 유형을 처음부터 모두 표시
    button.innerHTML=`<span class="care-type-icon" aria-hidden="true">${icon}</span><span><strong>${title}</strong><small>${official}</small><span>${description}</span></span><span aria-hidden="true">›</span>`;
    button.classList.toggle('care-type-simple',title===official); // SOFTM-TYPE-SPACE 날짜:20261007 : 같은 유형명을 두 줄로 반복하지 않아 선택 목록의 공간을 확보
-   button.onclick=()=>selectType(id);list.append(button); // SOFTM-TYPE-MENU 날짜:20260911 : 상단 메뉴와 카드의 유형 전환 동작을 통일
+   button.onclick=event=>{try{selectType(id);event.preventDefault();}catch(error){console.error(error);}};list.append(button); // SOFTM-TYPE-MENU 날짜:20260911 : 현재 상태를 보존해 전환하되 오류가 나면 링크의 기본 이동을 사용
+   /** SOFTM-TYPE-LINK END */
   }
   const expandButton=panel.querySelector('.care-type-expand');panel.querySelector('header').insertBefore(expandButton,panel.querySelector('[data-close]'));
   let opener=toggle,previousInert=false,previousSaved=false;

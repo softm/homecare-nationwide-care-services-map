@@ -1,0 +1,379 @@
+/** SOFTM-SEAMLESS-JOURNEY START 날짜:20261119 : 보호자가 유형 선택부터 상담 준비까지 같은 순서로 이해하도록 공용 4단계 여정을 제공 */
+.care-seamless-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  margin: 0 0 10px;
+  padding: 5px 11px;
+  border: 1px solid #bfd2e5;
+  border-radius: 999px;
+  background: #eef5fb;
+  color: #173f6b;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.care-seamless-panel {
+  position: relative;
+  padding: 26px 28px;
+  border: 1px solid #d2dfd4;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f3f7f1 0%, #edf4fa 100%);
+  overflow: hidden;
+}
+
+.care-seamless-panel::after {
+  position: absolute;
+  right: -54px;
+  bottom: -70px;
+  width: 170px;
+  height: 170px;
+  border: 30px solid rgba(36, 88, 136, .07);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.care-seamless-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.care-seamless-panel h2 {
+  margin: 0 0 20px;
+  color: #173f6b;
+  font-size: 22px;
+  line-height: 1.45;
+  letter-spacing: -.035em;
+}
+
+.care-seamless-journey {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.care-seamless-journey li {
+  position: relative;
+  min-width: 0;
+}
+
+.care-seamless-journey--hero {
+  position: relative;
+  display: grid;
+  gap: 16px;
+}
+
+.care-seamless-journey--hero::before {
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 21px;
+  width: 2px;
+  background: #b8cde0;
+  content: "";
+}
+
+.care-seamless-journey--hero li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.care-seamless-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #b9cee2;
+  border-radius: 14px;
+  background: #fff;
+  color: #245888;
+  box-shadow: 0 3px 10px rgba(23, 63, 107, .08);
+}
+
+.care-seamless-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.care-seamless-step-meta {
+  display: block;
+  margin-bottom: 2px;
+  color: #54718c;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.care-seamless-step-title {
+  display: block;
+  color: #173f6b;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.care-seamless-step-description {
+  display: block;
+  margin-top: 2px;
+  color: #5b6f82;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.care-seamless-journey--cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.care-seamless-journey--cards li {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  min-height: 184px;
+  padding: 20px;
+  border: 1px solid #d5e1eb;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.care-seamless-journey--cards li:not(:last-child)::after {
+  position: absolute;
+  z-index: 2;
+  top: 42px;
+  left: 100%;
+  width: 14px;
+  height: 2px;
+  background: #b8cde0;
+  content: "";
+}
+
+.care-seamless-journey--cards .care-seamless-step-copy {
+  min-width: 0;
+}
+
+.care-seamless-journey--cards .care-seamless-step-title {
+  font-size: 17px;
+}
+
+.care-seamless-journey--cards .care-seamless-step-description {
+  margin-top: 7px;
+  font-size: 14px;
+}
+
+.care-brand-principles {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.6fr);
+  gap: 32px;
+  margin-top: 48px;
+  padding: 32px;
+  border: 1px solid #d5e1eb;
+  border-radius: 20px;
+  background: linear-gradient(140deg, #f3f7f1 0%, #f4f8fc 100%);
+}
+
+.care-brand-kicker {
+  margin: 0 0 8px;
+  color: #245888;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.care-brand-concept h2 {
+  color: #173f6b;
+}
+
+.care-brand-concept > p:last-child {
+  margin: 12px 0 0;
+  color: #536a7f;
+}
+
+.care-brand-values {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.care-brand-values li {
+  position: relative;
+  min-height: 104px;
+  padding: 18px 20px 18px 64px;
+  border: 1px solid #d7e2eb;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.care-brand-value-number {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  color: #6d8ca8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.care-brand-values strong {
+  display: block;
+  color: #173f6b;
+  font-size: 17px;
+}
+
+.care-brand-values p {
+  margin: 5px 0 0;
+  color: #5b6f82;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.care-seamless-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 12px;
+  padding: 10px 11px;
+  border: 1px solid #cbdbe8;
+  border-radius: 14px;
+  background: #f5f9fc;
+}
+
+.care-seamless-entry-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.care-seamless-entry-label {
+  color: #173f6b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.care-seamless-entry-copy strong {
+  color: #173f6b;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.care-seamless-entry-copy > span:last-child {
+  color: #5b7084;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.care-seamless-entry-link {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: #245888;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.care-seamless-entry-link:focus-visible {
+  outline: 3px solid #e6a32a;
+  outline-offset: 1px;
+}
+
+body.care-type-open .care-type-map-overlay .care-seamless-entry {
+  margin-block: 5px 8px;
+}
+
+@media (max-width: 900px) {
+  .care-seamless-panel {
+    padding: 22px;
+  }
+
+  .care-seamless-journey--cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .care-seamless-journey--cards li:nth-child(2)::after {
+    display: none;
+  }
+
+  .care-brand-principles {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .care-seamless-badge {
+    margin-bottom: 8px;
+  }
+
+  .care-seamless-panel {
+    padding: 20px;
+  }
+
+  .care-seamless-panel h2 {
+    margin-bottom: 16px;
+    font-size: 20px;
+  }
+
+  .care-seamless-journey--hero {
+    gap: 14px;
+  }
+
+  .care-seamless-journey--cards {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .care-seamless-journey--cards li {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .care-seamless-journey--cards li:not(:last-child)::after {
+    top: 100%;
+    left: 41px;
+    width: 2px;
+    height: 14px;
+  }
+
+  .care-brand-principles {
+    margin-top: 36px;
+    padding: 20px;
+  }
+
+  .care-brand-values li {
+    padding: 17px 17px 17px 54px;
+  }
+
+  .care-brand-value-number {
+    left: 17px;
+  }
+
+  .care-seamless-entry {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding-inline: 10px;
+  }
+
+  .care-seamless-entry-link {
+    margin-left: auto;
+  }
+}
+/** SOFTM-SEAMLESS-JOURNEY END */

@@ -11,7 +11,7 @@
 .care-type-panel [data-close]{width:40px;height:40px;flex:none;border:1px solid #dce5ed;border-radius:12px;background:#fff;font-size:25px;color:#4f667b;cursor:pointer}
 .care-type-intro{font-size:13px;line-height:1.5;margin:8px 0 16px;color:#60758a}
 .care-type-options{display:grid;gap:10px}
-.care-type-option{width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) 12px;gap:10px;align-items:center;text-align:left;border:1px solid var(--edge);border-radius:14px;padding:13px 10px;background:var(--surface);color:#203d58;box-shadow:0 2px 5px #20445b0a;cursor:pointer}
+.care-type-option{width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) 12px;gap:10px;align-items:center;text-align:left;text-decoration:none;border:1px solid var(--edge);border-radius:14px;padding:13px 10px;background:var(--surface);color:#203d58;box-shadow:0 2px 5px #20445b0a;cursor:pointer}
 .care-type-option.blue{--edge:#b6d1ef;--surface:#f0f7ff;--accent:#1769bc}
 .care-type-option.green{--edge:#b5dcd0;--surface:#f0faf6;--accent:#18725b}
 .care-type-option.purple{--edge:#d4c4ea;--surface:#f8f3ff;--accent:#7047a0}

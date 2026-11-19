@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- SOFTM-SEO-SITEMAP START 날짜:20260904 : 기존 검색 대표와 실기관을 제공하는 지역 목록만 단일 사이트맵으로 제출 -->
-  <url><loc>https://homecare.designboard.net/</loc><lastmod>2026-09-25</lastmod><priority>1.0</priority></url>
+  <url><loc>https://homecare.designboard.net/</loc><lastmod>2026-11-19</lastmod><priority>1.0</priority></url>
   <url><loc>https://homecare.designboard.net/daycare-map.html</loc><lastmod>2026-09-14</lastmod><priority>1.0</priority></url>
   <url><loc>https://homecare.designboard.net/nursing-home-map.html</loc><lastmod>2026-09-14</lastmod><priority>0.9</priority></url>
   <url><loc>https://homecare.designboard.net/home-care-map.html</loc><lastmod>2026-09-14</lastmod><priority>0.9</priority></url>
@@ -11,7 +11,8 @@
   <url><loc>https://homecare.designboard.net/dementia-care-map.html</loc><lastmod>2026-09-14</lastmod><priority>0.8</priority></url>
   <url><loc>https://homecare.designboard.net/nursing-hospital-map.html</loc><lastmod>2026-09-30</lastmod><priority>0.8</priority></url>
   <url><loc>https://homecare.designboard.net/welfare-equipment-map.html</loc><lastmod>2026-09-14</lastmod><priority>0.8</priority></url>
-  <url><loc>https://homecare.designboard.net/about.html</loc><lastmod>2026-09-04</lastmod><priority>0.5</priority></url>
+  <url><loc>https://homecare.designboard.net/service-guide.html</loc><lastmod>2026-11-19</lastmod><priority>0.7</priority><!-- SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 전체 4단계 여정의 고정 공개 주소와 수정일을 사이트맵에 동기화 --></url>
+  <url><loc>https://homecare.designboard.net/about.html</loc><lastmod>2026-11-19</lastmod><priority>0.5</priority></url>
   <url><loc>https://homecare.designboard.net/data-status.html</loc><lastmod>2026-09-10</lastmod><priority>0.5</priority></url>
   <url><loc>https://homecare.designboard.net/care-cost.html</loc><lastmod>2026-09-04</lastmod></url>
   <url><loc>https://homecare.designboard.net/advertise.html</loc><lastmod>2026-09-17</lastmod></url>
