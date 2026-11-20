@@ -1,3 +1,4 @@
+import { api as memberApi, refreshSession, currentSession, logout as memberLogout } from './care-member-api.mjs'; // SOFTM-MEMBERS 날짜:20261120 : 기관 관리의 인증을 전용 회원 서비스로 연결
 /** SOFTM-INSTITUTION-PORTAL START 날짜:20261118 : 공통 계정의 단기 PKCE 세션으로 승인된 기관만 운영정보·사진·집계를 관리 */
 export const INSTITUTION_API_BASE = 'https://softm-homecare-pilot.softm.workers.dev';
 export const ACCOUNT_API_BASE = 'https://softm-hannun-account.softm.workers.dev';
@@ -6,7 +7,7 @@ export const MAX_PHOTOS = 10;
 export const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const SITE_ID = 'homecare';
 const PROOF = /^[A-Za-z0-9_-]{43}$/;
-const INSTITUTION_ID = /^\d{11}$/;
+const INSTITUTION_ID = /^(?:\d{11}|(?:hira|manual):[A-Za-z0-9_-]{1,360})$/;
 const ALLOWED_PHOTO_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 function text(value, max = 2000) {
@@ -276,7 +277,8 @@ if (browser) void mountPortal();
 
 async function mountPortal() {
     const $ = id => document.getElementById(id);
-    const client = createAccountClient();
+    const client = { get currentUser(){const user=currentSession()?.user;return user?.kind==='institution'&&user.onboarding==='complete'?{uid:user.id}:null;}, request:memberApi, fetchBlob:path=>memberApi(path,{blob:true}), login:async()=>{location.href='care-account.html?return=institution-portal.html';}, logout:memberLogout };
+    try { await refreshSession(); } catch { /* 로그인 화면에서 연결 오류를 다시 안내합니다. */ }
     const panels = ['authPanel', 'claimPanel', 'claimPendingPanel', 'agreementPanel', 'workspace'];
     const state = { membership: null, institution: null, profile: null, photos: [], statsLoaded: false, publishStatus: 'draft', contentRevision: null, conflict: false, canManage: false, canEdit: false, photoRenderToken: 0, photoObjectUrls: new Map() };
     const setGlobal = (message, kind = '') => { $('globalStatus').textContent = message; $('globalStatus').dataset.state = kind; };
@@ -331,7 +333,7 @@ async function mountPortal() {
             const institution = firstApprovedInstitution(data);
             if (!institution) {
                 const pending = Array.isArray(data?.pendingClaims) ? data.pendingClaims[0] : null;
-                if (!pending) { show('claimPanel'); setGlobal('관리할 기관의 연결 승인을 신청해 주세요.'); return; }
+                if (!pending) { location.href='institution-signup.html'; return; }
                 show('claimPendingPanel');
                 $('claimPendingText').textContent = `${text(pending.institutionName, 120) || '신청 기관'}의 담당자 정보를 운영자가 확인한 뒤 관리 권한을 연결합니다.`;
                 setGlobal('기관 연결 신청을 확인하고 있습니다.');
@@ -345,7 +347,7 @@ async function mountPortal() {
             await loadWorkspace(institution);
         } catch (error) {
             if (error.status === 401) { showAuth(); setGlobal('로그인이 만료됐습니다. 다시 로그인해 주세요.', 'error'); return; }
-            if (error.status === 404 || error.code === 'claim_required') { show('claimPanel'); setGlobal('관리할 기관의 연결 승인을 신청해 주세요.'); return; }
+            if (error.status === 404 || error.code === 'claim_required') { location.href='institution-signup.html'; return; }
             showAuth(); setGlobal(error.message, 'error');
         }
     }

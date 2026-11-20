@@ -4,6 +4,9 @@ import { resolveCoordinates } from './care-analysis-data.js?v=20260911-1';
 import { readOrigin, createOriginBinding } from './care-analysis-origin.js?v=20260911-binding1'; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 지도 위치와 현재 위치를 같은 취소 가능한 기본값으로 연결
 import { escapeHtml as esc, readJson, mapUrl, thumbnail, openComparison } from './care-photos-common.js?v=20260910-1';
 
+import { conditions as sharedConditions, saveConditions, ensureRecord, records as consultationRecords, saveRecord, questionId } from './care-workspace.mjs'; // SOFTM-MEMBERS 날짜:20261120 : 기존 조건·체크를 회원 작업공간과 연결
+import './care-shell.mjs';
+
 const $ = id => document.getElementById(id);
 const labels = { daycare: '주·야간보호센터', facility: '요양원·공동생활가정', 'home-care': '방문요양센터', 'home-nursing': '방문간호센터', 'home-bath': '방문목욕기관', 'short-stay': '단기보호센터', 'welfare-equipment': '복지용구사업소', dementia: '치매전담형 기관', 'nursing-hospital': '요양병원' };
 const supportedGroups = new Set(['dementia', 'cognitive', 'first', 'respite', 'integrated', 'pilot']);
@@ -171,6 +174,7 @@ async function submit(event) {
     originController?.cancel(); // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 분석을 시작한 뒤 역주소 응답이 기준 주소를 바꾸지 않음
     event?.preventDefault(); if (!$('analysisForm').reportValidity()) return;
     const input = draft(); if (!input.address) return;
+    saveConditions({type:input.type,address:input.address,radius:input.radiusKm,preferences:[...input.selected]});
     invalidate('기준 주소를 확인하고 있습니다.'); const token = generation; setBusy(true);
     try {
         await loadSdk(); if (token !== generation) return;
@@ -307,10 +311,17 @@ function renderConsultation() {
     const rows = activeRows(), checked = readConsultation();
     const cards = rows.map(row => {
         const entry = current.report.nearby.find(item => String(item.row.i) === String(row.i)) || { row, conditions: [] }, items = questions(entry);
-        const completed = new Set(Array.isArray(checked[row.i]) ? checked[row.i].map(Number) : []);
-        return `<article class="analysis-consultation-card"><header><h3>${esc(row.n)}</h3><span>${completed.size} / ${items.length} 확인</span></header><div class="analysis-question-list">${items.map((question, index) => `<label><input type="checkbox" data-consult-check="${esc(row.i)}" value="${index}" ${completed.has(index) ? 'checked' : ''}><span>${esc(question)}</span></label>`).join('')}</div></article>`;
+        const previous = consultationRecords().find(record => record.key === `${current.input.type}:${row.i}`);
+        const record = ensureRecord(current.input.type, row, items);
+        if (!previous && Array.isArray(checked[row.i])) {
+            const legacy = new Set(checked[row.i].map(String));
+            items.forEach((question, index) => { const saved = record.questions.find(q => q.id === questionId(question)); if (saved && (legacy.has(String(index)) || legacy.has(saved.id))) saved.checked = true; });
+            saveRecord(record);
+        }
+        const completed = new Set(record.questions.filter(question => question.checked).map(question => question.id));
+        return `<article class="analysis-consultation-card"><header><h3>${esc(row.n)}</h3><span>${items.filter(question => completed.has(questionId(question))).length} / ${items.length} 확인</span></header><div class="analysis-question-list">${items.map((question, index) => `<label><input type="checkbox" data-consult-check="${esc(row.i)}" value="${esc(questionId(question))}" ${completed.has(questionId(question)) ? 'checked' : ''}><span>${esc(question)}</span></label>`).join('')}</div><a href="care-record.html?key=${encodeURIComponent(record.key)}">답변·방문 기록 이어가기 →</a></article>`;
     }).join('');
-    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 4단계</span><h2 tabindex="-1">전화와 방문 전에 질문을 준비하세요</h2><p>체크 상태는 현재 브라우저 세션에만 저장되며 가족 공유 링크에는 포함되지 않습니다.</p></div><button type="button" data-analysis-go="compare">비교표로 돌아가기</button></header><div class="analysis-consultation-layout"><div class="analysis-consultation-list">${cards || '<p class="analysis-empty">상담을 준비할 시설을 먼저 선택해 주세요.</p>'}</div><aside class="analysis-consultation-side"><section><h3>가족과 후보 공유</h3><p>공개 기관기호만 담긴 링크로 같은 시설을 다시 확인할 수 있습니다.</p><button type="button" class="analysis-primary" data-analysis-share>비교 시설 공유</button><p id="analysisShareStatus" role="status" aria-live="polite"></p></section><section><h3>방문용 확인표</h3><p>주소와 개인 조건 없이 현재 질문표만 인쇄합니다.</p><button type="button" data-analysis-print>질문표 인쇄</button></section><section><h3>지도에서 이어보기</h3><p>보관한 전체 후보의 위치·상세정보·경로를 확인합니다.</p><a class="analysis-action" href="${esc(mapBasketLink())}" rel="nofollow">담은 기관 지도 보기</a></section><section class="analysis-session-note"><strong>현재 이용 중에만 보관</strong><p>자유 입력 메모와 상담 내용은 서버에 저장하지 않습니다.</p></section></aside></div>`;
+    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 4단계</span><h2 tabindex="-1">전화와 방문 전에 질문을 준비하세요</h2><p>체크 상태는 상담 기록과 연결됩니다. 계정 저장과 기록 공유는 직접 선택할 수 있습니다.</p></div><button type="button" data-analysis-go="compare">비교표로 돌아가기</button></header><div class="analysis-consultation-layout"><div class="analysis-consultation-list">${cards || '<p class="analysis-empty">상담을 준비할 시설을 먼저 선택해 주세요.</p>'}</div><aside class="analysis-consultation-side"><section><h3>가족과 후보 공유</h3><p>공개 기관기호만 담긴 링크로 같은 시설을 다시 확인할 수 있습니다.</p><button type="button" class="analysis-primary" data-analysis-share>비교 시설 공유</button><p id="analysisShareStatus" role="status" aria-live="polite"></p></section><section><h3>방문용 확인표</h3><p>주소와 개인 조건 없이 현재 질문표만 인쇄합니다.</p><button type="button" data-analysis-print>질문표 인쇄</button></section><section><h3>지도에서 이어보기</h3><p>보관한 전체 후보의 위치·상세정보·경로를 확인합니다.</p><a class="analysis-action" href="${esc(mapBasketLink())}" rel="nofollow">담은 기관 지도 보기</a></section><section class="analysis-session-note"><strong>다른 기기에서도 이어보기</strong><p>상담 기록에서 답변을 작성하고 계정에 저장할 수 있습니다.</p><a class="analysis-action" href="care-records.html">상담 기록 열기</a></section></aside></div>`;
 }
 function syncBasket() {
     if (!current) return;
@@ -336,6 +347,15 @@ async function shareComparison() {
 $('analysisType').innerHTML = Object.entries(labels).map(([type, label]) => `<option value="${type}">${label}</option>`).join('');
 const initialType = new URLSearchParams(location.search).get('type');
 $('analysisType').value = Object.hasOwn(labels, initialType) ? initialType : 'daycare'; renderCriteria();
+const savedConditions = sharedConditions();
+if(savedConditions && (!initialType || savedConditions.type === initialType)) {
+    $('analysisType').value = savedConditions.type; renderCriteria();
+    $('analysisAddress').value = savedConditions.address || [savedConditions.province,savedConditions.city].filter(Boolean).join(' ');
+    $('analysisRadius').value = savedConditions.radius || 3;
+    $('analysisCriteria').querySelectorAll('input').forEach(input => input.checked = savedConditions.preferences?.includes(input.value));
+    updateConditionSummary();
+} // SOFTM-MEMBERS 날짜:20261120 : 재진입에서도 같은 조건을 사용
+
 /** SOFTM-ANALYSIS-ORIGIN START 날짜:20260911 : 지도에서 온 위치를 우선하고 직접 진입은 현재 위치로 채우며 수동 입력을 보존 */
 originController = createOriginBinding({
     locate: options => bounded(CareLocation.request(options), 36000),
@@ -359,7 +379,7 @@ if (savedPoint) void originController.bind(savedPoint);
 else if (!$('analysisAddress').value.trim()) void originController.locate();
 /** SOFTM-ANALYSIS-ORIGIN END */
 $('analysisForm').addEventListener('submit', submit);
-$('analysisForm').addEventListener('input', () => { updateConditionSummary(); if (busy || current || !$('analysisAddressChoices').hidden) invalidate(); });
+$('analysisForm').addEventListener('input', () => { const input = draft(); saveConditions({type:input.type,address:input.address,radius:input.radiusKm,preferences:[...input.selected]}); updateConditionSummary(); if (busy || current || !$('analysisAddressChoices').hidden) invalidate(); });
 $('analysisType').addEventListener('change', () => { invalidate(); renderCriteria(); });
 $('analysisCriteria').addEventListener('change', () => { const count = $('analysisCriteria').querySelectorAll('input:checked').length; $('analysisPreferenceCount').textContent = count ? `${count}개 선택` : '선택 안 함'; updateConditionSummary(); });
 $('analysisCancel').onclick = () => invalidate('분석을 취소했습니다. 입력한 조건은 유지됩니다.');
@@ -392,7 +412,9 @@ $('analysisResults').addEventListener('click', event => {
 $('analysisResults').addEventListener('change', event => {
     const input = event.target.closest('[data-consult-check]'); if (!input || !current) return;
     const state = readConsultation(), id = input.dataset.consultCheck;
-    state[id] = [...document.querySelectorAll(`[data-consult-check="${CSS.escape(id)}"]:checked`)].map(item => Number(item.value)); writeConsultation(state);
+    state[id] = [...document.querySelectorAll(`[data-consult-check="${CSS.escape(id)}"]:checked`)].map(item => item.value); writeConsultation(state);
+    const record = consultationRecords().find(record => record.key === `${current.input.type}:${id}`);
+    if (record) { const question = record.questions.find(question => question.id === input.value); if (question) { question.checked = input.checked; saveRecord(record); } }
     const card = input.closest('.analysis-consultation-card'), total = card.querySelectorAll('[data-consult-check]').length, completed = card.querySelectorAll('[data-consult-check]:checked').length;
     card.querySelector('header span').textContent = `${completed} / ${total} 확인`;
 });

@@ -1,3 +1,4 @@
+import { saveConditions, conditions as sharedConditions } from './care-workspace.mjs'; // SOFTM-MEMBERS 날짜:20261120 : 지도 간편 조건과 맞춤 찾기 조건을 공유
 import { searchTools } from './search-tools.js?v=20260911-mapfirst1'; // SOFTM-SEARCH-TOOLS 날짜:20260911 : 검색 보조 기능의 배치 위치를 공유
 /** SOFTM-CARE-MATCH START 날짜:20260910 : 짧은 질문으로 중요 조건을 받고 기존 검색 결과를 제외하거나 재정렬하지 않은 채 선택 근거를 제공 */
 const { criteriaFor, analyzeMatch, renderConditions } = await import(`./care-insights.js?v=20260910-match1&attempt=${new URL(import.meta.url).searchParams.get('attempt') || '0'}`);
@@ -219,6 +220,7 @@ export function mount(config) {
         if (!draft.province || regionType !== draft.type || !regionRows.some(row => row.p === draft.province && (!draft.city || row.c === draft.city))) { step = 2; renderStep(); setStatus('조회할 시도를 선택해 주세요.'); return; }
         submitting = true; controls();
         const next = { active: true, type: draft.type, preferences: draft.preferences };
+        const previous = sharedConditions(); saveConditions({...previous,type:draft.type,province:draft.province,city:draft.city,address:previous?.province===draft.province&&previous?.city===draft.city?previous.address:'',preferences:draft.preferences});
         if (draft.type !== config.type) {
             try { if (!storage) throw new Error('session unavailable'); storage.setItem(key, JSON.stringify(next)); } catch { submitting = false; controls(); setStatus('브라우저 저장소를 사용할 수 없어 다른 서비스로 조건을 전달하지 못했습니다. 현재 서비스에서는 계속 사용할 수 있습니다.'); return; }
             window.location.assign(destinationUrl(draft, config.snapshot().filters, document.baseURI)); return;

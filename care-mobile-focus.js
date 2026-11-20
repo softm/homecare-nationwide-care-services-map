@@ -46,7 +46,7 @@
         </div>
         <button type="button" class="care-mobile-focus-menu" data-mobile-focus="menu" aria-label="지도 메뉴 열기" title="지도 메뉴 열기" hidden>${svg('menu')}</button>
         <button type="button" class="care-mobile-focus-query-status" data-mobile-focus="query-status" aria-controls="careMobileFocusSearch" hidden>${svg('search')}<span data-focus-query-status></span></button>
-        <div class="care-mobile-focus-side"><button type="button" data-mobile-focus="layers" aria-label="일반지도 보기" aria-pressed="true">${svg('layers')}</button><!-- SOFTM-MOBILE-IMMERSIVE 날짜:20261010 : 지도변경 바로 아래에 확장·축소를 두어 카카오맵식 조작 흐름을 맞춤 --><button type="button" data-mobile-focus="fullscreen" aria-label="지도만 크게 보기" aria-pressed="false" title="지도만 크게 보기">${svg('fullscreen')}</button><button type="button" data-mobile-focus="share" aria-label="현재 지도 공유" title="현재 지도 공유">${svg('share')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
+        <div class="care-mobile-focus-side"><button type="button" data-mobile-focus="layers" aria-label="기본지도로 전환" aria-pressed="true">${svg('layers')}</button><!-- SOFTM-MOBILE-IMMERSIVE 날짜:20261010 : 지도변경 바로 아래에 확장·축소를 두어 카카오맵식 조작 흐름을 맞춤 --><button type="button" data-mobile-focus="fullscreen" aria-label="지도만 크게 보기" aria-pressed="false" title="지도만 크게 보기">${svg('fullscreen')}</button><button type="button" data-mobile-focus="share" aria-label="현재 지도 공유" title="현재 지도 공유">${svg('share')}</button></div><nav class="care-mobile-focus-dock" aria-label="전체 지도 도구"><button type="button" data-mobile-focus="list" aria-expanded="false">${svg('list')}<span>목록 <b data-focus-count>0</b></span></button><button type="button" data-mobile-focus="saved" aria-expanded="false">${svg('saved')}<span>담은 기관 <b data-focus-saved>0</b></span></button><button type="button" data-mobile-focus="more" aria-haspopup="dialog">${svg('more')}<span>더보기</span></button></nav>`;
         /** SOFTM-MOBILE-SEARCH-MENU END */
         document.body.append(ui); // SOFTM-DOCK-OVERLAY 날짜:20261005 : 지도 겹침 영역 밖에 두어 메뉴가 목록 위에 실제로 떠 있게 함
         const searchForm = ui.querySelector('.care-mobile-focus-search');
@@ -252,7 +252,7 @@
                 document.querySelector('.care-filter-panel-close')?.focus({ preventScroll:true });
             } else if (action === 'layers') {
                 const satellite = config.layers(); button.setAttribute('aria-pressed', String(satellite));
-                button.setAttribute('aria-label', satellite ? '일반지도 보기' : '위성지도 보기');
+                button.setAttribute('aria-label', satellite ? '기본지도로 전환' : '실사지도로 전환');
             } else if (action === 'type') {
                 const choices = [...document.querySelectorAll('.care-type-menu-item')].map(source => {
                     /** SOFTM-MAP-STYLE START 날짜:20261005 : 기관 유형을 집·햇살·방문돌봄 등 의미 있는 그림으로 구분 */

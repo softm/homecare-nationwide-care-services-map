@@ -1,6 +1,12 @@
 /** SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 기관이 직접 확인한 정보와 사진을 공단 공개자료와 구분하고 개인 식별 없는 이용 집계만 전송 */
 const DEFAULT_API_BASE = 'https://softm-homecare-pilot.softm.workers.dev';
-const INSTITUTION_ID = /^\d{11}$/;
+const INSTITUTION_ID = /^(?:\d{11}|(?:hira|manual):[A-Za-z0-9_-]{1,360})$/; // SOFTM-MEMBERS 날짜:20261120 : 출처를 포함한 기관회원 식별자도 공개자료에 연결
+export function memberInstitutionId(value,institutionType='') {
+    const raw=String(value||'');
+    if(INSTITUTION_ID.test(raw))return raw;
+    if(institutionType!=='nursing-hospital'||raw.length<6||raw.length>256)return '';
+    return 'hira:'+btoa(String.fromCharCode(...new TextEncoder().encode(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
 const EVENT_TYPES = new Set(['detail_view', 'phone_click', 'inquiry_click', 'directions_click']);
 const MAX_PHOTOS = 10;
 const inflightProfiles = new Map();
@@ -308,7 +314,7 @@ export function trackPublicEvent(event, institutionId) {
 }
 
 export async function mountPublicProfile({ host, institution, institutionType = '' } = {}) {
-    const institutionId = String(institution?.id || institution?.i || '');
+    const institutionId = memberInstitutionId(institution?.id || institution?.i,institutionType);
     if (!host || !INSTITUTION_ID.test(institutionId)) return null;
     const token = Symbol(institutionId);
     loadTokens.set(host, token);
@@ -335,7 +341,7 @@ export async function mountPublicProfile({ host, institution, institutionType = 
 
 export function bindDetailTracking(host, institutionId, institutionType = '') {
     if (!host) return;
-    host.dataset.institutionTrackingId = String(institutionId || '');
+    host.dataset.institutionTrackingId = memberInstitutionId(institutionId,institutionType);
     host.dataset.institutionTrackingType = cleanText(institutionType, 50);
     if (boundDetails.has(host)) return;
     boundDetails.add(host);

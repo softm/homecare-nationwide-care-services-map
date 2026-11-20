@@ -9,7 +9,7 @@
   const button=(action,label,icon)=>`<button type="button" data-focus="${action}" aria-label="${label}" title="${label}"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[icon]}</svg><span>${label}</span></button>`;
   const controls=document.createElement('div');controls.className='care-focus-controls';controls.hidden=true;
   /* SOFTM-MAP-STYLE START 날짜:20261005 : 기본 혼합지도에서 일반지도 전환 동작을 정확히 안내 */
-  controls.innerHTML=`<div class="care-focus-top">${button('exit','전체 지도 닫기','back')}${button('search','지역·기관 검색','search')}</div><div class="care-focus-side">${button('layers','일반지도 보기','layers')}${button('saved','담은 기관','saved')}</div><div class="care-focus-bottom">${button('list','목록 보기','list')}</div>`;
+  controls.innerHTML=`<div class="care-focus-top">${button('exit','전체 지도 닫기','back')}${button('search','지역·기관 검색','search')}</div><div class="care-focus-side">${button('layers','기본지도로 전환','layers')}${button('saved','담은 기관','saved')}</div><div class="care-focus-bottom">${button('list','목록 보기','list')}</div>`;
   /* SOFTM-MAP-STYLE END */
   card.querySelector('.map-wrap').append(controls);
   const dialog=document.createElement('dialog');dialog.className='care-focus-dialog';dialog.innerHTML='<header><h2></h2><button type="button" aria-label="지도 도구 닫기">×</button></header><div class="care-focus-content"></div>';document.body.append(dialog);
@@ -50,7 +50,7 @@
   controls.addEventListener('click',e=>{const b=e.target.closest('[data-focus]');if(!b)return;
    if(b.dataset.focus==='exit')leave();
    else if(b.dataset.focus==='search'){search.hidden=false;selects[0].innerHTML=document.getElementById('province').innerHTML;selects[0].value=document.getElementById('province').value;syncCities();selects[1].value=document.getElementById('city').value;search.querySelector('input').value=document.getElementById('q').value;panel('지역·기관 검색',search)}
-   else if(b.dataset.focus==='layers'){const satellite=config.layers();b.setAttribute('aria-pressed',String(satellite));b.setAttribute('aria-label',satellite?'일반지도 보기':'위성지도 보기');b.title=b.getAttribute('aria-label');b.querySelector('span').textContent=b.title;}
+   else if(b.dataset.focus==='layers'){const satellite=config.layers();b.setAttribute('aria-pressed',String(satellite));b.setAttribute('aria-label',satellite?'기본지도로 전환':'실사지도로 전환');b.title=b.getAttribute('aria-label');b.querySelector('span').textContent=b.title;}
    else if(b.dataset.focus==='saved'){leave();config.saved()} // SOFTM-FOCUS-TABS 날짜:20260917 : 측면 담은 기관도 하단 탭과 동일한 작업 화면으로 전환
    else {closePanel();config.results();document.body.classList.add('care-focus-list');} // SOFTM-FOCUS-LIST 날짜:20260914 : 목록 보기를 반복해도 전체보기와 상단 숨김을 유지하며 하단 목록만 표시
   });

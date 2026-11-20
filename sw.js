@@ -1,9 +1,10 @@
-const CACHE_NAME='hannun-pwa-shell-20261120'; // SOFTM-GUIDED-PWA 날짜:20261120 : 맞춤 비교 화면과 안전한 탐색 캐시 정책을 이전 셸과 구분해 즉시 갱신
+importScripts('member-shell.js'); // SOFTM-MEMBERS 날짜:20261120 : 빌드가 생성한 정적 화면 의존성만 선캐시
+const CACHE_NAME='hannun-pwa-shell-20261120-members1-'+self.HOMECARE_MEMBER_REVISION; // SOFTM-GUIDED-PWA 날짜:20261120 : 맞춤 비교 화면과 안전한 탐색 캐시 정책을 이전 셸과 구분해 즉시 갱신
 const ROOT='./';
-const isRuntimeData=url=>url.pathname.includes('/data/')||url.pathname.includes('/api/')||url.pathname.includes('/auth/')||/\.(?:json|csv|gz|zip)(?:$|\?)/i.test(url.href);
+const isRuntimeData=url=>url.pathname.includes('/data/')||url.pathname.includes('/api/')||url.pathname.includes('/auth/')||url.pathname.endsWith('/auth-callback.html')||/\.(?:json|csv|gz|zip)(?:$|\?)/i.test(url.href);
 const sameOriginStatic=value=>{try{const url=new URL(value,self.location.href);return url.origin===self.location.origin&&!isRuntimeData(url);}catch{return false;}};
 
-self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll([ROOT])).then(()=>self.skipWaiting())));
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll([ROOT,...self.HOMECARE_MEMBER_SHELL])).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('hannun-pwa-shell-')&&key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{
  if(event.data?.type!=='PRECACHE_URLS'||!Array.isArray(event.data.urls))return;
@@ -19,5 +20,5 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fetch(request).then(response=>{if(response.ok)caches.open(CACHE_NAME).then(cache=>cache.put(pageKey,response.clone()));return response;}).catch(()=>caches.match(pageKey).then(hit=>hit||caches.match(ROOT))));return; // SOFTM-NAV-CACHE-PRIVACY 날짜:20261120 : 주소·검색·좌표 쿼리를 캐시 키에 남기지 않고 같은 화면 셸만 경로별로 보관
  }
  /** SOFTM-GUIDED-PWA END */
- event.respondWith(caches.match(request).then(cached=>{const refresh=fetch(request).then(response=>{if(response.ok)caches.open(CACHE_NAME).then(cache=>cache.put(request,response.clone()));return response;});if(cached){refresh.catch(()=>{});return cached;}return refresh;}));
+ event.respondWith(caches.open(CACHE_NAME).then(async cache=>{const cached=await cache.match(request,{ignoreSearch:true});const refresh=fetch(request).then(response=>{if(response.ok)cache.put(`${url.origin}${url.pathname}`,response.clone());return response;});if(cached){event.waitUntil(refresh.catch(()=>{}));return cached;}return refresh;}));
 });
