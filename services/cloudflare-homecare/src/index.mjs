@@ -18,6 +18,7 @@ import {
   validateProgram,
   validateVisitorId,
 } from "./core.mjs";
+import { fileStorage, StorageError } from '../../homecare-storage/file-storage.mjs'; // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 공개·기관 권한 검사를 유지한 채 파일 제공자만 분리
 
 /** SOFTM-HOMECARE-PILOT START 날짜:20261118 : 기관 직접 정보관리·사진·조회 통계를 무료 시범운영 범위로 제공 */
 
@@ -59,7 +60,7 @@ function failure(error) {
       { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } },
     );
   }
-  if (error instanceof HttpError) {
+  if (error instanceof HttpError || error instanceof StorageError) { // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 비밀값 없는 저장소 오류와 준비 상태를 전달
     return new Response(
       JSON.stringify({
         ok: false,
@@ -408,7 +409,7 @@ async function servePublicPhoto(env, institutionId, photoId) {
       LIMIT 1`,
   ).bind(normalizedPhotoId, id).first();
   if (!row) throw new HttpError(404, "photo_not_found", "사진을 찾을 수 없습니다.");
-  const object = await env.PHOTOS.get(row.r2_key);
+  const object = await fileStorage(env, 'PHOTOS').get(row.r2_key); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 기관·사진 게시 상태 확인 뒤 파일 조회
   if (!object) throw new HttpError(404, "photo_not_found", "사진 파일을 찾을 수 없습니다.");
   const headers = new Headers({
     "Content-Type": row.content_type,
@@ -431,7 +432,7 @@ async function servePrivatePhoto(request, env, institutionId, photoId) {
       LIMIT 1`,
   ).bind(normalizedPhotoId, id).first();
   if (!row) throw new HttpError(404, "photo_not_found", "사진을 찾을 수 없습니다.");
-  const object = await env.PHOTOS.get(row.r2_key);
+  const object = await fileStorage(env, 'PHOTOS').get(row.r2_key); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 기관 멤버십 확인 뒤 비공개 미리보기
   if (!object) throw new HttpError(404, "photo_not_found", "사진 파일을 찾을 수 없습니다.");
   const headers = new Headers({
     "Content-Type": row.content_type,
@@ -798,7 +799,7 @@ async function deleteProgram(request, env, institutionId, programId) {
 
 async function cleanupUncommittedPhoto(env, r2Key) {
   try {
-    await env.PHOTOS.delete(r2Key);
+    await fileStorage(env, 'PHOTOS').delete(r2Key); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : DB 반영 실패의 파일 보상 삭제 유지
     return;
   } catch {
     // R2 삭제가 실패하면 private orphan을 예약 정리 대상으로 남긴다.
@@ -868,7 +869,7 @@ async function uploadPhoto(request, env, institutionId) {
   });
   const photoId = crypto.randomUUID();
   const r2Key = `institutions/${id}/${photoId}.${detected.extension}`;
-  await env.PHOTOS.put(r2Key, bytes, {
+  await fileStorage(env, 'PHOTOS').put(r2Key, bytes, { // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 비공개·크기·준비 상태 검증 후 저장
     httpMetadata: { contentType: detected.mime, cacheControl: "private, no-store" },
     customMetadata: { institutionId: id, photoId },
   });
@@ -984,7 +985,7 @@ async function deletePhoto(request, env, institutionId, photoId) {
     throw new HttpError(404, "photo_not_found", "사진을 찾을 수 없습니다.");
   }
   try {
-    await env.PHOTOS.delete(row.r2_key);
+    await fileStorage(env, 'PHOTOS').delete(row.r2_key); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 삭제 실패를 기존 대기열로 재시도
     await env.DB.prepare("DELETE FROM r2_deletion_queue WHERE r2_key = ?").bind(row.r2_key).run();
   } catch {
     try {
@@ -1314,7 +1315,7 @@ export async function handleScheduled(env) {
   ).all();
   for (const item of resultRows(pending)) {
     try {
-      await env.PHOTOS.delete(item.r2_key);
+      await fileStorage(env, 'PHOTOS').delete(item.r2_key); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 공급자와 무관하게 실제 삭제 성공 후 대기열 제거
       await env.DB.prepare("DELETE FROM r2_deletion_queue WHERE r2_key = ?").bind(item.r2_key).run();
     } catch {
       await env.DB.prepare(
