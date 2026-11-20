@@ -1,4 +1,4 @@
-/** SOFTM-HOMECARE-PILOT START 날짜:20261120 : 실제 전용 계정·APAC 기관 D1과 회원 서비스 바인딩을 연결 */
+/** SOFTM-HOMECARE-PILOT START 날짜:20261121 : 기관 D1은 유지하고 카드 없는 Supabase 비공개 사진 저장소로 연결 준비 */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "softm-homecare-pilot",
@@ -14,12 +14,6 @@
       "migrations_dir": "migrations"
     }
   ],
-  "r2_buckets": [
-    {
-      "binding": "PHOTOS",
-      "bucket_name": "softm-homecare-pilot-photos"
-    }
-  ],
   "services": [
     {
       "binding": "ACCOUNT",
@@ -27,6 +21,10 @@
     }
   ],
   "vars": {
+    "FILE_STORAGE_PROVIDER": "supabase",
+    "SUPABASE_URL": "https://feaouitfpiqjjqdxrtfx.supabase.co",
+    "SUPABASE_PHOTOS_BUCKET": "homecare-photos",
+    "FILE_UPLOADS_ENABLED": "false",
     "ALLOWED_ORIGINS": "https://homecare.designboard.net,https://softm.github.io",
     "MAX_PHOTO_BYTES": "5242880",
     "MAX_PHOTOS_PER_INSTITUTION": "10"

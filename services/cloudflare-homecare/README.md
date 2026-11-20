@@ -8,13 +8,13 @@
 
 - Cloudflare Worker JavaScript 모듈
 - D1: 기관, 승인된 담당자 권한, 신청, 프로그램, 사진 메타데이터, 시범운영 협약, 일별 통계
-- R2: JPEG·PNG·WebP 원본 사진
+- Supabase Storage: 비공개 `homecare-photos`에 JPEG·PNG·WebP 파일 저장
 - Cloudflare service binding `ACCOUNT`: 전용 회원 Worker `softm-homecare-members`의 `/api/apps/homecare/session` <!-- SOFTM-LIVE-D1 날짜:20261120 : 현재 전용 회원 인증 바인딩과 운영 문서를 일치 -->
 - 익명 일별 집계: 브라우저 난수 쿠키를 날짜·기관·행동 범위의 HMAC으로 변환해 중복 제거
 
 IP 주소, User-Agent, Bearer 토큰과 익명 쿠키 원문은 D1에 저장하지 않습니다. 일별 중복 제거 해시는 날짜가 바뀌면 연결할 수 없으며 예약 작업이 8일이 지난 해시를 삭제합니다. 집계 숫자는 유지됩니다.
 
-R2 버킷의 `r2.dev` 공개 URL과 Custom Domain 공개 액세스는 반드시 비활성화합니다. 사진은 D1 공개 상태 또는 인증된 멤버십을 확인하는 이 Worker를 통해서만 제공합니다.
+Supabase 버킷은 `public=false`를 유지하고 익명 접근 정책을 추가하지 않습니다. 사진은 D1 공개 상태 또는 인증된 멤버십을 확인하는 이 Worker를 통해서만 제공합니다.
 
 ## 게시 흐름
 
@@ -37,9 +37,9 @@ npm run db:migrate:local
 npm run dev
 ```
 
-`wrangler.jsonc`의 D1 `database_id`는 2026-11-20 새로 만든 전용 기관 DB를 가리킵니다. R2와 Worker의 실제 운영 여부는 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)에서 확인합니다. `workers_dev`의 예정 주소는 `https://softm-homecare-pilot.softm.workers.dev`이며 설정에 적힌 주소만으로 배포 완료를 의미하지 않습니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 생성된 DB와 배포 예정 Worker·저장소를 구분 -->
+`wrangler.jsonc`의 D1 `database_id`는 2026-11-20 새로 만든 전용 기관 DB를 가리킵니다. Supabase와 Worker의 실제 운영 여부는 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)에서 확인합니다. `workers_dev`의 예정 주소는 `https://softm-homecare-pilot.softm.workers.dev`이며 설정에 적힌 주소만으로 배포 완료를 의미하지 않습니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 생성된 DB와 배포 예정 Worker·저장소를 구분 -->
 
-기관 Worker 단독 `npm run dev`는 API 단위개발용입니다. 로그인·증빙 심사·기관 관리의 로컬 전체 흐름은 [회원 Worker README](../cloudflare-homecare-members/README.md)의 두 Worker 실행 절차를 사용합니다. 운영 검증은 실제 D1·R2·secret·양방향 서비스 바인딩과 HTTPS 회원 API를 연결한 뒤 별도로 수행합니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 전용 회원 프록시를 사용하는 현재 로컬·운영 실행 절차 반영 -->
+기관 Worker 단독 `npm run dev`는 API 단위개발용입니다. 로그인·증빙 심사·기관 관리의 로컬 전체 흐름은 [회원 Worker README](../cloudflare-homecare-members/README.md)의 두 Worker 실행 절차를 사용합니다. 운영 검증은 실제 D1·Supabase·secret·양방향 서비스 바인딩과 HTTPS 회원 API를 연결한 뒤 별도로 수행합니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 전용 회원 프록시를 사용하는 현재 로컬·운영 실행 절차 반영 -->
 
 운영 비밀값은 Wrangler secret으로만 등록합니다.
 
@@ -62,21 +62,17 @@ npx wrangler secret put EVENT_HASH_SECRET
 마이그레이션은 `migrations/0001_initial.sql`, 현재 전체 스키마는 `schema.sql`에 있습니다.
 
 ```bash
-npx wrangler d1 create softm-homecare-pilot
 npx wrangler d1 migrations apply DB --local
 npx wrangler d1 migrations apply DB --remote
-npx wrangler r2 bucket create softm-homecare-pilot-photos
 ```
 
 원격 마이그레이션과 배포는 실제 리소스 식별자·라우트·비밀값을 확인한 뒤 별도로 실행합니다.
 
-배포 전 Cloudflare Dashboard의 **R2 → 해당 버킷 → Settings**에서 다음을 필수 확인합니다.
+<!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 무료 저장소 준비 결과와 담당자 업로드 개방 조건을 분리 -->
+이미 생성한 전용 D1을 재사용합니다. Supabase `homecare-photos`의 비공개·5MiB·JPEG/PNG/WebP 제한과 가상 파일 업로드·다운로드·익명 거부·삭제는 확인했습니다. 연결부·계정 상태는 [파일 저장소 문서](../homecare-storage/README.md)를 따릅니다.
 
-- `Public Development URL (r2.dev)`: Disabled
-- `Custom Domains`: 연결 항목 없음
-- 업로드 객체 `Cache-Control`: `private, no-store`
-
-이 확인 전에는 Worker를 배포하지 않습니다.
+`SUPABASE_SECRET_KEY`는 배포 시 Worker secret으로 등록합니다. 현재 서버 secret 등록·Worker 배포는 하지 않았고 `FILE_UPLOADS_ENABLED=false`로 실제 기관 담당자 업로드를 막고 있습니다. 로컬 개발도 같은 기본값이며 운영 키를 로컬 파일에 복사하지 않습니다. 회원·기관 데이터는 D1에 남습니다. D1의 기존 `r2_key`, `r2_deletion_queue` 이름은 스키마 호환을 위해 유지합니다. R2 구독이나 버킷을 생성하지 않습니다.
+<!-- SOFTM-SUPABASE-STORAGE END -->
 
 ## 공통 응답
 
@@ -160,7 +156,7 @@ If-Match: "7"
 
 `GET /api/public/institutions/:id/photos/:photoId`
 
-기관과 사진이 모두 공개 상태일 때만 R2 객체를 스트리밍합니다.
+기관과 사진이 모두 공개 상태일 때만 파일 객체를 스트리밍합니다.
 프로필과 사진 응답은 철회·삭제를 즉시 반영하도록 `Cache-Control: no-store`를 사용합니다.
 
 ### 이용 행동 기록
@@ -294,9 +290,9 @@ const objectUrl = URL.createObjectURL(await response.blob());
 
 미리보기 API는 `GET /api/institutions/:id/photos/:photoId/content`이며 승인된 멤버십을 확인하고 `Cache-Control: private, no-store`로 응답합니다.
 
-사진 삭제는 D1의 사진 행 삭제·기관 `draft` 전환·R2 삭제 대기열 기록을 한 batch에서 먼저 처리합니다. 이후 R2 삭제에 실패하면 `202`와 `storageCleanupPending: true`를 반환하고, 예약 작업이 `r2_deletion_queue`를 50건씩 재시도합니다. 따라서 R2 객체가 잠시 남더라도 공개·인증 사진 경로에서는 즉시 조회되지 않습니다.
+사진 삭제는 D1의 사진 행 삭제·기관 `draft` 전환·파일 삭제 대기열 기록을 한 batch에서 먼저 처리합니다. 이후 파일 삭제에 실패하면 `202`와 `storageCleanupPending: true`를 반환하고, 예약 작업이 `r2_deletion_queue`를 50건씩 재시도합니다. 따라서 파일 객체가 잠시 남더라도 공개·인증 사진 경로에서는 즉시 조회되지 않습니다.
 
-업로드는 R2 저장 뒤 D1 메타데이터를 기록합니다. D1 기록이 실패하면 R2 객체를 즉시 삭제하며, 그 삭제도 실패하면 원래 D1 오류를 유지한 채 `r2_deletion_queue` 등록을 시도합니다. D1까지 사용할 수 없어 queue 등록도 실패한 경우 객체는 private orphan으로 남을 수 있습니다. 운영자는 정기적으로 private 버킷의 `institutions/` 키 목록을 `institution_photos.r2_key`와 `r2_deletion_queue.r2_key`의 합집합과 비교하고, 어느 쪽에도 없는 키를 queue에 넣거나 확인 후 삭제합니다. 이 reconcile 중에도 `r2.dev`와 Custom Domain은 켜지 않습니다.
+업로드는 파일 저장소 저장 뒤 D1 메타데이터를 기록합니다. D1 기록이 실패하면 파일 객체를 즉시 삭제하며, 그 삭제도 실패하면 원래 D1 오류를 유지한 채 `r2_deletion_queue` 등록을 시도합니다. D1까지 사용할 수 없어 queue 등록도 실패한 경우 객체는 private orphan으로 남을 수 있습니다. 운영자는 정기적으로 private 버킷의 `institutions/` 키 목록을 `institution_photos.r2_key`와 `r2_deletion_queue.r2_key`의 합집합과 비교하고, 어느 쪽에도 없는 키를 queue에 넣거나 확인 후 삭제합니다. 이 점검 중에도 버킷을 공개로 바꾸거나 익명 정책을 추가하지 않습니다.
 
 ### 시범운영 협약
 
@@ -379,6 +375,6 @@ npm run claim:approve -- \
 npm test
 ```
 
-검사는 JavaScript 구문, 정확한 Origin 허용, `uid`·`site` 계정 검증, HTTPS 기관 URL, 프로필·프로그램 입력, 이미지 시그니처·크기, 인증 사진 Blob, 한국시간 일자·7일·30일·직접 기간, 익명 HMAC, 일반 신청의 무권한 `pending` 상태, 초대 1회성, revoked 비복구, 협약 수락 감사 보존과 append-only 이력·기관 삭제 cascade, `contentRevision` 원자 충돌, suspended 차단, 수정·삭제·철회 후 `draft`, D1/R2 삭제·orphan 정리 순서와 일별 행동 집계를 확인합니다. `schema.sql`과 fresh `0001_initial.sql`의 DDL도 실제 SQLite에서 비교합니다.
+검사는 JavaScript 구문, 정확한 Origin 허용, `uid`·`site` 계정 검증, HTTPS 기관 URL, 프로필·프로그램 입력, 이미지 시그니처·크기, 인증 사진 Blob, 한국시간 일자·7일·30일·직접 기간, 익명 HMAC, 일반 신청의 무권한 `pending` 상태, 초대 1회성, revoked 비복구, 협약 수락 감사 보존과 append-only 이력·기관 삭제 cascade, `contentRevision` 원자 충돌, suspended 차단, 수정·삭제·철회 후 `draft`, D1/파일 삭제·orphan 정리 순서와 일별 행동 집계를 확인합니다. `schema.sql`과 fresh `0001_initial.sql`의 DDL도 실제 SQLite에서 비교합니다.
 
 <!-- SOFTM-HOMECARE-PILOT END -->
