@@ -1,7 +1,18 @@
 /** SOFTM-MOBILE-SHEET START 날짜:20260914 : 검색·탭을 접는 지도 집중 단계를 포함한 네 단계 전환과 복귀를 검증 */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import '../map-experience.js';
+const mapSource = readFileSync(new URL('../map-experience.js', import.meta.url), 'utf8');
+const mapStyles = readFileSync(new URL('../map-experience.css', import.meta.url), 'utf8');
+
+/** SOFTM-FILTER-BADGE-INLINE START 날짜:20261120 : 필터 이름과 적용 수가 한 줄로 유지되는지 검증 */
+test('필터 버튼은 짧은 이름과 적용 조건 수를 가로로 표시한다', () => {
+    assert.match(mapSource, /toggleLabel\.textContent = '필터'/);
+    assert.match(mapStyles, /\.care-map-page \.care-mobile-filter-toggle \{[^}]*flex-direction:row/);
+    assert.doesNotMatch(mapSource, /toggleLabel\.textContent = '상세 필터'/);
+});
+/** SOFTM-FILTER-BADGE-INLINE END */
 test('위로 끌면 전체 목록, 뒤로가기는 이전 기본 화면', () => {
     const sheet = CareMapExperience.createSheetState();
     assert.equal(sheet.state(), 'split'); assert.equal(sheet.drag(-100), 'list');
