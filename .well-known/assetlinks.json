@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "net.softm.care.homecare",
+      "sha256_cert_fingerprints": ["8D:50:96:09:80:83:90:20:81:0E:91:D2:26:A8:1E:9D:B9:0B:26:36:0B:14:2D:00:0F:97:B2:DA:78:69:21:0E"]
+    }
+  }
+]
