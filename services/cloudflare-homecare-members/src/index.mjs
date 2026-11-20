@@ -3,6 +3,7 @@ import { fail, now, random, id, sha, challenge, equal, password, username, hashP
 import { authorizeUrlWithPkce, exchangeProfile, providerConfig } from './oauth.mjs';
 import { cleanWorkspace, shareSnapshot } from './workspace.mjs';
 import { listRegistrations, saveRegistration, uploadDocument, submitRegistration, reviewRegistration, downloadDocument } from './registrations.mjs';
+import { fileStorage } from '../../homecare-storage/file-storage.mjs'; // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 저장소 변경 후에도 개인정보 삭제 재시도를 보존
 
 import {recipientRoute,validateGuardian} from './recipients.mjs'; // SOFTM-GUARDIAN 날짜:20261120 : 대상자와 보호자 연락처의 소유권을 같은 세션으로 검증
 
@@ -121,9 +122,9 @@ async function workspace(request,env,user) {
 export async function completeDeletion(env,userId,accountDelete) {
  // R2 삭제 실패는 완료로 보고하지 않고 작업을 남겨 예약 실행에서 재시도합니다.
  const docs=await sql(env.INSTITUTIONS_DB,'SELECT document_key FROM member_registrations WHERE user_id=? AND document_key IS NOT NULL',userId).all();
- for(const row of docs.results)await env.DOCUMENTS.delete(row.document_key);
+ for(const row of docs.results)await fileStorage(env,'DOCUMENTS').delete(row.document_key); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 선택한 저장소의 실제 삭제 성공 확인
  const pending=await sql(env.INSTITUTIONS_DB,'SELECT r2_key FROM member_document_deletions WHERE user_id=?',userId).all();
- for(const row of pending.results)await env.DOCUMENTS.delete(row.r2_key);
+ for(const row of pending.results)await fileStorage(env,'DOCUMENTS').delete(row.r2_key); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 기존 삭제 대기열의 키를 그대로 사용
  const tasks=[sql(env.INSTITUTIONS_DB,'DELETE FROM registration_events WHERE registration_id IN(SELECT id FROM member_registrations WHERE user_id=?) OR actor_id=?',userId,userId),sql(env.INSTITUTIONS_DB,'DELETE FROM member_registrations WHERE user_id=?',userId),sql(env.INSTITUTIONS_DB,'DELETE FROM member_document_deletions WHERE user_id=?',userId)];
  if(accountDelete)tasks.push(sql(env.INSTITUTIONS_DB,"UPDATE institution_memberships SET status='revoked',updated_at=datetime('now') WHERE user_id=?",userId));
  await env.INSTITUTIONS_DB.batch(tasks);
@@ -189,7 +190,7 @@ export async function handleRequest(request,env) {
 export async function handleScheduled(env) {
  await env.DB.batch([sql(env.DB,'DELETE FROM sessions WHERE expires_at<?',now()),sql(env.DB,'DELETE FROM oauth_states WHERE expires_at<?',now()),sql(env.DB,'DELETE FROM auth_codes WHERE expires_at<?',now()),sql(env.DB,'DELETE FROM shares WHERE expires_at<?',now()),sql(env.DB,'DELETE FROM rate_limits WHERE expires_at<?',now())]);
  for(const job of (await sql(env.DB,'SELECT * FROM deletion_jobs LIMIT 20').all()).results){try{await completeDeletion(env,job.user_id,Boolean(job.account_delete));}catch{ /* 다음 실행에서 재시도하며 개인정보를 로그에 남기지 않습니다. */ }}
- for(const job of (await sql(env.INSTITUTIONS_DB,'SELECT * FROM member_document_deletions LIMIT 50').all()).results){try{await env.DOCUMENTS.delete(job.r2_key);await sql(env.INSTITUTIONS_DB,'DELETE FROM member_document_deletions WHERE r2_key=?',job.r2_key).run();}catch{}}
+ for(const job of (await sql(env.INSTITUTIONS_DB,'SELECT * FROM member_document_deletions LIMIT 50').all()).results){try{await fileStorage(env,'DOCUMENTS').delete(job.r2_key);await sql(env.INSTITUTIONS_DB,'DELETE FROM member_document_deletions WHERE r2_key=?',job.r2_key).run();}catch{}} // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 저장소 장애 시 대기열을 남겨 다음 실행에서 재시도
 }
 export default {fetch:handleRequest,scheduled:(_controller,env,ctx)=>ctx.waitUntil(handleScheduled(env))};
 /** SOFTM-MEMBERS END */

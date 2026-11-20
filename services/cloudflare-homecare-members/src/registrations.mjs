@@ -1,6 +1,7 @@
 /** SOFTM-MEMBERS START 날짜:20261120 : 기관 가입·비공개 증빙·운영자 심사를 기존 기관 멤버십에 연결 */
 import { fail, text, sql, now, id, boundedBody } from './security.mjs';
 import { TYPES } from './workspace.mjs';
+import { fileStorage } from '../../homecare-storage/file-storage.mjs'; // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 증빙 소유권 검사는 유지하고 파일 연결만 교체
 export const MAX_DOCUMENT=10*1024*1024;
 export function canonicalInstitution(source,raw,existingId) {
  if(source==='manual')return existingId?.startsWith('manual:')?existingId:`manual:${id()}`;
@@ -58,7 +59,7 @@ export async function uploadDocument(request,env,user,rid) {
  const file=form.get('document');
  if(!file||typeof file.arrayBuffer!=='function'||!file.size||file.size>MAX_DOCUMENT)fail('invalid_document','10MB 이하의 사업자등록증을 첨부해 주세요.');
  const bytes=new Uint8Array(await file.arrayBuffer()),type=documentType(bytes),key=`registrations/${user.id}/${rid}/${id()}`;
- await env.DOCUMENTS.put(key,bytes,{httpMetadata:{contentType:type}});
+ await fileStorage(env,'DOCUMENTS').put(key,bytes,{httpMetadata:{contentType:type}}); // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 준비 완료 전 업로드 차단과 비공개 버킷 검사
  try {
   const result=await sql(env.INSTITUTIONS_DB,"UPDATE member_registrations SET document_key=?,document_type=?,document_name=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status IN('draft','needs_info','rejected') RETURNING id",key,type,text(file.name,120),now(),rid,row.revision).first();
   if(!result)fail('conflict','신청 내용이 변경되었습니다. 파일을 다시 첨부해 주세요.',409);
@@ -87,7 +88,7 @@ export async function reviewRegistration(env,reviewer,rid,body) {
 }
 export async function downloadDocument(env,user,rid,admin=false) {
  const row=await ownedRegistration(env,user,rid,admin);
- const object=row.document_key?await env.DOCUMENTS.get(row.document_key):null;
+ const object=row.document_key?await fileStorage(env,'DOCUMENTS').get(row.document_key):null; // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 권한 확인 후 서버 경유로만 증빙 조회
  if(!object)fail('document_not_found','첨부한 증빙을 찾지 못했습니다.',404);
  return new Response(object.body,{headers:{'Content-Type':row.document_type,'Content-Disposition':`attachment; filename="business-document.${row.document_type==='application/pdf'?'pdf':row.document_type==='image/png'?'png':'jpg'}"`,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 }
