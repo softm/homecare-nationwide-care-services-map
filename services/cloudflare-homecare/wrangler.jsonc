@@ -1,7 +1,8 @@
-/** SOFTM-HOMECARE-PILOT START 날짜:20261118 : 기관 시범운영 Worker의 D1·R2·계정 서비스 바인딩을 고정 */
+/** SOFTM-HOMECARE-PILOT START 날짜:20261120 : 실제 전용 계정·APAC 기관 D1과 회원 서비스 바인딩을 연결 */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "softm-homecare-pilot",
+  "account_id": "324650409b822e9887bee48b932b4d71",
   "main": "src/index.mjs",
   "compatibility_date": "2026-11-18",
   "workers_dev": true,
@@ -9,7 +10,7 @@
     {
       "binding": "DB",
       "database_name": "softm-homecare-pilot",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "b1068cbf-7f1e-4c28-99ea-8fb65da84b3c",
       "migrations_dir": "migrations"
     }
   ],

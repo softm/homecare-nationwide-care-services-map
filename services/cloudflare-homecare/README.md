@@ -9,7 +9,7 @@
 - Cloudflare Worker JavaScript 모듈
 - D1: 기관, 승인된 담당자 권한, 신청, 프로그램, 사진 메타데이터, 시범운영 협약, 일별 통계
 - R2: JPEG·PNG·WebP 원본 사진
-- Cloudflare service binding `ACCOUNT`: 기존 `softm-hannun-account`의 `/api/apps/homecare/session`
+- Cloudflare service binding `ACCOUNT`: 전용 회원 Worker `softm-homecare-members`의 `/api/apps/homecare/session` <!-- SOFTM-LIVE-D1 날짜:20261120 : 현재 전용 회원 인증 바인딩과 운영 문서를 일치 -->
 - 익명 일별 집계: 브라우저 난수 쿠키를 날짜·기관·행동 범위의 HMAC으로 변환해 중복 제거
 
 IP 주소, User-Agent, Bearer 토큰과 익명 쿠키 원문은 D1에 저장하지 않습니다. 일별 중복 제거 해시는 날짜가 바뀌면 연결할 수 없으며 예약 작업이 8일이 지난 해시를 삭제합니다. 집계 숫자는 유지됩니다.
@@ -37,9 +37,9 @@ npm run db:migrate:local
 npm run dev
 ```
 
-`wrangler.jsonc`의 D1 `database_id`와 R2 `bucket_name`은 실제 Cloudflare 리소스를 만든 뒤 교체합니다. 현재 프런트엔드 계약에 맞춰 `workers_dev`를 켰으며 배포 주소는 `https://softm-homecare-pilot.softm.workers.dev`입니다.
+`wrangler.jsonc`의 D1 `database_id`는 2026-11-20 새로 만든 전용 기관 DB를 가리킵니다. R2와 Worker의 실제 운영 여부는 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)에서 확인합니다. `workers_dev`의 예정 주소는 `https://softm-homecare-pilot.softm.workers.dev`이며 설정에 적힌 주소만으로 배포 완료를 의미하지 않습니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 생성된 DB와 배포 예정 Worker·저장소를 구분 -->
 
-`npm run dev`/`wrangler dev`는 Worker API의 로컬 단위개발·테스트 용도입니다. 포털은 위 HTTPS Worker 주소를 고정 계약으로 사용하므로 로그인까지 포함한 E2E 검증은 실제 D1·R2·secret·`ACCOUNT` service binding을 설정하고 HTTPS Worker를 배포한 뒤 수행합니다. 로컬 Worker 주소로 바꾸는 런타임 override는 제공하지 않습니다.
+기관 Worker 단독 `npm run dev`는 API 단위개발용입니다. 로그인·증빙 심사·기관 관리의 로컬 전체 흐름은 [회원 Worker README](../cloudflare-homecare-members/README.md)의 두 Worker 실행 절차를 사용합니다. 운영 검증은 실제 D1·R2·secret·양방향 서비스 바인딩과 HTTPS 회원 API를 연결한 뒤 별도로 수행합니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 전용 회원 프록시를 사용하는 현재 로컬·운영 실행 절차 반영 -->
 
 운영 비밀값은 Wrangler secret으로만 등록합니다.
 
