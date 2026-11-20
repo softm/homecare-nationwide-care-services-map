@@ -12,7 +12,7 @@ Node 22.13 이상에서 이 디렉토리의 `npm install`, `npm test`를 실행�
 
 1. 기존 Cloudflare 계정의 실제 기관 D1/R2와 Worker 상태를 확인한다. 현재 저장소의 `00000000-…` ID는 운영 리소스를 증명하지 않는 예시 값이다.
 2. 전용 `softm-homecare-members` D1과 비공개 `softm-homecare-private-documents` R2를 만들고 실제 ID를 구성한다. `INSTITUTIONS_DB`는 기관 Worker의 DB와 같은 리소스여야 한다. `npm run deploy`의 preflight는 예시 ID를 거부한다.
-3. 회원 DB에 `migrations/0001_members.sql`, 기관 DB에 기존 마이그레이션과 `0006_member_registration.sql`을 적용한다. 원격 적용 전 백업과 현재 스키마를 확인한다.
+3. 회원 DB에 `migrations/0001_members.sql`과 `0002_care_recipient.sql`을 순서대로, 기관 DB에 기존 마이그레이션과 `0006_member_registration.sql`을 적용한다. 원격 적용 전 백업과 현재 스키마를 확인한다.
 4. 전용 Worker를 `api.homecare.designboard.net`에 연결한다. 웹은 기존 `homecare.designboard.net`에 남는다. 기관 Worker의 `ACCOUNT` 바인딩은 `softm-homecare-members`, 회원 Worker의 `INSTITUTIONS` 바인딩은 `softm-homecare-pilot`이다.
 5. 각 제공자에 `https://api.homecare.designboard.net/api/auth/oauth/{google|kakao|naver}/callback`을 등록한다. `GOOGLE_CLIENT_ID/SECRET`, `KAKAO_CLIENT_ID/SECRET`, `NAVER_CLIENT_ID/SECRET`을 Wrangler secrets로 설정한다. 네이버 공개 검수 완료 후 `NAVER_PUBLIC_ENABLED=true`로 바꾼다. 비밀키는 파일·Git·로그에 넣지 않는다.
 6. 운영자도 일반 가입 후 본인 확인을 거쳐 D1 `administrators`에 해당 전용 계정의 UUID를 등록한다. 공개 가입 화면으로 운영자 권한을 받을 수 없다. 승인 작업은 최근 10분 내 인증이 필요하다.
@@ -34,3 +34,11 @@ Node 22.13 이상에서 이 디렉토리의 `npm install`, `npm test`를 실행�
 웹 UI, API 테스트, Workers 번들, 실제 Cloudflare 배포, 실계정 SNS 로그인, 서명된 Android Release 설치 검증은 별도로 기록한다.
 
 인증된 증빙과 상담 CSV는 Android 시스템 문서 저장창으로 전달하고, 인쇄는 시스템 인쇄창을 사용한다. 파일 내용·로그인 쿠키를 외부 다운로드 URL에 전달하지 않는다. 최대 10MiB이며 선택 취소는 저장 완료로 표시하지 않는다. 새 웹 코드와 앱 버전을 함께 배포한 뒤 실제 문서 공급자에서 첨부·저장·취소를 추가 확인한다.
+
+<!-- SOFTM-GUARDIAN START 날짜:20261120 : 별도 대상자 동의와 보호자 연락처 API 운영 기준 -->
+## 돌봄 대상자
+
+회원 DB 마이그레이션 0002를 적용한 뒤 새 Worker를 배포한다. 이미 0001을 사용하는 로컬/운영 DB에도 0002가 필요하다. `GET/PUT/DELETE /api/me/care-recipient`는 일반회원 자신의 한 명 대상자만 관리하며 PUT/DELETE에 CSRF·If-Match가 필요하다. 관계·성별·이동·필요 돌봄·동의 권한은 허용 값만 저장하고, 동의 버전/시각은 서버에서 기록한다. PUT 전에 계정 이름·휴대폰 저장이 필요하다. 연락처는 계정에서만 읽으며 대상자 전화번호·임의 수신자 필드는 저장하지 않는다.
+
+`care_recipients`는 일반 작업공간·공유와 분리한다. 대상자 삭제·보관소 삭제·탈퇴에 동의 기록 삭제가 포함된다. 문의·회신 대상 표시는 있지만 실제 SMS/이메일 발송은 미연결이다. 별도 동의·다른 회원/기관 접근 차단·연락처 위조·revision 충돌·공유 제외·삭제는 `test/recipients.test.mjs`에서 검증한다.
+<!-- SOFTM-GUARDIAN END -->
