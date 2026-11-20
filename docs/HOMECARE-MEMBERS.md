@@ -39,7 +39,7 @@
 - 브라우저: 실제 공개 기관을 시험 후보로 사용해 3곳 비교 제한, 질문·답변 보존, 계정 저장, 별도 비로그인 브라우저의 공유 열람을 검증한다. 로컬 주소는 기존 Naver 지도 허용 Origin이 아니므로 지도 타일·주소 API 오류를 운영 장애로 단정하지 않는다.
 - Android: 공통 키로 서명한 Release를 별도 에뮬레이터에 설치해 확인한다. 현재 운영 웹에는 신규 회원 화면/API가 배포되지 않아 실계정 SNS 복귀·파일 제출 전체 과정은 배포 후 추가 검증해야 한다.
 
-실제 Cloudflare 로그인·리소스 ID·도메인 연결·SNS secrets가 준비되지 않은 상태다. [Worker README](../services/cloudflare-homecare-members/README.md)의 순서로 운영 연결 후 실계정 인증과 앱 링크를 검증한다. `.well-known/assetlinks.json`은 확인한 로컬 공통 Release 인증서이며, Play 실제 앱 서명 인증서는 별도 대조한다. 코드 푸시, 운영 배포, Play 업로드·심사·공개를 구분한다.
+2026-11-20 Cloudflare 배포 인증과 전용 D1 두 개의 생성·원격 마이그레이션을 완료했다. R2·Worker·도메인·SNS의 단계별 운영 상태는 [운영 연결 기록](HOMECARE-DEPLOYMENT.md)에서 관리한다. [Worker README](../services/cloudflare-homecare-members/README.md)의 순서로 운영 연결 후 실계정 인증과 앱 링크를 검증한다. `.well-known/assetlinks.json`은 확인한 로컬 공통 Release 인증서이며, Play 실제 앱 서명 인증서는 별도 대조한다. 코드 푸시, 운영 배포, Play 업로드·심사·공개를 구분한다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 실제 인증·DB 적용 결과와 남은 운영 작업을 구분 -->
 
 ## Bunzee 기획과의 적용 기준
 

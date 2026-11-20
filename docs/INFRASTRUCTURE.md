@@ -153,7 +153,7 @@
 
 기관 DB `0006_member_registration.sql`은 기존 기관 D1에 적용한다. 회원 D1은 별도이며 증빙 R2는 기관 공개사진 R2와 다르다. 기관 Worker `ACCOUNT`와 회원 Worker `INSTITUTIONS` 서비스 바인딩을 함께 배포해야 한다. 기존 공통 계정은 `?legacyAccount=1`에서 이전 보관소를 명시적으로 복원하는 경우에만 연결한다.
 
-저장소 설정의 D1 ID는 예시다. 이번 구현은 로컬 D1/R2에서 검증하며, 실제 Cloudflare 배포·SNS 제공자 설정·운영 App Link 검증은 별도 단계다. `api.homecare.designboard.net` DNS와 인증 자원이 준비되기 전에 웹의 회원 화면을 운영 메인에 배포하지 않는다.
+저장소 설정의 D1 ID는 2026-11-20 생성·마이그레이션한 실제 전용 DB다. [운영 연결 기록](HOMECARE-DEPLOYMENT.md)에 인증·DB·R2·Worker·도메인·SNS별 상태를 구분한다. DB 준비와 로컬 번들 검사를 실제 Worker 배포·SNS 제공자 설정·운영 App Link 검증으로 간주하지 않는다. `api.homecare.designboard.net` DNS와 인증 자원이 준비되기 전에 웹의 회원 화면을 운영 메인에 배포하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 운영 DB 준비 결과와 서비스 공개 전제조건을 구분 -->
 <!-- SOFTM-MEMBERS END -->
 
 <!-- SOFTM-GUARDIAN START 날짜:20261120 : 보호자·대상자 정보의 서버 경계와 운영 적용 순서 -->
