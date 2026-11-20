@@ -155,3 +155,11 @@
 
 저장소 설정의 D1 ID는 예시다. 이번 구현은 로컬 D1/R2에서 검증하며, 실제 Cloudflare 배포·SNS 제공자 설정·운영 App Link 검증은 별도 단계다. `api.homecare.designboard.net` DNS와 인증 자원이 준비되기 전에 웹의 회원 화면을 운영 메인에 배포하지 않는다.
 <!-- SOFTM-MEMBERS END -->
+
+<!-- SOFTM-GUARDIAN START 날짜:20261120 : 보호자·대상자 정보의 서버 경계와 운영 적용 순서 -->
+### 보호자 연락·대상자 조건
+
+회원 D1에 `services/cloudflare-homecare-members/migrations/0002_care_recipient.sql`을 0001 다음으로 적용한다. 대상자 원문과 동의는 `care_recipients`, 보호자 연락처는 `users`에서 관리한다. `/api/me/care-recipient`는 본인 일반회원 쿠키·CSRF·revision을 검증하고 기관 Worker로 대상자 원문을 전달하지 않는다. 응답은 `Cache-Control: no-store`이며 정적 셸에 API 응답을 포함하지 않는다. 대상자 정보 삭제·보관소 삭제·탈퇴는 동의 기록도 삭제한다.
+
+공개 조건 매칭과 상담 질문은 기존 분석 엔진을 유지한다. 상담 회신 대상 표시는 계정 소유자 이름·휴대폰이며 실제 문자·이메일 전송 경로는 미연결이다. 이번 변경은 로컬 검증과 기능 브랜치 푸시 범위이며 운영 D1 적용·Worker 배포를 뜻하지 않는다.
+<!-- SOFTM-GUARDIAN END -->
