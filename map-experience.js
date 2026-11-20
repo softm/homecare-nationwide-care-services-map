@@ -721,7 +721,7 @@
         const toggle = document.createElement('button');
         toggle.type = 'button'; toggle.className = 'care-mobile-filter-toggle';
         /** SOFTM-FILTER-BADGE START 날짜:20260916 : 상세필터 적용 여부를 패널을 다시 열지 않고도 확인하도록 상태 배지를 제공 */
-        const toggleLabel = document.createElement('span'); toggleLabel.className = 'care-filter-toggle-label'; toggleLabel.textContent = '상세 필터'; // SOFTM-FILTER-PILL 날짜:20260916 : 첨부 시안의 띄어쓰기로 버튼 가독성을 일치
+        const toggleLabel = document.createElement('span'); toggleLabel.className = 'care-filter-toggle-label'; toggleLabel.textContent = '필터'; // SOFTM-FILTER-BADGE-INLINE 날짜:20261120 : 짧은 이름 옆에 적용 조건 수를 한 줄로 표시
         const conditionBadge = document.createElement('span'); conditionBadge.className = 'care-filter-state-badge'; conditionBadge.textContent = '설정됨'; conditionBadge.hidden = true;
         toggle.append(toggleLabel, conditionBadge); toggle.setAttribute('aria-expanded', 'false');
         filters.id ||= 'careMobileFilters'; toggle.setAttribute('aria-controls', filters.id);
@@ -741,7 +741,7 @@
             const configured = counted ? Number(count) > 0 : hasConfiguredConditions(), open = document.body.classList.contains('care-mobile-filters-open');
             conditionBadge.textContent = counted ? count : '설정됨';
             conditionBadge.hidden = !configured; toggle.classList.toggle('has-active-filters', configured);
-            toggle.setAttribute('aria-label', `${configured ? `상세필터 ${counted ? count + '개 적용됨' : '설정됨'}, ` : ''}상세필터 ${open ? '열림' : '열기'}`);
+            toggle.setAttribute('aria-label', `${configured ? `필터 ${counted ? count + '개 적용됨' : '설정됨'}, ` : ''}필터 ${open ? '열림' : '열기'}`); // SOFTM-FILTER-BADGE-INLINE 날짜:20261120 : 보이는 짧은 이름과 접근성 이름을 일치
             /** SOFTM-FILTER-DESIGN END */
         };
         toggle.addEventListener('care-filter-count', syncConditionBadge); // SOFTM-FILTER-DESIGN 날짜:20260916 : 태그 해제와 초기화도 같은 배지 갱신을 사용
