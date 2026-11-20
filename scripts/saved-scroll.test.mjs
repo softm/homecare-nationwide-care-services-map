@@ -83,6 +83,8 @@ test('독립 목록의 담은 기관은 스크롤·카드 선택·화면 갱신�
     assert.equal(h.focused.length, count);
     assert.equal(h.details.length, 0);
     assert.equal(h.tail.isConnected, false);
+    assert.equal(h.cards[2].attrs['aria-current'], 'true');
+    assert.equal(h.cards[0].attrs['aria-current'], undefined);
 });
 /** SOFTM-LIST-MODE END */
 /** SOFTM-SAVED-SCROLL END */
