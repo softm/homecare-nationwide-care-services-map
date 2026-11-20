@@ -1,5 +1,9 @@
 /* SOFTM-MEMBERS START 날짜:20261120 : grammarly의 민트·카드·비교 구조를 기존 지도와 공용 화면에 적용 */
 :root{--hc-primary:#15c39a;--hc-dark:#0e6e57;--hc-ink:#1a1a1a;--hc-muted:#6b6b70;--hc-line:#e4e6e6;--hc-surface:#f7f8f8;--hc-shadow:0 8px 24px #152b2410}
+/* SOFTM-GUARDIAN 날짜:20261120 : 대상자 입력과 보호자 안내를 기존 카드·모바일 여백 안에 정렬 */
+.hc-care-needs{display:grid;gap:12px;margin:0}.hc-form input[type=checkbox]{flex-shrink:0}#careRecipient,#profileForm{scroll-margin-top:84px}.analysis-recipient{margin:0 0 24px;padding:22px;background:#f7f8f8;border:1px solid #e4e6e6;border-radius:16px}.analysis-recipient h2{font-size:20px;margin:0 0 10px}.analysis-recipient p{font-size:14px;line-height:1.7}.analysis-recipient button,.analysis-recipient a{font:inherit;font-size:14px}.analysis-recipient .hc-actions{gap:10px}.analysis-recipient.active{border-color:#15c39a}
+body[data-page=care-account] .hannun-pwa-install,body.analysis-page .hannun-pwa-install{position:static;width:max-content;margin:0 20px 24px auto} /* SOFTM-GUARDIAN 날짜:20261120 : 입력·삭제 버튼을 가리는 설치 버튼을 문서 아래 흐름에 배치 */
+@media print{#guardianContact,#analysisGuardianContact{display:none!important}} /* SOFTM-GUARDIAN 날짜:20261120 : 질문표 인쇄에 보호자 연락처를 자동 포함하지 않음 */
 /* SOFTM-MEMBERS 날짜:20261120 : 설치 버튼이 지도 하단 담기·더보기 버튼과 겹치지 않도록 위쪽 여백 확보 */
 @media(max-width:1000px){body.stitch-desktop.hc-integrated .hannun-pwa-install{bottom:calc(148px + var(--care-list-ad-space,0px) + env(safe-area-inset-bottom));z-index:180}}
 .hc-page{margin:0;background:#fff;color:var(--hc-ink);font-family:Pretendard,sans-serif;line-height:1.65;padding-top:72px;padding-bottom:48px}

@@ -6,6 +6,8 @@ import { escapeHtml as esc, readJson, mapUrl, thumbnail, openComparison } from '
 
 import { conditions as sharedConditions, saveConditions, ensureRecord, records as consultationRecords, saveRecord, questionId } from './care-workspace.mjs'; // SOFTM-MEMBERS 날짜:20261120 : 기존 조건·체크를 회원 작업공간과 연결
 import './care-shell.mjs';
+import {recipientContext,recipientSummary,mountGuardianContact} from './care-recipient.mjs'; // SOFTM-GUARDIAN 날짜:20261120 : 대상자 조건과 보호자 연락처를 같은 상담 흐름에 연결
+import {recipientMatching} from './care-recipient-model.mjs';
 
 const $ = id => document.getElementById(id);
 const labels = { daycare: '주·야간보호센터', facility: '요양원·공동생활가정', 'home-care': '방문요양센터', 'home-nursing': '방문간호센터', 'home-bath': '방문목욕기관', 'short-stay': '단기보호센터', 'welfare-equipment': '복지용구사업소', dementia: '치매전담형 기관', 'nursing-hospital': '요양병원' };
@@ -15,6 +17,25 @@ const memory = new Map();
 let generation = 0, sdkTask, current = null, limit = 12, view = 'nearby', busy = false, currentStep = 'conditions', comparisonSelection; // SOFTM-GUIDED-COMPARE 날짜:20261119 : 분석 결과를 후보·세 곳 비교·상담 준비 단계로 나누어 같은 세션에서 이동
 let storage; try { storage = sessionStorage; } catch {}
 let originController; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 주소를 직접 고치면 자동 위치 응답을 폐기
+
+/** SOFTM-GUARDIAN START 날짜:20261120 : 대상자 원문은 현재 화면에만 두고 명시적으로 적용한 공개 조건과 일반 질문을 연결 */
+let recipientProfile=null,recipientApplied=false,recipientOwner=null,recipientGeneration=0;
+function renderRecipient() {
+    const host=$('analysisRecipient');
+    if(!recipientProfile){host.innerHTML='<strong>가족 상황에 맞는 조건을 준비하세요</strong><p>보호자 계정에 관계·성별·돌봄 상태를 저장하면 맞춤 조건과 상담 질문에 적용할 수 있어요.</p><a href="care-account.html#careRecipient">돌봄 대상자 정보 입력 →</a>';host.classList.remove('active');return;}
+    const matching=recipientMatching(recipientProfile,$('analysisType').value),available=criteriaFor($('analysisType').value);
+    const applied=available.filter(item=>matching.criteria.includes(item.id));
+    host.classList.toggle('active',recipientApplied);
+    host.innerHTML=`<strong>저장한 돌봄 대상자</strong><p>${esc(recipientSummary(recipientProfile))}</p><p>공개 조건: ${esc(applied.map(item=>item.label).join(' · ')||'현재 유형에서 자동 적용할 공개 조건이 없어요.')}</p><p>이동·재활·간호 지원과 성별별 이용 가능 여부는 상담 질문으로 확인합니다.</p><div class="hc-actions"><button type="button" id="applyRecipient" aria-pressed="${recipientApplied}">${recipientApplied?'대상자 조건 적용 중 · 해제':'대상자 조건 적용'}</button><a href="care-account.html#careRecipient">대상자 정보 수정 →</a></div><p class="hc-help">대상자 원문과 보호자 연락처는 가족 공유 링크에 포함하지 않습니다. 상담 기록에 저장한 일반 질문은 공유 항목에 포함될 수 있습니다.</p>`;
+    $('applyRecipient').onclick=()=>{recipientApplied=!recipientApplied;invalidate(recipientApplied?'대상자 조건을 적용했습니다. 한 번에 분석을 눌러 주세요.':'대상자 조건 적용을 해제했습니다.');renderRecipient();updateConditionSummary();};
+}
+async function loadRecipient() {
+    const generation=++recipientGeneration;
+    try{const context=await recipientContext();if(generation!==recipientGeneration)return;if(recipientApplied&&JSON.stringify(recipientProfile)!==JSON.stringify(context?.profile||null)){recipientApplied=false;invalidate('대상자 정보가 변경되었습니다. 다시 적용해 주세요.');}recipientProfile=context?.profile||null;recipientOwner=context?.guardian.userId||null;renderRecipient();updateConditionSummary();}
+    catch(error){if(generation!==recipientGeneration)return;if(recipientApplied){recipientApplied=false;invalidate('대상자 정보를 다시 확인한 뒤 적용해 주세요.');}recipientProfile=null;updateConditionSummary();$('analysisRecipient').innerHTML=`<strong>대상자 정보를 불러오지 못했어요</strong><p>${esc(error.message)}</p><button type="button" id="retryRecipient">다시 불러오기</button>`;$('retryRecipient').onclick=()=>void loadRecipient();}
+}
+window.addEventListener('care:session',event=>{if(recipientOwner&&event.detail?.user?.id!==recipientOwner){recipientGeneration++;recipientProfile=null;recipientOwner=null;recipientApplied=false;invalidate('계정이 변경되었습니다. 조건을 다시 확인해 주세요.');renderRecipient();}});
+/** SOFTM-GUARDIAN END */
 
 /** SOFTM-GUIDED-COMPARE START 날짜:20261119 : URL에 주소·돌봄 조건을 남기지 않고 브라우저 기록과 화면 초점만 단계별로 관리 */
 const analysisSteps = ['conditions', 'candidates', 'compare', 'prepare'];
@@ -58,6 +79,7 @@ function setStep(next, { push = false, focus = true } = {}) {
 }
 function updateConditionSummary() {
     const type = $('analysisType').value, selected = [...$('analysisCriteria').querySelectorAll('input:checked')].map(input => input.nextElementSibling?.textContent || input.value);
+    if(recipientApplied)selected.push(...criteriaFor(type).filter(item=>recipientMatching(recipientProfile,type).criteria.includes(item.id)).map(item=>`${item.label} (대상자)`)); // SOFTM-GUARDIAN 날짜:20261120 : 자동 연결된 조건도 요약에서 숨기지 않음
     $('analysisSummaryRegion').textContent = $('analysisAddress').value.trim() || '주소 확인 전';
     $('analysisSummaryType').textContent = labels[type] || '시설 유형 확인 전';
     $('analysisSummaryRadius').textContent = $('analysisRadius').selectedOptions[0]?.textContent || '거리 확인 전';
@@ -167,14 +189,18 @@ async function photoSummaries(type, rows) {
 }
 function draft() {
     const type = $('analysisType').value;
-    const selected = new Set([...$('analysisCriteria').querySelectorAll('input:checked')].map(input => input.value));
-    return { type, radiusKm: Number($('analysisRadius').value), address: $('analysisAddress').value.trim(), criteria: criteriaFor(type), selected };
+    /** SOFTM-GUARDIAN START 날짜:20261120 : 대상자에서 유도된 조건을 일반 검색 저장본에 자동 복제하지 않음 */
+    const manualSelected = new Set([...$('analysisCriteria').querySelectorAll('input:checked')].map(input => input.value));
+    const matching=recipientApplied?recipientMatching(recipientProfile,type):{criteria:[],questions:[]},criteria=criteriaFor(type);
+    const selected=new Set([...manualSelected,...matching.criteria.filter(id=>criteria.some(item=>item.id===id))]);
+    return { type, radiusKm: Number($('analysisRadius').value), address: $('analysisAddress').value.trim(), criteria, selected,manualSelected,recipientQuestions:matching.questions };
+    /** SOFTM-GUARDIAN END */
 }
 async function submit(event) {
     originController?.cancel(); // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 분석을 시작한 뒤 역주소 응답이 기준 주소를 바꾸지 않음
     event?.preventDefault(); if (!$('analysisForm').reportValidity()) return;
     const input = draft(); if (!input.address) return;
-    saveConditions({type:input.type,address:input.address,radius:input.radiusKm,preferences:[...input.selected]});
+    saveConditions({type:input.type,address:input.address,radius:input.radiusKm,preferences:[...input.manualSelected]});
     invalidate('기준 주소를 확인하고 있습니다.'); const token = generation; setBusy(true);
     try {
         await loadSdk(); if (token !== generation) return;
@@ -232,7 +258,7 @@ function questions(entry) {
     const type = current.input.type;
     const selected = entry.conditions.filter(condition => current.input.selected.has(condition.id));
     const generic = type === 'welfare-equipment' ? ['필요한 제품의 대여·구매 가능 여부와 배송 지역은 어떻게 되나요?'] : type === 'nursing-hospital' ? ['필요한 진료와 입원이 가능한가요? 병실·간병 비용은 어떻게 되나요?'] : ['현재 이용 가능한 자리와 이용 시작일을 알려주실 수 있나요?', ['home-care', 'home-nursing', 'home-bath'].includes(type) ? '우리 집까지 방문이 가능한가요? 원하는 요일과 시간을 이용할 수 있나요?' : type === 'daycare' ? '우리 집까지 송영이 가능한가요? 이용시간과 실제 탑승시간은 어떻게 되나요?' : '입소·이용 조건과 가족 방문 시간은 어떻게 되나요?', '이용 조건에 따른 본인부담금과 식비 등 추가 비용은 얼마인가요?'];
-    return [...new Set([...selected.filter(item => item.status !== 'confirmed').map(item => item.question), ...generic])];
+    return [...new Set([...selected.filter(item => item.status !== 'confirmed').map(item => item.question), ...generic,...(current.input.recipientQuestions||[])])]; // SOFTM-GUARDIAN 날짜:20261120 : 개인 원문 대신 시설에 확인할 일반 질문만 상담 기록으로 전달
 }
 function gradeTable(entries) {
     const years = new Map();
@@ -321,7 +347,9 @@ function renderConsultation() {
         const completed = new Set(record.questions.filter(question => question.checked).map(question => question.id));
         return `<article class="analysis-consultation-card"><header><h3>${esc(row.n)}</h3><span>${items.filter(question => completed.has(questionId(question))).length} / ${items.length} 확인</span></header><div class="analysis-question-list">${items.map((question, index) => `<label><input type="checkbox" data-consult-check="${esc(row.i)}" value="${esc(questionId(question))}" ${completed.has(questionId(question)) ? 'checked' : ''}><span>${esc(question)}</span></label>`).join('')}</div><a href="care-record.html?key=${encodeURIComponent(record.key)}">답변·방문 기록 이어가기 →</a></article>`;
     }).join('');
-    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 4단계</span><h2 tabindex="-1">전화와 방문 전에 질문을 준비하세요</h2><p>체크 상태는 상담 기록과 연결됩니다. 계정 저장과 기록 공유는 직접 선택할 수 있습니다.</p></div><button type="button" data-analysis-go="compare">비교표로 돌아가기</button></header><div class="analysis-consultation-layout"><div class="analysis-consultation-list">${cards || '<p class="analysis-empty">상담을 준비할 시설을 먼저 선택해 주세요.</p>'}</div><aside class="analysis-consultation-side"><section><h3>가족과 후보 공유</h3><p>공개 기관기호만 담긴 링크로 같은 시설을 다시 확인할 수 있습니다.</p><button type="button" class="analysis-primary" data-analysis-share>비교 시설 공유</button><p id="analysisShareStatus" role="status" aria-live="polite"></p></section><section><h3>방문용 확인표</h3><p>주소와 개인 조건 없이 현재 질문표만 인쇄합니다.</p><button type="button" data-analysis-print>질문표 인쇄</button></section><section><h3>지도에서 이어보기</h3><p>보관한 전체 후보의 위치·상세정보·경로를 확인합니다.</p><a class="analysis-action" href="${esc(mapBasketLink())}" rel="nofollow">담은 기관 지도 보기</a></section><section class="analysis-session-note"><strong>다른 기기에서도 이어보기</strong><p>상담 기록에서 답변을 작성하고 계정에 저장할 수 있습니다.</p><a class="analysis-action" href="care-records.html">상담 기록 열기</a></section></aside></div>`;
+    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 4단계</span><h2 tabindex="-1">전화와 방문 전에 질문을 준비하세요</h2><p>체크 상태는 상담 기록과 연결됩니다. 계정 저장과 기록 공유는 직접 선택할 수 있습니다.</p></div><button type="button" data-analysis-go="compare">비교표로 돌아가기</button></header><div class="analysis-consultation-layout"><div class="analysis-consultation-list">${cards || '<p class="analysis-empty">상담을 준비할 시설을 먼저 선택해 주세요.</p>'}</div><aside class="analysis-consultation-side"><section id="analysisGuardianContact"></section><section><h3>가족과 후보 공유</h3><p>공개 기관기호만 담긴 링크로 같은 시설을 다시 확인할 수 있습니다.</p><button type="button" class="analysis-primary" data-analysis-share>비교 시설 공유</button><p id="analysisShareStatus" role="status" aria-live="polite"></p></section><section><h3>방문용 확인표</h3><p>주소와 개인 조건 없이 현재 질문표만 인쇄합니다.</p><button type="button" data-analysis-print>질문표 인쇄</button></section><section><h3>지도에서 이어보기</h3><p>보관한 전체 후보의 위치·상세정보·경로를 확인합니다.</p><a class="analysis-action" href="${esc(mapBasketLink())}" rel="nofollow">담은 기관 지도 보기</a></section><section class="analysis-session-note"><strong>다른 기기에서도 이어보기</strong><p>상담 기록에서 답변을 작성하고 계정에 저장할 수 있습니다.</p><a class="analysis-action" href="care-records.html">상담 기록 열기</a></section></aside></div>`;
+    void mountGuardianContact($('analysisGuardianContact')); // SOFTM-GUARDIAN 날짜:20261120 : 상담 회신을 받을 계정 소유자 표시
+
 }
 function syncBasket() {
     if (!current) return;
@@ -379,8 +407,8 @@ if (savedPoint) void originController.bind(savedPoint);
 else if (!$('analysisAddress').value.trim()) void originController.locate();
 /** SOFTM-ANALYSIS-ORIGIN END */
 $('analysisForm').addEventListener('submit', submit);
-$('analysisForm').addEventListener('input', () => { const input = draft(); saveConditions({type:input.type,address:input.address,radius:input.radiusKm,preferences:[...input.selected]}); updateConditionSummary(); if (busy || current || !$('analysisAddressChoices').hidden) invalidate(); });
-$('analysisType').addEventListener('change', () => { invalidate(); renderCriteria(); });
+$('analysisForm').addEventListener('input', () => { const input = draft(); saveConditions({type:input.type,address:input.address,radius:input.radiusKm,preferences:[...input.manualSelected]}); updateConditionSummary(); if (busy || current || !$('analysisAddressChoices').hidden) invalidate(); });
+$('analysisType').addEventListener('change', () => { invalidate(); renderCriteria(); renderRecipient(); });
 $('analysisCriteria').addEventListener('change', () => { const count = $('analysisCriteria').querySelectorAll('input:checked').length; $('analysisPreferenceCount').textContent = count ? `${count}개 선택` : '선택 안 함'; updateConditionSummary(); });
 $('analysisCancel').onclick = () => invalidate('분석을 취소했습니다. 입력한 조건은 유지됩니다.');
 $('analysisRadius').addEventListener('change', updateConditionSummary); // SOFTM-GUIDED-COMPARE 날짜:20261119 : 거리 선택과 요약 카드 문구를 즉시 일치
@@ -423,3 +451,6 @@ window.addEventListener('pageshow', () => { if (current) { current.basket = Care
 window.addEventListener('popstate', event => setStep(event.state?.analysisStep || (current ? 'candidates' : 'conditions'), { focus: false }));
 history.replaceState({ ...history.state, analysisStep: 'conditions' }, '', location.href); updateConditionSummary(); // SOFTM-GUIDED-COMPARE 날짜:20261119 : 새로고침 주소에 돌봄 조건을 노출하지 않고 단계 기록만 브라우저 상태로 보존
 /** SOFTM-CARE-ANALYSIS END */
+
+void loadRecipient(); // SOFTM-GUARDIAN 날짜:20261120 : 검색 UI를 막지 않고 개인 대상자 정보를 별도로 불러옴
+window.addEventListener('pageshow',event=>{if(event.persisted)void loadRecipient();}); // SOFTM-GUARDIAN 날짜:20261120 : 뒤로가기로 복원한 대상자도 현재 계정과 저장 상태를 다시 확인
