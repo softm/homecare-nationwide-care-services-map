@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="dcterms.modified" content="2026-11-20"> <!-- SOFTM-COST-INFOGRAPHIC 날짜:20261120 : 등급·본인부담금 인포그래픽 반영일을 사이트맵과 일치 -->
   <title>2026년 장기요양 월 예상 비용 | 돌봄한눈</title>
   <meta name="description" content="요양원·공동생활가정, 주야간보호, 방문요양의 2026년 월 예상 비용을 장기요양등급·본인부담 유형·이용량에 따라 확인하세요.">
   <meta name="robots" content="index,follow">
@@ -14,7 +15,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="돌봄한눈">
   <link rel="stylesheet" href="care-theme.css?v=20260904-1">
-  <link rel="stylesheet" href="care-cost.css?v=20260904-1">
+  <link rel="stylesheet" href="care-cost.css?v=20261120-2"> <!-- SOFTM-COST-INFOGRAPHIC 날짜:20261120 : 새 비용 인포그래픽 서식을 캐시 없이 적용 -->
   <!-- SOFTM-COST-ADS START 날짜:20260904 : 비용 확인을 마친 자리에서 사업자 문의를 접수하도록 광고·문의 공통 자원을 연결 -->
   <link rel="stylesheet" href="partner-banner.css?v=20260904-1">
   <link rel="stylesheet" href="partner-inquiry.css?v=20260917-1">
@@ -49,7 +50,25 @@
     <p class="cost-eyebrow">돌봄을 준비하는 한 걸음</p>
     <h1>우리 가족의 월 돌봄 예산</h1>
     <p class="cost-page-lead">이용자의 등급과 돌봄 방식에 따라 비용이 달라집니다. 예상 금액을 확인하고, 마음에 드는 기관에 구체적인 비용을 물어보세요.</p>
-    <div data-care-cost-page></div>
+    <!-- SOFTM-COST-INFOGRAPHIC START 날짜:20261120 : 등급부터 최종 확인까지 비용을 이루는 네 요소를 계산기 앞에서 안내 -->
+    <section class="cost-infographic" id="cost-grade-guide" aria-labelledby="cost-grade-guide-title">
+      <header class="cost-infographic-heading">
+        <p class="cost-infographic-series">원스톱 심리스 인포그래픽 03</p>
+        <h2 id="cost-grade-guide-title">장기요양등급만 알면 실제 월 비용도 알 수 있을까요?</h2>
+        <p>등급은 출발점입니다. 이용할 급여, 본인부담 유형, 월 한도 초과분과 비급여까지 함께 확인해야 예상 부담액에 가까워집니다.</p>
+      </header>
+      <ol class="cost-infographic-steps">
+        <li><span class="cost-infographic-number" aria-hidden="true">01</span><strong>등급과 급여 선택</strong><p>장기요양등급과 이용할 돌봄 방식에 따라 월 한도와 공식 수가가 달라집니다. 장애 정도를 장기요양등급으로 바꾸어 추정하지 않습니다.</p></li>
+        <li><span class="cost-infographic-number" aria-hidden="true">02</span><strong>본인부담 유형 확인</strong><p>일반·감경·면제 여부에 따라 한도 안 급여의 부담률이 달라집니다. 수급자증명서 등 본인의 적용 유형을 기준으로 선택하세요.</p></li>
+        <li><span class="cost-infographic-number" aria-hidden="true">03</span><strong>초과분·비급여 더하기</strong><p>월 한도를 넘은 급여액은 전액 본인부담이며, 식비·상급침실료 등 비급여는 기관별 실제 금액을 따로 확인해야 합니다.</p></li>
+        <li><span class="cost-infographic-number" aria-hidden="true">04</span><strong>기관에 최종 확인</strong><p>계산 결과는 공식 수가를 이용한 예상치입니다. 실제 이용일수·가감액·계약 조건을 반영한 청구액은 이용 기관에서 확인하세요.</p></li>
+      </ol>
+      <p class="cost-infographic-formula"><strong>예상 부담액</strong><span>한도 안 급여의 본인부담</span><span aria-hidden="true">＋</span><span>월 한도 초과분</span><span aria-hidden="true">＋</span><span>선택한 비급여</span></p>
+      <div class="cost-infographic-action"><div><strong>등급을 임의로 선택하지 않아도 됩니다</strong><span>확인된 조건만 입력하고 모르는 항목은 기관이나 공단에 먼저 문의하세요.</span></div><a href="#cost-calculator">내 조건으로 예상 비용 계산하기</a></div>
+      <footer class="cost-infographic-note"><strong>출처·기준일</strong><span>2026년 보건복지부 장기요양급여 제공기준·급여비용 고시와 본인부담 안내를 기준으로 계산합니다. 급여 자격과 실제 청구액은 국민건강보험공단과 이용 기관에서 최종 확인하세요.</span></footer>
+    </section>
+    <div id="cost-calculator" data-care-cost-page></div>
+    <!-- SOFTM-COST-INFOGRAPHIC END -->
     <noscript><p>계산에는 자바스크립트가 필요합니다. 공단 1577-1000 또는 이용할 기관에서 등급별 비용을 안내받을 수 있습니다.</p></noscript>
     <!-- SOFTM-COST-ADS START 날짜:20260904 : 비용 입력·결과를 가리지 않도록 계산기 밖 하단에만 광고 한 개를 제공 -->
     <aside class="content-ad" id="costAdZone" aria-label="광고 및 제휴 안내">

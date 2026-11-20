@@ -8,6 +8,8 @@ const serviceGuide = read('service-guide.html');
 const about = read('about.html');
 const picker = read('care-category-picker.js');
 const index = read('index.html');
+const careCost = read('care-cost.html');
+const costStyles = read('care-cost.css');
 const styles = read('care-seamless-journey.css');
 const sitemap = read('sitemap.xml');
 const stages = [
@@ -109,6 +111,25 @@ test('두 번째 후속 인포그래픽은 평가·정원·인력을 단정 없�
   assert.match(styles, /\.care-evidence-points \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(styles, /@media \(max-width: 900px\)[\s\S]*?\.care-evidence-points \{ grid-template-columns: 1fr; \}/);
   assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/about\.html<\/loc><lastmod>2026-11-20<\/lastmod>/);
+});
+
+test('세 번째 후속 인포그래픽은 등급부터 실제 부담액 확인까지 비용 요소를 안내한다', () => {
+  const topic = careCost.match(/<section class="cost-infographic"[\s\S]*?<\/section>/)?.[0] || '';
+  assert.match(topic, /id="cost-grade-guide"/);
+  assert.match(topic, /장기요양등급만 알면 실제 월 비용도 알 수 있을까요/);
+  assert.equal((topic.match(/<li>/g) || []).length, 4);
+  for (const text of ['등급과 급여 선택', '본인부담 유형 확인', '초과분·비급여 더하기', '기관에 최종 확인']) assert.match(topic, new RegExp(text));
+  assert.match(topic, /한도 안 급여의 본인부담/);
+  assert.match(topic, /월 한도 초과분/);
+  assert.match(topic, /선택한 비급여/);
+  assert.match(topic, /href="#cost-calculator">내 조건으로 예상 비용 계산하기/);
+  assert.match(topic, /2026년 보건복지부/);
+  assert.match(topic, /국민건강보험공단과 이용 기관에서 최종 확인/);
+  assert.match(careCost, /id="cost-calculator" data-care-cost-page/);
+  assert.match(costStyles, /\.cost-infographic-steps \{[^}]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(costStyles, /@media \(max-width: 600px\)[\s\S]*?\.cost-infographic-steps \{ grid-template-columns: 1fr; \}/);
+  assert.match(costStyles, /\.cost-infographic-action a \{[^}]*min-height: 46px/);
+  assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/care-cost\.html<\/loc><lastmod>2026-11-20<\/lastmod>/);
 });
 
 test('공식 서비스 구분·자료 출처와 기존 핵심 행동을 보존한다', () => {
