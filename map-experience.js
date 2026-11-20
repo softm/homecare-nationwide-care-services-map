@@ -846,10 +846,17 @@
         /** SOFTM-SAVED-SELECTION START 날짜:20260914 : 클릭한 기관을 마커 갱신의 자동 스크롤 선택이 덮지 않도록 유지 */
         bindSelectionIntent(bar); // SOFTM-MARKER-PERSIST 날짜:20260915 : 담은 기관의 마커 선택도 실제 목록 조작 전까지 유지
         let explicitId = null;
+        /** SOFTM-SAVED-CLICK-SELECTION START 날짜:20261120 : 목록 전용 모드에서도 클릭한 카드의 선택 강조를 상세 팝업과 즉시 동기화 */
+        const activateCard = card => {
+            if (!card || active === card) return;
+            active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
+            active = card; card.classList.add('care-scroll-active'); card.setAttribute('aria-current', 'true');
+        };
+        /** SOFTM-SAVED-CLICK-SELECTION END */
         document.addEventListener('click', event => {
             const card = event.target.closest('[data-basket-id]');
             if (workspace !== 'saved' || !card || event.target.closest('[data-care-basket],.care-drag-handle')) return;
-            explicitId = card.dataset.basketId; schedule();
+            explicitId = card.dataset.basketId; activateCard(card); schedule(); // SOFTM-SAVED-CLICK-SELECTION 날짜:20261120 : 상세 전환 전에 목록의 현재 기관 표시를 먼저 갱신
         }, true);
         const resumeScrollSelection = () => { explicitId = null; };
         for (const name of ['wheel', 'touchmove']) bar.addEventListener(name, resumeScrollSelection, { passive: true });
@@ -887,10 +894,7 @@
             const card = cards.find(node => node.dataset.basketId === explicitId) || (atEnd ? visible.at(-1) : atStart ? visible[0] : visible.find(node => node.getBoundingClientRect().bottom > selectionLine) || visible.at(-1)); // SOFTM-SAVED-SELECTION 날짜:20260914 : 직접 선택한 담은 기관을 자동 가시 카드보다 우선
             /** SOFTM-SAVED-SCROLL-EARLY END */
             if (!card) return;
-            if (active !== card) {
-                active?.classList.remove('care-scroll-active'); active?.removeAttribute('aria-current');
-                active = card; card.classList.add('care-scroll-active'); card.setAttribute('aria-current', 'true');
-            }
+            activateCard(card); // SOFTM-SAVED-CLICK-SELECTION 날짜:20261120 : 클릭과 스크롤이 같은 선택 표시 함수를 사용
             const id = card.dataset.basketId;
             if (requested) options.scrollDetail?.(id);
             options.mobileFocus?.(id, requested, true);
