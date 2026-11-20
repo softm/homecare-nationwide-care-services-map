@@ -4,6 +4,8 @@ import { authorizeUrlWithPkce, exchangeProfile, providerConfig } from './oauth.m
 import { cleanWorkspace, shareSnapshot } from './workspace.mjs';
 import { listRegistrations, saveRegistration, uploadDocument, submitRegistration, reviewRegistration, downloadDocument } from './registrations.mjs';
 
+import {recipientRoute,validateGuardian} from './recipients.mjs'; // SOFTM-GUARDIAN 날짜:20261120 : 대상자와 보호자 연락처의 소유권을 같은 세션으로 검증
+
 const AGE=7*24*3600;
 const output=(data,status=200,headers={})=>Response.json({data},{status,headers});
 const statementChanges=result=>Number(result?.meta?.changes||0);
@@ -125,7 +127,7 @@ export async function completeDeletion(env,userId,accountDelete) {
  const tasks=[sql(env.INSTITUTIONS_DB,'DELETE FROM registration_events WHERE registration_id IN(SELECT id FROM member_registrations WHERE user_id=?) OR actor_id=?',userId,userId),sql(env.INSTITUTIONS_DB,'DELETE FROM member_registrations WHERE user_id=?',userId),sql(env.INSTITUTIONS_DB,'DELETE FROM member_document_deletions WHERE user_id=?',userId)];
  if(accountDelete)tasks.push(sql(env.INSTITUTIONS_DB,"UPDATE institution_memberships SET status='revoked',updated_at=datetime('now') WHERE user_id=?",userId));
  await env.INSTITUTIONS_DB.batch(tasks);
- await env.DB.batch([sql(env.DB,'DELETE FROM shares WHERE user_id=?',userId),sql(env.DB,'DELETE FROM workspaces WHERE user_id=?',userId),sql(env.DB,'DELETE FROM sessions WHERE user_id=?',userId),...(accountDelete?[sql(env.DB,'DELETE FROM users WHERE id=?',userId)]:[]),sql(env.DB,'DELETE FROM deletion_jobs WHERE user_id=?',userId)]);
+ await env.DB.batch([sql(env.DB,'DELETE FROM shares WHERE user_id=?',userId),sql(env.DB,'DELETE FROM workspaces WHERE user_id=?',userId),sql(env.DB,'DELETE FROM care_recipients WHERE user_id=?',userId),sql(env.DB,'DELETE FROM sessions WHERE user_id=?',userId),...(accountDelete?[sql(env.DB,'DELETE FROM users WHERE id=?',userId)]:[]),sql(env.DB,'DELETE FROM deletion_jobs WHERE user_id=?',userId)]);
 }
 async function requestDeletion(request,env,user,accountDelete) {
  const body=await jsonBody(request,10000);
@@ -154,7 +156,9 @@ async function route(request,env) {
  if(path==='/api/auth/logout'&&request.method==='POST') {const user=await session(request,env,{csrf:true});await sql(env.DB,'DELETE FROM sessions WHERE token_hash=?',user.token_hash).run();return output({loggedOut:true},200,{'Set-Cookie':cookie(env)});}
  if(path==='/api/auth/complete'&&request.method==='POST') {const user=await session(request,env,{csrf:true}),body=await jsonBody(request,10000);if(user.kind!=='personal'||body.terms!==true)fail('invalid_onboarding','가입 정보를 확인해 주세요.');const p=profile(body);await sql(env.DB,"UPDATE users SET name=?,phone=?,province=?,city=?,onboarding='complete',terms_version=?,updated_at=? WHERE id=?",p.name,p.phone,p.province,p.city,TERMS,now(),user.id).run();return sessionResponse(env,await sql(env.DB,'SELECT * FROM users WHERE id=?',user.id).first(),200,user.token_hash);}
  if(path==='/api/auth/password'&&request.method==='POST') {const user=await session(request,env,{csrf:true}),body=await jsonBody(request,10000),c=await sql(env.DB,'SELECT * FROM credentials WHERE user_id=?',user.id).first();if(!c||!await verifyPassword(body.currentPassword,c.password_hash))fail('invalid_password','현재 비밀번호를 확인해 주세요.',401);const recoveryCode=random();await env.DB.batch([sql(env.DB,'UPDATE credentials SET password_hash=?,recovery_hash=? WHERE user_id=?',await hashPassword(body.password),await sha(recoveryCode),user.id),sql(env.DB,'DELETE FROM sessions WHERE user_id=?',user.id)]);const s=await newSession(env,user.id);return output({recoveryCode,csrf:s.csrf,user:publicUser(user)},200,{'Set-Cookie':cookie(env,s.raw,AGE)});}
- if(path==='/api/me/profile'&&request.method==='PATCH') {const user=await session(request,env,{complete:true,csrf:true}),body=await jsonBody(request,10000);if(!user.username)profile(body);await sql(env.DB,'UPDATE users SET name=?,phone=?,province=?,city=?,notifications=?,updated_at=? WHERE id=?',text(body.name,80),text(body.phone,30),text(body.province,30),text(body.city,40),body.notifications===false?0:1,now(),user.id).run();return output(publicUser(await sql(env.DB,'SELECT * FROM users WHERE id=?',user.id).first()));}
+ if(path==='/api/me/profile'&&request.method==='PATCH') {const user=await session(request,env,{complete:true,csrf:true}),body=await jsonBody(request,10000);if(!user.username)profile(body);if(await sql(env.DB,'SELECT user_id FROM care_recipients WHERE user_id=?',user.id).first())validateGuardian(body.name,body.phone);await sql(env.DB,'UPDATE users SET name=?,phone=?,province=?,city=?,notifications=?,updated_at=? WHERE id=?',text(body.name,80),text(body.phone,30),text(body.province,30),text(body.city,40),body.notifications===false?0:1,now(),user.id).run();return output(publicUser(await sql(env.DB,'SELECT * FROM users WHERE id=?',user.id).first()));}
+ // SOFTM-GUARDIAN 날짜:20261120 : 상담 연락처는 대상자가 아니라 가입한 보호자 계정에서 조회
+ if(path==='/api/me/care-recipient'&&['GET','PUT','DELETE'].includes(request.method))return recipientRoute(request,env,await session(request,env,{complete:true,csrf:mutate}));
  if(path==='/api/me/workspace'&&['GET','PUT'].includes(request.method))return workspace(request,env,await session(request,env,{complete:true,csrf:mutate}));
  if(['/api/me/vault','/api/me/account'].includes(path)&&request.method==='DELETE')return requestDeletion(request,env,await session(request,env,{csrf:true}),path.endsWith('/account'));
  if(path==='/api/me/shares'&&request.method==='GET') {const user=await session(request,env,{complete:true});return output((await sql(env.DB,'SELECT id,expires_at,created_at,viewed_at FROM shares WHERE user_id=? ORDER BY created_at DESC',user.id).all()).results);}
@@ -169,7 +173,14 @@ async function route(request,env) {
  fail('not_found','요청한 기능을 찾지 못했습니다.',404);
 }
 export async function handleRequest(request,env) {
- let response;try {response=await route(request,env);}catch(e){const constraint=String(e).includes('institution_already_managed');response=Response.json({error:{code:constraint?'institution_already_managed':e.code||'server_error',message:constraint?'이미 다른 담당자가 관리하는 기관입니다. 기존 권한을 확인해 주세요.':e.status?e.message:'요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'}},{status:constraint?409:e.status||500});}
+ /** SOFTM-GUARDIAN START 날짜:20261120 : 동시 변경에 대한 DB 연락처 제약도 재입력 가능한 오류로 안내 */
+ let response;
+ try {response=await route(request,env);}
+ catch(e){
+  const constraint=String(e).includes('institution_already_managed'),guardian=String(e).includes('guardian_contact_required');
+  response=Response.json({error:{code:guardian?'guardian_required':constraint?'institution_already_managed':e.code||'server_error',message:guardian?'연락받을 보호자의 이름과 휴대폰 번호를 먼저 저장해 주세요.':constraint?'이미 다른 담당자가 관리하는 기관입니다. 기존 권한을 확인해 주세요.':e.status?e.message:'요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'}},{status:guardian?400:constraint?409:e.status||500});
+ }
+ /** SOFTM-GUARDIAN END */
  const headers=new Headers(response.headers),origin=request.headers.get('Origin');
  headers.set('Cache-Control','no-store');headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','no-referrer');headers.set('Vary','Origin');
  if(origin&&allowedOrigin(origin,env)){headers.set('Access-Control-Allow-Origin',origin);headers.set('Access-Control-Allow-Credentials','true');headers.set('Access-Control-Allow-Headers','Content-Type, X-CSRF-Token, If-Match');headers.set('Access-Control-Allow-Methods','GET, POST, PUT, PATCH, DELETE, OPTIONS');}
