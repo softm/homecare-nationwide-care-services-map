@@ -57,8 +57,8 @@ test('지도 첫 진입은 위저드 없이 유형 선택 후 지도·목록으�
   assert.match(picker, /선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/);
   assert.doesNotMatch(picker, /원스톱 심리스 · 1\/4|aria-current="step"|4단계 요약/);
   assert.match(picker, /href="service-guide\.html#seamless-journey"/);
-  assert.match(index, /care-seamless-journey\.css\?v=20261119-3/);
-  assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/service-guide\.html<\/loc><lastmod>2026-11-19<\/lastmod>/);
+  assert.match(index, /care-seamless-journey\.css\?v=20261120-map1/);
+  assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/service-guide\.html<\/loc><lastmod>2026-11-20<\/lastmod>/);
   assert.ok(existsSync(new URL('../service-guide.html', import.meta.url)));
 });
 
@@ -67,6 +67,48 @@ test('인포그래픽은 반응형 카드·세로 타임라인과 44px 링크를
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*?\.care-seamless-journey--cards \{[\s\S]*?grid-template-columns: 1fr/);
   assert.match(styles, /\.care-seamless-entry-link \{[\s\S]*?min-height: 44px/);
   assert.doesNotMatch(styles, /animation:/);
+});
+
+test('첫 후속 인포그래픽은 질문·핵심 유형·CTA·출처와 주의사항을 모두 제공한다', () => {
+  const topic = serviceGuide.match(/<section class="care-topic-infographic"[\s\S]*?<\/section>/)?.[0] || '';
+  assert.match(topic, /id="care-type-guide"/);
+  assert.match(topic, /우리 부모님은 어디에서 돌봄받는 게 편할까요/);
+  assert.equal((topic.match(/<li>/g) || []).length, 4);
+  for (const text of ['방문요양·방문간호·방문목욕', '주·야간보호센터', '요양원·공동생활가정', '요양병원·단기보호·치매전담형']) assert.match(topic, new RegExp(text));
+  assert.match(topic, /href="index\.html">유형 선택하고 기관 찾기/);
+  assert.match(topic, /국민건강보험공단 공개 분류/);
+  assert.match(topic, /건강보험심사평가원 공개자료/);
+  assert.match(topic, /실제 이용 가능 여부와 적합성.*최종 확인/);
+  assert.match(styles, /\.care-type-paths \{[^}]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*?\.care-type-paths \{ grid-template-columns: 1fr; \}/);
+});
+
+test('지도 검색·기관 목록·상세에도 같은 판단 인포그래픽을 제공한다', () => {
+  const listStyles = read('care-list-view.css');
+  const decisionStyles = read('care-decision-summary.css');
+  assert.match(index, /class="care-search-infographic"/);
+  for (const text of ['위치', '생활권 안 후보 찾기', '공개정보', '평가·정원·인력 비교', '기관 확인', '빈자리·비용·운영 상담']) assert.match(index, new RegExp(text));
+  assert.match(index, /function careListEvidenceHtml\(c\)[\s\S]*?if\(!globalThis\.CareDecisionSummary\)return ''/);
+  assert.match(listStyles, /\.care-list-evidence \{ display:block/);
+  assert.match(styles, /\.care-search-infographic ol \{[^}]*grid-template-columns: repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(decisionStyles, /data-status="confirmed"[^}]*content:'✓'/);
+  assert.match(decisionStyles, /data-status="verify"[^}]*content:'!'/);
+  assert.match(decisionStyles, /data-status="unknown"[^}]*content:'–'/);
+});
+
+test('두 번째 후속 인포그래픽은 평가·정원·인력을 단정 없이 읽도록 안내한다', () => {
+  const topic = about.match(/<section class="care-topic-infographic care-evidence-infographic"[\s\S]*?<\/section>/)?.[0] || '';
+  assert.match(topic, /id="evidence-guide"/);
+  assert.match(topic, /평가가 높고 정원이 크면 더 좋은 기관일까요/);
+  assert.equal((topic.match(/<li>/g) || []).length, 4);
+  for (const text of ['평가는 연도부터 확인', '정원은 빈자리가 아닙니다', '인력은 기준일의 공개 현황', '미평가·미확인은 낮은 점수가 아닙니다']) assert.match(topic, new RegExp(text));
+  assert.match(topic, /href="index\.html">기관 공개정보 비교하기/);
+  assert.match(topic, /국민건강보험공단/);
+  assert.match(topic, /건강보험심사평가원/);
+  assert.match(topic, /기관과 공식 출처에서 최종 확인/);
+  assert.match(styles, /\.care-evidence-points \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(styles, /@media \(max-width: 900px\)[\s\S]*?\.care-evidence-points \{ grid-template-columns: 1fr; \}/);
+  assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/about\.html<\/loc><lastmod>2026-11-20<\/lastmod>/);
 });
 
 test('공식 서비스 구분·자료 출처와 기존 핵심 행동을 보존한다', () => {
