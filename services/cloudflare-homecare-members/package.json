@@ -1,0 +1,19 @@
+{
+  "name": "@softm/homecare-members",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --config wrangler.jsonc --config ../cloudflare-homecare/wrangler.jsonc --local --ip 127.0.0.1 --port 8788 --var ENVIRONMENT:development --var WEB_ORIGIN:http://127.0.0.1:3000 --var API_ORIGIN:http://127.0.0.1:8788 --var DEV_ORIGIN:http://127.0.0.1:3000",
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check src/index.mjs && node --check src/security.mjs && node --check src/registrations.mjs && npm test",
+    "db:local": "wrangler d1 migrations apply DB --local && wrangler d1 migrations apply INSTITUTIONS_DB --local",
+    "deploy": "node scripts/preflight.mjs && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.165.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

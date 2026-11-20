@@ -1,0 +1,22 @@
+// SOFTM-MEMBERS START 날짜:20261120 : 기존 정적 웹을 유지하고 돌봄한눈 계정만 별도 Workers·D1·R2로 분리
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "softm-homecare-members",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-11-18",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "d1_databases": [
+    { "binding": "DB", "database_name": "softm-homecare-members", "database_id": "00000000-0000-0000-0000-000000000002", "migrations_dir": "migrations" },
+    { "binding": "INSTITUTIONS_DB", "database_name": "softm-homecare-pilot", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "../cloudflare-homecare/migrations" }
+  ],
+  "r2_buckets": [{ "binding": "DOCUMENTS", "bucket_name": "softm-homecare-private-documents" }],
+  "services": [{ "binding": "INSTITUTIONS", "service": "softm-homecare-pilot" }],
+  "vars": {
+    "WEB_ORIGIN": "https://homecare.designboard.net",
+    "API_ORIGIN": "https://api.homecare.designboard.net",
+    "NAVER_PUBLIC_ENABLED": "false"
+  },
+  "triggers": { "crons": ["31 18 * * *"] }
+}
+// SOFTM-MEMBERS END
