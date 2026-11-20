@@ -10,8 +10,8 @@ Node 22.13 이상에서 이 디렉토리의 `npm install`, `npm test`를 실행�
 
 ## 운영 연결
 
-1. 기존 Cloudflare 계정의 실제 기관 D1/R2와 Worker 상태를 확인한다. 현재 저장소의 `00000000-…` ID는 운영 리소스를 증명하지 않는 예시 값이다.
-2. 전용 `softm-homecare-members` D1과 비공개 `softm-homecare-private-documents` R2를 만들고 실제 ID를 구성한다. `INSTITUTIONS_DB`는 기관 Worker의 DB와 같은 리소스여야 한다. `npm run deploy`의 preflight는 예시 ID를 거부한다.
+1. 기존 Cloudflare 계정의 실제 D1/R2와 Worker 상태를 확인한다. 2026-11-20 전용 회원·기관 D1을 새로 생성해 실제 ID를 구성했으며, 단계별 현황은 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)을 따른다. DB 생성은 Worker 배포 완료를 의미하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 실제 생성된 DB와 아직 연결되지 않은 서비스를 구분 -->
+2. 기존 전용 D1을 재사용하고 비공개 `softm-homecare-private-documents` R2의 실제 생성·비공개 상태를 확인한다. `INSTITUTIONS_DB`는 기관 Worker의 DB와 같은 리소스여야 한다. `npm run deploy`의 preflight는 예시 ID를 거부하지만 R2 가입·DNS·SNS 연결까지 검증하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 중복 DB 생성과 설정 검사만으로 운영 준비를 단정하는 오류 방지 -->
 3. 회원 DB에 `migrations/0001_members.sql`과 `0002_care_recipient.sql`을 순서대로, 기관 DB에 기존 마이그레이션과 `0006_member_registration.sql`을 적용한다. 원격 적용 전 백업과 현재 스키마를 확인한다.
 4. 전용 Worker를 `api.homecare.designboard.net`에 연결한다. 웹은 기존 `homecare.designboard.net`에 남는다. 기관 Worker의 `ACCOUNT` 바인딩은 `softm-homecare-members`, 회원 Worker의 `INSTITUTIONS` 바인딩은 `softm-homecare-pilot`이다.
 5. 각 제공자에 `https://api.homecare.designboard.net/api/auth/oauth/{google|kakao|naver}/callback`을 등록한다. `GOOGLE_CLIENT_ID/SECRET`, `KAKAO_CLIENT_ID/SECRET`, `NAVER_CLIENT_ID/SECRET`을 Wrangler secrets로 설정한다. 네이버 공개 검수 완료 후 `NAVER_PUBLIC_ENABLED=true`로 바꾼다. 비밀키는 파일·Git·로그에 넣지 않는다.

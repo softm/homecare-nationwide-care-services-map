@@ -1,18 +1,20 @@
-// SOFTM-MEMBERS START 날짜:20261120 : 기존 정적 웹을 유지하고 돌봄한눈 계정만 별도 Workers·D1·R2로 분리
+// SOFTM-MEMBERS START 날짜:20261120 : 실제 전용 계정·APAC D1을 연결하고 정적 웹과 회원 Workers·R2를 분리
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "softm-homecare-members",
+  "account_id": "324650409b822e9887bee48b932b4d71",
   "main": "src/index.mjs",
   "compatibility_date": "2026-11-18",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "d1_databases": [
-    { "binding": "DB", "database_name": "softm-homecare-members", "database_id": "00000000-0000-0000-0000-000000000002", "migrations_dir": "migrations" },
-    { "binding": "INSTITUTIONS_DB", "database_name": "softm-homecare-pilot", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "../cloudflare-homecare/migrations" }
+    { "binding": "DB", "database_name": "softm-homecare-members", "database_id": "a7670255-4de9-4a63-a8fc-445e6218fadd", "migrations_dir": "migrations" },
+    { "binding": "INSTITUTIONS_DB", "database_name": "softm-homecare-pilot", "database_id": "b1068cbf-7f1e-4c28-99ea-8fb65da84b3c", "migrations_dir": "../cloudflare-homecare/migrations" }
   ],
   "r2_buckets": [{ "binding": "DOCUMENTS", "bucket_name": "softm-homecare-private-documents" }],
   "services": [{ "binding": "INSTITUTIONS", "service": "softm-homecare-pilot" }],
   "vars": {
+    "ENVIRONMENT": "production",
     "WEB_ORIGIN": "https://homecare.designboard.net",
     "API_ORIGIN": "https://api.homecare.designboard.net",
     "NAVER_PUBLIC_ENABLED": "false"
