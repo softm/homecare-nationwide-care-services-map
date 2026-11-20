@@ -9,11 +9,22 @@
 | 배포 인증 | Wrangler OAuth 연결·계정 조회·D1 목록 조회 성공 | 승인된 범위에서만 사용 |
 | 회원 D1 | `softm-homecare-members` 생성, 0001·0002 적용, 회원·대상자 0건 조회 | Worker 연결 후 가입·저장·삭제 검증 |
 | 기관 D1 | `softm-homecare-pilot` 생성, 0001·0006 적용, 기관·신청 0건 조회 | Worker 연결 후 증빙·권한·게시 검증 |
-| R2 | 가입 조건 확인 후 결제수단 입력 단계 | 사용자 결제수단 등록·활성화, 버킷 생성·비공개 확인 |
-| Worker | 회원·기관 설정과 `deploy --dry-run` 번들 통과 | R2·양방향 바인딩·secret 연결 후 실제 배포 |
+| 파일 저장소 | R2 미활성·버킷 미생성. 사용자는 카드·결제수단 미등록을 희망 | R2 유지와 무료 대안을 먼저 비교·선정. 결제수단 등록을 다음 작업으로 자동 진행하지 않음 |
+| Worker | 회원·기관 설정과 `deploy --dry-run` 번들 통과 | 저장소 선정·양방향 바인딩·secret 연결 후 실제 배포 |
 | 회원 API 도메인 | `api.homecare.designboard.net` 미등록, Cloudflare 계정에 연결된 도메인 없음 | 현재 카페24 DNS를 고려한 연결 방식 결정 |
 | 공개 웹 | GitHub Pages는 `main` 루트, 신규 회원 화면 미배포 | 회원 API HTTPS·쿠키 동작 검증 후 반영 |
 | SNS·알림 | 실제 제공자 설정 미연결 | 제공자 앱 정보·콜백 등록, 발송 채널 준비 |
+
+## 사용자 요청에 따른 보류와 검토
+
+<!-- SOFTM-STORAGE-HOLD START 날짜:20261120 : 로그인 보류와 저장소 미선정 상태를 외부 리소스 준비와 구분 -->
+
+- 사용자는 [기관 운영정보·사진 관리](https://homecare.designboard.net/institution-portal.html)의 로그인부터 동작하지 않는다고 보고했고, 이 문제를 우선 보류하도록 요청했다. 로그인 문제는 미해결이며 이번 저장소 비교에서 인증 코드를 수정하지 않는다.
+- 확인한 운영 HTML은 HTTP 200이고 기존 공통 계정 로그인을 안내한다. 해당 운영 JS는 `softm-hannun-account.softm.workers.dev`와 `softm-homecare-pilot.softm.workers.dev`를 참조한다. 기관 API `/health`는 HTTP 404와 `error code: 1042`를 반환했다. 이것만으로 로그인 실패의 근본 원인을 확정하지 않으며, 전용 회원 기능 브랜치의 동작과 혼동하지 않는다.
+- 현재 우선 과제는 [R2와 무료 파일 저장소 비교](HOMECARE-STORAGE-DECISION.md)다. 공급자 변경·가입·이전은 실행하지 않았고 R2 결제도 진행하지 않았다. 파일을 D1로 이동하지 않았다.
+- 재개 시에는 저장소 결정과 별도로 실제 로그인 → 기관 권한 확인 → 사진 업로드·조회·삭제를 운영 환경에서 검증한다.
+
+<!-- SOFTM-STORAGE-HOLD END -->
 
 원격 DB는 기존 서비스 DB 여섯 개와 별도로 새로 만들었으며 기존 DB 데이터는 변경하지 않았다. APAC 위치 힌트로 생성했고 확인 요청의 실제 응답은 회원 DB `SIN`, 기관 DB `NRT`였다. 위치 힌트와 응답 위치를 한국 내 저장 보장으로 해석하지 않는다. 새 빈 DB에 초기 스키마를 적용했으며 기존 운영 DB를 마이그레이션할 때는 별도 백업·현재 스키마 확인이 필요하다.
 
@@ -28,7 +39,7 @@
 | 증빙 R2 예정 이름 | `softm-homecare-private-documents` → 회원 Worker `DOCUMENTS` |
 | 사진 R2 예정 이름 | `softm-homecare-pilot-photos` → 기관 Worker `PHOTOS` |
 
-D1에는 회원·기관·상담·심사 상태와 파일 키를 저장하고 PDF·이미지 원본은 R2에 분리한다. 두 R2 버킷 모두 `r2.dev` 공개 URL과 Custom Domain 공개 접근을 끄고 Worker에서 권한·게시 상태를 확인한다. 증빙 다운로드는 신청자·심사 담당자만 허용한다.
+현재 코드는 D1에 회원·기관·상담·심사 상태와 파일 키를 저장하고 PDF·이미지 원본은 R2에 분리하도록 구현되어 있다. 실제 파일 저장소는 위의 비교 후 결정한다. R2를 선택할 경우 두 버킷 모두 `r2.dev` 공개 URL과 Custom Domain 공개 접근을 끄고 Worker에서 권한·게시 상태를 확인한다. 다른 저장소를 선택해도 증빙 다운로드는 신청자·심사 담당자만 허용하고, 기관 사진은 게시 상태를 확인하는 경계를 유지한다.
 
 ## 이 PC의 Wrangler 인증
 
