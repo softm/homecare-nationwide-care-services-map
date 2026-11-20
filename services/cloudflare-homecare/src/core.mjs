@@ -14,7 +14,7 @@ export const ALLOWED_IMAGE_TYPES = Object.freeze({
 });
 
 const DEFAULT_ALLOWED_ORIGINS = ["https://homecare.designboard.net", "https://softm.github.io"];
-const INSTITUTION_ID_PATTERN = /^[A-Za-z0-9._:-]{1,80}$/;
+const INSTITUTION_ID_PATTERN = /^[A-Za-z0-9._:-]{1,400}$/; // SOFTM-MEMBERS 날짜:20261120 : 출처가 포함된 심평원·수동등록 식별자 지원
 const RESOURCE_ID_PATTERN = /^[A-Za-z0-9_-]{1,80}$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
