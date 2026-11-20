@@ -1,4 +1,4 @@
-// SOFTM-MEMBERS START 날짜:20261120 : 실제 전용 계정·APAC D1을 연결하고 정적 웹과 회원 Workers·R2를 분리
+// SOFTM-MEMBERS START 날짜:20261121 : D1은 유지하고 카드 없는 Supabase 비공개 증빙 저장소로 연결 준비
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "softm-homecare-members",
@@ -11,9 +11,12 @@
     { "binding": "DB", "database_name": "softm-homecare-members", "database_id": "a7670255-4de9-4a63-a8fc-445e6218fadd", "migrations_dir": "migrations" },
     { "binding": "INSTITUTIONS_DB", "database_name": "softm-homecare-pilot", "database_id": "b1068cbf-7f1e-4c28-99ea-8fb65da84b3c", "migrations_dir": "../cloudflare-homecare/migrations" }
   ],
-  "r2_buckets": [{ "binding": "DOCUMENTS", "bucket_name": "softm-homecare-private-documents" }],
   "services": [{ "binding": "INSTITUTIONS", "service": "softm-homecare-pilot" }],
   "vars": {
+    "FILE_STORAGE_PROVIDER": "supabase",
+    "SUPABASE_URL": "https://feaouitfpiqjjqdxrtfx.supabase.co",
+    "SUPABASE_DOCUMENTS_BUCKET": "homecare-documents",
+    "FILE_UPLOADS_ENABLED": "false",
     "ENVIRONMENT": "production",
     "WEB_ORIGIN": "https://homecare.designboard.net",
     "API_ORIGIN": "https://api.homecare.designboard.net",
