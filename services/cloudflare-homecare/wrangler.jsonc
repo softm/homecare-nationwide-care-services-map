@@ -22,7 +22,7 @@
   "services": [
     {
       "binding": "ACCOUNT",
-      "service": "softm-hannun-account"
+      "service": "softm-homecare-members"
     }
   ],
   "vars": {
