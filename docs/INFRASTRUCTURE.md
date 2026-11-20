@@ -14,8 +14,8 @@
 | 기관 기본 데이터 | GitHub Pages 정적 파일 | `data/care/*.json.gz`, `data/care/manifest.json`, `care-data.js` | 지도 목록·마커·필터의 기본 자료 | 예, 상대경로 정적 파일 | 없음 |
 | 공단 상세·사진 | GitHub Pages 정적 파일 | `data/nhis/details/**/*.json.gz`, 기타 `data/nhis/**/*.json`, `nhis-static-data.js` | 두 지도가 공유하는 기관 상세·평가·사진 매니페스트 | 예, 상대경로 정적 파일 | 브라우저 인증정보 없음 | <!-- SOFTM-NHIS-GZIP 날짜:20260903 : 상세 압축 파일과 그 외 JSON의 배포 형식을 구분 -->
 | 기관 직접 제공 화면 | GitHub Pages 또는 로컬 정적 서버 | `institution-content.js`, `institution-content.css`, `institution-portal.html` | 승인된 기관의 운영정보·프로그램·사진 표시와 담당자 관리 화면 | 예 | 전용 회원의 HttpOnly 쿠키·CSRF, 회원 Worker의 기관 API 프록시 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 공단 정적 자료와 기관 직접 제공 작업본의 책임을 분리 -->
-| 기관 시범운영 API | Cloudflare Workers + D1 + R2 | `services/cloudflare-homecare` · `softm-homecare-pilot` | 기관 신청·권한·작업본·명시 게시·사진·익명 일별 통계 | 예 | `ACCOUNT` 서비스 바인딩, `EVENT_HASH_SECRET` | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 결제 기능 없는 기관용 쓰기 경로와 사진 저장소를 독립 운영 -->
-| 전용 회원 인증 | Cloudflare Workers + D1 + 비공개 R2 | `services/cloudflare-homecare-members` | 아이디·SNS 가입, 기록·가족 공유, 기관 증빙·심사 | 브라우저는 쿠키, 기관 Worker는 내부 서비스 바인딩 | 전용 OAuth secrets · private documents R2 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 로그인과 기관 관리 권한 승인을 별도 계층으로 유지 -->
+| 기관 시범운영 API | Cloudflare Workers + D1 + Supabase Storage | `services/cloudflare-homecare` · `softm-homecare-pilot` | 기관 신청·권한·작업본·명시 게시·사진·익명 일별 통계 | 예 | `ACCOUNT` 서비스 바인딩, `EVENT_HASH_SECRET` | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 결제 기능 없는 기관용 쓰기 경로와 사진 저장소를 독립 운영 -->
+| 전용 회원 인증 | Cloudflare Workers + D1 + 비공개 Supabase Storage | `services/cloudflare-homecare-members` | 아이디·SNS 가입, 기록·가족 공유, 기관 증빙·심사 | 브라우저는 쿠키, 기관 Worker는 내부 서비스 바인딩 | 전용 OAuth secrets · Supabase 서버 secret | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 로그인과 기관 관리 권한 승인을 별도 계층으로 유지 -->
 | 데이터 수집 현황 | GitHub Pages 정적 파일·GitHub 공개 API | `data-status.html`, `data-status.js`, 수집 매니페스트, Actions 최근 실행 API | 공개된 수집률·변경 경과·유형별 기준일과 실행 상태 표시 | 정적 JSON과 공개 Actions 상태 조회 | 인증정보 없음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 비밀키 없이 공개 수집 결과와 진행 중 실행을 구분해 확인 -->
 | 공단 데이터 수집 | GitHub Actions 또는 승인된 로컬 수집 환경 | `.github/workflows/refresh-nhis-static.yml`, `scripts/sync_nhis_static.py`, 로컬 사진 전용 `scripts/collect_missing_nhis_photos.py` | 공공데이터와 공단 공개 상세·사진 페이지를 배포 전 수집·정규화 | 브라우저 호출 아님 | OpenAPI는 `DATA_GO_KR_SERVICE_KEY`, 공개 사진 페이지는 키 불필요 | <!-- SOFTM-NHIS-MISSING-PHOTOS 날짜:20260904 : 로컬 사진 전용 실행 위치와 공개 페이지 인증 경계를 명시 -->
 | 길찾기 서버 | Firebase Functions v2 | `services/firebase-api` | 네이버 Directions 15 자동차 경로 중계 | `POST /directions`만 호출 | Google Secret Manager의 `NAVER_MAPS_API_SECRET` |
@@ -36,7 +36,7 @@
 | 공단 사진 | 브라우저 | `data/nhis/photos/{기관기호 앞 2자리}/{기관기호}.json` | 사진 탭을 열 때 정적 사진 매니페스트 로드 | 원본 이미지는 공단 공개 URL 사용 가능 |
 | 기관 직접 운영정보 | 브라우저→Cloudflare Worker | `GET /api/public/institutions/:id` | `published` 상태의 기관 확인 정보만 상세 화면에 별도 표시 | 공단 정적 상세를 덮어쓰거나 검색순위에 반영하지 않음 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 기관 입력과 공식 공개자료를 화면·데이터 양쪽에서 분리 -->
 | 기관 관리 | 담당자 브라우저→전용 회원 Worker→기관 Worker | `/connect`, `/api/institutions/*` | 아이디 쿠키·CSRF 인증 후 승인된 전용 UID↔기관 멤버십을 다시 확인 | 로그인만으로 수정권한을 부여하지 않고 일반 신청은 `pending` 유지 | <!-- SOFTM-INSTITUTION-PILOT 날짜:20261118 : 기관 사칭과 클라이언트 UID 신뢰를 방지 -->
-| 기관 사진 | 담당자 브라우저→Worker→R2 | `/api/institutions/:id/photos`, 공개 사진 API | JPEG·PNG·WebP 실제 시그니처·5 MiB·10장 상한 검증 후 저장 | 공개 기관·공개 사진일 때만 스트리밍, SVG 불허 |
+| 기관 사진 | 담당자 브라우저→Worker→Supabase | `/api/institutions/:id/photos`, 공개 사진 API | JPEG·PNG·WebP 실제 시그니처·5 MiB·10장 상한 검증 후 저장 | 공개 기관·공개 사진일 때만 스트리밍, SVG 불허 |
 | 기관 이용 현황 | 브라우저→Worker→D1 | `POST /api/public/events`, `GET /api/institutions/:id/stats` | 세션 난수를 날짜·기관·행동별 HMAC으로 변환해 중복 제거 후 합계 제공 | IP·User-Agent·bearer·난수 원문을 D1에 저장하지 않음 |
 | 수집 현황 | 브라우저 | `data/nhis/manifest.json`, `changes.json`, `checkpoints/*.json`, `data/care/manifest.json` | 공개된 수집률·최근 변경·유형별 기준일·샤드 완료 경과 표시 | 원본 수집 파일이나 비밀키는 읽지 않음 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 화면에 공개할 운영 지표와 비공개 수집 자격정보의 경계를 고정 -->
 | 최근 Actions 실행 | 브라우저→GitHub 공개 API | `api.github.com/repos/softm/homecare-nationwide-care-services-map/actions/workflows/refresh-nhis-static.yml/runs` | 최근 8회와 진행 중 상태 표시, 실행 중일 때만 90초 후 재확인 | 인증 없이 공개 저장소의 실행 메타정보만 조회 | <!-- SOFTM-DATA-STATUS 날짜:20260910 : 정적 매니페스트 반영 전에도 현재 실행 여부를 확인 -->
@@ -151,9 +151,9 @@
 
 현재 지도 화면과 검색 데이터는 정적 HTML/CSS/JS 구조 그대로다. `care-shell.mjs`가 지도 찾기·맞춤 찾기·담은 기관·상담 기록을 연결한다. 회원 정책과 로컬 검증/운영 연결 순서는 [HOMECARE-MEMBERS.md](HOMECARE-MEMBERS.md), [회원 Worker README](../services/cloudflare-homecare-members/README.md)를 따른다.
 
-기관 DB `0006_member_registration.sql`은 기존 기관 D1에 적용한다. 회원 D1은 별도이며 증빙 R2는 기관 공개사진 R2와 다르다. 기관 Worker `ACCOUNT`와 회원 Worker `INSTITUTIONS` 서비스 바인딩을 함께 배포해야 한다. 기존 공통 계정은 `?legacyAccount=1`에서 이전 보관소를 명시적으로 복원하는 경우에만 연결한다.
+기관 DB `0006_member_registration.sql`은 기존 기관 D1에 적용한다. 회원 D1은 별도이며 Supabase 증빙 버킷은 기관 사진 버킷과 분리한다. 기관 Worker `ACCOUNT`와 회원 Worker `INSTITUTIONS` 서비스 바인딩을 함께 배포해야 한다. 기존 공통 계정은 `?legacyAccount=1`에서 이전 보관소를 명시적으로 복원하는 경우에만 연결한다.
 
-저장소 설정의 D1 ID는 2026-11-20 생성·마이그레이션한 실제 전용 DB다. [운영 연결 기록](HOMECARE-DEPLOYMENT.md)에 인증·DB·R2·Worker·도메인·SNS별 상태를 구분한다. DB 준비와 로컬 번들 검사를 실제 Worker 배포·SNS 제공자 설정·운영 App Link 검증으로 간주하지 않는다. `api.homecare.designboard.net` DNS와 인증 자원이 준비되기 전에 웹의 회원 화면을 운영 메인에 배포하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 운영 DB 준비 결과와 서비스 공개 전제조건을 구분 -->
+저장소 설정의 D1 ID는 2026-11-20 생성·마이그레이션한 실제 전용 DB다. [운영 연결 기록](HOMECARE-DEPLOYMENT.md)에 인증·DB·Supabase·Worker·도메인·SNS별 상태를 구분한다. DB 준비와 로컬 번들 검사를 실제 Worker 배포·SNS 제공자 설정·운영 App Link 검증으로 간주하지 않는다. `api.homecare.designboard.net` DNS와 인증 자원이 준비되기 전에 웹의 회원 화면을 운영 메인에 배포하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 운영 DB 준비 결과와 서비스 공개 전제조건을 구분 -->
 <!-- SOFTM-MEMBERS END -->
 
 <!-- SOFTM-GUARDIAN START 날짜:20261120 : 보호자·대상자 정보의 서버 경계와 운영 적용 순서 -->
@@ -163,3 +163,7 @@
 
 공개 조건 매칭과 상담 질문은 기존 분석 엔진을 유지한다. 상담 회신 대상 표시는 계정 소유자 이름·휴대폰이며 실제 문자·이메일 전송 경로는 미연결이다. 이번 변경은 로컬 검증과 기능 브랜치 푸시 범위이며 운영 D1 적용·Worker 배포를 뜻하지 않는다.
 <!-- SOFTM-GUARDIAN END -->
+
+<!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 파일 저장소 실제 준비와 미배포 상태 기록 -->
+기관 파일은 담당자가 웹 회원가입·기관 관리 화면에서 올린다. 운영 구성은 `services/homecare-storage/file-storage.mjs`를 통해 Supabase private 버킷에 연결한다. 2026-11-21 Free·카드 없음·추가 과금 제한과 파일 왕복·익명 거부·삭제를 확인했다. 실제 Worker secret·배포·회원 업로드는 아직 미완료이며 `FILE_UPLOADS_ENABLED=false`다. D1은 파일 키·권한·메타데이터만 보관한다. [운영 상태](HOMECARE-DEPLOYMENT.md), [저장소 구성·남은 작업](../services/homecare-storage/README.md)을 따른다.
+<!-- SOFTM-SUPABASE-STORAGE END -->

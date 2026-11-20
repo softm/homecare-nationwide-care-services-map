@@ -2,15 +2,15 @@
 
 <!-- SOFTM-LIVE-D1 START 날짜:20261120 : 실제 외부 리소스 생성과 아직 완료되지 않은 운영 공개를 구분 -->
 
-## 2026-11-20 확인 결과
+## 2026-11-21 기준 확인 결과
 
 | 단계 | 실제 결과 | 남은 작업 |
 |---|---|---|
 | 배포 인증 | Wrangler OAuth 연결·계정 조회·D1 목록 조회 성공 | 승인된 범위에서만 사용 |
 | 회원 D1 | `softm-homecare-members` 생성, 0001·0002 적용, 회원·대상자 0건 조회 | Worker 연결 후 가입·저장·삭제 검증 |
 | 기관 D1 | `softm-homecare-pilot` 생성, 0001·0006 적용, 기관·신청 0건 조회 | Worker 연결 후 증빙·권한·게시 검증 |
-| 파일 저장소 | R2 미활성·버킷 미생성. 사용자는 카드·결제수단 미등록을 희망 | R2 유지와 무료 대안을 먼저 비교·선정. 결제수단 등록을 다음 작업으로 자동 진행하지 않음 |
-| Worker | 회원·기관 설정과 `deploy --dry-run` 번들 통과 | 저장소 선정·양방향 바인딩·secret 연결 후 실제 배포 |
+| 파일 저장소 | Supabase Free·결제수단 없음·추가 과금 제한 활성화 확인. 증빙·사진 비공개 버킷 생성 및 가상 파일 왕복·익명 거부·삭제 통과 | 독립 백업·복원, 무료 총량 제한 보완. R2는 미활성 유지 |
+| Worker | Supabase 파일 연결부 구현·테스트, 운영 구성의 R2 바인딩 제거. 업로드 기본 비활성 | 양방향 바인딩·Worker secret·공식 API 연결 후 배포 및 회원 동선 검증 |
 | 회원 API 도메인 | `api.homecare.designboard.net` 미등록, Cloudflare 계정에 연결된 도메인 없음 | 현재 카페24 DNS를 고려한 연결 방식 결정 |
 | 공개 웹 | GitHub Pages는 `main` 루트, 신규 회원 화면 미배포 | 회원 API HTTPS·쿠키 동작 검증 후 반영 |
 | SNS·알림 | 실제 제공자 설정 미연결 | 제공자 앱 정보·콜백 등록, 발송 채널 준비 |
@@ -21,7 +21,7 @@
 
 - 사용자는 [기관 운영정보·사진 관리](https://homecare.designboard.net/institution-portal.html)의 로그인부터 동작하지 않는다고 보고했고, 이 문제를 우선 보류하도록 요청했다. 로그인 문제는 미해결이며 이번 저장소 비교에서 인증 코드를 수정하지 않는다.
 - 확인한 운영 HTML은 HTTP 200이고 기존 공통 계정 로그인을 안내한다. 해당 운영 JS는 `softm-hannun-account.softm.workers.dev`와 `softm-homecare-pilot.softm.workers.dev`를 참조한다. 기관 API `/health`는 HTTP 404와 `error code: 1042`를 반환했다. 이것만으로 로그인 실패의 근본 원인을 확정하지 않으며, 전용 회원 기능 브랜치의 동작과 혼동하지 않는다.
-- 현재 우선 과제는 [R2와 무료 파일 저장소 비교](HOMECARE-STORAGE-DECISION.md)다. 공급자 변경·가입·이전은 실행하지 않았고 R2 결제도 진행하지 않았다. 파일을 D1로 이동하지 않았다.
+- 사용자가 Supabase Free 가입·프로젝트 생성을 완료한 뒤 비공개 파일 저장소를 준비했다. [선택·검증 기록](HOMECARE-STORAGE-DECISION.md)과 [파일 연결부](../services/homecare-storage/README.md)를 따른다. R2 결제·운영 파일 이전·D1으로 파일 이동은 하지 않았다. <!-- SOFTM-SUPABASE-STORAGE 날짜:20261121 : 사용자 선택 이후 실제 진행 결과 반영 -->
 - 저장소 선정의 최우선 조건은 키 유출·악용 시 자동 과금 방지다. 카드 없는 Free 조직/플랜과 초과 사용 제한 정책을 실제 계정에서도 확인하기 전에는 연결 완료로 표시하지 않는다. 공급자의 예산 알림과 실제 사용 차단을 구분한다. <!-- SOFTM-COST-GUARD 날짜:20261120 : 비용 차단을 확인하지 않은 유료 리소스 활성화 방지 -->
 - 재개 시에는 저장소 결정과 별도로 실제 로그인 → 기관 권한 확인 → 사진 업로드·조회·삭제를 운영 환경에서 검증한다.
 
@@ -37,10 +37,11 @@
 |---|---|
 | 회원 D1 | `a7670255-4de9-4a63-a8fc-445e6218fadd` → 회원 Worker `DB` |
 | 기관 D1 | `b1068cbf-7f1e-4c28-99ea-8fb65da84b3c` → 기관 Worker `DB`, 회원 Worker `INSTITUTIONS_DB` |
-| 증빙 R2 예정 이름 | `softm-homecare-private-documents` → 회원 Worker `DOCUMENTS` |
-| 사진 R2 예정 이름 | `softm-homecare-pilot-photos` → 기관 Worker `PHOTOS` |
+| Supabase 프로젝트 | `feaouitfpiqjjqdxrtfx`, `dolbom-free`, `ap-southeast-2`(Sydney) |
+| 비공개 증빙 | `homecare-documents` → 회원 Worker 파일 연결부 |
+| 비공개 사진 | `homecare-photos` → 기관 Worker 파일 연결부 |
 
-현재 코드는 D1에 회원·기관·상담·심사 상태와 파일 키를 저장하고 PDF·이미지 원본은 R2에 분리하도록 구현되어 있다. 실제 파일 저장소는 위의 비교 후 결정한다. R2를 선택할 경우 두 버킷 모두 `r2.dev` 공개 URL과 Custom Domain 공개 접근을 끄고 Worker에서 권한·게시 상태를 확인한다. 다른 저장소를 선택해도 증빙 다운로드는 신청자·심사 담당자만 허용하고, 기관 사진은 게시 상태를 확인하는 경계를 유지한다.
+현재 코드는 D1에 회원·기관·상담·심사 상태와 파일 키를 저장하고 PDF·이미지 원본은 Supabase Storage에 분리한다. 두 버킷의 `public=false`, 파일 크기·MIME 제한을 원격 응답으로 확인했다. 증빙 다운로드는 신청자·심사 담당자만 허용하고, 기관 사진은 멤버십 또는 공개 게시 상태를 확인하는 기존 API 경계를 유지한다. 서버 키는 실제 Worker에 아직 등록하지 않았다. 테스트 키는 브라우저 관리 화면에서 검증 프로세스 메모리로만 전달했고, 실제 기관 파일이나 D1 회원 자료를 사용하지 않았다. `FILE_UPLOADS_ENABLED=false`이며 로그인 문제 해결·실제 회원 업로드·백업 완료로 보고하지 않는다. <!-- SOFTM-SUPABASE-STORAGE 날짜:20261121 : 저장소 실검증과 운영 미배포를 분리 -->
 
 ## 이 PC의 Wrangler 인증
 
