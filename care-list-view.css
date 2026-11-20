@@ -10,7 +10,19 @@ body[data-care-mode="list"] .list-head #careListViewToolbar { order:1; }
 body.stitch-desktop.care-map-page[data-care-mode="list"] .layout { bottom:var(--care-list-ad-space,0px)!important; }
 body.stitch-desktop.care-map-page[data-care-mode="list"] .layout > .results:not([hidden]) { overflow-y:auto; }
 body.stitch-desktop.care-map-page[data-care-mode="list"] .layout #list { min-height:200px; }
-.care-list-evidence { display:none; }
+/** SOFTM-LIST-INFOGRAPHIC START 날짜:20261120 : 지도 분할 목록과 전체 목록에서 평가·정원·인력 근거를 같은 시각 카드로 읽도록 통일 */
+.care-list-evidence { display:block; margin-top:7px; }
+.care-list-evidence .care-decision-summary { margin:0; }
+.care-list-evidence .care-decision-grid { gap:4px; }
+.care-list-evidence .care-decision-cell { padding:6px 7px; border-color:#dde8e3; border-radius:8px; background:#f8fbfa; }
+.care-list-evidence .care-decision-cell:first-child { background:#eaf6f1; }
+.care-list-evidence .care-decision-cell dt { font-size:11px; }
+.care-list-evidence .care-decision-cell dd { margin-top:1px; font-size:15px; }
+.care-list-evidence .care-decision-context { display:none; }
+.care-list-evidence .care-decision-note,
+.care-list-evidence .care-list-evidence-meta,
+.care-list-evidence .care-list-verification { display:none; }
+/** SOFTM-LIST-INFOGRAPHIC END */
 body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-view="rows"] .layout #list,
 body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-view="compact"] .layout #list { grid-template-columns:minmax(0,1fr); }
 body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-list-view="rows"] #list .row { grid-template-columns:100px minmax(0,1fr); padding:18px; gap:6px 18px; }

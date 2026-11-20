@@ -113,13 +113,13 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <!-- SOFTM-PHOTO-MAP END -->
 <link rel="stylesheet" href="search-tools.css?v=20260911-disclosure-button1"> <!-- SOFTM-SEARCH-TOOLS 날짜:20260911 : 목록 앞 기능을 압축한 공용 배치 적용 --> <!-- SOFTM-SEARCH-TOOLS-BUTTON 날짜:20260911 : 보조 기능 펼침 버튼과 큰 상태 아이콘을 이전 캐시 없이 적용 -->
 <link rel="stylesheet" href="care-category-picker.css?v=20261119-link1"> <!-- SOFTM-TYPE-LINK 날짜:20261119 : 유형 선택 카드의 링크 기본 동작 스타일을 캐시 없이 적용 -->
-<link rel="stylesheet" href="care-seamless-journey.css?v=20261119-3"> <!-- SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 위저드 표시 없이 유형 선택 후 즉시 진입하는 안내 서식을 적용 -->
+<link rel="stylesheet" href="care-seamless-journey.css?v=20261120-map1"> <!-- SOFTM-MAP-INFOGRAPHIC 날짜:20261120 : 실제 지도·목록 판단 안내를 이전 캐시 없이 적용 -->
 <script src="care-category-picker.js?v=20261119-link1"></script> <!-- SOFTM-TYPE-LINK 날짜:20261119 : 선택 카드가 반드시 유형 URL로 진입하도록 보강한 동작을 캐시 없이 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
 <!-- SOFTM-LIST-ACTIONS 날짜:20260913 : 목록 동작의 균일한 크기와 선택 상태를 이전 캐시 없이 적용 -->
 <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
 <!-- SOFTM-POPUP-CONTEXT START 날짜:20260924 : 유형별 판단 요약과 팝업 방향에 맞는 마커 위치를 두 지도에 공용 적용 -->
-<link rel="stylesheet" href="care-decision-summary.css?v=20261118-review1">
+<link rel="stylesheet" href="care-decision-summary.css?v=20261120-infographic1"> <!-- SOFTM-DETAIL-INFOGRAPHIC 날짜:20261120 : 상세 상태 아이콘을 이전 캐시 없이 적용 -->
 <!-- SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 기관 직접 제공 운영정보·사진을 공단 자료와 구분해 상세에 표시 -->
 <link rel="stylesheet" href="institution-content.css?v=20261118-1">
 <!-- SOFTM-INSTITUTION-CONTENT END -->
@@ -215,7 +215,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
    <p class="route-note">지역 선택 시 기관이 모인 곳을 확대합니다. ‘전체 위치’에서 외곽까지 확인할 수 있습니다. 지도를 움직이면 현재 화면을 자동 조회합니다.</p> <!-- SOFTM-REGION-SPACING 날짜:20260904 : 확대 화면 밖 기관도 전체 위치 버튼으로 확인할 수 있음을 안내 -->
   </div>
 <!-- SOFTM-MAP-WORDING START 날짜:20260904 : 기관 평가와 이용자 등급·비교 선택을 혼동하지 않도록 표현 -->
-  <aside class="card results"><div class="list-head"><h2>검색한 기관</h2><select id="sort"><option value="priority">우선순위</option><option value="rating" selected>공단 평가점수순</option><option value="distance">기준위치 가까운순</option><option value="name">기관명순</option><option value="new">최근 지정순</option><option value="capacity">정원 큰순</option></select></div><div class="select-tools"><label><input id="selectAll" type="checkbox" checked> 지도 모두 표시</label></div><div class="result-list" id="list"><div class="empty">현재 위치를 확인하고 있습니다.</div></div><p class="route-note" id="routeNote">체크는 검색 결과 지도 표시에 사용됩니다. 비교함에 담으면 담은 기관만 보거나 순서대로 방문 경로를 찾을 수 있습니다.</p><div class="ad-banner-host" id="careRouteAdHost" hidden></div> <!-- SOFTM-AD-EXPANSION 날짜:20260926 : 길찾기 결과 아래 전용 광고를 결과 확인 뒤에만 표시 --></aside> <!-- SOFTM-WORKSPACE 날짜:20260905 : 검색 목록의 비교·경로 중복 행동을 담은 기관 화면으로 이동 --> <!-- SOFTM-DEFAULT-SCORE 날짜:20260910 : 최초 진입의 정렬 기준을 공단 평가점수 높은 순으로 표시 -->
+  <aside class="card results"><div class="list-head"><h2>검색한 기관</h2><select id="sort"><option value="priority">우선순위</option><option value="rating" selected>공단 평가점수순</option><option value="distance">기준위치 가까운순</option><option value="name">기관명순</option><option value="new">최근 지정순</option><option value="capacity">정원 큰순</option></select></div><!-- SOFTM-MAP-INFOGRAPHIC START 날짜:20261120 : 지도와 목록의 공개정보를 같은 세 가지 기준으로 읽고 기관 확인까지 이어지도록 안내 --><section class="care-search-infographic" aria-label="지도와 기관 목록 읽는 방법"><h3>기관을 이렇게 살펴보세요</h3><ol><li><span class="care-search-infographic-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span><b>위치</b><small>생활권 안 후보 찾기</small></span></li><li><span class="care-search-infographic-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span><b>공개정보</b><small>평가·정원·인력 비교</small></span></li><li><span class="care-search-infographic-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4h10v16H7zM9 2h6v4H9zM9 11l2 2 4-4M9 17h6"/></svg></span><span><b>기관 확인</b><small>빈자리·비용·운영 상담</small></span></li></ol></section><!-- SOFTM-MAP-INFOGRAPHIC END --><div class="select-tools"><label><input id="selectAll" type="checkbox" checked> 지도 모두 표시</label></div><div class="result-list" id="list"><div class="empty">현재 위치를 확인하고 있습니다.</div></div><p class="route-note" id="routeNote">체크는 검색 결과 지도 표시에 사용됩니다. 비교함에 담으면 담은 기관만 보거나 순서대로 방문 경로를 찾을 수 있습니다.</p><div class="ad-banner-host" id="careRouteAdHost" hidden></div> <!-- SOFTM-AD-EXPANSION 날짜:20260926 : 길찾기 결과 아래 전용 광고를 결과 확인 뒤에만 표시 --></aside> <!-- SOFTM-WORKSPACE 날짜:20260905 : 검색 목록의 비교·경로 중복 행동을 담은 기관 화면으로 이동 --> <!-- SOFTM-DEFAULT-SCORE 날짜:20260910 : 최초 진입의 정렬 기준을 공단 평가점수 높은 순으로 표시 -->
 <!-- SOFTM-MAP-WORDING END -->
  </section>
 </main>
@@ -273,7 +273,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <script src="care-list-location.js?v=20260930-result1"></script> <!-- SOFTM-LOCATION-RESULT 날짜:20260930 : 실제 위치 조회 완료와 적용 상태를 즉시 표시 -->
 <!-- SOFTM-LIST-MODE END -->
 <!-- SOFTM-LIST-VIEW START 날짜:20260930 : 검색 결과를 다시 조회하지 않고 목록의 표시 밀도를 선택 -->
-<link rel="stylesheet" href="care-list-view.css?v=20261118-evidence1">
+<link rel="stylesheet" href="care-list-view.css?v=20261120-infographic1"> <!-- SOFTM-LIST-INFOGRAPHIC 날짜:20261120 : 지도·목록 판단 카드를 이전 캐시 없이 적용 -->
 <script src="care-list-view.js?v=20261118-default-rows1"></script> <!-- SOFTM-COMPETITIVE-LIST 날짜:20261118 : PC 첫 진입의 공개 근거 비교형 목록과 기존 사용자 선택 복원을 즉시 적용 -->
 <!-- SOFTM-LIST-VIEW END -->
 <!-- SOFTM-LIST-ANCHOR-ADS START 날짜:20260930 : 목록모드의 접기형 하단 광고를 기존 지면과 별도로 연결 -->
@@ -549,7 +549,7 @@ function updateStats(){requestAnimationFrame(updateCareResultSummary);/* SOFTM-C
 let careListVersion=0;
 /** SOFTM-COMPETITIVE-EVIDENCE START 날짜:20261118 : 기관별 공개 사실과 문의가 필요한 현재 상태를 분리해 추천처럼 오인하지 않도록 표시 */
 function careListEvidenceHtml(c){
- if(!CareListMode.isList()||!globalThis.CareDecisionSummary)return '';
+ if(!globalThis.CareDecisionSummary)return '';
  const source=CONFIG.source==='hira'?'심평원 의료기관 개설현황':'공단 장기요양 공개자료';
  const sourceDate=CONFIG.sourceDate?String(CONFIG.sourceDate).replaceAll('-','.'):'미확인';
  const verification=TYPE==='nursing-hospital'?'입원 가능 여부와 실제 비용은 병원에 확인':TYPE==='welfare-equipment'?'대여·구입 가능 품목과 재고는 기관에 확인':['facility','daycare','short-stay','dementia'].includes(TYPE)?'등록 정원은 빈자리 수가 아닙니다 · 현재 이용 가능 여부는 기관에 확인':'실제 서비스 가능 여부와 현재 근무인원은 기관에 확인';

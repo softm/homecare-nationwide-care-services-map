@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="dcterms.modified" content="2026-11-19"> <!-- SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 원스톱 심리스 이용 여정 반영일을 공개 문서에 표시 -->
+  <meta name="dcterms.modified" content="2026-11-20"> <!-- SOFTM-CARE-TYPE-INFOGRAPHIC 날짜:20261120 : 돌봄 유형 선택 인포그래픽 반영일을 공개 문서에 표시 -->
   <!-- SOFTM-LTC-KEYWORD START 날짜:20260914 : 고유 브랜드와 장기요양기관 찾기 검색 구문을 반복 없이 함께 전달 -->
   <title>돌봄한눈 서비스 안내 | 장기요양기관 찾기</title> <!-- SOFTM-SERVICE-GUIDE 날짜:20260925 : 지도 홈 전환 뒤 기존 설명형 인덱스 콘텐츠를 별도 안내 주소로 보존 -->
   <meta name="description" content="돌봄한눈은 전국 장기요양기관 찾기와 요양병원 위치 확인, 공단·심평원 공개정보의 지역별 비교를 돕는 독립 정보 서비스입니다.">
@@ -130,7 +130,7 @@
     /** SOFTM-AD-FIT END */
   .home-nav:has(a[href="care-photos.html"]){flex-wrap:wrap;column-gap:16px;row-gap:0} /* SOFTM-PHOTO-NAV 날짜:20260910 : 사진 탐색 메뉴가 작은 화면에서도 겹치지 않도록 줄바꿈 허용 */
 </style>
-<link rel="stylesheet" href="care-seamless-journey.css?v=20261119-3"> <!-- SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 안내·소개의 4단계와 지도 첫 유형 선택 안내에 공용 브랜드 서식을 사용 -->
+<link rel="stylesheet" href="care-seamless-journey.css?v=20261120-5"> <!-- SOFTM-EVIDENCE-INFOGRAPHIC 날짜:20261120 : 공용 후속 인포그래픽 서식을 캐시 없이 적용 -->
 <link rel="stylesheet" href="seo-entrypoints.css?v=20260904-1"> <!-- SOFTM-SEO-ENTRYPOINTS 날짜:20260904 : 지역 탐색 링크를 작은 화면에서도 읽고 선택할 수 있도록 전용 서식을 연결 -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 64x64">
@@ -195,16 +195,50 @@
       <div class="ad-host" id="indexAdHost"><span class="ad-loading">광고를 준비하고 있습니다.</span></div>
     </aside>
     <!-- /** SOFTM-INDEX-UNIFIED START 날짜:20260904 : 모든 유형을 한 번씩 안내 페이지로 연결해 중복 선택과 서로 다른 지도 진입을 방지 */ -->
-    <!-- SOFTM-HOME-HELP START 날짜:20260904 : 낯선 급여 명칭보다 생활 방식으로 유형을 이해한 뒤 기존 안내 경로를 선택하도록 도움 -->
-    <details class="care-help">
-      <summary>어떤 돌봄이 필요한지 아직 모르겠다면 <span>생활 방식으로 먼저 살펴보세요</span></summary>
-      <div class="help-options">
-        <a href="#category-home-care"><strong>집에서 도움받기 <span aria-hidden="true">→</span></strong><span>방문요양을 살펴보고, 필요한 간호·목욕 서비스도 확인하세요.</span></a>
-        <a href="#category-daycare"><strong>센터에 다녀오기 <span aria-hidden="true">→</span></strong><span>낮 또는 밤 동안 돌봄을 받는 주·야간보호를 살펴보세요.</span></a>
-        <a href="#category-facility"><strong>시설에서 생활하기 <span aria-hidden="true">→</span></strong><span>입소 돌봄을 제공하는 요양원·공동생활가정을 살펴보세요.</span></a>
+    <!-- SOFTM-CARE-TYPE-INFOGRAPHIC START 날짜:20261120 : 보호자의 한 가지 질문에서 생활 방식별 유형과 실제 지도 선택으로 이어지는 첫 후속 인포그래픽 -->
+    <section class="care-topic-infographic" id="care-type-guide" aria-labelledby="care-type-guide-title">
+      <header class="care-topic-heading">
+        <p class="care-topic-series">원스톱 심리스 인포그래픽 01</p>
+        <h2 id="care-type-guide-title">우리 부모님은 어디에서 돌봄받는 게 편할까요?</h2>
+        <p>먼저 생활 장소와 필요한 도움을 생각해 보세요. 아래 선택은 기관을 확정하는 진단이 아니라, 살펴볼 돌봄 유형을 좁히는 출발점입니다.</p>
+      </header>
+      <ol class="care-type-paths">
+        <li>
+          <span class="care-type-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7v9H3Z"/><path d="M9 20v-6h6v6"/></svg></span>
+          <span class="care-type-path-question">익숙한 집에서 생활하고 싶어요</span>
+          <strong>방문요양·방문간호·방문목욕</strong>
+          <span>요양보호사·간호인력 등이 집으로 방문하는 유형을 살펴보세요.</span>
+          <a href="#category-home-care">집에서 받는 돌봄 보기 <span aria-hidden="true">→</span></a>
+        </li>
+        <li>
+          <span class="care-type-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11Z"/><path d="M8 13h8M8 17h5"/></svg></span>
+          <span class="care-type-path-question">낮 동안 활동과 돌봄이 필요해요</span>
+          <strong>주·야간보호센터</strong>
+          <span>집에서 통원하며 낮이나 저녁 동안 돌봄과 프로그램을 이용하는 유형입니다.</span>
+          <a href="#category-daycare">센터 돌봄 보기 <span aria-hidden="true">→</span></a>
+        </li>
+        <li>
+          <span class="care-type-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 21V4h14v17M2 21h20"/><path d="M9 8h2m2 0h2M9 12h2m2 0h2M10 21v-5h4v5"/></svg></span>
+          <span class="care-type-path-question">24시간 생활 돌봄이 필요해요</span>
+          <strong>요양원·공동생활가정</strong>
+          <span>기관에 입소해 일상생활 지원과 돌봄을 받는 유형을 확인하세요.</span>
+          <a href="#category-facility">입소 돌봄 보기 <span aria-hidden="true">→</span></a>
+        </li>
+        <li>
+          <span class="care-type-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 3h8v5h5v8h-5v5H8v-5H3V8h5Z"/></svg></span>
+          <span class="care-type-path-question">치료·단기 돌봄·특화 지원이 우선이에요</span>
+          <strong>요양병원·단기보호·치매전담형</strong>
+          <span>입원 진료가 필요한지, 일정 기간 돌봄인지, 치매 특화기관인지 구분해 보세요.</span>
+          <a href="#categories">다른 유형 함께 보기 <span aria-hidden="true">→</span></a>
+        </li>
+      </ol>
+      <div class="care-topic-action">
+        <div><strong>유형을 정했다면 가까운 기관을 찾아보세요</strong><span>선택한 유형은 지도에서 다시 바꿀 수 있습니다.</span></div>
+        <a href="index.html">유형 선택하고 기관 찾기 <span aria-hidden="true">→</span></a>
       </div>
-    </details>
-    <!-- SOFTM-HOME-HELP END -->
+      <footer class="care-topic-note"><strong>기준·주의사항</strong><span>장기요양기관 유형은 국민건강보험공단 공개 분류를 기준으로 안내합니다. 요양병원은 건강보험심사평가원 공개자료를 사용하며 장기요양기관과 구분합니다. 실제 이용 가능 여부와 적합성은 기관 및 관련 전문가에게 최종 확인하세요.</span></footer>
+    </section>
+    <!-- SOFTM-CARE-TYPE-INFOGRAPHIC END -->
     <section class="category-section" id="categories" aria-labelledby="categoryTitle"> <!-- SOFTM-HOME-CATEGORY 날짜:20260904 : 도움말과 주 탐색에서 같은 9개 카드로 이동 -->
       <!-- SOFTM-HOME-CATEGORY START 날짜:20260904 : 자료 수보다 이용 목적을 먼저 읽고 유형 안내를 선택하도록 정보 순서를 통일 -->
       <div class="category-heading"><div><h2 id="categoryTitle">어떤 돌봄기관을 찾으세요?</h2><p>유형별 이용 안내를 확인한 뒤, 지도에서 가까운 기관을 찾아보세요.</p></div><span>9개 유형</span></div>

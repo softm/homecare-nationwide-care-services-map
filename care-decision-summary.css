@@ -16,6 +16,12 @@
 #detailDecision .care-review-row[data-status="confirmed"]{border-color:#c9e3d8;background:#edf7f2}
 #detailDecision .care-review-row[data-status="verify"]{border-color:#eadcb9;background:#fff8e9}
 #detailDecision .care-review-row dt{margin:0;padding-top:1px;font-size:12px;line-height:1.45;font-weight:800}
+/** SOFTM-DETAIL-INFOGRAPHIC START 날짜:20261120 : 상세의 강점·확인·미확인을 글자색만이 아니라 상태 아이콘으로도 구분 */
+#detailDecision .care-review-row dt::before{display:inline-grid;place-items:center;width:18px;height:18px;margin-right:6px;border-radius:50%;background:#e4ece8;color:#36594e;font-size:11px;vertical-align:-3px;content:'?'}
+#detailDecision .care-review-row[data-status="confirmed"] dt::before{background:#d5eee3;color:#23664f;content:'✓'}
+#detailDecision .care-review-row[data-status="verify"] dt::before{background:#f7e8bf;color:#765817;content:'!'}
+#detailDecision .care-review-row[data-status="unknown"] dt::before{background:#e8edf1;color:#536475;content:'–'}
+/** SOFTM-DETAIL-INFOGRAPHIC END */
 #detailDecision .care-review-row dd{min-width:0;margin:0}
 #detailDecision .care-review-row ul{display:flex;flex-wrap:wrap;gap:4px 12px;margin:0;padding:0;list-style:none}
 #detailDecision .care-review-row li{display:flex;min-width:0;gap:5px;font-size:11px;line-height:1.45}
