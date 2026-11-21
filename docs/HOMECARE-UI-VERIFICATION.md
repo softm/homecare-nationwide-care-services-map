@@ -149,4 +149,6 @@ AUDIT_FILTER='^map-detail-switch-' AUDIT_MODE=checkout node scripts/check-ui-pla
 
 기존 독립 숨김 Playwright와 회원 API 가상 응답·실제 쓰기 차단 원칙을 유지한다. 시험 화면과 결과는 운영 폴더 `marker-detail-switch-20261121/{checkout-final,checkout-recheck}`에 보관한다.
 
+운영 배포 뒤 공개 `index.html`의 SHA-256이 로컬 검증본과 일치함을 확인했다. 390·1440px의 세 유형 6개 조합도 재검사 포함 통과했다. 첫 상세의 SDK 지도 이동 효과를 마커 전환과 섞지 않도록 지도 정지 후 실제 클릭 직전·직후 좌표를 비교한다. 별도 이동 호출 추적에서도 열린 상세를 교체할 때 `panTo`·`setCenter` 호출이 없음을 확인했다. 운영 증거는 같은 폴더의 `live`, `live-recheck`, `live-stable`에 보관한다.
+
 <!-- SOFTM-MARKER-DETAIL-SWITCH END -->
