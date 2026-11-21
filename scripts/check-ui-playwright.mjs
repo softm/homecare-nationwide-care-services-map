@@ -53,6 +53,7 @@ const cases=[
  {name:'shared-record',url:'care-share.html#layout-fixture',seed:true,user:'personal'},
  {name:'analysis',url:'care-analysis.html'},
  {name:'analysis-choices',url:'care-analysis.html',action:'condition-choices'}, // SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 실제 유형 카드·조건 펼침·키보드·재방문 상태를 검증
+ {name:'analysis-no-conditions',url:'care-analysis.html',action:'no-conditions'}, // SOFTM-EMPTY-CONDITIONS 날짜:20261121 : 빈 조건 확인과 취소·키보드 복귀를 실제 조작으로 검증
  ...['candidates','compare','prepare'].map(action=>({name:`analysis-${action}`,url:'care-analysis.html',action:`analysis-${action}`})),
  ...['facility','home-care','home-nursing','home-bath','short-stay','welfare-equipment','dementia','nursing-hospital'].map(type=>({name:`analysis-candidates-${type}`,url:'care-analysis.html',action:'analysis-candidates',type})), // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 유형마다 다른 정원·인력·비용·병원 지표를 실제 화면에서 확인
  {name:'analysis-candidates-conditions',url:'care-analysis.html',action:'analysis-candidates',preferences:['evaluation-ab','photos']}, // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 선택 조건의 확인·다름·미확인 표기와 펼친 질문을 확인
@@ -214,12 +215,46 @@ async function run(c,width){
     await (await mobile.isVisible()?mobile:page.locator('.care-focus-entry')).click();
    }
   }
+  /** SOFTM-EMPTY-CONDITIONS START 날짜:20261121 : 검색 전 확인에서 취소하거나 반복해서 열어도 입력과 단계가 유지되는지 확인 */
+  if(c.action==='no-conditions'){
+   const address=page.locator('#analysisAddress'),dialog=page.locator('#analysisNoConditions'),run=page.locator('#analysisRun');
+   await page.waitForFunction(()=>document.querySelector('#analysisAddress').value.length>0,{},{timeout:20000});
+   const value=await address.inputValue();
+   await page.locator('.analysis-preferences>summary').click();
+   await run.click();await dialog.waitFor({state:'visible'});
+   assert.equal(await page.locator('body').getAttribute('data-analysis-step'),'conditions','확인 전 단계 유지');
+   assert.ok(await page.locator('#analysisResults').isHidden(),'확인 전 검색 미실행');
+   assert.equal(await page.evaluate(()=>document.activeElement?.value),'edit','조건 선택 버튼 기본 초점');
+   await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});
+   await page.waitForFunction(()=>document.querySelector('.analysis-preferences').open&&document.activeElement===document.querySelector('#analysisCriteria input'));
+   assert.ok(await page.locator('.analysis-preferences').evaluate(e=>e.open),'Esc 뒤 조건 펼침');
+   assert.ok(await page.evaluate(()=>document.activeElement===document.querySelector('#analysisCriteria input')),'Esc 뒤 조건 초점');
+   assert.ok(await page.locator('#analysisResults').isHidden(),'Esc 뒤 검색 미실행');
+   await run.click();await dialog.waitFor({state:'visible'});
+   await dialog.locator('[value=edit]').click();await dialog.waitFor({state:'hidden'});
+   await page.waitForFunction(()=>document.activeElement===document.querySelector('#analysisCriteria input'));
+   assert.equal(await address.inputValue(),value,'조건 선택 복귀 시 주소 보존');
+   assert.ok(await page.locator('#analysisResults').isHidden(),'조건 선택 복귀 시 검색 미실행');
+   await address.focus();await address.press('Enter');await dialog.waitFor({state:'visible'});
+   assert.equal(await page.locator('#analysisCriteria input:checked').count(),0,'임의 조건 선택 없음');
+   await dialog.locator('[value=search]').click({trial:true});
+   await dialog.screenshot({path:out+`/${c.name}-${width}-dialog.png`,animations:'disabled'});
+  }
+  /** SOFTM-EMPTY-CONDITIONS END */
   if(c.action?.startsWith('analysis-')){
    await page.locator('#analysisAddress').waitFor();
    await page.waitForFunction(()=>document.querySelector('#analysisAddress').value.length>0,{},{timeout:20000});
    if(c.type)await page.locator(`[name=careTypeChoice][value="${c.type}"]`).check(); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 실제 라디오 선택과 검색 결과를 연결
    for(const criterion of c.preferences||[])await page.locator(`#analysisCriteria input[value="${criterion}"]`).check(); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 조건을 실제로 선택한 뒤 후보 표시를 검증
    await page.locator('#analysisRun').click();
+   /** SOFTM-EMPTY-CONDITIONS START 날짜:20261121 : 빈 조건은 명시적인 진행 선택 뒤 검색하고 조건 선택·의료기관 검색은 바로 진행 */
+   const confirmation=page.locator('#analysisNoConditions');
+   if(!c.preferences?.length&&c.type!=='nursing-hospital'){
+    await confirmation.waitFor({state:'visible'});
+    assert.ok(await page.locator('#analysisResults').isHidden(),'그냥 찾기 선택 전 검색 미실행');
+    await confirmation.locator('[value=search]').click();
+   }else assert.ok(await confirmation.isHidden(),'선택한 조건 또는 조건 없는 유형은 바로 검색');
+   /** SOFTM-EMPTY-CONDITIONS END */
    await page.locator('[data-analysis-save]').first().waitFor({timeout:45000});
    /** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 공용 목록 값과 실제 표시·글자 크기·질문 펼침·담기 해제가 일치하는지 확인 */
    const card=page.locator('.analysis-card').first();
