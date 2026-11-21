@@ -178,3 +178,10 @@ Node 22.13 이상을 사용한다. 이 PC의 기본 Node 20은 설치된 Wrangle
 공용 `care-comparison-workspace.js`와 `care-comparison-cost.mjs` 순서를 변경하므로 맞춤찾기·지도 비교·회원 비교·단일 기관 상세에 동일하게 적용한다. 스크립트 버전은 `20261122-core-first1`이다. 비용 계산식과 저장 조건, 기관 선택, 전체 공개자료 표는 변경하지 않는다. DOM 순서와 실제 비용 재계산을 함께 검증하고 모바일·PC에서 가로 스크롤과 주요 버튼 가림 여부를 확인한다.
 
 <!-- SOFTM-COMPARE-CORE-FIRST END -->
+## 2026-11-22 후보 카드 상단 행동·독립 기관 상세
+
+- 맞춤찾기 후보 카드의 `기관 상세`·`사진 보기`를 핵심 지표 위의 헤더로 옮겼다.
+- `기관 상세`는 지도 `index.html?institution=...`이 아닌 `care-facility.html?type=...&id=...`로 연결하고, 독립 상세 화면에서만 지도 이동을 선택하게 했다.
+- 비교표의 `상세 보기`도 같은 독립 상세로 연결하며, 단일 상세 화면 안에서는 자기 자신으로 다시 이동하는 중복 버튼을 숨긴다.
+- 캐시 버전은 `care-analysis.css/js?v=20261122-card-top1`, `care-comparison-workspace.js?v=20261122-detail-top1`이다.
+- 로컬 검증은 320·390·768·1024·1440px 작업 전용 숨김 Playwright에서 후보 카드와 독립 상세 화면을 각각 확인한다.
