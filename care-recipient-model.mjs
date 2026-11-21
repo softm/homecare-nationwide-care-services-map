@@ -3,13 +3,21 @@ export const RELATIONSHIPS = {parent:'부모님',spouse:'배우자',child:'자�
 export const SEXES = {female:'여성',male:'남성',unspecified:'선택하지 않음'};
 export const MOBILITY = {independent:'혼자 이동할 수 있어요',assisted:'이동할 때 도움이 필요해요',wheelchair:'휠체어를 이용해요',bedridden:'누워 지내는 시간이 많아요',unspecified:'아직 확인 중이에요'};
 export const CARE_NEEDS = {daily:'일상생활 도움',cognitive:'인지 활동·기억력 지원',dementia:'치매 돌봄',rehabilitation:'재활 지원',nursing:'간호 지원',meals:'식사 도움'};
-export const CARE_CONSENT_VERSION = 'care-recipient-20261120';
+/** SOFTM-PERSONAL-COST START 날짜:20261121 : 등급 미확인을 보존하고 별도 동의한 비용 조건만 보호자 계정에 저장 */
+export const CARE_GRADES = {'':'아직 모르거나 신청 전이에요','1':'1등급','2':'2등급','3':'3등급','4':'4등급','5':'5등급',cognitive:'인지지원등급'};
+export const CARE_BURDENS = {'':'아직 확인하지 않았어요',general:'일반 본인부담',reduced40:'본인부담금 40% 감경',reduced60:'본인부담금 60% 감경',exempt:'본인부담금 면제'};
+export const CARE_CONSENT_VERSION = 'care-recipient-20261121-cost';
+/** SOFTM-PERSONAL-COST END */
 export function validateRecipient(value) {
     if(!value || typeof value!=='object' || Array.isArray(value) || typeof value.relationship!=='string' || typeof value.sex!=='string' || typeof value.mobility!=='string' || !Object.hasOwn(RELATIONSHIPS,value.relationship) || !Object.hasOwn(SEXES,value.sex) || !Object.hasOwn(MOBILITY,value.mobility)) throw new Error('대상자와의 관계·성별·이동 상태를 확인해 주세요.');
     if(!Array.isArray(value.careNeeds) || value.careNeeds.length>Object.keys(CARE_NEEDS).length || value.careNeeds.some(key=>typeof key!=='string'||!Object.hasOwn(CARE_NEEDS,key))) throw new Error('필요한 돌봄 항목을 확인해 주세요.');
     const allowed=value.relationship==='self'?['self']:['subject-consent','legal-representative'];
     if(!allowed.includes(value.authority) || value.healthConsent!==true) throw new Error('대상자 본인의 동의 또는 법정대리 권한과 돌봄 상태의 별도 수집·이용 동의를 확인해 주세요.');
-    return {relationship:value.relationship,sex:value.sex,mobility:value.mobility,careNeeds:[...new Set(value.careNeeds)],authority:value.authority};
+    /** SOFTM-PERSONAL-COST START 날짜:20261121 : 기존 미입력 대상자를 유지하며 임의 등급·감경과 배열 입력을 거부 */
+    const grade=value.grade??'',burden=value.burden??'';
+    if(typeof grade!=='string'||!Object.hasOwn(CARE_GRADES,grade)||typeof burden!=='string'||!Object.hasOwn(CARE_BURDENS,burden))throw new Error('장기요양등급과 본인부담 유형을 확인해 주세요.');
+    return {relationship:value.relationship,sex:value.sex,mobility:value.mobility,careNeeds:[...new Set(value.careNeeds)],authority:value.authority,grade,burden};
+    /** SOFTM-PERSONAL-COST END */
 }
 export function recipientSummary(profile) {
     if(!profile)return '돌봄 대상자 정보를 아직 입력하지 않았어요.';

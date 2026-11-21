@@ -5,7 +5,7 @@ import { readOrigin, createOriginBinding } from './care-analysis-origin.js?v=202
 import { escapeHtml as esc, readJson, mapUrl, thumbnail, openComparison } from './care-photos-common.js?v=20260910-1';
 /** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 지도 목록과 맞춤 후보의 지표·비용 계산을 공유해 같은 기관의 값이 달라지지 않도록 연결 */
 import './care-decision-summary.js?v=20261121-candidates1';
-import './care-cost-rates.js?v=20260904-1';
+import './care-cost-rates.js?v=20261121-personal-cost1';
 import './care-cost-engine.js?v=20260904-1';
 import './care-cost-preview.js?v=20261118-1';
 /** SOFTM-CANDIDATE-FACTS END */
@@ -399,6 +399,7 @@ function renderComparison() {
     const host = document.querySelector('[data-analysis-panel="compare"]'); if (!host || !current) return;
     const rows = activeRows(), allRows = basketRows(), selectedCriteria = current.input.criteria.filter(item => current.input.selected.has(item.id)).map(item => item.label);
     host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 3단계</span><h2 tabindex="-1">선택한 시설을 같은 기준으로 비교합니다</h2><p>평가연도와 미확인 상태를 함께 읽고 실제 이용 가능 여부는 상담에서 확인하세요.</p></div><button type="button" data-analysis-go="candidates">후보 다시 보기</button></header>${CareComparisonWorkspace.render({ rows, allRows, activeIds: rows.map(row => row.i), type: current.input.type, source: current.input.type === 'nursing-hospital' ? 'hira' : 'nhis', sourceDate: current.report.sourceDate, selectedCriteria })}<details class="analysis-full-data"><summary>전체 공개자료 표 보기</summary><div>${renderFullDataTable(rows)}<p><a href="${esc(mapBasketLink())}" rel="nofollow">지도 비교함에서 정렬·엑셀 다운로드 이용</a></p></div></details><div class="analysis-compare-actions"><button type="button" data-analysis-go="candidates">후보 추가·교체</button><button type="button" class="analysis-primary" data-analysis-go="prepare" ${rows.length ? '' : 'disabled'}>상담 질문 준비</button></div>`;
+    void CareComparisonWorkspace.mountCosts(host,{type:current.input.type,rows}); // SOFTM-PERSONAL-COST 날짜:20261121 : 맞춤 비교표에 공식 급여 계산과 개인 등급 연결
 }
 function consultationKey() { return `careConsultation:v1:${current.input.type}`; }
 function readConsultation() { try { const value = JSON.parse(storage?.getItem(consultationKey()) || '{}'); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; } catch { return {}; } }

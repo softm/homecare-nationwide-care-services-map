@@ -124,7 +124,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <!-- SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 기관 직접 제공 운영정보·사진을 공단 자료와 구분해 상세에 표시 -->
 <link rel="stylesheet" href="institution-content.css?v=20261118-1">
 <!-- SOFTM-INSTITUTION-CONTENT END -->
-<link rel="stylesheet" href="care-comparison-workspace.css?v=20261119-guide1"><script src="care-compare-evidence.js?v=20261118-policy1"></script><script src="care-comparison-workspace.js?v=20261119-guide1"></script><!-- SOFTM-GUIDED-COMPARE 날짜:20261119 : 지도 비교표도 보관 후보 중 세 곳을 골라 핵심 지표부터 읽도록 통일 -->
+<link rel="stylesheet" href="care-comparison-workspace.css?v=20261121-personal-cost1"><script src="care-compare-evidence.js?v=20261118-policy1"></script><script src="care-comparison-workspace.js?v=20261121-personal-cost1"></script><!-- SOFTM-GUIDED-COMPARE 날짜:20261119 : 지도 비교표도 보관 후보 중 세 곳을 골라 핵심 지표부터 읽도록 통일 -->
 <script src="care-decision-summary.js?v=20261118-review1"></script> <!-- SOFTM-DETAIL-REVIEW 날짜:20261118 : 상세 상단에서 공개 강점·기관 확인·누락을 분리 -->
 <script src="care-popup-geometry.js?v=20260924-1"></script>
 <!-- SOFTM-POPUP-CONTEXT END -->
@@ -249,7 +249,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <script src="advanced-search.js?v=20260917-filter-reload1"></script><!-- SOFTM-FILTER-RELOAD 날짜:20260917 : 조건 초기화 URL 동기화를 이전 캐시 없이 적용 --><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공단 제공 서비스와 설립주체의 공통 판정을 로드 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 특화 판정 연결을 최신 버전으로 함께 적용 -->
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 공식 수가 계산과 세션 비교함을 같은 공용 모듈로 연결 -->
-<script src="care-cost-rates.js?v=20260904-1"></script>
+<script src="care-cost-rates.js?v=20261121-personal-cost1"></script>
 <script src="care-cost-engine.js?v=20260904-1"></script>
 <script src="care-cost-preview.js?v=20261118-1"></script><!-- SOFTM-LIST-COST 날짜:20261118 : 상세 계산기와 같은 공식 수가로 목록 기본 예상액 산출 -->
 <script src="care-cost-ui.js?v=20260904-1"></script>
@@ -427,6 +427,7 @@ function renderCompare(){
  $('compareFoot').textContent=policy.source==='hira'?'심평원 요양기관 개설현황 자료입니다. 장기요양기관 공단 평가와 다른 자료입니다.':'기관 평가등급·총점은 국민건강보험공단 공개자료입니다. 미확인은 낮은 평가를 뜻하지 않습니다.';
  const fullTable=rows.length>=2?`<table class="compare-table" id="compareTable" aria-describedby="compareEvidence"><thead><tr>${COMPARE_COLUMNS.map(col=>{const blocked=COMPARE_EVALUATION_KEYS.has(col.key)&&!policy.allowsSort(col.key),active=!blocked&&compareSort.key===col.key,aria=active?(compareSort.dir==='asc'?'ascending':'descending'):'none',arrow=active?(compareSort.dir==='asc'?' ▲':' ▼'):'';return`<th scope="col" aria-sort="${aria}"><button type="button" data-compare-sort="${col.key}"${blocked?' aria-disabled="true" aria-describedby="compareEvidence" title="평가연도가 달라 순위를 제공하지 않습니다."':''}>${esc(col.label)}${arrow}</button></th>`}).join('')}</tr></thead><tbody>${rows.map(c=>`<tr>${COMPARE_COLUMNS.map(col=>`<td class="${['score','capacity','social','nursing','rehab','caregiver','distance'].includes(col.key)?'num':''}">${compareDisplay(c,col.key)}</td>`).join('')}</tr>`).join('')}</tbody></table>`:'';
  $('compareBody').innerHTML=CareComparisonWorkspace.render({rows,allRows:compareCandidates,activeIds:rows.map(row=>row.i),type:TYPE,source:CONFIG.source,sourceDate:CONFIG.sourceDate})+`<details class="care-full-compare"${rows.length<2?' hidden':compareFullOpen?' open':''}><summary>전체 공개자료 표 보기</summary><div class="care-full-compare-scroll">${fullTable}</div></details>`;
+ void CareComparisonWorkspace.mountCosts($('compareBody'),{type:TYPE,rows}); // SOFTM-PERSONAL-COST 날짜:20261121 : 지도 비교표에 보호자 비용 조건 연결
  $('compareExcel').disabled=rows.length<2;
  const fullCompare=$('compareBody').querySelector('.care-full-compare');if(fullCompare)fullCompare.ontoggle=()=>{compareFullOpen=fullCompare.open}; // SOFTM-COMPARE-TABLE-OPEN 날짜:20261119 : 사용자의 펼침·접힘 선택을 다음 비교표 렌더링에 반영
  document.querySelectorAll('[data-compare-sort]').forEach(button=>button.onclick=()=>{const key=button.dataset.compareSort;if(!policy.allowsSort(key)){toast(policy.message);return}compareSort=compareSort.key===key?{key,dir:compareSort.dir==='asc'?'desc':'asc'}:{key,dir:['name','type','region','date','address','id'].includes(key)?'asc':'desc'};renderCompare()})

@@ -4,9 +4,9 @@
   root.CareCostRates = {
     year: 2026,
     effectiveFrom: '2026-01-01',
-    verifiedAt: '2026-09-04',
-    notice: '보건복지부 고시 제2025-247호',
-    source: 'https://www.nhis.or.kr/lm/lmxsrv/law/lawFullContent.do?SEQ=1637&SEQ_HISTORY=594054',
+    verifiedAt: '2026-11-21',
+    notice: '보건복지부 고시 제2026-189호 (2026년 수가)', // SOFTM-PERSONAL-COST 날짜:20261121 : 10월 개정 고시의 제13·18·31·44조 표 금액 재확인
+    source: 'https://www.nhis.or.kr/lm/lmxsrv/law/lawFullContent.do?SEQ=1637&SEQ_HISTORY=615058',
     legalSource: 'https://law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000271110&chrClsCd=010201',
     burdenSource: 'https://www.mohw.go.kr/menu.es?mid=a10712030100',
     monthlyCaps: { '1': 2512900, '2': 2331200, '3': 1528200, '4': 1409700, '5': 1208900, cognitive: 676320 },

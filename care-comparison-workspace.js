@@ -57,7 +57,7 @@
         if (type === 'welfare-equipment') metrics.push({ key: 'availability', label: '품목·배송', help: '재고와 배송지역' });
         else if (type === 'nursing-hospital') metrics.push({ key: 'availability', label: '입원 가능 여부', help: '병실·진료 확인' });
         else metrics.push({ key: 'availability', label: '이용 가능 여부', help: '빈자리·대기기간' });
-        metrics.push({ key: 'cost', label: '예상 비용', help: '급여·비급여 확인' });
+        metrics.unshift({ key: 'cost', label: '월 예상 본인부담금', help: '이용 조건에 따른 비용 예측' });
         return metrics;
     }
 
@@ -86,7 +86,7 @@
         }
         if (metric.key === 'designated') return row.d ? { value: String(row.d), note: '공개자료 표시일', tone: 'confirmed' } : { value: '미확인', note: '기관에 확인', tone: 'unknown' };
         if (metric.key === 'availability') return { value: '기관 확인 필요', note: type === 'welfare-equipment' ? '재고·배송은 실시간 정보 아님' : '공개 정원은 빈자리가 아님', tone: 'verify' };
-        if (metric.key === 'cost') return { value: '기관 확인 필요', note: '본인부담·비급여 별도 확인', tone: 'verify' };
+        if (metric.key === 'cost') return { value: '계산 조건 확인', note: '장기요양등급·이용량에 따른 예상액', tone: 'verify' }; // SOFTM-PERSONAL-COST 날짜:20261121 : 등급을 임의 추정하지 않고 공통 계산 조건 입력으로 안내
         return { value: '미확인', note: '', tone: 'unknown' };
     }
 
@@ -100,11 +100,18 @@
         const minimumRows = options.single === true ? 1 : 2; // SOFTM-MEMBERS 날짜:20261120 : 단일 기관 상세에서도 공개 지표를 동일하게 표시
         const empty = rows.length < minimumRows ? `<div class="care-compare-empty" role="status"><strong>시설을 2곳 이상 선택해 주세요.</strong><p>보관한 후보는 그대로 두고 한 번에 최대 3곳을 비교할 수 있습니다.</p></div>` : '';
         const heads = rows.length >= minimumRows ? `<div class="care-compare-matrix care-compare-head-row" style="--care-compare-count:${count}" role="row"><div class="care-compare-label" role="columnheader">비교 지표</div>${rows.map((row, index) => `<article class="care-compare-facility" role="columnheader"><span>${index + 1}</span><h3>${escape(row.n)}</h3><p>${escape(row.a || '주소 미확인')}</p><button type="button" data-comparison-detail="${escape(row.i)}">상세 보기</button></article>`).join('')}</div>` : '';
-        const body = rows.length >= minimumRows ? metrics.map(metric => `<div class="care-compare-matrix care-compare-metric-row" style="--care-compare-count:${count}" role="row"><div class="care-compare-label" role="rowheader"><strong>${escape(metric.label)}</strong><span>${escape(metric.help)}</span></div>${rows.map(row => { const value = metricValue(row, metric, { type, source }); return `<div class="care-compare-value" data-tone="${value.tone}" role="cell"><strong>${escape(value.value)}</strong><span>${escape(value.note)}</span></div>`; }).join('')}</div>`).join('') : '';
+        const body = rows.length >= minimumRows ? metrics.map(metric => `<div class="care-compare-matrix care-compare-metric-row" style="--care-compare-count:${count}" role="row"><div class="care-compare-label" role="rowheader"><strong>${escape(metric.label)}</strong><span>${escape(metric.help)}</span></div>${rows.map((row, index) => { const value = metricValue(row, metric, { type, source }); return `<div class="care-compare-value" ${metric.key === 'cost' ? `data-cost-index="${index}"` : ''} data-tone="${value.tone}" role="cell"><strong>${escape(value.value)}</strong><span>${escape(value.note)}</span></div>`; }).join('')}</div>`).join('') : '';
         const evidence = policy ? root.CareCompareEvidence.render(policy) : `<p>자료 출처와 기준일을 함께 확인하세요.</p>`;
         return `<section class="care-compare-workspace" aria-label="선택 시설 비교">${picker}<div class="care-compare-layout"><div class="care-compare-main" role="table">${empty}${heads}${body}</div><aside class="care-compare-guide"><span class="care-compare-guide-icon" aria-hidden="true">i</span><h3>비교표 읽는 법</h3><div class="care-compare-policy">${evidence}</div>${selectedCriteria.length ? `<div class="care-compare-criteria"><strong>확인 중인 조건</strong><p>${selectedCriteria.map(escape).join(' · ')}</p></div>` : ''}<ul><li>평가연도가 다르면 등급·총점을 순위로 보지 않습니다.</li><li>미확인은 낮은 평가나 서비스 미제공을 뜻하지 않습니다.</li><li>빈자리·대기기간·추가 비용은 기관에 직접 확인합니다.</li></ul></aside></div></section>`;
     }
 
-    root.CareComparisonWorkspace = Object.freeze({ createSelection, metricsFor, metricValue, render });
+    /** SOFTM-PERSONAL-COST START 날짜:20261121 : 기존 지도·맞춤·회원 비교표가 같은 계산 모듈을 사용 */
+    async function mountCosts(host, options) {
+        const workspace=host.querySelector('.care-compare-workspace');
+        try { const costs = await import('./care-comparison-cost.mjs?v=20261121-personal-cost1'); if(workspace?.isConnected&&host.querySelector('.care-compare-workspace')===workspace)await costs.mount(host, options); }
+        catch { host.querySelectorAll('[data-cost-index]').forEach(cell => { cell.querySelector('strong').textContent='계산기 연결 필요'; cell.querySelector('span').innerHTML='<a href="care-cost.html">월 예상 비용 계산기로 이동 →</a>'; }); }
+    }
+    root.CareComparisonWorkspace = Object.freeze({ createSelection, metricsFor, metricValue, render, mountCosts });
+    /** SOFTM-PERSONAL-COST END */
 })(typeof window === 'undefined' ? globalThis : window);
 /** SOFTM-GUIDED-COMPARE END */
