@@ -8,28 +8,26 @@
 .care-decision-cell .care-decision-context{display:block;margin-top:2px;color:#52665c;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
 .care-decision-note{margin:5px 0 0;color:#607168;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 @media(max-width:380px){.care-decision-cell{padding:7px 6px}.care-decision-grid{gap:4px}.care-decision-cell dd{font-size:17px}}
-/** SOFTM-DETAIL-REVIEW START 날짜:20261118 : 상세 상단에서 공개 근거·상담 확인·누락을 색상과 제목으로 함께 구분 */
-#detailDecision .care-decision-review{margin:10px 0 2px;padding-top:10px;border-top:1px solid #dce7e2;color:#203c35}
-#detailDecision .care-decision-review>h4{margin:0 0 7px;font-size:13px;line-height:1.4;font-weight:800}
-#detailDecision .care-decision-review dl{display:grid;gap:5px;margin:0}
-#detailDecision .care-review-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px;align-items:start;padding:7px 9px;border:1px solid #dce7e2;border-radius:9px;background:#f6f8f7}
-#detailDecision .care-review-row[data-status="confirmed"]{border-color:#c9e3d8;background:#edf7f2}
-#detailDecision .care-review-row[data-status="verify"]{border-color:#eadcb9;background:#fff8e9}
-#detailDecision .care-review-row dt{margin:0;padding-top:1px;font-size:12px;line-height:1.45;font-weight:800}
-/** SOFTM-DETAIL-INFOGRAPHIC START 날짜:20261120 : 상세의 강점·확인·미확인을 글자색만이 아니라 상태 아이콘으로도 구분 */
-#detailDecision .care-review-row dt::before{display:inline-grid;place-items:center;width:18px;height:18px;margin-right:6px;border-radius:50%;background:#e4ece8;color:#36594e;font-size:11px;vertical-align:-3px;content:'?'}
-#detailDecision .care-review-row[data-status="confirmed"] dt::before{background:#d5eee3;color:#23664f;content:'✓'}
-#detailDecision .care-review-row[data-status="verify"] dt::before{background:#f7e8bf;color:#765817;content:'!'}
-#detailDecision .care-review-row[data-status="unknown"] dt::before{background:#e8edf1;color:#536475;content:'–'}
-/** SOFTM-DETAIL-INFOGRAPHIC END */
-#detailDecision .care-review-row dd{min-width:0;margin:0}
-#detailDecision .care-review-row ul{display:flex;flex-wrap:wrap;gap:4px 12px;margin:0;padding:0;list-style:none}
-#detailDecision .care-review-row li{display:flex;min-width:0;gap:5px;font-size:11px;line-height:1.45}
-#detailDecision .care-review-row li b{flex:none;color:#36594e}
-#detailDecision .care-review-row li span,#detailDecision .care-review-empty{color:#53675f;overflow-wrap:anywhere}
-#detailDecision .care-decision-review>p{margin:6px 1px 0;color:#607168;font-size:10px;line-height:1.45}
-#detailDecision .care-decision-review>p span{display:block}
-@media(max-width:640px){#detailDecision .care-review-row{grid-template-columns:92px minmax(0,1fr);padding:6px 8px}#detailDecision .care-review-row ul{display:grid;gap:3px}}
-@media(max-width:380px){#detailDecision .care-review-row{grid-template-columns:1fr;gap:3px}#detailDecision .care-review-row dt{padding:0}}
-/** SOFTM-DETAIL-REVIEW END */
+/** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 반복 상태 카드 대신 필요한 추가 정보와 접힌 상담 질문으로 본문 공간 확보 */
+#detailDecision .care-decision-review{margin:8px 0 12px;color:#203c35}
+#detailDecision .care-review-staff,#detailDecision .care-review-missing{display:flex;flex-wrap:wrap;gap:3px 8px;margin:8px 0;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+#detailDecision .care-review-staff b,#detailDecision .care-review-missing b{flex:none;font-weight:700}
+#detailDecision .care-review-staff span{color:#53675f}
+#detailDecision .care-review-missing{padding:7px 10px;border-left:3px solid #b77920;background:#fff8e9;color:#765817}
+#detailDecision .care-review-questions{border:1px solid #dce7e2;border-radius:10px;background:#f7faf8}
+#detailDecision .care-review-questions>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 12px;box-sizing:border-box;list-style:none;cursor:pointer;font-size:14px;line-height:1.5;font-weight:700}
+#detailDecision .care-review-questions>summary::-webkit-details-marker{display:none}
+#detailDecision .care-review-questions>summary>span:first-child{flex:1;min-width:0}
+#detailDecision .care-review-count{flex:none;color:#607168;font-size:12px;font-weight:500}
+#detailDecision .care-review-questions>summary::after{content:'';flex:none;width:7px;height:7px;margin:0 3px 4px;border:solid #42665a;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+#detailDecision .care-review-questions[open]>summary::after{transform:rotate(225deg);margin-bottom:-3px}
+#detailDecision .care-review-questions>summary:focus-visible{outline:2px solid #087f6b;outline-offset:2px;border-radius:10px}
+#detailDecision .care-review-questions ul{display:grid;gap:8px;margin:0;padding:10px 12px;border-top:1px solid #dce7e2;list-style:none}
+#detailDecision .care-review-questions li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:8px;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+#detailDecision .care-review-questions li b{font-weight:700;color:#36594e}
+#detailDecision .care-review-questions li span{color:#53675f}
+#detailDecision .care-review-note{margin:0;padding:0 12px 12px;color:#607168;font-size:12px;line-height:1.6}
+#detailDecision .care-review-source{display:flex;flex-wrap:wrap;gap:0 7px;margin:6px 1px 0;color:#607168;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+#detailDecision .care-review-source span{white-space:nowrap}
+/** SOFTM-DETAIL-ESSENTIALS END */
 /** SOFTM-DECISION-SUMMARY END */

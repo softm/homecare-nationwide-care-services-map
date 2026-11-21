@@ -97,14 +97,17 @@
                     : '등록 정원은 빈자리, 등록 인력은 실제 근무조를 뜻하지 않습니다.';
         return { confirmed, verify, unknown, note };
     }
+    /** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 반복 평가·빈 상태 상자를 없애고 실제 누락과 펼쳐볼 상담 질문만 표시 */
     function renderReview(c, type, context = {}) {
         const data = review(c, type);
         const item = value => `<li><b>${escape(value.label)}</b><span>${escape(value.detail)}</span></li>`;
-        const row = (status, title, values, empty) => `<div class="care-review-row" data-status="${status}"><dt>${escape(title)}</dt><dd><ul>${values.length ? values.map(item).join('') : `<li class="care-review-empty">${escape(empty)}</li>`}</ul></dd></div>`;
+        const staff = data.confirmed.filter(value => value.label === '등록 인력').map(value => value.detail);
+        const missing = [...new Set(data.unknown.map(value => value.label))];
         const source = context.source || (type === 'nursing-hospital' ? '건강보험심사평가원 요양기관 개설현황' : '국민건강보험공단 공개 수집 자료');
         const sourceDate = context.sourceDate || '미확인';
-        return `${render(c, type)}<section class="care-decision-review" aria-label="기관 선택 확인 요약"><h4>선택 전에 확인할 3가지</h4><dl>${row('confirmed', '확인된 강점', data.confirmed, '이 요약 기준에서 확인된 강점 항목이 없습니다. 강점이 없다는 뜻은 아닙니다.')}${row('verify', '기관 확인 필요', data.verify, '현재 운영정보는 기관에 직접 확인해 주세요.')}${row('unknown', '미확인', data.unknown, '이 요약 기준에서 별도로 분류된 미확인 항목 없음')}</dl><p>${escape(data.note)} <span>${escape(source)} · 검색자료 기준일 ${escape(sourceDate)}</span></p></section>`;
+        return `${render(c, type, { showNote: false })}<section class="care-decision-review" aria-label="추가 확인 정보">${staff.length ? `<p class="care-review-staff"><b>추가 등록 인력</b><span>${staff.map(escape).join(' · ')}</span></p>` : ''}${missing.length ? `<p class="care-review-missing"><b>공개자료 미확인</b><span>${missing.map(escape).join(' · ')}</span></p>` : ''}<details class="care-review-questions"><summary><span>상담할 때 확인하기</span><span class="care-review-count">${data.verify.length}개 항목</span></summary><ul>${data.verify.map(item).join('')}</ul><p class="care-review-note">${escape(data.note)}</p></details><p class="care-review-source">${escape(source)}<span>검색자료 기준 ${escape(sourceDate)}</span></p></section>`;
     }
+    /** SOFTM-DETAIL-ESSENTIALS END */
     /** SOFTM-DETAIL-REVIEW END */
     function markerLines(c, type) {
         const { cells } = summary(c, type);
@@ -117,10 +120,10 @@
         const year = /^\d{4}-\d{2}-\d{2}$/.test(String(c.d || '')) ? `지정 ${String(c.d).slice(0,4)}년` : '지정연도 미확인';
         return [first, second || `장기요양 복지용구 · ${year}`];
     }
-    function render(c, type) {
+    function render(c, type, { showNote = true } = {}) { // SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 상세의 자료 해설은 상담 펼침 안에서 한 번만 표시
         const { cells, note } = summary(c, type);
         const html = cells.map(({ label, value, detail }) => `<div class="care-decision-cell"><dt>${escape(label)}</dt><dd>${escape(value)}</dd>${detail ? `<span class="care-decision-context">${escape(detail)}</span>` : ''}</div>`).join('');
-        return `<section class="care-decision-summary" aria-label="기관 판단 요약"><dl class="care-decision-grid" style="--care-decision-columns:${cells.length}">${html}</dl>${note ? `<p class="care-decision-note">${escape(note)}</p>` : ''}</section>`;
+        return `<section class="care-decision-summary" aria-label="기관 판단 요약"><dl class="care-decision-grid" style="--care-decision-columns:${cells.length}">${html}</dl>${showNote && note ? `<p class="care-decision-note">${escape(note)}</p>` : ''}</section>`; // SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 목록의 기존 해설은 유지하고 상세의 중복만 제거
     }
     globalThis.CareDecisionSummary = { summary, render, review, renderReview, staffText, markerLines }; // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 맞춤 후보도 지도 목록과 같은 유형별 지표·누락 판정을 사용
     /** SOFTM-MARKER-INSIGHTS END */
