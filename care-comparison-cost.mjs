@@ -1,3 +1,5 @@
+import {loadFacts,hydrateFacts,dateFact} from './care-service-facts.mjs?v=20261121-facts1';
+import {monthlyFees} from './care-service-facts-model.mjs'; // SOFTM-KEY 날짜:20261121 : 확인된 비급여만 공통 이용일수로 계산
 /** SOFTM-PERSONAL-COST START 날짜:20261121 : 같은 이용 조건과 공식 수가로 비교하며 미확인 비급여·계정 변경을 구분 */
 import './care-cost-rates.js?v=20261121-personal-cost1';
 import './care-cost-engine.js?v=20260904-1';
@@ -22,13 +24,14 @@ export function estimate(type,row,state){
     if(!state.burden)return fail('본인부담 유형 선택','일반·감경·면제 여부를 선택해 주세요.');
     const result=globalThis.CareCostEngine.calculate({...state,service:type,facilityKind:context.facilityKind,quantity:Number(state.quantity),specialCare:state.exception});
     if(!result.low)return fail('이용 조건 확인 필요',result.issues.join(' '));
-    const raw=state.extras?.[row.i],hasExtra=raw!==''&&raw!==undefined;
+    const manual=state.extras?.[row.i],provided=type==='daycare'?monthlyFees(state.serviceFacts?.[row.i]?.facts?.fees,Number(state.quantity)):{total:null},auto=manual===undefined||manual==='';
+    const raw=auto?provided.total:manual,hasExtra=raw!==''&&raw!==undefined&&raw!==null;
     const extra=hasExtra?Number(raw):0;
     if(hasExtra&&(!Number.isSafeInteger(extra)||extra<0||extra>100000000))return fail('비급여 금액 확인','월 비급여는 0~100,000,000원의 정수로 입력해 주세요.');
     const low=result.low.total+extra,high=result.high.total+extra;
     const range=(a,b)=>a===b?won(a):`${won(a)} ~ ${won(b)}`;
-    const description=[`${CARE_GRADES[state.grade]} · 본인부담 ${result.percent}% · 월 ${state.quantity}일`,type==='daycare'?`하루 ${bands[state.daycareBand]}`:type==='home-care'?`1일 1회 · 회당 ${state.minutes}분`:'',`급여 본인부담 ${range(result.low.copay,result.high.copay)}`,result.low.excess?`한도 초과 전액부담 ${won(result.low.excess)}`:'',hasExtra?`입력한 월 비급여 ${won(extra)} 포함`:'식비 등 비급여 미포함 · 추가 확인 필요',...result.notes].filter(Boolean);
-    return {value:range(low,high),note:description.join(' / '),tone:'confirmed',result,low,high,hasExtra};
+    const description=[`${CARE_GRADES[state.grade]} · 본인부담 ${result.percent}% · 월 ${state.quantity}일`,type==='daycare'?`하루 ${bands[state.daycareBand]}`:type==='home-care'?`1일 1회 · 회당 ${state.minutes}분`:'',`급여 본인부담 ${range(result.low.copay,result.high.copay)}`,result.low.excess?`한도 초과 전액부담 ${won(result.low.excess)}`:'',hasExtra?`${auto?'기관 확인':'입력한'} 월 비급여 ${won(extra)} 포함${auto?' · '+provided.reason+' · 확인 '+dateFact(state.serviceFacts[row.i].facts.fees.confirmedAt):''}`:`식비 등 비급여 미포함 · ${provided.reason||'추가 확인 필요'}`,...result.notes].filter(Boolean);
+    return {value:`${hasExtra?'약 ':'급여 기준 약 '}${range(low,high)}`,note:description.join(' / '),tone:'confirmed',result,low,high,hasExtra};
 }
 
 function panel(type,state){
@@ -47,7 +50,7 @@ export async function mount(host,{type,rows}){
     const update=()=>{
         cells.forEach((cell,index)=>{
             const row=rows[index];if(!row)return;
-            const value=estimate(type,row,state);cell.dataset.tone=value.tone;
+            const value=estimate(type,row,state);cell.dataset.tone=value.tone;const input=cell.querySelector('.care-cost-extra input');if(input)input.placeholder=type==='daycare'&&monthlyFees(state.serviceFacts?.[row.i]?.facts?.fees,Number(state.quantity)).total!==null?'기관 확인액 자동 적용':'미확인';
             cell.querySelector('strong').textContent=value.value;cell.querySelector('span').textContent=value.note;
         });
         const eligible=container.querySelector('[data-facility-eligibility]');if(eligible)eligible.hidden=!['3','4','5'].includes(state.grade);
@@ -58,7 +61,7 @@ export async function mount(host,{type,rows}){
         cells.forEach((cell,index)=>{
             cell.querySelector('.care-cost-extra')?.remove();
             if(!supported.has(type))return;
-            const label=document.createElement('label');label.className='care-cost-extra';label.innerHTML=`기관에서 확인한 월 비급여 (선택)<input type="number" inputmode="numeric" min="0" max="100000000" step="1" placeholder="미확인" aria-label="${esc(rows[index].n)} 월 비급여 금액" value="${esc(state.extras[rows[index].i]??'')}"><small>월 합계 · 원 / 확인된 경우만 입력</small>`;cell.append(label);
+            const label=document.createElement('label');label.className='care-cost-extra';label.innerHTML=`직접 확인한 월 비급여 (선택)<input type="number" inputmode="numeric" min="0" max="100000000" step="1" placeholder="미확인" aria-label="${esc(rows[index].n)} 월 비급여 금액" value="${esc(state.extras[rows[index].i]??'')}"><small>월 합계 · 원 / 입력하면 기관 제공 금액 대신 적용</small>`;cell.append(label);
             label.querySelector('input').addEventListener('input',event=>{state.touched=true;state.extras[rows[index].i]=event.target.value;update();announce();});
         });
         container.addEventListener('input',onInput,{signal:controller.signal});
@@ -73,6 +76,8 @@ export async function mount(host,{type,rows}){
     const controller=new AbortController();
     const reset=()=>{state=initial(type);states.set(type,state);status='계정이 변경되어 이전 계산 조건을 지웠어요. 등급을 선택해 주세요.';draw();};
     const item={workspace,reset};mounted.add(item);draw();
+    // SOFTM-KEY 날짜:20261121 : 비급여 조회 실패는 급여 계산과 기존 수동 입력을 막지 않음
+    if(type==='daycare'){const currentEpoch=epoch;void Promise.all(rows.map(row=>loadFacts(row.i))).then(data=>{if(!workspace.isConnected||currentEpoch!==epoch)return;state.serviceFacts=Object.fromEntries(rows.map((row,i)=>[row.i,data[i]]));update();});}
     if(!supported.has(type))return;
     try{
         const {recipientContext}=await import('./care-recipient.mjs');

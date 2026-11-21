@@ -1,3 +1,4 @@
+import {mountFactsEditor} from './care-service-facts-editor.mjs'; // SOFTM-KEY 날짜:20261121 : 승인된 기관 관리에 항목별 운영정보 연결
 import { api as memberApi, refreshSession, currentSession, logout as memberLogout } from './care-member-api.mjs'; // SOFTM-MEMBERS 날짜:20261120 : 기관 관리의 인증을 전용 회원 서비스로 연결
 /** SOFTM-INSTITUTION-PORTAL START 날짜:20261118 : 공통 계정의 단기 PKCE 세션으로 승인된 기관만 운영정보·사진·집계를 관리 */
 export const INSTITUTION_API_BASE = 'https://softm-homecare-pilot.softm.workers.dev';
@@ -366,6 +367,7 @@ async function mountPortal() {
         setPublishStatus(data.status || 'draft');
         applyAccessMode();
         renderPhotos();
+        void mountFactsEditor($('serviceFactsEditor'),institutionId,{readOnly:!state.canEdit}); // SOFTM-KEY 날짜:20261121 : 소개글과 분리한 확인일 관리
         setGlobal(state.canEdit ? '기관 관리 화면을 불러왔습니다.' : data.status === 'suspended' ? '운영 중지 상태로 조회만 할 수 있습니다.' : '조회 전용 권한으로 기관 정보를 불러왔습니다.', 'success');
     }
     function setPublishStatus(statusValue) {
