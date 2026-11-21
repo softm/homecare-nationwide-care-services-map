@@ -82,3 +82,11 @@ IA의 18개 화면은 위 표의 기존/신규 화면에 통합했다. 소개는
 <!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 이전 로컬 R2 검증과 새 파일 저장소 연결 준비를 구분 -->
 2026-11-21 운영 파일 구성은 Supabase private 버킷으로 변경했다. 이전에 수행한 로컬 R2 에뮬레이터 검증은 당시 결과이며 운영 R2가 생성됐다는 뜻이 아니다. [파일 연결부](../services/homecare-storage/README.md)의 실제 버킷·Worker secret·배포 및 가상 기관의 API 검사 18개를 완료했다. 사용자가 로그인·API 주소 연결·실제 업로드 작업을 재개해 두 Worker 업로드를 활성화하고 Pages 게이트웨이와 카페24 CNAME을 구성했다. 공식 HTTPS·운영 브라우저·관리자 연결 상태는 [운영 기록](HOMECARE-DEPLOYMENT.md)을 따른다.
 <!-- SOFTM-SUPABASE-STORAGE END -->
+
+<!-- SOFTM-PERSONAL-COST START 날짜:20261121 : 간편가입과 민감정보 선택 입력을 분리한 비용 조건 정책 -->
+## 장기요양등급과 예상 비용
+
+일반회원 가입 완료(복구코드 보관 이후)와 SNS 추가정보 완료 이후에 선택 입력 화면 `care-account.html?view=care-setup`을 제공한다. 보호자 연락처와 대상자 등급·본인부담 유형을 등록하거나 건너뛸 수 있다. 기존 계정은 `care-account.html#careRecipient`에서 같은 항목을 관리한다.
+
+대상자 API는 `grade`(빈값·1~5·cognitive)와 `burden`(빈값·general·reduced40·reduced60·exempt)을 검증해 기존 비공개 JSON에 저장한다. 별도 D1 스키마 변경은 없다. 서버도 루트 `care-recipient-model.mjs`를 번들하므로 이 모델 수정은 회원 Worker 배포가 필요하다. 기존 프로필의 누락 필드는 미확인으로 유지하고, 새 저장은 비용 계산 목적을 포함한 `care-recipient-20261121-cost` 동의를 기록한다. 소유권·CSRF·연락처·수정 버전·삭제·공유 제외 규칙은 그대로 적용한다.
+<!-- SOFTM-PERSONAL-COST END -->

@@ -93,3 +93,12 @@ Node 22.13 이상을 사용한다. 이 PC의 기본 Node 20은 설치된 Wrangle
 - 코드 푸시, DB 적용, Worker 배포, 실제 웹 공개와 Android 배포는 각각 따로 확인한다.
 
 <!-- SOFTM-LIVE-D1 END -->
+
+## 2026-11-21 대상자 등급·감경 저장 API
+
+<!-- SOFTM-PERSONAL-COST START 날짜:20261121 : 비교표 비용 계산에 필요한 실제 회원 API 배포 기록 -->
+
+대상자 `grade`·`burden` 허용값과 비용 계산 목적의 별도 동의 버전을 기존 회원 Worker에 반영했다. D1 스키마·기관 파일 저장소·과금 설정은 변경하지 않았다. Worker 버전은 `9b36ef76-d1b1-49fb-987e-27fb7eddbf8a`다. `npm run check` 646개 검사, 286개 셸 자산, Worker 사전검사와 dry-run을 통과한 소스다.
+
+실제 가입→선택 입력→등급·감경 저장→새로고침→비교 금액 검증은 `scripts/check-personal-cost-live-playwright.mjs`로 수행한다. `ALLOW_LIVE_TEST_ACCOUNT=1`을 명시해야 운영 가상 계정 한 개를 생성하며, 비밀번호·복구코드·쿠키·CSRF를 출력하거나 저장하지 않는다. 검증 후 해당 시험 계정과 데이터를 삭제하고 성공/실패 상태만 작업 폴더에 기록한다. 기존 운영자·기관 계정은 사용하지 않는다.
+<!-- SOFTM-PERSONAL-COST END -->
