@@ -17,7 +17,7 @@ function renderShell(){
  document.body.append(nav);
  if(map){const account=document.createElement('a');account.className='hc-account-link hc-map-account';account.href='care-account.html';account.dataset.hcAccount='';account.textContent='로그인';document.body.append(account);}
  // SOFTM-BRAND-CONSISTENCY 날짜:20261121 : 지도와 회원·맞춤·상담 화면에서 동일한 대표 아이콘 사용
- else {const header=document.createElement('header');header.className='hc-header';header.innerHTML=`<a class="hc-brand" href="index.html"><img class="hc-brand-icon" src="assets/brand/dolbom-hannun-icon-20261007.png" width="36" height="36" alt="">돌봄한눈</a><a class="hc-account-link" data-hc-account href="care-account.html">로그인</a>`;document.body.prepend(header);}
+ else {const header=document.createElement('header');header.className='hc-header';header.innerHTML=`<a class="hc-brand" href="index.html"><img class="hc-brand-icon" src="assets/brand/dolbom-hannun-icon-20261122.png" width="36" height="36" alt="">돌봄한눈</a><a class="hc-account-link" data-hc-account href="care-account.html">로그인</a>`;document.body.prepend(header);} // SOFTM-BRAND-LOGO 날짜:20261122 : 회원·상세·상담 화면의 공통 헤더에 투명 배경 새 로고를 적용
  if(document.body.classList.contains('hc-page')){const footer=document.createElement('footer');footer.className='hc-footer';footer.innerHTML='<span>가족의 선택에 필요한 근거, 돌봄한눈</span><a href="service-guide.html">이용 안내</a><a href="about.html">자료 출처</a><a href="privacy.html">개인정보처리방침</a><a href="institution-signup.html">기관회원</a>';document.body.append(footer);}
 }
 globalThis.addEventListener?.('care:session',event=>{const data=event.detail;switchOwner(data?.user?.id||null);document.querySelectorAll('[data-hc-account]').forEach(a=>{a.textContent=data?.user?'내 정보':'로그인';});});
