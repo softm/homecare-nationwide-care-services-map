@@ -13,6 +13,17 @@ const key = 'institutions/hira:test_1/photo-1.jpg';
 const jpeg = new Uint8Array([255, 216, 255, 0]);
 const options = { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { institutionId: 'hira:test_1', photoId: 'photo-1' } };
 
+// SOFTM-STORAGE-RUNTIME 날짜:20261121 : 실제 Workers처럼 fetch의 수신 객체를 검사해 Node에서만 통과하는 호출을 방지
+test('기본 연결은 Workers의 fetch 수신 객체와 지원하는 리디렉션 모드를 사용한다', async t => {
+  t.mock.method(globalThis, 'fetch', async function (_url, init) {
+    if (this !== globalThis) throw new TypeError('Illegal invocation');
+    if (!['manual', 'follow'].includes(init.redirect)) throw new TypeError('Invalid redirect value');
+    return Response.json(privateBucket);
+  });
+  const result = await createSupabaseStorage(config).verifyPrivateBucket();
+  assert.equal(result.private, true);
+});
+
 test('비공개 설정 확인 후 서버 키로 파일을 생성하고 인증 경로로 읽고 정확한 키만 삭제한다', async () => {
   const calls = [];
   const storage = createSupabaseStorage(config, async (url, init) => {
@@ -31,7 +42,7 @@ test('비공개 설정 확인 후 서버 키로 파일을 생성하고 인증 �
   for (const { url, init } of calls) {
     assert.equal(init.headers.get('apikey'), config.secret);
     assert.equal(init.headers.get('authorization'), null);
-    assert.equal(init.redirect, 'error');
+    assert.equal(init.redirect, 'manual');
     assert.ok(init.signal instanceof AbortSignal);
     assert.ok(!url.includes(config.secret));
   }
@@ -96,6 +107,23 @@ test('업스트림 예외·큰 오류 본문·리디렉션은 키나 오류 원�
     await assert.rejects(storage.get(key), error => error.code === 'storage_unavailable' && !error.message.includes(config.secret));
   }
 });
+
+// SOFTM-STORAGE-RUNTIME START 날짜:20261121 : 모든 파일 동작에서 외부 리디렉션을 추적하지 않는지 검증
+test('버킷 확인·업로드·다운로드·삭제에서 리디렉션을 따르거나 성공으로 표시하지 않는다', async () => {
+  for (const operation of ['verifyPrivateBucket', 'put', 'get', 'delete']) {
+    const calls = [];
+    const storage = createSupabaseStorage(config, async (url, init) => {
+      calls.push(url);
+      assert.equal(init.redirect, 'manual');
+      if (operation === 'put' && url.endsWith(`/bucket/${config.bucket}`)) return Response.json(privateBucket);
+      return new Response(null, { status: 307, headers: { Location: 'https://other.example/must-not-receive-key' } });
+    });
+    await assert.rejects(storage[operation](key, jpeg, options), { code: 'storage_unavailable' });
+    assert.ok(calls.every(url => url.startsWith(`${config.url}/storage/v1/`)));
+    assert.equal(calls.length, operation === 'put' ? 2 : 1);
+  }
+});
+// SOFTM-STORAGE-RUNTIME END
 
 test('업로드 크기·형식을 제한하고 충돌 시 덮어쓰지 않는다', async () => {
   let uploads = 0;
