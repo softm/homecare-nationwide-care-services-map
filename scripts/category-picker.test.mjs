@@ -47,7 +47,7 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261119-link1/);
+ assert.match(index,/care-category-picker\.js\?v=20261121-type1/); // SOFTM-TYPE-SELECTOR 날짜:20261121 : 현재 유형 표시가 반영된 자산 버전 확인
 });
 test('첫 유형 선택은 손대지 않은 전국 지도를 넘기지 않고 일반 진입은 현재 위치를 우선한다',()=>{
  const source=readFileSync(new URL('../index.html',import.meta.url),'utf8');

@@ -52,6 +52,7 @@ const cases=[
  {name:'share-management',url:'care-share.html?manage=1',seed:true,user:'personal'},
  {name:'shared-record',url:'care-share.html#layout-fixture',seed:true,user:'personal'},
  {name:'analysis',url:'care-analysis.html'},
+ {name:'analysis-choices',url:'care-analysis.html',action:'condition-choices'}, // SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 실제 유형 카드·조건 펼침·키보드·재방문 상태를 검증
  ...['candidates','compare','prepare'].map(action=>({name:`analysis-${action}`,url:'care-analysis.html',action:`analysis-${action}`})),
  ...['service-guide','about','care-cost','care-photos','data-status','privacy','terms','advertise','partner-profile-sample'].map(name=>({name,url:name+'.html'})),
  ...['daycare','nursing-home','nursing-hospital','home-care','home-nursing','home-bath','short-stay-care','welfare-equipment','dementia-care'].map(name=>({name:name+'-landing',url:name+'-map.html'})),
@@ -138,6 +139,32 @@ async function run(c,width){
   if(c.action==='stats')await page.locator('#statsTab').click();
   if(c.action==='share-dialog')await page.locator('#shareRecord').click();
   if(c.action==='install')await page.locator('.hannun-pwa-install').click();
+  /** SOFTM-ANALYSIS-GUIDE START 날짜:20261121 : 실제 사용자 조작으로 선택과 다음 단계 안내가 연결되는지 확인 */
+  if(c.name.startsWith('analysis')){
+   assert.equal(await page.locator('#analysisTypeChoices input[type=radio]').count(),9,'9개 돌봄 유형 표시');
+   assert.equal(await page.locator('.analysis-preferences').getAttribute('open'),'','조건 기본 펼침');
+   assert.ok((await page.locator('.hc-brand-icon').getAttribute('src')).endsWith('dolbom-hannun-icon-20261007.png'),'지도와 같은 대표 아이콘');
+   await page.locator('.analysis-recipient-button').first().click({trial:true});
+  }
+  if(c.action==='condition-choices'){
+   await page.locator('[name=careTypeChoice][value=facility]').check();
+   assert.equal(await page.locator('#analysisType').inputValue(),'facility');
+   await page.locator('.analysis-preferences>summary').click();
+   await page.locator('[name=careTypeChoice][value=home-nursing]').check();
+   assert.ok(await page.locator('.analysis-preferences').evaluate(e=>e.open),'유형 변경 시 조건 펼침');
+   await page.locator('[name=careTypeChoice][value=nursing-hospital]').check();
+   assert.equal(await page.locator('#analysisCriteria input').count(),0,'의료기관에 돌봄기관 조건 미적용');
+   assert.match(await page.locator('#analysisPreferencesHelp').innerText(),/요양병원/);
+   await page.locator('[name=careTypeChoice]:checked').press('ArrowRight');
+   assert.equal(await page.locator('#analysisType').inputValue(),'daycare','키보드 유형 선택');
+   const choice=page.locator('#analysisCriteria input').first();await choice.check();
+   const label=await choice.locator('..').innerText();
+   assert.ok((await page.locator('#analysisSummaryCriteria').innerText()).includes(label),'선택 조건 요약 연결');
+   await page.reload({waitUntil:'domcontentloaded'});await page.locator('#analysisTypeChoices input:checked').waitFor();
+   assert.equal(await page.locator('#analysisCriteria input:checked').count(),1,'재방문 조건 복원');
+   assert.equal(await page.locator('#analysisPreferenceCount').innerText(),'1개 선택','복원한 선택 개수');
+  }
+  /** SOFTM-ANALYSIS-GUIDE END */
   if(c.action?.startsWith('map-')){
    const more=page.locator('[data-mobile-focus=more]');
    const openMenu=async()=>{if(await more.isVisible())await more.click();else await page.locator('.care-menu-trigger').click();};

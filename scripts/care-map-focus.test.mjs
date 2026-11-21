@@ -61,8 +61,10 @@ test('모바일 전체 지도 확장 토글은 주변 오버레이를 숨기고 
 /** SOFTM-MOBILE-IMMERSIVE END */
 /** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261027 : 모바일 전체 지도 칩과 검색어를 보존하는 접힘 상태를 함께 검증 */
 test('모바일 전체 지도 필터 칩은 짧은 문구와 작은 아이콘을 사용한다',()=>{
- assert.match(mapHtml,/care-mobile-focus\.css\?v=20261027-query-status1/);
- assert.match(mapHtml,/care-mobile-focus\.js\?v=20261027-query-status1/);
+ /** SOFTM-TYPE-SELECTOR START 날짜:20261121 : 현재 유형과 독립 펼침 화살표가 포함된 자산 버전 확인 */
+ assert.match(mapHtml,/care-mobile-focus\.css\?v=20261121-type1/);
+ assert.match(mapHtml,/care-mobile-focus\.js\?v=20261121-type1/);
+ /** SOFTM-TYPE-SELECTOR END */
  assert.match(mobileFocusSource,/>필터<\/span>/);
  assert.match(mobileFocusSource,/`필터 · \$\{filterCount \|\| '설정됨'\}`/);
  assert.doesNotMatch(mobileFocusSource,/상세필터/);

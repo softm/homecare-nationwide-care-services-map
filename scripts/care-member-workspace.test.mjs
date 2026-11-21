@@ -12,3 +12,15 @@ test('상담을 다시 열어도 답변·최근 수정 시각을 바꾸지 않�
 test('단일 기관 상세는 비교할 다른 기관 없이 실제 평가 지표를 표시한다',()=>{const context=vm.createContext({});vm.runInContext(readFileSync(new URL('../care-comparison-workspace.js',import.meta.url),'utf8'),context);const row={i:'1',n:'기관',g:'A',ey:2024};const single=context.CareComparisonWorkspace.render({rows:[row],single:true});assert.match(single,/2024년/);assert.match(single,/공공 평가/);assert.doesNotMatch(single,/시설을 2곳 이상/);assert.match(context.CareComparisonWorkspace.render({rows:[row]}),/시설을 2곳 이상/);});
 test('병원 원문 식별자는 서버와 동일한 출처 포함 키가 되고 공단 번호는 그대로 유지한다',()=>{assert.equal(memberInstitutionId('24215000294','daycare'),'24215000294');const raw='병원+/=identifier';assert.equal(memberInstitutionId(raw,'nursing-hospital'),'hira:'+Buffer.from(raw).toString('base64url'));assert.equal(memberInstitutionId(raw,'daycare'),'');});
 test('중복 세션 조회를 하나로 합치고 늦은 401 응답이 새 로그인을 지우지 않는다',async t=>{const original=globalThis.fetch; t.after(()=>globalThis.fetch=original);let finish,calls=0;globalThis.fetch=()=>{calls++;return new Promise(resolve=>finish=resolve)};const m=await import('../care-member-api.mjs');const first=m.refreshSession(),second=m.refreshSession();assert.equal(first,second);assert.equal(calls,1);const signedIn={user:{id:'new-user'},csrf:'new-csrf'};m.acceptSession(signedIn);finish(Response.json({error:{message:'만료'}},{status:401}));assert.deepEqual(await first,signedIn);assert.deepEqual(m.currentSession(),signedIn);});
+
+/** SOFTM-RECIPIENT-RETURN START 날짜:20261121 : 대상자 입력 복귀를 허용해도 외부 주소·임의 해시를 허용하지 않는지 확인 */
+test('대상자 입력 복귀 위치만 보존하고 외부 로그인 복귀 주소를 차단한다',async t=>{
+ const previous=globalThis.location;t.after(()=>{if(previous===undefined)delete globalThis.location;else globalThis.location=previous;});
+ globalThis.location={href:'https://homecare.designboard.net/care-account.html',origin:'https://homecare.designboard.net'};
+ const {safeReturn}=await import('../care-member-api.mjs');
+ assert.equal(safeReturn('care-account.html#careRecipient'),'/care-account.html#careRecipient');
+ assert.equal(safeReturn('care-account.html#unrecognized'),'/care-account.html');
+ assert.equal(safeReturn('care-share.html#private-fragment'),'/care-share.html');
+ for(const url of ['https://example.invalid/care-account.html#careRecipient','//example.invalid/care-account.html','javascript:alert(1)'])assert.equal(safeReturn(url),'care-account.html');
+});
+/** SOFTM-RECIPIENT-RETURN END */
