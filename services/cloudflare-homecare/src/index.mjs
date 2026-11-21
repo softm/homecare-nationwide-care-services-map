@@ -1037,7 +1037,7 @@ async function submitInstitution(request, env, institutionId) {
                )
         )`,
   ).bind(id, expectedRevision, PILOT_AGREEMENT_VERSION).run();
-  if (affectedRows(publishResult) !== 1) {
+  if (affectedRows(publishResult) < 1) { // SOFTM-D1-TRIGGER 날짜:20261121 : 기본키 조건은 한 기관만 갱신하지만 확인일 트리거까지 changes에 합산됨
     const state = await env.DB.prepare(
       `SELECT i.status, i.content_revision,
               EXISTS(
@@ -1169,7 +1169,7 @@ async function savePilotAgreement(request, env, institutionId) {
               updated_at = datetime('now')
         WHERE institution_id = ? AND status = 'accepted'`,
     ).bind(user.id, id).run();
-    if (affectedRows(withdrawal) !== 1) {
+    if (affectedRows(withdrawal) < 1) { // SOFTM-D1-TRIGGER 날짜:20261121 : 협약 철회 성공에 감사·비공개 트리거 변경도 합산됨
       throw new HttpError(409, "pilot_agreement_not_accepted", "동의한 시범운영 협약이 없어 철회할 수 없습니다.");
     }
   }
