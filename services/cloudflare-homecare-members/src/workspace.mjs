@@ -1,3 +1,4 @@
+import {cleanUseConditions,cleanUseCheck,shareUseCheck} from '../../../care-consultation-model.mjs'; // SOFTM-KEY 날짜:20261121 : 비공개 통화 조건·결과를 허용 필드로만 동기화
 /** SOFTM-MEMBERS START 날짜:20261120 : 사용자 기록과 공유에 허용한 필드만 저장하여 인증·위치 캐시의 유입을 차단 */
 import { fail, text } from './security.mjs';
 export const TYPES=['daycare','facility','home-care','home-nursing','home-bath','short-stay','welfare-equipment','dementia','nursing-hospital'];
@@ -7,7 +8,7 @@ export function cleanRecord(value) {
  if(!value||!TYPES.includes(value.type)||!text(value.institutionId,256))fail('invalid_record','상담 기관을 확인해 주세요.');
  const questions=(Array.isArray(value.questions)?value.questions:[]).slice(0,60).map(q=>({id:text(q.id,512),text:text(q.text,500),answer:multiline(q.answer,2000),checked:q.checked===true})).filter(q=>q.id&&q.text);
  const checklist=(Array.isArray(value.checklist)?value.checklist:[]).slice(0,30).map(q=>({id:text(q.id,80),text:text(q.text,300),checked:q.checked===true})).filter(q=>q.id&&q.text);
- return {key:`${value.type}:${text(value.institutionId,256)}`,type:value.type,institutionId:text(value.institutionId,256),name:text(value.name,120),address:text(value.address,200),phone:text(value.phone,40),status:['preparing','contacted','scheduled','completed'].includes(value.status)?value.status:'preparing',visitAt:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value.visitAt)?value.visitAt:'',questions,checklist,notes:multiline(value.notes,5000),updatedAt:Number.isSafeInteger(value.updatedAt)?value.updatedAt:0};
+ return {key:`${value.type}:${text(value.institutionId,256)}`,type:value.type,institutionId:text(value.institutionId,256),name:text(value.name,120),address:text(value.address,200),phone:text(value.phone,40),status:['preparing','contacted','scheduled','completed'].includes(value.status)?value.status:'preparing',visitAt:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value.visitAt)?value.visitAt:'',questions,checklist,...(value.useConditions?{useConditions:cleanUseConditions(value.useConditions)}:{}),...(value.useCheck?{useCheck:cleanUseCheck(value.useCheck)}:{}),notes:multiline(value.notes,5000),updatedAt:Number.isSafeInteger(value.updatedAt)?value.updatedAt:0};
 }
 export function cleanWorkspace(value) {
  if(value?.v!==1)fail('invalid_workspace','저장 형식을 확인해 주세요.');
@@ -22,6 +23,6 @@ export function shareSnapshot(value) {
  if(value.records?.length>3)fail('share_limit','한 번에 3곳까지 공유할 수 있습니다.');
  const records=(Array.isArray(value.records)?value.records:[]).map(cleanRecord);
  if(!records.length)fail('empty_share','공유할 상담 기록을 선택해 주세요.');
- return {title:text(value.title,100)||'우리 가족 시설 비교',records:records.map(r=>({type:r.type,institutionId:r.institutionId,name:r.name,status:r.status,questions:r.questions.map(q=>({text:q.text,checked:q.checked,...(value.includeAnswers===true?{answer:q.answer}:{})})),checklist:r.checklist.map(q=>({text:q.text,checked:q.checked})),...(value.includeNotes===true?{notes:r.notes}:{})}))};
+ return {title:text(value.title,100)||'우리 가족 시설 비교',records:records.map(r=>({type:r.type,institutionId:r.institutionId,name:r.name,status:r.status,questions:r.questions.map(q=>({text:q.text,checked:q.checked,...(value.includeAnswers===true?{answer:q.answer}:{})})),checklist:r.checklist.map(q=>({text:q.text,checked:q.checked})),...(value.includeUseCheck===true&&r.useCheck?{useCheck:shareUseCheck(r.useCheck)}:{}),...(value.includeNotes===true?{notes:r.notes}:{})}))};
 }
 /** SOFTM-MEMBERS END */

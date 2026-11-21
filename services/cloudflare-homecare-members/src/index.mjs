@@ -1,3 +1,4 @@
+import {managedFacts,changeFacts,enrollPilot,pilotDashboard,publicFacts} from '../../homecare-service-facts.mjs'; // SOFTM-KEY 날짜:20261121 : 기존 회원 인증에 시범운영 항목 권한 연결
 /** SOFTM-MEMBERS START 날짜:20261120 : 돌봄한눈 전용 인증·회원 기록·기관 가입 API */
 import { fail, now, random, id, sha, challenge, equal, password, username, hashPassword, verifyPassword, text, cookie, token, allowedOrigin, requireOrigin, jsonBody, sql, publicUser, profile, rateLimit, TERMS } from './security.mjs';
 import { authorizeUrlWithPkce, exchangeProfile, providerConfig } from './oauth.mjs';
@@ -170,6 +171,23 @@ async function route(request,env) {
  if((match=path.match(/^\/api\/registrations\/([\w-]+)\/(document|submit)$/))) {const user=await session(request,env,{csrf:mutate});if(match[2]==='document'&&request.method==='POST')return output(await uploadDocument(request,env,user,match[1]));if(match[2]==='document'&&request.method==='GET')return downloadDocument(env,user,match[1]);if(match[2]==='submit'&&request.method==='POST')return output(await submitRegistration(env,user,match[1],await jsonBody(request,10000)));}
  if(path==='/api/admin/registrations'&&request.method==='GET')return output(await listRegistrations(env,await admin(request,env),true));
  if((match=path.match(/^\/api\/admin\/registrations\/([\w-]+)\/(document|review)$/))) {const user=await admin(request,env,mutate);if(match[2]==='document'&&request.method==='GET')return downloadDocument(env,user,match[1],true);if(match[2]==='review'&&request.method==='POST')return output(await reviewRegistration(env,user,match[1],await jsonBody(request,10000)));}
+ // SOFTM-KEY START 날짜:20261121 : 운영자 재인증·담당자 CSRF를 거친 항목별 운영정보 API
+ if(path==='/api/public/service-facts'&&request.method==='GET')return output(await publicFacts(env.INSTITUTIONS_DB,url.searchParams.has('ids')?url.searchParams.get('ids').split(','):undefined));
+ // SOFTM-KEY 날짜:20261121 : 공개 기관·집계 요청도 API 도메인에서 기관 Worker로 전달하며 계정 자격증명은 제거
+ if((request.method==='GET'&&/^\/api\/public\/institutions\/[^/]+(?:\/photos\/[^/]+)?$/.test(path))||(request.method==='POST'&&['/api/public/events','/api/public/pilot-events'].includes(path))){
+  if(!env.INSTITUTIONS?.fetch)fail('service_unavailable','기관 서비스에 연결하지 못했습니다.',503);
+  const headers=new Headers(request.headers);for(const name of ['Cookie','Authorization','X-CSRF-Token','Host'])headers.delete(name);
+  return env.INSTITUTIONS.fetch(new Request(`https://institution.internal${path}${url.search}`,{method:request.method,headers,...(mutate?{body:request.body,duplex:'half'}:{})}));
+ }
+ if(path==='/api/admin/service-pilot'&&request.method==='GET'){await admin(request,env);return output(await pilotDashboard(env.INSTITUTIONS_DB));}
+ if((match=path.match(/^\/api\/(institutions|admin\/institutions)\/(\d{11})\/(service-facts|service-pilot)$/))){
+  const operator=match[1].startsWith('admin'),user=operator?await admin(request,env,mutate):await session(request,env,{complete:true,csrf:mutate});
+  if(!operator&&user.kind!=='institution')fail('forbidden','기관회원으로 로그인해 주세요.',403);
+  if(match[3]==='service-pilot'&&operator&&request.method==='PUT')return output(await enrollPilot(env.INSTITUTIONS_DB,match[2],user,await jsonBody(request,10000)));
+  if(match[3]==='service-facts'&&request.method==='GET')return output(await managedFacts(env.INSTITUTIONS_DB,match[2],user,operator));
+  if(match[3]==='service-facts'&&request.method==='PUT')return output(await changeFacts(env.INSTITUTIONS_DB,match[2],user,await jsonBody(request,20000),operator));
+ }
+ // SOFTM-KEY END
  if(path.startsWith('/api/institutions/')) {const user=await session(request,env,{complete:true,csrf:mutate});if(user.kind!=='institution')fail('institution_account_required','기관회원으로 로그인해 주세요.',403);if(path==='/api/institutions/claim')fail('registration_required','기관 가입 화면에서 증빙과 함께 신청해 주세요.',403);if(!env.INSTITUTIONS)fail('service_unavailable','기관 서비스에 연결하지 못했습니다.',503);const headers=new Headers(request.headers);headers.set('Authorization',`Bearer ${token(request,env)}`);headers.delete('Cookie');return env.INSTITUTIONS.fetch(new Request(`https://institution.internal${path}${url.search}`,{method:request.method,headers,body:mutate?request.body:undefined,duplex:'half'}));}
  fail('not_found','요청한 기능을 찾지 못했습니다.',404);
 }
