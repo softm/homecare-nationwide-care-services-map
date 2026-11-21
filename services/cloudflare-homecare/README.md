@@ -37,7 +37,7 @@ npm run db:migrate:local
 npm run dev
 ```
 
-`wrangler.jsonc`의 D1 `database_id`는 2026-11-20 새로 만든 전용 기관 DB를 가리킵니다. Supabase와 Worker의 실제 운영 여부는 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)에서 확인합니다. `workers_dev`의 예정 주소는 `https://softm-homecare-pilot.softm.workers.dev`이며 설정에 적힌 주소만으로 배포 완료를 의미하지 않습니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 생성된 DB와 배포 예정 Worker·저장소를 구분 -->
+`wrangler.jsonc`의 D1 `database_id`는 2026-11-20 새로 만든 전용 기관 DB를 가리킵니다. 2026-11-21 `https://softm-homecare-pilot.softm.workers.dev`에 배포하고 회원 Worker와 양방향 서비스 바인딩·Supabase 저장소를 검증했습니다. 운영 웹 공개와 남은 작업은 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)을 따릅니다. <!-- SOFTM-LIVE-D1 날짜:20261121 : 실제 Worker 배포와 아직 미공개인 회원 화면을 구분 -->
 
 기관 Worker 단독 `npm run dev`는 API 단위개발용입니다. 로그인·증빙 심사·기관 관리의 로컬 전체 흐름은 [회원 Worker README](../cloudflare-homecare-members/README.md)의 두 Worker 실행 절차를 사용합니다. 운영 검증은 실제 D1·Supabase·secret·양방향 서비스 바인딩과 HTTPS 회원 API를 연결한 뒤 별도로 수행합니다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 전용 회원 프록시를 사용하는 현재 로컬·운영 실행 절차 반영 -->
 
@@ -71,7 +71,7 @@ npx wrangler d1 migrations apply DB --remote
 <!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 무료 저장소 준비 결과와 담당자 업로드 개방 조건을 분리 -->
 이미 생성한 전용 D1을 재사용합니다. Supabase `homecare-photos`의 비공개·5MiB·JPEG/PNG/WebP 제한과 가상 파일 업로드·다운로드·익명 거부·삭제는 확인했습니다. 연결부·계정 상태는 [파일 저장소 문서](../homecare-storage/README.md)를 따릅니다.
 
-`SUPABASE_SECRET_KEY`는 배포 시 Worker secret으로 등록합니다. 현재 서버 secret 등록·Worker 배포는 하지 않았고 `FILE_UPLOADS_ENABLED=false`로 실제 기관 담당자 업로드를 막고 있습니다. 로컬 개발도 같은 기본값이며 운영 키를 로컬 파일에 복사하지 않습니다. 회원·기관 데이터는 D1에 남습니다. D1의 기존 `r2_key`, `r2_deletion_queue` 이름은 스키마 호환을 위해 유지합니다. R2 구독이나 버킷을 생성하지 않습니다.
+`SUPABASE_SECRET_KEY`와 `EVENT_HASH_SECRET`을 Worker secret으로 등록했습니다. 배포된 API에서 가상 기관 승인 후 사진 업로드·체크섬·비공개 상태·삭제를 검증했고 시험 계정·파일·삭제 대기열은 모두 정리했습니다. 운영 화면·API 도메인·백업 준비 전까지 `FILE_UPLOADS_ENABLED=false`를 유지합니다. 로컬 개발도 같은 기본값이며 운영 키를 로컬 파일에 복사하지 않습니다. 회원·기관 데이터는 D1에 남습니다. D1의 기존 `r2_key`, `r2_deletion_queue` 이름은 스키마 호환을 위해 유지합니다. R2 구독이나 버킷을 생성하지 않습니다.
 <!-- SOFTM-SUPABASE-STORAGE END -->
 
 ## 공통 응답
