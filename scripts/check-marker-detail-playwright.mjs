@@ -29,7 +29,7 @@ export async function verifyMarkerDetail(page,{width,out,name}){
  const click=async point=>{
   // 닫기·첫 선택 뒤의 지도 도구 및 이름표 배치가 끝난 좌표를 다시 확인한다.
   await page.waitForTimeout(350);
-  const stable=await pointFor({id:point.id});await page.mouse.click(stable.x,stable.y);
+  const stable=await pointFor({id:point.id}),before=await viewport();await page.mouse.click(stable.x,stable.y);return before;
  };
  const viewport=()=>page.evaluate(()=>({lat:map.getCenter().lat(),lng:map.getCenter().lng(),zoom:map.getZoom()}));
  const current=()=>page.evaluate(()=>({id:activeDetail?.i,name:document.getElementById('detailName').textContent,visible:!document.getElementById('detailSheet').hidden&&getComputedStyle(document.getElementById('detailSheet')).visibility!=='hidden',selected:document.querySelector('#naverMap .care-mobile-active-marker [data-marker-id]')?.dataset.markerId,tab:document.querySelector('[data-detail-view][aria-selected=true]')?.dataset.detailView,scroll:CareDetailLayout.scroller(document.getElementById('detailBody')).scrollTop}));
@@ -38,10 +38,15 @@ export async function verifyMarkerDetail(page,{width,out,name}){
  const first=await pointFor();await click(first);
  if(width>1000){assert.ok(await sheet.isHidden(),'닫힌 PC 상세에서 첫 클릭은 선택');await click(await pointFor({id:first.id}));}
  await sheet.waitFor({state:'visible'});await page.waitForFunction(()=>getComputedStyle(document.getElementById('detailSheet')).visibility!=='hidden'&&!detailMoveTimer&&!markerBlinkTimer);
- await page.waitForTimeout(350);
+ // 첫 상세의 SDK 이동 효과와 실제 마커 교체를 분리해 비교한다.
+ await page.waitForFunction(()=>{
+  const position=[map.getCenter().lat(),map.getCenter().lng(),map.getZoom()].join(','),now=performance.now();
+  if(window.markerDetailAuditPosition!==position){window.markerDetailAuditPosition=position;window.markerDetailAuditChangedAt=now;}
+  return now-window.markerDetailAuditChangedAt>=300;
+ },{},{polling:100,timeout:10000});
  const switchOnce=async()=>{
   const before=await current(),next=await pointFor({except:before.id});
-  const mapBefore=await viewport();await click(next);
+  const mapBefore=await click(next);
   const after=await current();assert.equal(after.id,next.id,'한 번 클릭으로 즉시 기관 교체');assert.equal(after.visible,true,'교체 후 상세 계속 표시');assert.equal(after.selected,next.id,'활성 마커와 상세 일치');assert.equal(after.name,next.name,'상세 제목도 선택 기관과 일치');
   assert.deepEqual(await viewport(),mapBefore,'교체할 때 지도 중심·배율 보존');assert.equal(after.scroll,0,'새 기관은 내용 처음부터');
   await page.waitForTimeout(550);assert.equal((await current()).id,next.id,'이전 이동·상세 응답으로 기관이 되돌아가지 않음');
