@@ -18,6 +18,7 @@ import {recipientMatching} from './care-recipient-model.mjs';
 
 const $ = id => document.getElementById(id);
 const labels = { daycare: '주·야간보호센터', facility: '요양원·공동생활가정', 'home-care': '방문요양센터', 'home-nursing': '방문간호센터', 'home-bath': '방문목욕기관', 'short-stay': '단기보호센터', 'welfare-equipment': '복지용구사업소', dementia: '치매전담형 기관', 'nursing-hospital': '요양병원' };
+const facilityUrl = (type, row) => `care-facility.html?${new URLSearchParams({ type, id: row.i })}`; // SOFTM-INDEPENDENT-DETAIL 날짜:20261122 : 맞춤 후보에서 지도를 거치지 않고 독립 상세화면을 열기 위함
 /** SOFTM-ANALYSIS-TYPES START 날짜:20261121 : 이름만으로 판단하기 어려운 돌봄 유형을 이용 상황과 함께 선택 */
 const typeDescriptions = {daycare:'낮 동안 센터에서 돌봄',facility:'시설에 입소해 생활하며 돌봄','home-care':'집으로 방문해 일상생활 도움','home-nursing':'집으로 방문하는 간호','home-bath':'집에서 받는 목욕 지원','short-stay':'일정 기간만 시설에서 돌봄','welfare-equipment':'보행기·휠체어 등 보조용품',dementia:'치매전담 서비스를 제공하는 기관','nursing-hospital':'입원하며 진료와 치료'};
 function syncTypeChoices() {
@@ -416,17 +417,20 @@ function renderCards({ append = false } = {}) {
         const card = document.createElement('article'); card.className = 'analysis-card'; card.dataset.institutionId = row.i;
         const heading = document.createElement('header'); heading.className = 'analysis-card-heading';
         if (photo?.representative && photo.count > 0) {
-            const figure = thumbnail(photo.representative), button = figure.querySelector('button'); button.tabIndex = 0; button.dataset.analysisPhotos = row.i; button.setAttribute('aria-label', `${row.n} 등록사진 보기`); heading.append(figure);
+            const figure = thumbnail(photo.representative), button = figure.querySelector('button'); button.tabIndex = 0; button.dataset.analysisPhotos = row.i; button.setAttribute('aria-label', `${row.n} 등록사진 보기`);
+            heading.append(figure);
         } else {
             const placeholder = document.createElement('div'); placeholder.className = 'analysis-card-placeholder'; placeholder.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M2 21h20M9 21v-5h6v5M8 7h2m4 0h2M8 11h2m4 0h2"/></svg><span>등록사진 미확인</span>'; heading.append(placeholder);
         }
         const body = document.createElement('div'); body.className = 'analysis-card-body';
         const selectedConditions = conditions.filter(condition => input.selected.has(condition.id)), selectedConfirmed = selectedConditions.filter(condition => condition.status === 'confirmed');
         const verify = questions(entry), badge = selectedConditions.length ? `선택 조건 ${selectedConfirmed.length}/${selectedConditions.length} 확인` : '가까운 거리순';
-        heading.insertAdjacentHTML('beforeend', `<div class="analysis-card-identity"><p class="analysis-card-type">${esc(row.tn || labels[input.type])}</p><h3>${esc(row.n)}</h3><p class="analysis-card-address">${esc(row.a || '주소 미확인')}</p></div><div class="analysis-badges"><span>${esc(badge)}</span>${selectedConditions.length && confirmed.has(String(row.i)) ? '<span>희망조건 모두 확인</span>' : ''}</div>`);
+        /** SOFTM-CARD-TOP-ACTIONS START 날짜:20261122 : 긴 후보 내용을 읽기 전에 독립 상세와 사진을 바로 열 수 있게 함 */
+        heading.insertAdjacentHTML('beforeend', `<div class="analysis-card-identity"><p class="analysis-card-type">${esc(row.tn || labels[input.type])}</p><h3>${esc(row.n)}</h3><p class="analysis-card-address">${esc(row.a || '주소 미확인')}</p></div><div class="analysis-card-meta"><div class="analysis-card-top-actions"><a href="${esc(facilityUrl(input.type, row))}">기관 상세</a>${photo?.count > 0 ? `<button type="button" class="analysis-photo-link" data-analysis-photos="${esc(row.i)}" aria-label="${esc(row.n)} 사진 보기">사진 보기</button>` : ''}</div><div class="analysis-badges"><span>${esc(badge)}</span>${selectedConditions.length && confirmed.has(String(row.i)) ? '<span>희망조건 모두 확인</span>' : ''}</div></div>`);
+        /** SOFTM-CARD-TOP-ACTIONS END */
         const statusLabels = { confirmed: '✓ 확인', different: '조건과 다름', unknown: '확인 필요' };
         const matching = selectedConditions.length ? `<section class="analysis-condition-matches" aria-label="선택한 조건 확인"><strong>내가 선택한 조건</strong><ul>${selectedConditions.map(condition => `<li data-status="${esc(condition.status)}" title="${esc(condition.evidence)}"><span>${esc(condition.label)}</span><b>${statusLabels[condition.status]}</b></li>`).join('')}</ul></section>` : '';
-        body.innerHTML = `${input.type==='daycare'?`<div data-service-facts-id="${esc(row.i)}" data-service-facts-compact="true"></div>`:''}${candidateFacts(row, input.type, distance)}${candidateCost(row, input.type)}${matching}<p class="analysis-card-source">${input.type === 'nursing-hospital' ? '심평원 개설현황' : '국민건강보험공단 공개자료'} · 검색자료 기준 ${esc(report.sourceDate || '미확인')}</p><details class="analysis-card-questions"><summary>기관에 확인할 질문 <b>${verify.length}개</b><span aria-hidden="true">⌄</span></summary><p>${esc(CareDecisionSummary.review(row, input.type).note)}</p><ul>${verify.map(question => `<li>${esc(question)}</li>`).join('')}</ul></details><div class="analysis-card-actions"><button type="button" data-analysis-save="${esc(row.i)}" aria-pressed="false">비교 후보에 담기</button><a href="${esc(mapUrl(input.type, row))}" rel="nofollow">기관 상세</a>${photo?.count > 0 ? `<button type="button" data-analysis-photos="${esc(row.i)}">사진 보기</button>` : ''}</div>`;
+        body.innerHTML = `${input.type==='daycare'?`<div data-service-facts-id="${esc(row.i)}" data-service-facts-compact="true"></div>`:''}${candidateFacts(row, input.type, distance)}${candidateCost(row, input.type)}${matching}<p class="analysis-card-source">${input.type === 'nursing-hospital' ? '심평원 개설현황' : '국민건강보험공단 공개자료'} · 검색자료 기준 ${esc(report.sourceDate || '미확인')}</p><details class="analysis-card-questions"><summary>기관에 확인할 질문 <b>${verify.length}개</b><span aria-hidden="true">⌄</span></summary><p>${esc(CareDecisionSummary.review(row, input.type).note)}</p><ul>${verify.map(question => `<li>${esc(question)}</li>`).join('')}</ul></details><div class="analysis-card-actions"><button type="button" data-analysis-save="${esc(row.i)}" aria-pressed="false">비교 후보에 담기</button></div>`;
         card.append(heading, body); host.append(card);
     }
     $('analysisMore').hidden = entries.length <= limit;
@@ -555,7 +559,7 @@ $('analysisResults').addEventListener('click', async event => {
         renderTray(); if (currentStep === 'compare') renderComparison(); setStep(currentStep, { focus: false });
     }
     else if (button.dataset.analysisGo) setStep(button.dataset.analysisGo, { push: true });
-    else if (button.dataset.comparisonDetail) { const row = current.rowById.get(String(button.dataset.comparisonDetail)); if (row) location.href = mapUrl(current.input.type, row); }
+    else if (button.dataset.comparisonDetail) { const row = current.rowById.get(String(button.dataset.comparisonDetail)); if (row) location.href = facilityUrl(current.input.type, row); } // SOFTM-INDEPENDENT-DETAIL 날짜:20261122 : 비교표의 상세도 지도 팝업 대신 독립 화면으로 통일
     else if (button.hasAttribute('data-analysis-share')) void shareComparison();
     else if (button.hasAttribute('data-analysis-print')) window.print();
     else if (button.dataset.analysisPhotos) { const row = current.report.nearby.find(entry => String(entry.row.i) === button.dataset.analysisPhotos)?.row; if (row) openComparison({ rows: [row], type: current.input.type, opener: button, title: `${row.n} 등록사진` }); }

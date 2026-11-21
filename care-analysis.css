@@ -147,6 +147,13 @@ body.analysis-page .analysis-card .analysis-card-type { margin:0 0 5px; color:#0
 body.analysis-page .analysis-card .analysis-card-identity h3 { font-size:24px; font-weight:750; line-height:1.4; letter-spacing:-.4px; }
 body.analysis-page .analysis-card .analysis-card-address { margin:6px 0 0!important; color:#53655e; font-size:16px; line-height:1.5; word-break:keep-all; overflow-wrap:anywhere; }
 body.analysis-page .analysis-card .analysis-badges { align-self:start; justify-content:flex-end; max-width:200px; margin:0; font-size:14px; }
+/** SOFTM-CARD-TOP-ACTIONS START 날짜:20261122 : 상세·사진 행동을 카드 첫머리에 배치해 긴 정보 아래에 숨지 않게 함 */
+body.analysis-page .analysis-card-meta { display:grid; justify-items:end; align-self:stretch; gap:12px; }
+body.analysis-page .analysis-card-top-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+body.analysis-page .analysis-card-top-actions :is(a,button) { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:8px 14px; border:1px solid #9ccdbb; border-radius:10px; background:#fff; color:#075c4c; font:inherit; font-size:14px; font-weight:750; line-height:1.4; text-decoration:none; cursor:pointer; white-space:nowrap; }
+body.analysis-page .analysis-card-top-actions :is(a,button):hover { border-color:#07856d; background:#e8f7f1; color:#06493d; }
+body.analysis-page .analysis-card-top-actions :is(a,button):focus-visible { outline:3px solid #00866f; outline-offset:2px; }
+/** SOFTM-CARD-TOP-ACTIONS END */
 body.analysis-page .analysis-card-body { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:none; gap:16px; padding:22px 24px 24px; }
 .analysis-key-facts { display:grid; grid-template-columns:repeat(var(--analysis-fact-columns,4),minmax(0,1fr)); gap:10px; margin:0; font-variant-numeric:tabular-nums; }
 .analysis-key-facts>div { min-width:0; padding:16px 18px; border:1px solid #dbe5e0; border-radius:12px; background:#f7f9f8; }
@@ -188,7 +195,9 @@ body.analysis-page .analysis-card-actions>button:first-child[aria-pressed=true] 
 .analysis-card :is(button,a,summary):focus-visible { outline:3px solid #00866f; outline-offset:3px; }
 @media(max-width:1000px) {
  body.analysis-page .analysis-card-heading { grid-template-columns:88px minmax(0,1fr); gap:12px 18px; }
- body.analysis-page .analysis-card .analysis-badges { grid-column:2; justify-content:flex-start; max-width:none; }
+ body.analysis-page .analysis-card-meta { grid-column:2; justify-items:start; }
+ body.analysis-page .analysis-card-top-actions { justify-content:flex-start; }
+ body.analysis-page .analysis-card .analysis-badges { justify-content:flex-start; max-width:none; }
  .analysis-key-facts>div { padding:14px; }
  .analysis-key-facts dd { font-size:25px; }
 }
@@ -198,7 +207,10 @@ body.analysis-page .analysis-card-actions>button:first-child[aria-pressed=true] 
  body.analysis-page .analysis-card .care-photo-image { height:68px; }
  body.analysis-page .analysis-card-placeholder { min-height:84px; font-size:11px; padding:8px 4px; }
  body.analysis-page .analysis-card-body { padding:18px 16px; gap:14px; }
- body.analysis-page .analysis-card .analysis-badges { grid-column:1/-1; font-size:14px; }
+ body.analysis-page .analysis-card-meta { grid-column:1/-1; width:100%; }
+ body.analysis-page .analysis-card-top-actions { display:grid; grid-template-columns:1fr 1fr; width:100%; }
+ body.analysis-page .analysis-card-top-actions :is(a,button):only-child { grid-column:1/-1; }
+ body.analysis-page .analysis-card .analysis-badges { font-size:14px; }
  .analysis-key-facts { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
  .analysis-key-facts>div:last-child:nth-child(odd) { grid-column:1/-1; }
  .analysis-key-facts>div { padding:13px 12px; }
