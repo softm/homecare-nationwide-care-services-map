@@ -149,7 +149,7 @@ async function run(c,width){
   await page.waitForTimeout(c.name.startsWith('map-')?4500:500);
   if(await page.locator('#welcomeAdDialog[open]').count())await page.locator('#welcomeAdClose').click();
   /** SOFTM-BRAND-LOGO START 날짜:20261122 : 화면별 공통 헤더가 투명 배경 새 로고를 실제로 불러오는지 검증 */
-  const expectedBrand='dolbom-hannun-icon-20261122.png';
+  const expectedBrand='dolbom-hannun-icon-20261122-tight.png'; // SOFTM-BRAND-TIGHT 날짜:20261122 : CSS 크기 확대 없이 내부 여백을 줄인 자산을 검증
   if(c.name==='map-daycare')assert.ok((await page.locator('.stitch-brand-icon').getAttribute('src')).endsWith(expectedBrand),'지도 헤더 새 로고');
   if(c.name==='analysis')assert.ok((await page.locator('.analysis-brand-mark').getAttribute('src')).endsWith(expectedBrand),'맞춤찾기 헤더 새 로고');
   if(c.name==='institution-profile')assert.ok((await page.locator('.portal-brand img').getAttribute('src')).endsWith(expectedBrand),'기관 관리 헤더 새 로고');
