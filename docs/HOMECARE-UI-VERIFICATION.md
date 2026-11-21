@@ -152,3 +152,21 @@ AUDIT_FILTER='^map-detail-switch-' AUDIT_MODE=checkout node scripts/check-ui-pla
 운영 배포 뒤 공개 `index.html`의 SHA-256이 로컬 검증본과 일치함을 확인했다. 390·1440px의 세 유형 6개 조합도 재검사 포함 통과했다. 첫 상세의 SDK 지도 이동 효과를 마커 전환과 섞지 않도록 지도 정지 후 실제 클릭 직전·직후 좌표를 비교한다. 별도 이동 호출 추적에서도 열린 상세를 교체할 때 `panTo`·`setCenter` 호출이 없음을 확인했다. 운영 증거는 같은 폴더의 `live`, `live-recheck`, `live-stable`에 보관한다.
 
 <!-- SOFTM-MARKER-DETAIL-SWITCH END -->
+
+## 2026-11-21 상세 확인 영역 간소화
+
+<!-- SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 중복·빈 안내를 제거하면서 실제 누락과 상담 질문 접근을 유지 -->
+
+평가등급을 다시 표시하던 `확인된 강점`, 고정된 `3가지` 제목, 항목이 없어도 나타나던 미확인 상자를 제거했다. 평가·정원·인력의 핵심 수치는 유지하고, 추가로 확인된 등록 간호사·치료사와 실제 누락 항목이 있을 때만 짧게 표시한다. 복수 급여 합계나 누락 인력으로 추가 인원을 단정하지 않는다.
+
+유형별 상담 질문은 기본 접힘인 `상담할 때 확인하기`에서 펼친다. 실제 질문 수와 자료 해석 안내를 함께 제공한다. 출처와 검색자료 기준일은 계속 보이며, 기존 목록·맞춤 후보의 지표와 질문 데이터는 유지한다. 지도 JS·CSS 버전과 회원 셸을 함께 갱신한다.
+
+주야간보호·요양원·방문간호·복지용구·요양병원 상세를 320·390·768·1024·1440px에서 확인해 25개 조합을 모두 통과했다. 실제 기관 상세에서 기본 접힘, 마우스로 펼침, 질문 수·본문·자료 안내, Enter로 접기, 가로 넘침·버튼 가림을 확인했다. 320·390px의 핵심 요약과 펼친 질문도 시각 검토했다. 9개 유형의 누락·실제 0명·복수 급여·추가 인력·출처 이스케이프와 관련 화면의 별도 검사 22개를 통과했다.
+
+전체 `npm run check`의 648개 검사, 286개 회원 셸 자산과 기존 Python·정적 자료 검사도 통과했다. 기존 독립 숨김 Playwright·가상 회원 응답·실제 쓰기 차단 원칙을 유지한다. 증거는 운영 폴더 `detail-essentials-20261121/checkout`에 보관한다.
+
+```sh
+AUDIT_MODE=checkout AUDIT_FILTER='^map-detail(-(facility|home-nursing|welfare-equipment|nursing-hospital))?$' node scripts/check-ui-playwright.mjs
+```
+
+<!-- SOFTM-DETAIL-ESSENTIALS END -->
