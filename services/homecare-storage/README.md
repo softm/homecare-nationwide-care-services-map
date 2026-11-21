@@ -12,14 +12,16 @@
 - `homecare-photos`: private, 5,242,880바이트, JPEG/PNG/WebP.
 - 두 버킷에 공개 읽기·쓰기를 허용하는 정책은 추가하지 않았다. 서버 secret은 RLS를 우회하므로 요청자의 권한 검사는 기존 Worker가 담당한다. 키의 권한을 특정 버킷으로 제한했다고 설명하지 않는다.
 - `verify-storage.mjs`로 실제 버킷에 가상 PNG·PDF 업로드, SHA-256 일치, 익명 public/authenticated 경로 거부, 삭제 후 조회 불가를 확인했다. 시험 파일은 모두 삭제했다. 비밀키는 검증 프로세스 메모리에서만 사용했으며 파일·명령 인자·로그·Git에 기록하지 않았다.
-- Worker secret 등록, Worker 배포, 사이트의 실제 회원 업로드, 독립 백업·복원은 **미완료**다. 로그인 문제도 사용자 요청으로 보류 중이다.
-- 검증: `npm run check` Node 626개 실패 0·기존 Python/정적 검사·회원 셸 280개 통과, 회원·기관 Worker `deploy --dry-run` 모두 통과. 저장소 관련 신규 10개에는 다른 회원의 증빙 접근 차단과 삭제 장애 후 재시도를 포함한다. 이 결과를 운영 로그인·전체 회원 동선 검증으로 대체하지 않는다.
+- 전용 서버 키를 회원·기관 Worker의 `SUPABASE_SECRET_KEY`로 등록하고 양방향 서비스 바인딩과 함께 실제 배포했다. 기관 통계용 `EVENT_HASH_SECRET`도 등록했다. 비밀값은 메모리에서 전달했으며 파일·명령 인자·도구 결과·Git에 기록하지 않았다.
+- `verify-member-upload.mjs`로 실제 배포 API의 기관 가입 → 증빙 제출 → 승인 → 사진 업로드·조회·삭제 18개 검사를 통과했다. 증빙 체크섬·no-store, 다른 회원의 증빙 접근 거부, 승인 전 권한 없음, 일반회원의 심사 접근 거부, 사진 체크섬·미공개 사진 익명 접근 거부도 확인했다. 시험 계정·관리자·신청·사진·삭제 대기열은 모두 0건으로 정리했다.
+- 운영 사이트의 로그인과 신규 화면 공개, 독립 백업·복원은 **미완료**다. 사용자 요청으로 보류한 기존 운영 로그인은 변경하지 않았다. 위 시험은 HTTP 클라이언트로 쿠키·CSRF를 사용한 실제 서버 검증이며 운영 브라우저의 DNS·쿠키 동작 검증을 대신하지 않는다.
+- 검증: `npm run check` 통과, 회원 셸 280개 및 기존 지도·정적 검사 통과. Workers에서 지원하지 않는 `redirect: error`를 `manual`과 3xx 거부로 고쳤고 전역 fetch 수신 객체를 보존했다. 저장소 관련 12개 검사에는 런타임 호환·외부 리디렉션 거부·다른 회원 접근 차단·삭제 장애 재시도를 포함한다.
 
 ## 서버 연결
 
 `file-storage.mjs`가 기존 `put/get/delete` 동작을 Supabase Storage REST API로 변환한다. `FILE_STORAGE_PROVIDER=supabase`일 때만 사용하며 연결 실패를 R2로 우회하지 않는다. 기존 D1의 `r2_key`, `r2_deletion_queue`는 적용된 스키마와 삭제 대기열을 보존하기 위해 유지한 이름이다. 실제 파일 본문은 D1에 저장하지 않는다.
 
-각 Worker 설정에는 프로젝트 URL과 해당 버킷 이름만 둔다. `SUPABASE_SECRET_KEY`는 운영 시 Worker secret으로 등록한다. `sb_secret_…` 서버 키만 허용하며 브라우저의 publishable 키와 세션 토큰을 대신 사용하지 않는다. 키는 HTTP `apikey` 헤더에만 넣고, 공식 프로젝트 HTTPS 주소만 허용하며 다른 주소로 리디렉션하지 않는다. upstream 오류 본문은 사용자 응답에 전달하지 않는다.
+각 Worker 설정에는 프로젝트 URL과 해당 버킷 이름만 둔다. `SUPABASE_SECRET_KEY`는 Worker secret에 등록되어 있다. `sb_secret_…` 서버 키만 허용하며 브라우저의 publishable 키와 세션 토큰을 대신 사용하지 않는다. 키는 HTTP `apikey` 헤더에만 넣고, 공식 프로젝트 HTTPS 주소만 허용하며 다른 주소로 리디렉션하지 않는다. Workers가 지원하는 `manual` 모드에서 3xx 응답을 직접 거부한다. upstream 오류 본문은 사용자 응답이나 로그에 전달하지 않는다.
 
 현재 두 운영 설정은 `FILE_UPLOADS_ENABLED=false`다. 아직 준비 중인 서비스가 실제 회원 파일을 수집하지 않도록 업로드만 차단하며, 이미 보관한 파일의 권한 있는 조회·삭제·정리 작업은 이 스위치와 분리한다. 로컬 `wrangler dev`도 이 기본값을 따른다. 자동 테스트는 외부 연결 없이 주입한 저장소와 SQLite로 검증한다. 검증 코드의 명시적인 가상 파일 시험은 실제 회원 업로드 개방을 뜻하지 않는다.
 
@@ -27,12 +29,18 @@
 
 ## 운영 개방 전
 
-1. 전용 Worker secret, 양방향 서비스 바인딩과 공식 HTTPS API 연결을 준비한다. 유료 전환은 하지 않는다.
+1. 완료된 Worker·secret·양방향 바인딩을 유지하고 `api.homecare.designboard.net`의 HTTPS 연결을 준비한다. 유료 전환은 하지 않는다.
 2. 보류 중인 로그인 작업을 재개할 때 기관 담당자 가입 → 증빙 제출 → 운영자 심사 → 기관 사진 등록·공개·삭제를 실제 사이트에서 검증한다.
 3. 무료 한도를 고려한 사진 축소, 전체 저장량·요청량 제한과 사용량 확인을 보완한다. 현재 장당 제한만으로 총량 제한이 구현됐다고 간주하지 않는다.
 4. 운영용 독립 백업의 위치·실행 환경·보관 기간을 정하고 테스트 파일 복원을 검증한다. 이는 기관 담당자에게 추가 업로드를 요구하는 기능이 아니다. 아직 자동 백업을 구현하지 않았다.
 5. 해외 저장 지역과 실제 처리 흐름을 개인정보 안내에 반영하고 운영 개방 조건 확인 후 업로드를 활성화한다.
 
 공식 기준: [API 키](https://supabase.com/docs/guides/api/api-keys), [비공개 버킷](https://supabase.com/docs/guides/storage/buckets/fundamentals), [Storage 오류](https://supabase.com/docs/guides/storage/debugging/error-codes), [무료 플랜·초과 정책](https://supabase.com/docs/guides/platform/billing-faq). 플랜 상태와 무료 조건은 연결 시점의 확인 결과이며 향후 정책이나 서비스 존속을 보장하지 않는다.
+
+## 실제 API 검증 도구
+
+`verify-member-upload.mjs`는 운영 키를 인자로 받지 않는다. `base`, `origin`, `publicBase`와 시험 계정에만 권한을 부여하는 `grantTestReviewer`, 시험 기관만 정리하는 `removeTestInstitution` 콜백을 명시적으로 주입한다. 무작위 비밀번호·세션 쿠키·CSRF는 프로세스 메모리에서만 사용하며 진행 출력은 검사명·성공 여부와 실패 시 제한된 상태/오류 코드뿐이다. 실행자는 시험 데이터 정리와 기존 업로드 스위치 복구를 확인해야 하며 일반 회원을 관리자에 등록하는 데 사용하지 않는다. 이 외부 검증은 `npm run check`에서 자동 실행하지 않는다.
+
+Workers 런타임 기준: [Request의 redirect 지원 범위](https://developers.cloudflare.com/workers/runtime-apis/request/), [잘못된 this 수신 객체 오류](https://developers.cloudflare.com/workers/observability/errors/#illegal-invocation-errors).
 
 <!-- SOFTM-SUPABASE-STORAGE END -->

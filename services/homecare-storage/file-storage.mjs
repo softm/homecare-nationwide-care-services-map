@@ -49,7 +49,8 @@ function isMissingObject(response, detail) {
   );
 }
 
-export function createSupabaseStorage({ url, secret, bucket, uploadsEnabled = false, maxBytes, types }, fetcher = globalThis.fetch) {
+// SOFTM-STORAGE-RUNTIME 날짜:20261121 : Workers에서 전역 fetch를 분리 호출하면 실패하므로 수신 객체를 유지
+export function createSupabaseStorage({ url, secret, bucket, uploadsEnabled = false, maxBytes, types }, fetcher = (...args) => globalThis.fetch(...args)) {
   // HTTPS 공식 프로젝트 주소만 허용하고 리디렉션을 따르지 않아 비밀키의 다른 서버 전송을 차단합니다.
   if (!/^https:\/\/[a-z0-9]{20}\.supabase\.co\/?$/.test(url || '') ||
       !/^sb_secret_[A-Za-z0-9_-]{16,}$/.test(secret || '') ||
@@ -62,9 +63,15 @@ export function createSupabaseStorage({ url, secret, bucket, uploadsEnabled = fa
     const headers = new Headers(options.headers);
     headers.set('apikey', secret);
     try {
-      return await fetcher(`${base}${path}`, {
-        ...options, headers, redirect: 'error', signal: AbortSignal.timeout(30000),
+      // SOFTM-STORAGE-RUNTIME 날짜:20261121 : Workers가 지원하는 manual 모드에서 3xx를 직접 거부해 키 전달 방지
+      const response = await fetcher(`${base}${path}`, {
+        ...options, headers, redirect: 'manual', signal: AbortSignal.timeout(30000),
       });
+      if (response.status === 0 || (response.status >= 300 && response.status < 400)) {
+        await response.body?.cancel().catch(() => {});
+        throw new StorageError();
+      }
+      return response;
     } catch {
       // 공급자 오류 원문에는 파일 경로·키가 포함될 수 있어 응답과 로그에 전달하지 않습니다.
       throw new StorageError();
