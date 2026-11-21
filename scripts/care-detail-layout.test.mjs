@@ -112,12 +112,12 @@ test('모바일 기본 상세 팝업은 확장 전에도 지도와 함께 더 �
 });
 /** SOFTM-DETAIL-HEIGHT END */
 
-/** SOFTM-DETAIL-INFOGRAPHIC START 날짜:20261120 : 상세 판단 요약과 상태 아이콘이 행동 뒤·긴 본문 전에 유지되는지 정적 검증 */
-test('상세 상단은 담기 행동 다음에 공개 강점·기관 확인·미확인 요약을 렌더링한다',()=>{
+/** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 간결한 요약도 담기 행동 뒤·긴 본문 전에 제공하고 변경 자산 캐시를 갱신 */
+test('상세 상단은 담기 행동 다음에 핵심 정보와 필요한 확인 내용을 렌더링한다',()=>{
  const action=mapHtml.indexOf('id="detailBasketAction"'),decision=mapHtml.indexOf('id="detailDecision"'),body=mapHtml.indexOf('id="detailBody"');
  assert.ok(action>=0&&action<decision&&decision<body);
  assert.match(mapHtml,/CareDecisionSummary\.renderReview\(c,TYPE,\{source:/);
- assert.match(mapHtml,/care-decision-summary\.css\?v=20261120-infographic1/);
- assert.match(mapHtml,/care-decision-summary\.js\?v=20261118-review1/);
+ assert.match(mapHtml,/care-decision-summary\.css\?v=20261121-essentials1/);
+ assert.match(mapHtml,/care-decision-summary\.js\?v=20261121-essentials1/);
 });
-/** SOFTM-DETAIL-INFOGRAPHIC END */
+/** SOFTM-DETAIL-ESSENTIALS END */

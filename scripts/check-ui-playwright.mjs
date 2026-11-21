@@ -80,6 +80,7 @@ const cases=[
  ...['daycare','facility','nursing-hospital'].map(type=>({name:`map-detail-switch-${type}`,url:`index.html?type=${type}&lat=37.5663&lng=126.9018&z=14`,action:'map-detail-switch'})),
  ...['daycare','facility','nursing-hospital'].map(type=>({name:`map-saved-markers-${type}`,url:`index.html?type=${type}&lat=37.5663&lng=126.9018&z=14`,action:'map-saved-markers'})), // SOFTM-SAVED-MARKER 날짜:20261121 : 공단 시설·재가·병원을 같은 공개 지도 위치와 담기 시나리오로 검증
  ...['menu','types','filter','advanced','match-1','match-2','match-3','saved','compare','detail','list','full'].map(action=>({name:`map-${action}`,url:'index.html?type=daycare',action:`map-${action}`,seed:['saved','compare'].includes(action)})),
+ ...['facility','home-nursing','welfare-equipment','nursing-hospital'].map(type=>({name:`map-detail-${type}`,url:`index.html?type=${type}`,action:'map-detail'})), // SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 유형별 실제 상세에서 핵심 정보·접힌 질문과 출처를 검증
  {name:'installation-guide',url:'care-account.html',action:'install'},
 ];
 let selected=cases.filter(c=>!process.env.AUDIT_FILTER||new RegExp(process.env.AUDIT_FILTER).test(c.name));
@@ -215,6 +216,21 @@ async function run(c,width){
     if(await list.isVisible())await list.click();
     await page.locator('#list [data-saved-detail]').first().click();
     await page.locator('#detailSheet').waitFor({state:'visible',timeout:15000});
+    /** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 상담 질문을 마우스·키보드로 펼쳐도 실제 정보와 상세 조작을 유지 */
+    const review=page.locator('#detailDecision'),questions=review.locator('.care-review-questions'),questionToggle=questions.locator('summary');
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('detailSheet')).visibility!=='hidden');
+    assert.equal(await questions.evaluate(e=>e.open),false,'상담 질문 기본 접힘');
+    assert.doesNotMatch(await review.innerText(),/확인된 강점|3가지|미확인 항목 없음/,'중복·빈 상태 문구 제거');
+    assert.ok(await review.locator('.care-review-source').isVisible(),'자료 출처·기준일 유지');
+    await questionToggle.click();assert.equal(await questions.evaluate(e=>e.open),true,'상담 질문 펼침');
+    const questionCount=await questions.locator('li').count();assert.ok(questionCount>=3);
+    assert.match(await questionToggle.innerText(),new RegExp(`${questionCount}개 항목`),'실제 항목 수 표시');
+    for(const item of await questions.locator('li').all())assert.ok(await item.isVisible(),'유형별 상담 질문 유지');
+    assert.ok(await questions.locator('.care-review-note').isVisible(),'자료 해석 안내 유지');
+    await questions.screenshot({path:`${out}/${c.name}-${width}-questions.png`,animations:'disabled'});
+    await questionToggle.focus();await page.keyboard.press('Enter');assert.equal(await questions.evaluate(e=>e.open),false,'키보드로 질문 접기');
+    await review.screenshot({path:`${out}/${c.name}-${width}-summary.png`,animations:'disabled'});
+    /** SOFTM-DETAIL-ESSENTIALS END */
     await page.locator('#detailSheet .care-detail-toolbar button').last().click({trial:true});
     for(const button of await page.locator('#detailSheet .care-detail-footer button').all())if(await button.isVisible()&&await button.isEnabled())await button.click({trial:true});
    }

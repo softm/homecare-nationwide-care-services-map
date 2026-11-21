@@ -53,7 +53,27 @@ for (const type of ['facility', 'daycare', 'short-stay', 'dementia', 'home-care'
     assert.ok(review(base, type).verify.length >= 2, `${type}: 기관 확인 질문 제공`);
 }
 const reviewHtml = renderReview({ ...base, n: '<img>' }, 'daycare', { source: '<script>', sourceDate: '<2026>' });
-for (const title of ['확인된 강점', '기관 확인 필요', '미확인']) assert.equal((reviewHtml.match(new RegExp(`<dt>${title}</dt>`, 'g')) || []).length, 1);
+/** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 중복과 빈 상태는 없애도 실제 누락·유형별 질문·인력·출처는 잃지 않음 */
+assert.equal((reviewHtml.match(/A등급/g) || []).length, 1, '평가등급은 핵심 수치에 한 번만 표시');
+assert.doesNotMatch(reviewHtml, /확인된 강점|3가지|care-review-empty|care-review-missing|care-review-row/);
+assert.match(reviewHtml, /추가 등록 인력.*간호사 2명/s);
+assert.match(reviewHtml, /<details class="care-review-questions"><summary>/, '상담 질문은 기본 접힘');
+assert.match(reviewHtml, /3개 항목/);
+const missingReview = renderReview({ ...base, staffMissing: true, ey: null }, 'daycare');
+assert.match(missingReview, /care-review-missing.*공개자료 미확인.*평가연도 · 요양보호사/s);
+assert.doesNotMatch(renderReview({ ...base, cw: 0, rn: 0, pt: 0, ot: 0 }, 'home-care'), /care-review-missing|추가 등록 인력/);
+const multipleReview = renderReview({ ...base, t: 'B03,C01' }, 'daycare');
+assert.doesNotMatch(multipleReview, /추가 등록 인력/);
+assert.match(multipleReview, /4개 항목.*급여별 인력/s);
+for (const type of ['facility', 'daycare', 'short-stay', 'dementia', 'home-care', 'home-bath', 'home-nursing', 'welfare-equipment', 'nursing-hospital']) {
+ const html = renderReview(base, type);
+ assert.doesNotMatch(html, /확인된 강점|강점 항목이 없|미확인 항목 없음|care-decision-note/, `${type}: 빈 상태와 중복 해설 제거`);
+ for (const question of review(base, type).verify) assert.ok(html.includes(question.detail), `${type}: 상담 질문 유지`);
+}
+assert.doesNotMatch(renderReview(base, 'nursing-hospital'), /공단 평가|요양보호사|추가 등록 인력|care-review-missing/);
+assert.match(renderReview({ ...base, d: '' }, 'nursing-hospital'), /care-review-missing.*개설일/s);
+assert.doesNotMatch(renderReview(base, 'welfare-equipment'), /추가 등록 인력|등록 정원|요양보호사/);
+/** SOFTM-DETAIL-ESSENTIALS END */
 assert.doesNotMatch(reviewHtml, /<script>|<2026>/);
 assert.match(reviewHtml, /&lt;script&gt;.*&lt;2026&gt;/s);
 console.log('care-decision-summary: 상세 선택 확인 요약 검증 통과');
