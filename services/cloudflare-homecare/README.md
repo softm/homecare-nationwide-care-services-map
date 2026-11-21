@@ -71,7 +71,7 @@ npx wrangler d1 migrations apply DB --remote
 <!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 무료 저장소 준비 결과와 담당자 업로드 개방 조건을 분리 -->
 이미 생성한 전용 D1을 재사용합니다. Supabase `homecare-photos`의 비공개·5MiB·JPEG/PNG/WebP 제한과 가상 파일 업로드·다운로드·익명 거부·삭제는 확인했습니다. 연결부·계정 상태는 [파일 저장소 문서](../homecare-storage/README.md)를 따릅니다.
 
-`SUPABASE_SECRET_KEY`와 `EVENT_HASH_SECRET`을 Worker secret으로 등록했습니다. 배포된 API에서 가상 기관 승인 후 사진 업로드·체크섬·비공개 상태·삭제를 검증했고 시험 계정·파일·삭제 대기열은 모두 정리했습니다. 운영 화면·API 도메인·백업 준비 전까지 `FILE_UPLOADS_ENABLED=false`를 유지합니다. 로컬 개발도 같은 기본값이며 운영 키를 로컬 파일에 복사하지 않습니다. 회원·기관 데이터는 D1에 남습니다. D1의 기존 `r2_key`, `r2_deletion_queue` 이름은 스키마 호환을 위해 유지합니다. R2 구독이나 버킷을 생성하지 않습니다.
+`SUPABASE_SECRET_KEY`와 `EVENT_HASH_SECRET`을 Worker secret으로 등록했습니다. 배포된 API에서 가상 기관 승인 후 사진 업로드·체크섬·비공개 상태·삭제를 검증했고 시험 계정·파일·삭제 대기열은 모두 정리했습니다. 사용자의 운영 재개 지시에 따라 `FILE_UPLOADS_ENABLED=true`를 배포했습니다. 공식 웹·HTTPS·가입·업로드 검증 결과는 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)에 별도로 남깁니다. 운영 키를 로컬 파일에 복사하지 않습니다. 회원·기관 데이터는 D1에 남습니다. D1의 기존 `r2_key`, `r2_deletion_queue` 이름은 스키마 호환을 위해 유지합니다. R2 구독이나 버킷을 생성하지 않습니다. 독립 자동 백업은 아직 구현하지 않았습니다.
 <!-- SOFTM-SUPABASE-STORAGE END -->
 
 ## 공통 응답

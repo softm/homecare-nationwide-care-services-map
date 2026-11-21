@@ -6,6 +6,7 @@
   "main": "src/index.mjs",
   "compatibility_date": "2026-11-18",
   "workers_dev": true,
+  "preview_urls": false,
   "d1_databases": [
     {
       "binding": "DB",
@@ -24,7 +25,8 @@
     "FILE_STORAGE_PROVIDER": "supabase",
     "SUPABASE_URL": "https://feaouitfpiqjjqdxrtfx.supabase.co",
     "SUPABASE_PHOTOS_BUCKET": "homecare-photos",
-    "FILE_UPLOADS_ENABLED": "false",
+    // SOFTM-MEMBER-LIVE 날짜:20261121 : 승인된 기관 담당자의 사진 등록 개방
+    "FILE_UPLOADS_ENABLED": "true",
     "ALLOWED_ORIGINS": "https://homecare.designboard.net,https://softm.github.io",
     "MAX_PHOTO_BYTES": "5242880",
     "MAX_PHOTOS_PER_INSTITUTION": "10"
