@@ -1,6 +1,8 @@
 /** SOFTM-CARE-MATCH START 날짜:20260910 : 중요 조건의 삼상태 판정·전체 집계·기존 필터 전달을 독립 사례로 검증 */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs'; // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 배포 특화자료와 공단 수집 원본의 일치 검증
+import { gunzipSync } from 'node:zlib'; // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 실제 배포 압축자료로 기관기호 판정 검증
 import '../advanced-search.js';
 import { criteriaFor, assess, analyzeMatch, renderConditions, renderMatchComparison } from '../care-insights.js';
 import { readPreferences, clearPreferences, relevantPreferences, effectiveFilters, destinationUrl, compactHighlights, selectedCriteriaFor, compactScopeLabel, compactSelectedCriteria } from '../care-match.js';
@@ -86,3 +88,34 @@ test('서비스·지역 전환은 기존 검색어·평가·특화 조건을 전
  assert.equal(effectiveFilters(filters,'nursing-hospital').grades.length,0);assert.equal(effectiveFilters(filters,'nursing-hospital').staff,'');
 });
 /** SOFTM-CARE-MATCH END */
+
+/** SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 특화 서비스의 원본·유형 범위·미확인과 목록 일치를 검증 */
+const featureIndex = JSON.parse(gunzipSync(readFileSync(new URL('../data/nhis/search-index.json.gz', import.meta.url))));
+test('상세 특화는 공단 원본 기관기호와 일치하며 이름·선택 조건으로 추정하지 않는다', () => {
+ const row = { i: '21141000342', n: '구립가재울데이케어센터' };
+ const report = CareAdvancedSearch.confirmedFeatures(row, 'daycare', featureIndex);
+ assert.deepEqual(report.items.map(item => item.id), ['dementia', 'cognitive']);
+ assert.equal(report.sourceDate, '20260904');
+ for (const key of ['dementia-daycare', 'cognitive-daycare']) {
+  const source = JSON.parse(readFileSync(new URL(`../source-data/nhis-search/20260904/${key}-11.json`, import.meta.url)));
+  assert.ok(source.rows.some(([id]) => id === row.i), `${key}: 원본 기관기호 확인`);
+ }
+ const conditions = analyzeMatch([row], { ...context, preferences: ['feature:dementia', 'feature:cognitive'], hasFeature: CareAdvancedSearch.createMatcher(featureIndex, 'daycare').hasFeature }).cards[0].conditions;
+ assert.deepEqual(report.items.map(item => item.label), compactHighlights(conditions).items.map(item => item.label), '목록과 상세의 같은 특화 명칭');
+ assert.deepEqual(CareAdvancedSearch.confirmedFeatures({ i: 'missing', n: '치매 인지활동 전문센터' }, 'daycare', featureIndex).items, []);
+});
+test('상세 특화 전체를 표시하되 급여 유형 밖 서비스와 청구·조사 참여는 제외한다', () => {
+ const report = CareAdvancedSearch.confirmedFeatures({ i: '21168000177' }, 'daycare', featureIndex);
+ assert.deepEqual(report.items.map(item => item.id), ['dementia', 'cognitive', 'integrated', 'pilot']);
+ assert.equal(report.items.find(item => item.id === 'pilot').label, '주야간보호기관 내 단기보호 시범사업');
+ assert.deepEqual(report.items.flatMap(item => item.services.map(service => service.key)), ['dementia-daycare', 'cognitive-daycare', 'integrated-daycare', 'short-pilot']);
+ const synthetic = { features: ['dementia-facility', 'dementia-home', 'green', 'panel'], records: { '1': [3, 15] } };
+ assert.deepEqual(CareAdvancedSearch.confirmedFeatures({ i: '1' }, 'facility', synthetic).items.map(item => [item.id, item.services.length]), [['dementia', 2]], '같은 특화는 중복 없이 세부 유형만 합침');
+ assert.deepEqual(CareAdvancedSearch.confirmedFeatures({ i: '1' }, 'daycare', synthetic).items, [], '다른 급여 특화는 미적용');
+});
+test('특화 미등재·자료 실패·요양병원에는 빈 특화 영역이나 미제공 단정을 만들지 않는다', () => {
+ for (const [row, type, index] of [[{ i: '21144000257' }, 'daycare', featureIndex], [{ i: '21141000342' }, 'daycare', null], [{ i: '21141000342' }, 'nursing-hospital', featureIndex]]) {
+  assert.deepEqual(CareAdvancedSearch.confirmedFeatures(row, type, index).items, []);
+ }
+});
+/** SOFTM-DETAIL-SPECIALTIES END */

@@ -79,6 +79,25 @@ assert.match(reviewHtml, /&lt;script&gt;.*&lt;2026&gt;/s);
 console.log('care-decision-summary: 상세 선택 확인 요약 검증 통과');
 /** SOFTM-DETAIL-REVIEW END */
 
+/** SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 특화 전체와 기준일·세부 유형을 표시하고 없는 항목은 숨김 */
+const featureReport = { sourceDate: '20260904', items: [
+ { id: 'dementia', label: '치매전담형 장기요양기관', services: [{ key: 'dementia-daycare', label: '주야간보호 내 치매전담실' }] },
+ { id: 'cognitive', label: '인지활동형 프로그램 제공기관', services: [{ key: 'cognitive-daycare', label: '주야간보호' }] },
+ { id: 'integrated', label: '통합재가서비스', services: [{ key: 'integrated-daycare', label: '주야간보호형' }] }
+] };
+const featuresHtml = renderReview(base, 'daycare', { features: featureReport, sourceDate: '2026-09-30' });
+assert.match(featuresHtml, /care-decision-grid.*care-detail-features.*care-decision-review/s, '핵심 수치 바로 뒤에 특화 배치');
+assert.match(featuresHtml, /care-feature-badges"><li>치매전담형 장기요양기관<\/li><li>인지활동형 프로그램 제공기관<\/li><li>통합재가서비스<\/li>/, '확인된 특화 전체를 기본 노출');
+assert.match(featuresHtml, /특화자료 기준 2026-09-04.*검색자료 기준 2026-09-30/s, '서로 다른 자료 기준일 구분');
+assert.match(featuresHtml, /<details class="care-feature-guide"><summary>세부 유형·이용 안내/);
+assert.match(featuresHtml, /주야간보호 내 치매전담실.*현재 이용 대상·운영 일정/s);
+assert.doesNotMatch(renderReview(base, 'daycare', { features: { items: [] } }), /care-detail-features|특화 없음|미제공/);
+assert.doesNotMatch(renderReview(base, 'daycare'), /care-detail-features/);
+assert.doesNotMatch(renderReview(base, 'nursing-hospital', { features: featureReport }), /care-detail-features|치매전담/);
+assert.doesNotMatch(renderReview(base, 'daycare', { features: { sourceDate: '<img>', items: [{ label: '<script>', services: [{ label: '<img>' }] }] } }), /<script>|<img>/);
+console.log('care-decision-summary: 상세 특화 전체·세부 유형·자료 기준일 검증 통과');
+/** SOFTM-DETAIL-SPECIALTIES END */
+
 /** SOFTM-MARKER-INSIGHT-TEST START 날짜:20260930 : 근접 지도에서 유형에 맞는 판단 근거와 수집 누락을 일관되게 안내하도록 검증 */
 const { markerLines } = globalThis.CareDecisionSummary;
 const near = { ...base, ey: 2024 };

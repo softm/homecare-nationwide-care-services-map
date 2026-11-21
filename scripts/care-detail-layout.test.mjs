@@ -117,7 +117,7 @@ test('상세 상단은 담기 행동 다음에 핵심 정보와 필요한 확인
  const action=mapHtml.indexOf('id="detailBasketAction"'),decision=mapHtml.indexOf('id="detailDecision"'),body=mapHtml.indexOf('id="detailBody"');
  assert.ok(action>=0&&action<decision&&decision<body);
  assert.match(mapHtml,/CareDecisionSummary\.renderReview\(c,TYPE,\{source:/);
- assert.match(mapHtml,/care-decision-summary\.css\?v=20261121-essentials1/);
- assert.match(mapHtml,/care-decision-summary\.js\?v=20261121-essentials1/);
+ assert.match(mapHtml,/care-decision-summary\.css\?v=20261121-specialties1/); // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 특화 강조 스타일의 캐시 갱신 검증
+ assert.match(mapHtml,/care-decision-summary\.js\?v=20261121-specialties1/); // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 특화 렌더러 캐시 갱신 검증
 });
 /** SOFTM-DETAIL-ESSENTIALS END */

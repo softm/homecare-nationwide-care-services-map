@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os';
 import { gunzipSync } from 'node:zlib';
 import {verifyPersonalCost} from './check-personal-cost-playwright.mjs'; // SOFTM-PERSONAL-COST 날짜:20261121 : 공통 비용 조작과 계정 전환 검사
 import {verifyMarkerDetail} from './check-marker-detail-playwright.mjs'; // SOFTM-MARKER-DETAIL-SWITCH 날짜:20261121 : 실제 마커 연속 클릭으로 상세 전환 검사
+import {verifyDetailSpecialties} from './check-detail-specialties-playwright.mjs'; // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 실제 공단 특화자료를 상세 기본 노출과 연결해 검사
 import { verifySavedMarkers } from './check-saved-markers-playwright.mjs'; // SOFTM-SAVED-MARKER 날짜:20261121 : 공용 숨김 브라우저·쓰기 차단 조건에서 마커 담기 상태도 검증
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
@@ -81,6 +82,13 @@ const cases=[
  ...['daycare','facility','nursing-hospital'].map(type=>({name:`map-saved-markers-${type}`,url:`index.html?type=${type}&lat=37.5663&lng=126.9018&z=14`,action:'map-saved-markers'})), // SOFTM-SAVED-MARKER 날짜:20261121 : 공단 시설·재가·병원을 같은 공개 지도 위치와 담기 시나리오로 검증
  ...['menu','types','filter','advanced','match-1','match-2','match-3','saved','compare','detail','list','full'].map(action=>({name:`map-${action}`,url:'index.html?type=daycare',action:`map-${action}`,seed:['saved','compare'].includes(action)})),
  ...['facility','home-nursing','welfare-equipment','nursing-hospital'].map(type=>({name:`map-detail-${type}`,url:`index.html?type=${type}`,action:'map-detail'})), // SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 유형별 실제 상세에서 핵심 정보·접힌 질문과 출처를 검증
+ /** SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 실제 특화 2·4개와 미등재·자료 실패·병원 사례를 검증 */
+ {name:'map-specialties-two',url:'index.html?type=daycare&institution=21141000342',institution:'21141000342',action:'map-detail',specialties:['치매전담형 장기요양기관','인지활동형 프로그램 제공기관']},
+ {name:'map-specialties-multiple',url:'index.html?type=daycare&institution=21168000177',institution:'21168000177',action:'map-detail',specialties:['치매전담형 장기요양기관','인지활동형 프로그램 제공기관','통합재가서비스','주야간보호기관 내 단기보호 시범사업']},
+ {name:'map-specialties-none',url:'index.html?type=daycare&institution=21144000257',institution:'21144000257',action:'map-detail',specialties:[]},
+ {name:'map-specialties-unavailable',url:'index.html?type=daycare&institution=21141000342',institution:'21141000342',action:'map-detail',specialties:[],featureError:true},
+ {name:'map-specialties-hospital',url:'index.html?type=nursing-hospital',action:'map-detail',specialties:[]},
+ /** SOFTM-DETAIL-SPECIALTIES END */
  {name:'installation-guide',url:'care-account.html',action:'install'},
 ];
 let selected=cases.filter(c=>!process.env.AUDIT_FILTER||new RegExp(process.env.AUDIT_FILTER).test(c.name));
@@ -122,6 +130,7 @@ async function run(c,width){
    return send(null,404);
   }
   if(!['GET','HEAD','OPTIONS'].includes(req.method()))return route.abort();
+  if(c.featureError&&u.origin===site&&u.pathname==='/data/nhis/search-index.json.gz')return route.fulfill({status:503,body:'Specialty data unavailable for UI verification'}); // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 특화자료 실패도 기존 기관 상세는 정상 열림
   if(mode==='checkout'&&u.origin===site){
    const path=resolve(root,decodeURIComponent(u.pathname==='/'?'/index.html':u.pathname).slice(1));
    if(!path.startsWith(root+'/'))return route.abort();
@@ -130,7 +139,7 @@ async function run(c,width){
   }
   return route.continue();
  });
- const result={name:c.name,width,mode,fixture:Boolean(c.user||c.seed),url:c.url.split('#')[0]};
+ const result={name:c.name,width,mode,fixture:Boolean(c.user||c.seed||c.featureError),url:c.url.split('#')[0]}; // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 의도적으로 실패시킨 특화자료 응답도 가상 검증으로 기록
  try{
   const response=await page.goto(site+'/'+c.url,{waitUntil:'domcontentloaded',timeout:30000});result.http=response?.status();
   await page.locator('#hcStartup,#hannunStartup').waitFor({state:'detached',timeout:18000}).catch(()=>{});
@@ -212,13 +221,18 @@ async function run(c,width){
     if(c.action==='map-compare')await page.locator('#careSavedPanel [data-basket-open]').click();
    }
    if(c.action==='map-detail'){
-    const list=page.locator('[data-mobile-focus=list]');
-    if(await list.isVisible())await list.click();
-    await page.locator('#list [data-saved-detail]').first().click();
+    /** SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 기관 공유 링크는 실제 자동 상세를 기다리고 일반 진입은 목록에서 열기 */
+    if(!c.institution){
+     const list=page.locator('[data-mobile-focus=list]');
+     if(await list.isVisible())await list.click();
+     await page.locator('#list [data-saved-detail]').first().click();
+    }
+    /** SOFTM-DETAIL-SPECIALTIES END */
     await page.locator('#detailSheet').waitFor({state:'visible',timeout:15000});
     /** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 상담 질문을 마우스·키보드로 펼쳐도 실제 정보와 상세 조작을 유지 */
     const review=page.locator('#detailDecision'),questions=review.locator('.care-review-questions'),questionToggle=questions.locator('summary');
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('detailSheet')).visibility!=='hidden');
+    if(c.specialties)result.specialties=await verifyDetailSpecialties(page,{expected:c.specialties,out,name:c.name,width}); // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 펼치기 전 전체 특화 노출과 이용 안내 확인
     assert.equal(await questions.evaluate(e=>e.open),false,'상담 질문 기본 접힘');
     assert.doesNotMatch(await review.innerText(),/확인된 강점|3가지|미확인 항목 없음/,'중복·빈 상태 문구 제거');
     assert.ok(await review.locator('.care-review-source').isVisible(),'자료 출처·기준일 유지');
