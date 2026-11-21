@@ -170,3 +170,19 @@ AUDIT_MODE=checkout AUDIT_FILTER='^map-detail(-(facility|home-nursing|welfare-eq
 ```
 
 <!-- SOFTM-DETAIL-ESSENTIALS END -->
+
+## 2026-11-21 상세 특화서비스 표시
+
+<!-- SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 기관기호로 확인한 특화를 조건 선택 없이 상세에서 확인 -->
+
+공단 기관검색 수집 원본과 `data/nhis/search-index.json.gz`의 기관기호를 대조했다. 특화자료 기준일은 2026-09-04다. 상세의 평가·정원·인력 바로 아래에 확인된 돌봄서비스 전체를 표시하고, 세부 급여 유형·현재 이용 안내는 펼침으로 제공한다. 출처와 특화자료 기준일은 기본 노출한다. 청구그린기관·조사 참여 여부를 돌봄서비스 특화로 분류하지 않는다.
+
+실제 특화 2개인 구립가재울데이케어센터, 4개인 국민건강보험공단 서울요양원 재가복지센터, 특화 미등재 기관, 의도적인 특화자료 503 응답, 요양병원 상세를 320·390·768·1024·1440px에서 확인했다. 25개 조합 모두 통과했다. 맞춤조건 미선택 상태의 전체 특화 노출, 긴 이름의 줄바꿈·글자 크기, 세부 유형 마우스 펼침·Enter 접기, 빈 영역 미표시와 기존 상담 질문·닫기·이전/다음 조작을 검사했다. 좁은 화면의 특화 배지와 펼친 세부 유형은 캡처를 시각 검토했다.
+
+```sh
+AUDIT_MODE=checkout AUDIT_FILTER='^map-specialties-' node scripts/check-ui-playwright.mjs
+```
+
+원본 기관기호·목록 명칭 일치, 급여 유형 밖 항목·청구/조사 참여 제외, 같은 특화의 세부 유형 합침, 자료 실패·미등재·병원, 기준일 구분·HTML 이스케이프를 포함한 관련 검사 28개를 통과했다. 전체 `npm run check`의 651개 검사, 286개 회원 셸 자산과 기존 Python·정적 자료 검사도 통과했다. 기존 숨김 Playwright·가상 회원 응답·실제 쓰기 차단 원칙을 유지한다. 검사 결과와 화면은 운영 폴더 `detail-specialties-20261121/checkout`에 보관한다.
+
+<!-- SOFTM-DETAIL-SPECIALTIES END -->
