@@ -54,6 +54,8 @@ const cases=[
  {name:'analysis',url:'care-analysis.html'},
  {name:'analysis-choices',url:'care-analysis.html',action:'condition-choices'}, // SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 실제 유형 카드·조건 펼침·키보드·재방문 상태를 검증
  ...['candidates','compare','prepare'].map(action=>({name:`analysis-${action}`,url:'care-analysis.html',action:`analysis-${action}`})),
+ ...['facility','home-care','home-nursing','home-bath','short-stay','welfare-equipment','dementia','nursing-hospital'].map(type=>({name:`analysis-candidates-${type}`,url:'care-analysis.html',action:'analysis-candidates',type})), // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 유형마다 다른 정원·인력·비용·병원 지표를 실제 화면에서 확인
+ {name:'analysis-candidates-conditions',url:'care-analysis.html',action:'analysis-candidates',preferences:['evaluation-ab','photos']}, // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 선택 조건의 확인·다름·미확인 표기와 펼친 질문을 확인
  ...['service-guide','about','care-cost','care-photos','data-status','privacy','terms','advertise','partner-profile-sample'].map(name=>({name,url:name+'.html'})),
  ...['daycare','nursing-home','nursing-hospital','home-care','home-nursing','home-bath','short-stay-care','welfare-equipment','dementia-care'].map(name=>({name:name+'-landing',url:name+'-map.html'})),
  {name:'auth-callback-error',url:'auth-callback.html'},
@@ -76,7 +78,7 @@ await mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const results=[];
 async function run(c,width){
- const context=await browser.newContext({viewport:{width,height:width<600?844:960},locale:'ko-KR',serviceWorkers:'block',geolocation:{latitude:37.5663,longitude:126.9018},permissions:['geolocation'],reducedMotion:'reduce'});
+ const context=await browser.newContext({viewport:{width,height:width<600?844:960},locale:'ko-KR',serviceWorkers:'block',geolocation:c.type==='short-stay'?{latitude:37.536,longitude:127.067}:{latitude:37.5663,longitude:126.9018},permissions:['geolocation'],reducedMotion:'reduce'}); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 단기보호는 공개 기관이 있는 광진구에서 실제 카드 검증
  const page=await context.newPage();page.setDefaultTimeout(12000);
  const errors=[];page.on('pageerror',e=>errors.push(String(e.message).slice(0,240)));
  await context.addInitScript(({seed,rows,record,user})=>{
@@ -215,8 +217,38 @@ async function run(c,width){
   if(c.action?.startsWith('analysis-')){
    await page.locator('#analysisAddress').waitFor();
    await page.waitForFunction(()=>document.querySelector('#analysisAddress').value.length>0,{},{timeout:20000});
+   if(c.type)await page.locator(`[name=careTypeChoice][value="${c.type}"]`).check(); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 실제 라디오 선택과 검색 결과를 연결
+   for(const criterion of c.preferences||[])await page.locator(`#analysisCriteria input[value="${criterion}"]`).check(); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 조건을 실제로 선택한 뒤 후보 표시를 검증
    await page.locator('#analysisRun').click();
    await page.locator('[data-analysis-save]').first().waitFor({timeout:45000});
+   /** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 공용 목록 값과 실제 표시·글자 크기·질문 펼침·담기 해제가 일치하는지 확인 */
+   const card=page.locator('.analysis-card').first();
+   result.candidateFacts=await page.evaluate(async type=>{
+    const cards=[...document.querySelectorAll('.analysis-card')], rows=await CareData.category(type);
+    return cards.slice(0,3).map(card=>{
+     const row=rows.find(row=>String(row.i)===card.dataset.institutionId),expected=CareDecisionSummary.summary(row,type).cells;
+     const cells=[...card.querySelectorAll('.analysis-key-facts>div')].map(cell=>({label:cell.querySelector('dt').textContent,value:cell.querySelector('dd').textContent,detail:cell.querySelector('small').textContent}));
+     const cost=CareCostPreview.build(type,row);
+     return {id:row.i,cells,expected,cost:cost?.amount||null,costText:card.querySelector('.analysis-candidate-cost').textContent,headingSize:parseFloat(getComputedStyle(card.querySelector('h3')).fontSize),valueSize:parseFloat(getComputedStyle(card.querySelector('dd')).fontSize),addressSize:parseFloat(getComputedStyle(card.querySelector('.analysis-card-address')).fontSize)};
+    });
+   },c.type||'daycare');
+   for(const card of result.candidateFacts){
+    assert.equal(card.cells[0].label,'기준지 거리');
+    for(const expected of card.expected){const actual=card.cells.find(cell=>cell.label===expected.label);assert.equal(actual?.value,expected.value,expected.label+' 공용 목록 수치');if(expected.detail)assert.equal(actual.detail,expected.detail);}
+    assert.ok(card.headingSize>=22&&card.valueSize>=24&&card.addressSize>=16,'이름·지표·주소 최소 가독성');
+    if(card.cost){assert.ok(card.costText.includes(card.cost),'목록과 같은 비용 계산');assert.match(card.costText,/공통 조건 예시/);assert.match(card.costText,/비급여 별도/);}
+    else assert.match(card.costText,/기관 확인 필요/);
+    if(c.type==='nursing-hospital')assert.ok(!card.cells.some(cell=>/공단 평가|정원|요양보호사/.test(cell.label)),'병원에 장기요양 지표 미적용');
+   }
+   const questions=card.locator('.analysis-card-questions');
+   await questions.locator('summary').click();assert.ok(await questions.evaluate(e=>e.open),'질문 펼침');assert.ok(await questions.locator('li').count()>0);
+   await questions.locator('summary').click();assert.ok(!await questions.evaluate(e=>e.open),'질문 접기');
+   const save=card.locator('[data-analysis-save]');
+   await save.click();assert.equal(await save.getAttribute('aria-pressed'),'true');assert.ok(await card.evaluate(e=>e.classList.contains('is-saved')),'담은 카드 구분');
+   await save.click();assert.equal(await save.getAttribute('aria-pressed'),'false');assert.ok(!await card.evaluate(e=>e.classList.contains('is-saved')),'담기 해제');
+   if(c.preferences){assert.equal(await card.locator('.analysis-condition-matches li').count(),c.preferences.length,'선택 조건별 상태');await questions.locator('summary').click();}
+   await card.screenshot({path:out+`/${c.name}-${width}-card.png`,animations:'disabled',style:'#analysisCompareTray,.hc-header,.hc-nav{visibility:hidden}'});
+   /** SOFTM-CANDIDATE-FACTS END */
    if(c.action!=='analysis-candidates'){
     const buttons=page.locator('[data-analysis-save]');
     await buttons.nth(0).click();await buttons.nth(1).click();
