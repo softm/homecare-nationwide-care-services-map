@@ -4,7 +4,8 @@ import { readFileSync,writeFileSync,existsSync } from 'node:fs';
 import { resolve,dirname,relative } from 'node:path';
 import { createHash } from 'node:crypto';
 const root=resolve(import.meta.dirname,'..');
-const pages=['care-account.html','institution-signup.html','institution-review.html','institution-portal.html','care-saved.html','care-compare.html','care-facility.html','care-records.html','care-record.html','care-share.html','care-analysis.html','terms.html'];
+// SOFTM-KEY 날짜:20261121 : 새 시범 화면의 정적 자산만 셸에 포함, API 응답은 저장하지 않음
+const pages=['assets/pilot/qr-institution.png','assets/pilot/qr-welfare.png','assets/pilot/qr-community.png','care-pilot.html','care-pilot-admin.html','care-account.html','institution-signup.html','institution-review.html','institution-portal.html','care-saved.html','care-compare.html','care-facility.html','care-records.html','care-record.html','care-share.html','care-analysis.html','terms.html'];
 const files=new Set(),hash=createHash('sha256');
 function visit(file){if(files.has(file)||file.startsWith('..')||file.startsWith('data/')||file==='auth-callback.html')return;const path=resolve(root,file);if(!existsSync(path))throw new Error(`누락된 셸 자산: ${file}`);files.add(file);const bytes=readFileSync(path);hash.update(file);hash.update(bytes);if(!/\.(?:html|mjs|js|css)$/.test(file))return;const source=bytes.toString();const candidates=[...source.matchAll(/(?:src|href)=["']([^"']+)["']/g),...source.matchAll(/(?:from\s*|import\s*(?:\(\s*)?)["'](\.[^"']+)["']/g),...source.matchAll(/url\(["']?([^)'"\s]+)["']?\)/g)].map(m=>m[1]);for(const value of candidates){if(/^(?:https?:|data:|mailto:|#|\$)/.test(value))continue;const bare=value.split(/[?#]/)[0];if(!/\.(?:js|mjs|css|woff2?|ttf|svg|png|ico)$/.test(bare))continue;visit(relative(root,resolve(value.startsWith('/')?root:dirname(path),bare.replace(/^\//,''))));}}
 for(const page of pages)visit(page);
