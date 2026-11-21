@@ -235,6 +235,7 @@
     function evaluationLabel(row) { if(options?.source==='hira'||options?.type==='nursing-hospital')return '심평원 의료기관 개설현황';const grade=row.g||row.ev?.grade,year=row.ey||row.ev?.year,yearText=year?`${year}년`:'평가연도 미확인';return ['A','B','C','D','E'].includes(grade)?`기관 평가 ${grade}등급 · ${yearText}`:grade==='N'?'신설·미평가':'기관 평가 미확인'; } // SOFTM-COMPARE-EVIDENCE 날짜:20261118 : 비교함 목록에서도 평가연도와 심평원 자료 구분을 유지
     function refresh() {
         if (!basket || !bar) return;
+        root.CareMarkerLabels?.refreshSaved(document.getElementById('naverMap')); // SOFTM-SAVED-MARKER 날짜:20261121 : 담기·해제·전체 비우기·페이지 복귀를 현재 지도 배지에 즉시 반영
         matchController?.refresh(); // SOFTM-CARE-MATCH 날짜:20260910 : 목록 재렌더와 페이지 변경에도 선택 근거를 다시 연결
         const selected = rows();
         tabs.querySelector('[data-saved-count]').textContent = selected.length;

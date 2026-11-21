@@ -5,6 +5,14 @@
     const inside = (rect,bounds) => rect.width > 0 && rect.height > 0 && rect.left >= bounds.left+8 && rect.right <= bounds.right-8 && rect.top >= bounds.top+8 && rect.bottom <= bounds.bottom-8;
     const detailLevel = zoom => zoom >= 18 ? 2 : zoom >= 16 ? 1 : 0;
     const markerScale = zoom => zoom < 14 ? 'dot' : zoom < 16 ? 'pin' : zoom < 18 ? 'name' : 'detail'; // SOFTM-MARKER-SCALE 날짜:20261005 : 위치점·핀의 크기 단계와 상세 현황 단계를 구분하며 이름은 모든 배율에서 배치
+    /** SOFTM-SAVED-MARKER START 날짜:20261121 : 마커 재생성·선택 복원 때도 현재 비교함 기준으로 담기 배지만 갱신 */
+    function refreshSaved(host) {
+        for (const marker of host?.querySelectorAll('.care-named-marker') || []) {
+            const badge = marker.querySelector('.care-marker-saved');
+            if (badge) badge.hidden = !root.CareMapExperience?.contains(marker.dataset.markerId);
+        }
+    }
+    /** SOFTM-SAVED-MARKER END */
     /** SOFTM-LABEL-DENSITY START 날짜:20261005 : 이름을 일괄 숨기는 대신 지도 배율·화면 넓이로 표시 밀도만 조절 */
     function labelBudget(zoom, width, height) {
         const area = Math.max(0, width) * Math.max(0, height);
@@ -39,6 +47,7 @@
         function layout() {
             const zoom = map.getZoom();
             host.dataset.markerScale = markerScale(zoom); // SOFTM-MARKER-SCALE 날짜:20261005 : 실제 확대 배율로 마커 모양과 이름표 표시를 함께 갱신
+            refreshSaved(host); // SOFTM-SAVED-MARKER 날짜:20261121 : 초기 지도와 배율 변경에도 현재 담기 상태를 적용
             const bounds = host.getBoundingClientRect();
             const labels = [...host.querySelectorAll('.marker-name')];
             /** SOFTM-MARKER-PLACEMENT START 날짜:20260930 : 선택·배율 변경 뒤 이전 이동량이 다음 충돌 실측에 남지 않도록 초기화 */
@@ -114,13 +123,13 @@
         }
         const schedule = () => { clearTimeout(timer); timer=setTimeout(layout,100); };
         new MutationObserver(records=>{
-            if(records.some(record=>!record.target.closest?.('.marker-name'))) schedule();
+            if(records.some(record=>!record.target.closest?.('.marker-name'))) { refreshSaved(host); schedule(); } // SOFTM-SAVED-MARKER 날짜:20261121 : 선택 아이콘·복원 마커의 오래된 HTML을 첫 표시 전에 동기화
         }).observe(host,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
         new ResizeObserver(schedule).observe(host);
         root.naver.maps.Event.addListener(map,'zoom_changed',schedule); // SOFTM-MARKER-SCALE 날짜:20261005 : 재검색 완료를 기다리지 않고 배율 변경을 표시
         root.naver.maps.Event.addListener(map,'idle',schedule);
         schedule();
     }
-    root.CareMarkerLabels = {mount,detailLevel,fitLevel,markerScale,labelBudget,compareLabels};
+    root.CareMarkerLabels = {mount,detailLevel,fitLevel,markerScale,labelBudget,compareLabels,refreshSaved}; // SOFTM-SAVED-MARKER 날짜:20261121 : 담기·해제에서 지도 이동 없이 표시를 갱신
 })(globalThis);
 /** SOFTM-MARKER-INSIGHTS END */
