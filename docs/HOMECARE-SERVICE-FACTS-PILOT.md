@@ -123,3 +123,9 @@ UI 검증은 사용자 Chrome과 분리된 숨김 Playwright에서 수행했다.
 로컬 증거는 `/Users/softm/workspace_data/homecare-ops/` 아래 `service-facts-final-check-20261121.log`, `service-facts-ui-20261121/summary.json`, `service-facts-regression-20261121/checkout/report.json`, `service-facts-cost-conditions-20261121/summary.json`과 각 화면 PNG에 보관했다. 두 Worker의 dry-run 기록은 `service-facts-institution-bundle-20261121.log`, `service-facts-member-bundle-20261121.log`이다.
 
 이 검증 시점에는 원격 푸시·운영 migration·Worker 배포·실제 기관 참여 설정을 수행하지 않았다. 운영 적용은 위 배포 순서와 별도 배포 기록으로 확인한다.
+
+## 운영 적용 — 2026-11-22
+
+사용자의 명시적인 푸시·운영 반영 승인 후 DB 백업과 복원 검사를 마치고 기관 D1 migration 0007 → 기관 Worker → 회원 Worker → GitHub Pages `main` 순서로 적용했다. 보호자 안내 주소는 `https://homecare.designboard.net/care-pilot.html`, 운영자 주소는 `https://homecare.designboard.net/care-pilot-admin.html`이다.
+
+실제 사이트의 가입·로그인, 개인 상담 조건/결과 저장·복원, 조건 변경 안내, 선택적 가족 공유와 비공개 필드 제외를 확인했다. 시험 계정은 모두 삭제했으며 실제 기관의 참여 등록은 수행하지 않았다. 배포 시 참여 기관이 0곳이므로 보호자 화면은 준비 중 안내를 제공한다. 실제 기관의 항목 게시·수정은 담당자 가입·승인·동의·참여 설정을 거쳐 별도로 점검한다. API 버전·웹 소스 커밋·배포 검증 증거는 `HOMECARE-DEPLOYMENT.md`의 같은 날짜 기록을 따른다.
