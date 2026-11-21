@@ -308,6 +308,14 @@ async function run(c,width){
    } // SOFTM-STRICT-CONDITION-FILTER 날짜:20261122 : 선택 조건이 배지 안내가 아니라 실제 기본 필터인지 검증
    /** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 공용 목록 값과 실제 표시·글자 크기·질문 펼침·담기 해제가 일치하는지 확인 */
    const card=page.locator('.analysis-card').first();
+   /** SOFTM-CARD-TOP-ACTIONS START 날짜:20261122 : 상세·사진이 긴 카드 끝이 아닌 상단에 있고 독립 상세화면으로 이동하는지 검증 */
+   const topActions=card.locator('.analysis-card-heading .analysis-card-top-actions');
+   assert.equal(await topActions.count(),1,'카드 상단 행동 영역');
+   const detailHref=await topActions.getByRole('link',{name:'기관 상세'}).getAttribute('href');
+   assert.equal(new URL(detailHref,page.url()).pathname.split('/').pop(),'care-facility.html','독립 기관 상세 화면 연결');
+   assert.ok(new URL(detailHref,page.url()).searchParams.get('id'),'기관 식별자 전달');
+   assert.equal(await card.locator('.analysis-card-body :is(a,button)').filter({hasText:/^기관 상세$|^사진 보기$/}).count(),0,'상세·사진 하단 중복 제거');
+   /** SOFTM-CARD-TOP-ACTIONS END */
    result.candidateFacts=await page.evaluate(async type=>{
     const cards=[...document.querySelectorAll('.analysis-card')], rows=await CareData.category(type);
     return cards.slice(0,3).map(card=>{
