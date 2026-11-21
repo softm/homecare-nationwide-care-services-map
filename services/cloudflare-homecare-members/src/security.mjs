@@ -9,7 +9,7 @@ export const sha = async value => Buffer.from(await crypto.subtle.digest('SHA-25
 export const challenge = async value => Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))).toString('base64url');
 export function equal(a, b) { const x=Buffer.from(String(a||'')), y=Buffer.from(String(b||'')); return x.length===y.length && x.length>0 && timingSafeEqual(x,y); }
 const derive = (password,salt) => new Promise((resolve,reject) => scrypt(password,salt,64,{N:16384,r:8,p:5,maxmem:32*1024*1024},(e,key)=>e?reject(e):resolve(key)));
-export function password(value) { if(typeof value!=='string'||value.length<12||value.length>128) fail('invalid_password','비밀번호를 12~128자로 입력해 주세요.'); return value; }
+export function password(value) { if(typeof value!=='string'||value.length<8||value.length>128) fail('invalid_password','비밀번호를 8~128자로 입력해 주세요.'); return value; } // SOFTM-PASSWORD-LENGTH 날짜:20261122 : 화면과 서버의 최소 8자 기준을 일치시키고 기존 해시·상한은 유지
 export function username(value) { const v=String(value||'').trim().toLowerCase(); if(!/^[a-z0-9][a-z0-9_.-]{3,31}$/.test(v)) fail('invalid_username','아이디는 영문·숫자로 시작하는 4~32자의 영문·숫자·밑줄·점·하이픈으로 입력해 주세요.'); return v; }
 export async function hashPassword(value) { const salt=randomBytes(16).toString('hex'); return `scrypt$16384$8$5$${salt}$${(await derive(password(value),salt)).toString('hex')}`; }
 export async function verifyPassword(value,encoded) { if(typeof value!=='string'||value.length>128) return false; const parts=String(encoded||'').split('$'); if(parts.length!==6||parts.slice(0,4).join('$')!=='scrypt$16384$8$5')return false; return equal((await derive(value,parts[4])).toString('hex'),parts[5]); }
