@@ -2,6 +2,9 @@
 import assert from 'node:assert/strict';
 export async function verifyPersonalCost(page,{profile=false,type='daycare'}={}){
  const panel=page.locator('.care-compare-cost:visible').first();await panel.waitFor({timeout:15000});
+ const workspace=panel.locator('xpath=ancestor::*[contains(@class,"care-compare-workspace")]');
+ assert.ok(await workspace.evaluate(root=>Boolean(root.querySelector('.care-compare-layout').compareDocumentPosition(root.querySelector('.care-compare-cost'))&Node.DOCUMENT_POSITION_FOLLOWING)),'핵심 비교표 뒤에 비용 입력 표시');
+ assert.equal(await workspace.locator('.care-compare-metric-row .care-compare-label strong').first().textContent(),'기준지 거리','기관명 다음에 핵심 비교 내용부터 표시'); // SOFTM-COMPARE-CORE-FIRST 날짜:20261122 : 비교 화면 정보 순서를 실제 DOM에서 검증
  const grade=panel.locator('[name=grade]'),burden=panel.locator('[name=burden]'),cell=page.locator('[data-cost-index="0"]:visible').first();
  if(profile){await page.waitForFunction(()=>document.querySelector('.care-compare-cost [name=grade]')?.value==='3');assert.equal(await burden.inputValue(),'reduced60');assert.match(await cell.innerText(),/78,725원/);}
  else {assert.equal(await grade.inputValue(),'');assert.match(await cell.innerText(),/등급 입력 후 계산/);}

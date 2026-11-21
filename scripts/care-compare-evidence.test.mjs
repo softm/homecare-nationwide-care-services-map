@@ -98,6 +98,8 @@ test('비교 화면은 빈자리를 기관 확인으로 남기고 비용 조건 
     const html=globalThis.CareComparisonWorkspace.render({type:'daycare',source:'nhis',sourceDate:'2026-11-19',allRows:[{i:'1',n:'<img>',a:'주소'}],activeIds:['1'],rows:[{i:'1',n:'<img>',a:'주소'},{i:'2',n:'둘',a:'주소'}]});
     assert.match(html,/기관 확인 필요/);assert.match(html,/월 예상 본인부담금/);assert.match(html,/장기요양등급·이용량에 따른 예상액/); // SOFTM-PERSONAL-COST 날짜:20261121 : 미확인 값 안내와 개인 조건 계산의 역할 구분
     assert.match(html,/&lt;img&gt;/);assert.doesNotMatch(html,/<img>/);
+    assert.ok(html.indexOf('data-compare-metric="distance"') < html.indexOf('data-service-facts-key="schedule"'));
+    assert.ok(html.indexOf('data-compare-metric="designated"') < html.indexOf('data-compare-metric="cost"')); // SOFTM-COMPARE-CORE-FIRST 날짜:20261122 : 거리·평가·정원·인력·지정일을 운영정보와 비용보다 먼저 표시
 });
 
 test('간호 인력 두 항목이 모두 비어 있으면 0명으로 추정하지 않는다',()=>{
