@@ -94,9 +94,9 @@ test('유형별 비교 지표는 병원 평가와 복지용구 시설 인력을 
     assert.equal(equipment.includes('availability'),true);
 });
 
-test('비교 화면은 빈자리와 비용을 기관 확인으로 남기고 HTML을 실행하지 않는다',()=>{
+test('비교 화면은 빈자리를 기관 확인으로 남기고 비용 조건 입력을 안내하며 HTML을 실행하지 않는다',()=>{
     const html=globalThis.CareComparisonWorkspace.render({type:'daycare',source:'nhis',sourceDate:'2026-11-19',allRows:[{i:'1',n:'<img>',a:'주소'}],activeIds:['1'],rows:[{i:'1',n:'<img>',a:'주소'},{i:'2',n:'둘',a:'주소'}]});
-    assert.match(html,/기관 확인 필요/);assert.match(html,/본인부담·비급여 별도 확인/);
+    assert.match(html,/기관 확인 필요/);assert.match(html,/월 예상 본인부담금/);assert.match(html,/장기요양등급·이용량에 따른 예상액/); // SOFTM-PERSONAL-COST 날짜:20261121 : 미확인 값 안내와 개인 조건 계산의 역할 구분
     assert.match(html,/&lt;img&gt;/);assert.doesNotMatch(html,/<img>/);
 });
 

@@ -19,3 +19,11 @@ test('본인과 가족의 동의 권한을 구분하고 임의 추가 필드를 
  assert.equal(validateRecipient({...profile,relationship:'self',authority:'self'}).authority,'self');
 });
 /** SOFTM-GUARDIAN END */
+
+/** SOFTM-PERSONAL-COST START 날짜:20261121 : 등급·감경의 미입력과 위조 입력을 구분 */
+test('등급과 본인부담 유형은 선택 입력이며 알려진 코드만 저장한다',()=>{
+ assert.equal(validateRecipient(profile).grade,'');assert.equal(validateRecipient(profile).burden,'');
+ for(const grade of ['1','2','3','4','5','cognitive',''])for(const burden of ['general','reduced40','reduced60','exempt',''])assert.deepEqual({...validateRecipient({...profile,grade,burden})},{...validateRecipient(profile),grade,burden});
+ for(const changes of [{grade:'A'},{grade:3},{grade:['3']},{burden:'5%'},{burden:['exempt']}])assert.throws(()=>validateRecipient({...profile,...changes}));
+});
+/** SOFTM-PERSONAL-COST END */

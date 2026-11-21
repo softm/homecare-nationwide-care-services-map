@@ -1,11 +1,13 @@
 /** SOFTM-LAYOUT-AUDIT START 날짜:20261121 : 사용자 Chrome과 실제 회원자료를 건드리지 않고 Playwright로 모든 화면 유형을 점검 */
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { gunzipSync } from 'node:zlib';
+import {verifyPersonalCost} from './check-personal-cost-playwright.mjs'; // SOFTM-PERSONAL-COST 날짜:20261121 : 공통 비용 조작과 계정 전환 검사
 import { verifySavedMarkers } from './check-saved-markers-playwright.mjs'; // SOFTM-SAVED-MARKER 날짜:20261121 : 공용 숨김 브라우저·쓰기 차단 조건에서 마커 담기 상태도 검증
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
@@ -15,6 +17,7 @@ assert.ok(['live','checkout'].includes(mode),'AUDIT_MODE must be live or checkou
 const out=resolve(process.env.AUDIT_OUTPUT||resolve(tmpdir(),`homecare-ui-${Date.now()}`),process.env.AUDIT_LABEL||mode);
 const site=process.env.AUDIT_SITE||'https://homecare.designboard.net';
 const rows=JSON.parse(gunzipSync(await readFile(root+'/data/care/daycare.json.gz'))).slice(0,3);
+const costRows=Object.fromEntries(['facility','home-care'].map(type=>[type,JSON.parse(gunzipSync(readFileSync(root+'/data/care/'+type+'.json.gz'))).find(row=>String(row.t).split(',').includes(type==='facility'?'A03':'B01'))])); // SOFTM-PERSONAL-COST 날짜:20261121 : 공식 일반 급여가 있는 시설·방문요양 입력 확인
 const record={key:`daycare:${rows[0].i}`,type:'daycare',institutionId:rows[0].i,name:rows[0].n,address:rows[0].a,phone:'',status:'scheduled',visitAt:'2026-11-25T14:00',updatedAt:1795212000000,questions:[{id:'q:1',text:'현재 이용 가능한 자리와 대기기간은 어떻게 되나요?',answer:'화면 검증용 예시 답변입니다.',checked:true},{id:'q:2',text:'추가 비용과 식사비는 얼마인가요?',answer:'',checked:false}],notes:'화면 검증용 예시 메모',checklist:[{id:'space',text:'생활공간·이동 동선 확인',checked:false},{id:'staff',text:'담당 인력과 응급 대응 확인',checked:true}]};
 const registration={id:'layout-registration',institution_type:'daycare',institution_name:'화면 검증용 주간보호센터',institution_id:'manual:layout-institution',source:'manual',address:'화면 검증용 주소 · 실제 기관 아님',business_number:'0000000000',representative:'검증용 대표자',contact_name:'검증용 담당자',contact_phone:'01000000000',contact_email:'layout@example.invalid',status:'pending',revision:1,hasDocument:true,document_name:'화면 검증용.pdf',review_reason:''};
 const agreement={status:'accepted',version:'homecare-pilot-20261118-v1',confirmations:{freePilot:true,noPayment:true,contentAuthority:true}};
@@ -44,6 +47,9 @@ const cases=[
  {name:'institution-statistics',url:'institution-portal.html',user:'institution',action:'stats'},
  {name:'saved-empty',url:'care-saved.html'},
  {name:'saved-filled',url:'care-saved.html',seed:true},
+ {name:'care-setup',url:'care-account.html?view=care-setup&return=care-compare.html',user:'personal'}, // SOFTM-PERSONAL-COST 날짜:20261121 : 가입 후 건너뛰기 가능한 등급 입력 화면
+ ...['facility','home-care'].map(type=>({name:`cost-${type}`,url:`care-facility.html?type=${type}&id=${costRows[type].i}`,costType:type})),
+ {name:'cost-profile',url:'care-compare.html',seed:true,user:'personal',recipient:true},
  {name:'comparison',url:'care-compare.html',seed:true},
  {name:'facility',url:`care-facility.html?type=daycare&id=${rows[0].i}`},
  {name:'records-empty',url:'care-records.html'},
@@ -99,7 +105,7 @@ async function run(c,width){
    if(!c.user)return send(null,401);
    const inst=c.user.startsWith('institution');
    if(u.pathname==='/api/auth/session')return send({user:{id:'layout-user',username:c.user==='social'?null:'layout_user',kind:inst?'institution':'personal',onboarding:['institution-pending','social'].includes(c.user)?'pending':'complete',name:'화면 검증용 회원',phone:'01000000000',province:'서울특별시',city:'마포구',notifications:true},csrf:'layout-only-not-a-token',isAdmin:c.user==='admin'});
-   if(u.pathname==='/api/me/care-recipient')return send({profile:null,revision:0,guardian:{userId:'layout-user',name:'화면 검증용 보호자',phone:'01000000000'}});
+   if(u.pathname==='/api/me/care-recipient')return send({profile:c.recipient?{relationship:'parent',sex:'female',mobility:'unspecified',careNeeds:[],grade:'3',burden:'reduced60',authority:'subject-consent'}:null,revision:c.recipient?1:0,guardian:{userId:'layout-user',name:'화면 검증용 보호자',phone:'01000000000'}});
    if(u.pathname==='/api/me/workspace')return send({workspace:null,revision:0});
    if(u.pathname==='/api/registrations')return send(c.registration?[{...registration,status:c.registration}]:[]);
    if(u.pathname==='/api/admin/registrations')return send([registration]);
@@ -295,6 +301,9 @@ async function run(c,width){
    }
   }
   await page.waitForTimeout(150);
+  // SOFTM-PERSONAL-COST 날짜:20261121 : 네 진입점에서 같은 비용 입력과 금액 갱신 확인
+  if(['comparison','facility','cost-profile','analysis-compare','map-compare'].includes(c.name)||c.costType)result.personalCost=await verifyPersonalCost(page,{profile:!!c.recipient,type:c.costType||'daycare'});
+  if(c.name==='care-setup'){await page.locator('#careRecipient [name=grade]').waitFor();assert.equal(await page.locator('#careRecipient [name=grade]').inputValue(),'');await page.getByRole('link',{name:'지금은 건너뛰고 시작하기'}).click({trial:true});}
   await page.evaluate(()=>{document.activeElement?.blur();scrollTo({top:0,behavior:'instant'});});
   result.metrics=await page.evaluate(()=>{
    const visible=e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&e.checkVisibility({checkVisibilityCSS:true,checkOpacity:true});};
