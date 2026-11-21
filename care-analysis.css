@@ -217,3 +217,16 @@ body.analysis-page .analysis-card-actions>button:first-child[aria-pressed=true] 
  .analysis-card-questions>summary { padding:12px; }
 }
 /** SOFTM-CANDIDATE-FACTS END */
+
+/** SOFTM-EMPTY-CONDITIONS START 날짜:20261121 : 검색 전 확인을 모바일·PC에서 읽고 두 행동을 명확히 선택 */
+.analysis-page .analysis-confirm { width:min(500px,calc(100% - 32px)); max-height:calc(100dvh - 32px); margin:auto; padding:28px; border:1px solid #c9ded4; border-radius:20px; background:#fff; color:#153e34; box-shadow:0 20px 72px #153e3433; overflow:auto; }
+.analysis-confirm::backdrop { background:#102a2473; }
+.analysis-confirm form { margin:0; }
+.analysis-confirm .analysis-confirm-kicker { margin:0 0 10px; color:#087a61; font-size:14px; font-weight:700; }
+.analysis-confirm h2 { margin:0 0 14px; font-size:26px; line-height:1.4; letter-spacing:-.5px; word-break:keep-all; }
+.analysis-confirm #analysisNoConditionsDescription { margin:0; color:#53655e; font-size:16px; line-height:1.7; word-break:keep-all; }
+.analysis-confirm-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:26px; }
+.analysis-page .analysis-confirm-actions button { min-height:48px; padding:11px 14px; border-radius:10px; font-size:16px; }
+.analysis-page .analysis-confirm-actions .analysis-primary { background:#087a61; border-color:#087a61; color:white; }
+@media(max-width:400px) { .analysis-page .analysis-confirm { padding:22px; } .analysis-confirm h2 { font-size:24px; } .analysis-confirm-actions { grid-template-columns:1fr; } }
+/** SOFTM-EMPTY-CONDITIONS END */

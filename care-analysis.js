@@ -226,10 +226,36 @@ function draft() {
     return { type, radiusKm: Number($('analysisRadius').value), address: $('analysisAddress').value.trim(), criteria, selected,manualSelected,recipientQuestions:matching.questions };
     /** SOFTM-GUARDIAN END */
 }
+/** SOFTM-EMPTY-CONDITIONS START 날짜:20261121 : 유효한 검색 입력에서 조건이 비어 있을 때만 확인하고 취소하면 선택 위치로 복귀 */
+let confirmingEmptyConditions = false;
+function confirmWithoutConditions() {
+    const dialog = $('analysisNoConditions');
+    dialog.returnValue = 'edit';
+    return new Promise(resolve => {
+        dialog.addEventListener('close', () => {
+            const proceed = dialog.returnValue === 'search';
+            if (!proceed) {
+                const criteria = $('analysisCriteria');
+                criteria.closest('details').open = true;
+                criteria.querySelector('input')?.focus({ preventScroll: true });
+                criteria.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+            }
+            resolve(proceed);
+        }, { once: true });
+        dialog.showModal();
+    });
+}
 async function submit(event) {
-    originController?.cancel(); // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 분석을 시작한 뒤 역주소 응답이 기준 주소를 바꾸지 않음
-    event?.preventDefault(); if (!$('analysisForm').reportValidity()) return;
+    event?.preventDefault();
+    if (busy || confirmingEmptyConditions || !$('analysisForm').reportValidity()) return;
     const input = draft(); if (!input.address) return;
+    if (input.criteria.length && !input.selected.size) {
+        confirmingEmptyConditions = true;
+        try { if (!await confirmWithoutConditions()) return; }
+        finally { confirmingEmptyConditions = false; }
+    }
+    originController?.cancel(); // SOFTM-EMPTY-CONDITIONS 날짜:20261121 : 검색 진행을 선택한 뒤에만 주소 처리를 확정
+    /** SOFTM-EMPTY-CONDITIONS END */
     saveConditions({type:input.type,address:input.address,radius:input.radiusKm,preferences:[...input.manualSelected]});
     invalidate('기준 주소를 확인하고 있습니다.'); const token = generation; setBusy(true);
     try {
