@@ -47,4 +47,30 @@ test('API와 회원 인증 응답은 자산 캐시로 가로채지 않는다',as
  assert.equal(await w.read('/auth-callback.html'),null);
  assert.deepEqual(w.requests,[]);
 });
+/** SOFTM-PWA-BRAND START 날짜:20261122 : 설치 앱 아이콘의 새 로고 규격·버전·안전 배경을 고정 */
+test('설치 앱 매니페스트는 새 브랜드 아이콘과 흰 배경을 사용한다',()=>{
+ const manifest=JSON.parse(readFileSync(new URL('../manifest.webmanifest',import.meta.url),'utf8'));
+ assert.equal(manifest.background_color,'#ffffff');
+ assert.equal(manifest.theme_color,'#087b5c');
+ assert.deepEqual(manifest.icons.map(icon=>[icon.src,icon.sizes,icon.purpose]),[
+  ['./site-icon-192.png?v=20261122-brand1','192x192','any'],
+  ['./site-icon-512.png?v=20261122-brand1','512x512','any maskable']
+ ]);
+});
+test('PWA와 Apple PNG 아이콘은 정확한 크기와 불투명 흰 모서리를 가진다',()=>{
+ for(const [name,width,height] of [['site-icon-192.png',192,192],['site-icon-512.png',512,512],['apple-touch-icon.png',180,180]]){
+  const png=readFileSync(new URL('../'+name,import.meta.url));
+  assert.equal(png.toString('ascii',1,4),'PNG',name+' PNG 시그니처');
+  assert.equal(png.readUInt32BE(16),width,name+' 너비');
+  assert.equal(png.readUInt32BE(20),height,name+' 높이');
+  assert.equal(png[25],2,name+' RGB 불투명 색상');
+ }
+});
+test('파비콘은 다중 ICO와 새 브랜드 SVG를 함께 제공한다',()=>{
+ const ico=readFileSync(new URL('../favicon.ico',import.meta.url));
+ assert.equal(ico.readUInt16LE(0),0);assert.equal(ico.readUInt16LE(2),1);assert.ok(ico.readUInt16LE(4)>=6);
+ const svg=readFileSync(new URL('../favicon.svg',import.meta.url),'utf8');
+ assert.match(svg,/SOFTM-PWA-BRAND/);assert.match(svg,/#087b5c/);assert.match(svg,/#ff6957/);
+});
+/** SOFTM-PWA-BRAND END */
 /** SOFTM-ASSET-VERSION END */
