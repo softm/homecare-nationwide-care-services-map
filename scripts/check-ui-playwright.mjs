@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { gunzipSync } from 'node:zlib';
 import {verifyPersonalCost} from './check-personal-cost-playwright.mjs'; // SOFTM-PERSONAL-COST 날짜:20261121 : 공통 비용 조작과 계정 전환 검사
+import {verifyMarkerDetail} from './check-marker-detail-playwright.mjs'; // SOFTM-MARKER-DETAIL-SWITCH 날짜:20261121 : 실제 마커 연속 클릭으로 상세 전환 검사
 import { verifySavedMarkers } from './check-saved-markers-playwright.mjs'; // SOFTM-SAVED-MARKER 날짜:20261121 : 공용 숨김 브라우저·쓰기 차단 조건에서 마커 담기 상태도 검증
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
@@ -76,6 +77,7 @@ const cases=[
  {name:'map-daycare',url:'index.html?type=daycare'},
  {name:'map-facility',url:'index.html?type=facility'},
  {name:'map-hospital',url:'index.html?type=nursing-hospital'},
+ ...['daycare','facility','nursing-hospital'].map(type=>({name:`map-detail-switch-${type}`,url:`index.html?type=${type}&lat=37.5663&lng=126.9018&z=14`,action:'map-detail-switch'})),
  ...['daycare','facility','nursing-hospital'].map(type=>({name:`map-saved-markers-${type}`,url:`index.html?type=${type}&lat=37.5663&lng=126.9018&z=14`,action:'map-saved-markers'})), // SOFTM-SAVED-MARKER 날짜:20261121 : 공단 시설·재가·병원을 같은 공개 지도 위치와 담기 시나리오로 검증
  ...['menu','types','filter','advanced','match-1','match-2','match-3','saved','compare','detail','list','full'].map(action=>({name:`map-${action}`,url:'index.html?type=daycare',action:`map-${action}`,seed:['saved','compare'].includes(action)})),
  {name:'installation-guide',url:'care-account.html',action:'install'},
@@ -143,6 +145,7 @@ async function run(c,width){
    assert.equal(await page.locator('[name=kind]:checked').inputValue(),'personal','키보드로 일반회원 선택');
    await page.locator(`[name=kind][value=${initial}]`).check();
   }
+  if(c.action==='map-detail-switch')result.markerDetail=await verifyMarkerDetail(page,{out,name:c.name,width}); // SOFTM-MARKER-DETAIL-SWITCH 날짜:20261121 : 별도 숨김 브라우저에서 즉시 교체와 지도 유지 검증
   if(c.action==='delete-dialog')await page.locator('[data-delete=account]').click();
   if(c.action==='storage-dialog')await page.locator('[data-storage-open]').first().click();
   if(c.action==='edit-registration')await page.locator('[data-edit]').click();
