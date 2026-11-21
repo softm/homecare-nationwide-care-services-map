@@ -555,7 +555,7 @@ test("업로드 D1 실패 뒤 R2 정리도 실패하면 queue를 시도하고 �
   );
 });
 
-test("공개하기도 If-Match를 원자 확인하고 최신 contentRevision을 반환한다", async () => {
+test("공개하기는 D1 트리거 합산 변경 건수를 허용하고 stale If-Match는 거부한다", async () => {
   const membership = {
     institution_id: "24119001267",
     user_id: "user-1",
@@ -565,6 +565,7 @@ test("공개하기도 If-Match를 원자 확인하고 최신 contentRevision을 
   };
   const db = new FakeDB((kind, sql) => {
     if (kind === "first" && sql.includes("FROM institution_memberships")) return membership;
+    if (kind === "run" && sql.includes("SET status = 'published'")) return { meta: { changes: 2 } }; // SOFTM-D1-TRIGGER 날짜:20261121 : 운영 D1의 기관·확인일 두 행 갱신을 재현
     if (kind === "first" && sql.includes("FROM institutions i")) {
       return {
         id: "24119001267",
@@ -668,8 +669,9 @@ test("시범운영 동의는 frontend 버전과 세 가지 확인을 모두 요�
   });
 });
 
-test("협약 철회는 수락 감사값을 보존하고 철회 행위만 기록한다", async () => {
+test("협약 철회는 감사·비공개 트리거 합산에도 성공하고 수락 감사값을 보존한다", async () => {
   const db = new FakeDB((kind, sql) => {
+    if (kind === "run" && sql.includes("UPDATE pilot_agreements")) return { meta: { changes: 3 } }; // SOFTM-D1-TRIGGER 날짜:20261121 : 협약·철회 감사·기관 비공개 갱신 합산을 재현
     if (kind === "first" && sql.includes("FROM institution_memberships")) {
       return {
         institution_id: "24119001267",
