@@ -113,9 +113,9 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <!-- SOFTM-CARE-ANALYSIS END -->
 <!-- SOFTM-PHOTO-MAP END -->
 <link rel="stylesheet" href="search-tools.css?v=20260911-disclosure-button1"> <!-- SOFTM-SEARCH-TOOLS 날짜:20260911 : 목록 앞 기능을 압축한 공용 배치 적용 --> <!-- SOFTM-SEARCH-TOOLS-BUTTON 날짜:20260911 : 보조 기능 펼침 버튼과 큰 상태 아이콘을 이전 캐시 없이 적용 -->
-<link rel="stylesheet" href="care-category-picker.css?v=20261119-link1"> <!-- SOFTM-TYPE-LINK 날짜:20261119 : 유형 선택 카드의 링크 기본 동작 스타일을 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-category-picker.css?v=20261121-type1"> <!-- SOFTM-TYPE-SELECTOR 날짜:20261121 : 현재 유형과 선택 상태 표시를 새 버전으로 적용 -->
 <link rel="stylesheet" href="care-seamless-journey.css?v=20261120-map1"> <!-- SOFTM-MAP-INFOGRAPHIC 날짜:20261120 : 실제 지도·목록 판단 안내를 이전 캐시 없이 적용 -->
-<script src="care-category-picker.js?v=20261119-link1"></script> <!-- SOFTM-TYPE-LINK 날짜:20261119 : 선택 카드가 반드시 유형 URL로 진입하도록 보강한 동작을 캐시 없이 적용 -->
+<script src="care-category-picker.js?v=20261121-type1"></script> <!-- SOFTM-TYPE-SELECTOR 날짜:20261121 : 선택한 유형 이름을 표시하는 동작을 새 버전으로 적용 -->
 <!-- SOFTM-DETAIL-LAYOUT START 날짜:20260911 : 주소 행동과 기본정보 구성을 두 지도에서 공유 -->
 <!-- SOFTM-LIST-ACTIONS 날짜:20260913 : 목록 동작의 균일한 크기와 선택 상태를 이전 캐시 없이 적용 -->
 <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
@@ -172,7 +172,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <script src="google-ads-config.js?v=20261010-1"></script>
 <script defer src="google-ads.js?v=20261010-1"></script> <!-- SOFTM-GOOGLE-ADS 날짜:20261010 : AdSense 승인 ID 입력 후 Auto ads·전면광고를 전역 로드 -->
   <style id="hannunStartupStyle">.hannun-startup{position:fixed;z-index:2147483000;inset:0;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#f7fbf9,#e6f1ec 52%,#dbeae3);font-family:"Noto Sans KR",system-ui,sans-serif;color:#173f35;opacity:1;visibility:visible;transition:opacity .28s ease,visibility .28s ease}.hannun-startup.is-ready{opacity:0;visibility:hidden;pointer-events:none}.hannun-startup__card{text-align:center}.hannun-startup__mark{display:grid;place-items:center;width:72px;height:72px;margin:0 auto 16px;border-radius:22px;background:#17695b;box-shadow:0 14px 34px #173f3530}.hannun-startup__mark svg{width:44px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.hannun-startup strong{display:block;font-size:25px;letter-spacing:-.05em}.hannun-startup p{margin:10px 0 15px;color:#637970;font-size:13px;font-weight:600}.hannun-startup__track{display:block;width:180px;height:6px;overflow:hidden;border-radius:999px;background:#17695b20}.hannun-startup__track i{display:block;width:42%;height:100%;border-radius:inherit;background:#17695b;animation:hannun-startup-progress 1.15s ease-in-out infinite}@keyframes hannun-startup-progress{0%{transform:translateX(-110%)}100%{transform:translateX(340%)}}@media(prefers-reduced-motion:reduce){.hannun-startup{transition:none}.hannun-startup__track i{animation-duration:2.4s}}</style>
-<link rel="stylesheet" href="care-service.css?v=20261121-layout1"><!-- SOFTM-LAYOUT-CACHE 날짜:20261121 : 회원 선택·지도 메뉴 겹침 수정 스타일을 새 버전으로 적용 --><script type="module" src="care-shell.mjs"></script><!-- SOFTM-MEMBERS 날짜:20261120 : 기존 화면에 공용 탐색·계정·디자인 연결 -->
+<link rel="stylesheet" href="care-service.css?v=20261121-guide3"><!-- SOFTM-TYPE-SELECTOR 날짜:20261121 : 유형 선택 버튼과 화면 폭에 맞는 배치를 새 버전으로 적용 --><script type="module" src="care-shell.mjs"></script><!-- SOFTM-MEMBERS 날짜:20261120 : 기존 화면에 공용 탐색·계정·디자인 연결 -->
 </head>
 <body class="stitch-desktop care-map-page care-region-pending" data-care-workspace="search" data-care-view="list">
   <div class="hannun-startup" id="hannunStartup" role="status" aria-live="polite" aria-label="돌봄한눈 시작 화면"><div class="hannun-startup__card"><span class="hannun-startup__mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="m6 13 14-7 14 7-14 7Z"/><path d="m6 20 14 7 14-7M6 27l14 7 14-7"/></svg></span><strong>돌봄한눈</strong><p>서비스를 준비하고 있어요</p><span class="hannun-startup__track" aria-hidden="true"><i></i></span></div></div><script>(()=>{const e=document.getElementById('hannunStartup'),s=performance.now();let d=false;const f=()=>{if(d)return;d=true;setTimeout(()=>{e.classList.add('is-ready');setTimeout(()=>e.remove(),320)},Math.max(0,360-(performance.now()-s)))};if(document.readyState==='complete')f();else addEventListener('load',f,{once:true});setTimeout(f,8000)})();</script> <!-- SOFTM-REGION-ENTRY 날짜:20260913 : 자료 로딩 중에도 임의 전국 지도를 노출하지 않고 지역 진입 화면을 준비 -->
@@ -289,8 +289,8 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <script src="care-list-sticky.js?v=20261118-rail1"></script> <!-- SOFTM-FILTER-RAIL 날짜:20261118 : 레일을 스크롤 중에도 접근 가능하게 유지 -->
 <!-- SOFTM-LIST-STICKY END -->
 <!-- SOFTM-MAP-STYLE START 날짜:20261005 : 목록 드래그 접힘 높이와 하단 메뉴 배치를 최신 캐시로 적용 -->
-<link rel="stylesheet" href="care-mobile-focus.css?v=20261027-query-status1"> <!-- SOFTM-MOBILE-QUERY-STATE 날짜:20261027 : 닫힌 화면의 검색어 표식 스타일을 이전 캐시 없이 적용 -->
-<script src="care-mobile-focus.js?v=20261027-query-status1"></script> <!-- SOFTM-MOBILE-QUERY-STATE 날짜:20261027 : 검색어 입력·삭제와 접힘 상태의 표식을 즉시 동기화 -->
+<link rel="stylesheet" href="care-mobile-focus.css?v=20261121-type1"> <!-- SOFTM-TYPE-SELECTOR 날짜:20261121 : 모바일 유형 이름과 펼침 화살표를 새 버전으로 적용 -->
+<script src="care-mobile-focus.js?v=20261121-type1"></script> <!-- SOFTM-TYPE-SELECTOR 날짜:20261121 : 모바일 현재 선택 유형과 접근성 안내를 새 버전으로 적용 -->
 <!-- SOFTM-MAP-STYLE END -->
 <script>
 let advancedSearch=null; // SOFTM-ADVANCED-SEARCH 날짜:20260904 : 상세조건 준비 전에도 기본 검색 초기화를 유지

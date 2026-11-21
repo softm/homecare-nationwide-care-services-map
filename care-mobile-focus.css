@@ -95,6 +95,13 @@ body.care-map-page.care-initial-location-loading #mapLoading small { display:blo
  .care-mobile-focus-chips [data-mobile-focus="search"] svg { color:#fff; background:linear-gradient(145deg,#3e91f7,#176bd3); }
  .care-mobile-focus-chips [data-mobile-focus="close"] svg { width:20px; height:20px; padding:0; color:#526a64; background:transparent; }
  .care-mobile-focus-chips span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+ /** SOFTM-TYPE-SELECTOR START 날짜:20261121 : 모바일 선택값이 말줄임으로 사라지지 않게 두 줄과 독립 화살표 사용 */
+ .care-mobile-focus-chips [data-mobile-focus="type"]{min-height:44px;padding:6px 10px;border:1px solid #a8d9c9;gap:8px}
+ .care-mobile-focus-chips [data-mobile-focus="type"]::after{content:"";flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+ .care-mobile-focus-chips [data-focus-type]{white-space:normal;overflow:visible;word-break:keep-all;overflow-wrap:anywhere;line-height:1.3}
+ @media(max-width:440px){.care-mobile-focus-chips [data-mobile-focus="type"] svg{display:none}}
+ @media(max-width:370px){.care-mobile-focus-chips :is([data-mobile-focus="filter"],[data-mobile-focus="search"]) span{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}.care-mobile-focus-chips :is([data-mobile-focus="filter"],[data-mobile-focus="search"]){padding:4px 6px}}
+ /** SOFTM-TYPE-SELECTOR END */
  .care-mobile-focus-chips [aria-expanded="true"] { background:#f0e7ff; color:#6536a2; }
  body.care-mobile-search-open .care-mobile-focus-chips [data-mobile-focus="search"] { background:#e7f1ff; color:#185fba; }
  /** SOFTM-MOBILE-QUERY-STATE START 날짜:20261027 : 검색창이 닫혀도 파란 활성색과 점으로 입력된 검색어를 구분 */

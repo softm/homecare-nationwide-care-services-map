@@ -11,6 +11,21 @@ import {recipientMatching} from './care-recipient-model.mjs';
 
 const $ = id => document.getElementById(id);
 const labels = { daycare: '주·야간보호센터', facility: '요양원·공동생활가정', 'home-care': '방문요양센터', 'home-nursing': '방문간호센터', 'home-bath': '방문목욕기관', 'short-stay': '단기보호센터', 'welfare-equipment': '복지용구사업소', dementia: '치매전담형 기관', 'nursing-hospital': '요양병원' };
+/** SOFTM-ANALYSIS-TYPES START 날짜:20261121 : 이름만으로 판단하기 어려운 돌봄 유형을 이용 상황과 함께 선택 */
+const typeDescriptions = {daycare:'낮 동안 센터에서 돌봄',facility:'시설에 입소해 생활하며 돌봄','home-care':'집으로 방문해 일상생활 도움','home-nursing':'집으로 방문하는 간호','home-bath':'집에서 받는 목욕 지원','short-stay':'일정 기간만 시설에서 돌봄','welfare-equipment':'보행기·휠체어 등 보조용품',dementia:'치매전담 서비스를 제공하는 기관','nursing-hospital':'입원하며 진료와 치료'};
+function syncTypeChoices() {
+    $('analysisTypeChoices').querySelectorAll('input').forEach(input => { input.checked = input.value === $('analysisType').value; });
+}
+function renderTypeChoices() {
+    $('analysisTypeChoices').innerHTML = Object.entries(labels).map(([type,label]) => `<label class="analysis-type-choice"><input type="radio" name="careTypeChoice" value="${type}" aria-describedby="analysis-type-${type}"><span><strong>${label}</strong><small id="analysis-type-${type}">${typeDescriptions[type]}</small></span></label>`).join('');
+    syncTypeChoices();
+    $('analysisTypeChoices').addEventListener('input', event => {
+        const input = event.target.closest('input[name="careTypeChoice"]'); if (!input) return;
+        $('analysisType').value = input.value;
+        $('analysisType').dispatchEvent(new Event('change', {bubbles:true}));
+    });
+}
+/** SOFTM-ANALYSIS-TYPES END */
 const supportedGroups = new Set(['dementia', 'cognitive', 'first', 'respite', 'integrated', 'pilot']);
 const validPoint = p => p && Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180;
 const memory = new Map();
@@ -22,12 +37,12 @@ let originController; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 주소를 직�
 let recipientProfile=null,recipientApplied=false,recipientOwner=null,recipientGeneration=0;
 function renderRecipient() {
     const host=$('analysisRecipient');
-    if(!recipientProfile){host.innerHTML='<strong>가족 상황에 맞는 조건을 준비하세요</strong><p>보호자 계정에 관계·성별·돌봄 상태를 저장하면 맞춤 조건과 상담 질문에 적용할 수 있어요.</p><a href="care-account.html#careRecipient">돌봄 대상자 정보 입력 →</a>';host.classList.remove('active');return;}
+    if(!recipientProfile){host.innerHTML='<div><span class="analysis-optional">선택 사항</span><strong>저장한 대상자 정보로 더 쉽게 찾아요</strong><p>관계·성별·돌봄 상태를 조건과 상담 질문에 적용해요. 입력 없이도 찾을 수 있어요.</p></div><a class="analysis-recipient-button" href="care-account.html?return=care-account.html%23careRecipient#careRecipient">돌봄 대상자 정보 입력 <span aria-hidden="true">→</span></a>';host.classList.remove('active');return;} // SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 선택 입력을 분명히 알리고 실제 대상자 편집으로 이어지는 버튼 강조
     const matching=recipientMatching(recipientProfile,$('analysisType').value),available=criteriaFor($('analysisType').value);
     const applied=available.filter(item=>matching.criteria.includes(item.id));
     host.classList.toggle('active',recipientApplied);
-    host.innerHTML=`<strong>저장한 돌봄 대상자</strong><p>${esc(recipientSummary(recipientProfile))}</p><p>공개 조건: ${esc(applied.map(item=>item.label).join(' · ')||'현재 유형에서 자동 적용할 공개 조건이 없어요.')}</p><p>이동·재활·간호 지원과 성별별 이용 가능 여부는 상담 질문으로 확인합니다.</p><div class="hc-actions"><button type="button" id="applyRecipient" aria-pressed="${recipientApplied}">${recipientApplied?'대상자 조건 적용 중 · 해제':'대상자 조건 적용'}</button><a href="care-account.html#careRecipient">대상자 정보 수정 →</a></div><p class="hc-help">대상자 원문과 보호자 연락처는 가족 공유 링크에 포함하지 않습니다. 상담 기록에 저장한 일반 질문은 공유 항목에 포함될 수 있습니다.</p>`;
-    $('applyRecipient').onclick=()=>{recipientApplied=!recipientApplied;invalidate(recipientApplied?'대상자 조건을 적용했습니다. 한 번에 분석을 눌러 주세요.':'대상자 조건 적용을 해제했습니다.');renderRecipient();updateConditionSummary();};
+    host.innerHTML=`<strong>저장한 돌봄 대상자</strong><p>${esc(recipientSummary(recipientProfile))}</p><p>공개 조건: ${esc(applied.map(item=>item.label).join(' · ')||'현재 유형에서 자동 적용할 공개 조건이 없어요.')}</p><p>이동·재활·간호 지원과 성별별 이용 가능 여부는 상담 질문으로 확인합니다.</p><div class="hc-actions"><button type="button" id="applyRecipient" class="analysis-recipient-button" aria-pressed="${recipientApplied}">${recipientApplied?'대상자 조건 적용 중 · 해제':'대상자 조건 적용'}</button><a class="analysis-recipient-button secondary" href="care-account.html#careRecipient">대상자 정보 수정 →</a></div><p class="hc-help">대상자 원문과 보호자 연락처는 가족 공유 링크에 포함하지 않습니다. 상담 기록에 저장한 일반 질문은 공유 항목에 포함될 수 있습니다.</p>`; // SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 저장된 대상자의 적용·수정도 명확한 버튼으로 제공
+    $('applyRecipient').onclick=()=>{recipientApplied=!recipientApplied;invalidate(recipientApplied?'대상자 조건을 적용했습니다. 추천 후보 보기를 눌러 주세요.':'대상자 조건 적용을 해제했습니다.');renderRecipient();updateConditionSummary();};
 }
 async function loadRecipient() {
     const generation=++recipientGeneration;
@@ -66,6 +81,10 @@ function setStep(next, { push = false, focus = true } = {}) {
         next = current ? 'candidates' : 'conditions';
     }
     currentStep = next; document.body.dataset.analysisStep = next;
+    /** SOFTM-ANALYSIS-GUIDE START 날짜:20261121 : 단계와 선택 수에 맞춰 바로 다음 행동을 안내 */
+    const nextAction = {conditions:'아래에서 돌봄 유형을 고르고 위치·조건을 확인한 뒤, ‘추천 후보 보기’를 누르세요.',candidates:selected.length<2?'후보에서 비교할 기관을 2곳 이상 담아주세요. 한 번에 최대 3곳을 비교할 수 있어요.':`비교할 기관을 골랐어요. 아래 ‘${selected.length}곳 비교하기’ 버튼으로 차이를 확인하세요.`,compare:'기관별 차이와 확인할 항목을 살펴본 뒤, ‘상담 질문 준비’를 누르세요.',prepare:'질문을 확인하고 기관별 ‘답변·방문 기록 이어가기’를 눌러 기록하세요. 저장한 기록은 가족과 공유할 수 있어요.'};
+    $('analysisNextAction').querySelector('span').textContent = nextAction[next];
+    /** SOFTM-ANALYSIS-GUIDE END */
     document.querySelectorAll('button[data-analysis-step]').forEach(button => {
         const step = button.dataset.analysisStep;
         button.disabled = step === 'candidates' ? !current : step === 'compare' ? !current || selected.length < 2 : step === 'prepare' ? !current || !selected.length : false;
@@ -79,6 +98,7 @@ function setStep(next, { push = false, focus = true } = {}) {
 }
 function updateConditionSummary() {
     const type = $('analysisType').value, selected = [...$('analysisCriteria').querySelectorAll('input:checked')].map(input => input.nextElementSibling?.textContent || input.value);
+    $('analysisPreferenceCount').textContent = type === 'nursing-hospital' ? '위치로 확인' : selected.length ? `${selected.length}개 선택` : '선택 안 함'; // SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 저장 조건 복원 시에도 펼친 조건의 실제 선택 개수를 표시
     if(recipientApplied)selected.push(...criteriaFor(type).filter(item=>recipientMatching(recipientProfile,type).criteria.includes(item.id)).map(item=>`${item.label} (대상자)`)); // SOFTM-GUARDIAN 날짜:20261120 : 자동 연결된 조건도 요약에서 숨기지 않음
     $('analysisSummaryRegion').textContent = $('analysisAddress').value.trim() || '주소 확인 전';
     $('analysisSummaryType').textContent = labels[type] || '시설 유형 확인 전';
@@ -100,8 +120,12 @@ function criteriaFor(type) {
 function renderCriteria() {
     const type = $('analysisType').value;
     $('analysisCriteria').innerHTML = '<legend class="analysis-sr">희망 조건</legend>' + criteriaFor(type).map(item => `<label><input type="checkbox" value="${esc(item.id)}"><span>${esc(item.label)}</span></label>`).join('');
-    $('analysisCriteria').closest('details').hidden = type === 'nursing-hospital';
-    $('analysisPreferenceCount').textContent = '선택 안 함';
+    /** SOFTM-ANALYSIS-GUIDE START 날짜:20261121 : 유형을 바꾸면 관련 조건을 펼치고 자료가 없는 유형도 이유를 안내 */
+    $('analysisCriteria').closest('details').open = true;
+    $('analysisPreferencesHelp').textContent = type === 'nursing-hospital' ? '요양병원에는 아래 돌봄기관 조건을 적용하지 않아요. 위치로 후보를 확인하고 진료과·간병·비용은 병원에 문의해 주세요.' : '함께 확인하고 싶은 조건을 여러 개 선택할 수 있어요. 선택하지 않아도 후보를 볼 수 있습니다.';
+    syncTypeChoices();
+    /** SOFTM-ANALYSIS-GUIDE END */
+    $('analysisPreferenceCount').textContent = type === 'nursing-hospital' ? '위치로 확인' : '선택 안 함'; // SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 추가 조건이 없는 유형의 상태를 구분
     $('analysisMap').href = `index.html?type=${encodeURIComponent(type)}`;
     updateConditionSummary(); // SOFTM-GUIDED-COMPARE 날짜:20261119 : 유형 변경 즉시 오른쪽 조건 요약을 같은 값으로 갱신
 }
@@ -140,7 +164,7 @@ function showMoreCards() {
 document.addEventListener('visibilitychange', scheduleAnalysisMore);
 document.addEventListener('close', scheduleAnalysisMore, true);
 /** SOFTM-ANALYSIS-AUTOLOAD END */
-function invalidate(message = '입력이 바뀌었습니다. 한 번에 분석을 눌러 새 조건으로 확인해 주세요.') {
+function invalidate(message = '입력이 바뀌었습니다. 추천 후보 보기를 눌러 새 조건으로 확인해 주세요.') {
     generation++; setBusy(false); $('analysisAddressChoices').hidden = true;
     if (current || ! $('analysisResults').hidden) { current = null; $('analysisResults').hidden = true; }
     comparisonSelection = null; setStep('conditions', { focus: false }); updateConditionSummary(); // SOFTM-GUIDED-COMPARE 날짜:20261119 : 조건을 바꾸면 이전 후보 화면을 숨기고 입력 단계로 안전하게 복귀
@@ -373,6 +397,7 @@ async function shareComparison() {
 }
 /** SOFTM-GUIDED-COMPARE END */
 $('analysisType').innerHTML = Object.entries(labels).map(([type, label]) => `<option value="${type}">${label}</option>`).join('');
+renderTypeChoices(); // SOFTM-ANALYSIS-TYPES 날짜:20261121 : 기존 URL·저장 조건 복원 전에 접근 가능한 9개 유형 카드 생성
 const initialType = new URLSearchParams(location.search).get('type');
 $('analysisType').value = Object.hasOwn(labels, initialType) ? initialType : 'daycare'; renderCriteria();
 const savedConditions = sharedConditions();
@@ -394,7 +419,7 @@ originController = createOriginBinding({
         if (state.phase === 'ready') {
             $('analysisAddress').value = state.label; updateConditionSummary(); // SOFTM-GUIDED-COMPARE 날짜:20261119 : 자동 위치 주소도 조건 요약에 즉시 반영
             $('analysisOriginStatus').textContent = `${state.source === 'map' ? '지도에서 보고 있던 위치' : '현재 위치'}가 기본 적용됐습니다. 다른 곳을 원하면 주소를 바꿔 주세요.`;
-            if (!busy && !current) $('analysisStatus').textContent = '기준 위치가 준비됐습니다. 한 번에 분석을 눌러 주세요.'; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 기본값이 채워진 뒤 주소 재입력을 요구하는 안내를 남기지 않음
+            if (!busy && !current) $('analysisStatus').textContent = '기준 위치가 준비됐습니다. 추천 후보 보기를 눌러 주세요.'; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 기본값이 채워진 뒤 주소 재입력을 요구하는 안내를 남기지 않음
         } else if (state.phase === 'loading') $('analysisOriginStatus').textContent = '기준 위치를 자동으로 확인하고 있습니다. 주소를 직접 입력해도 됩니다.';
         else if (state.phase === 'error') $('analysisOriginStatus').textContent = `${state.error} 주소를 직접 입력하거나 현재 위치를 다시 눌러 주세요.`;
         else $('analysisOriginStatus').textContent = '입력한 주소를 기준으로 분석합니다.';

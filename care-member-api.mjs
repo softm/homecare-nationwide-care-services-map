@@ -35,9 +35,9 @@ export async function finishSocial(){
  if(!proof||Date.now()-proof.time>12*60*1000)throw new Error('로그인을 시작한 기기와 화면에서 다시 시도해 주세요.');
  const result=await api('/api/auth/oauth/exchange',{method:'POST',body:{code:params.get('code'),verifier:proof.verifier}});
  sessionStorage.removeItem('careOAuthProof');acceptSession(result);
- return result.user.onboarding==='complete'?safeReturn(proof.returnTo):'care-account.html?view=complete';
+ return result.user.onboarding==='complete'?safeReturn(proof.returnTo):`care-account.html?view=complete&return=${encodeURIComponent(safeReturn(proof.returnTo))}`; // SOFTM-RECIPIENT-RETURN 날짜:20261121 : SNS 추가 정보 완료 후에도 사용자가 시작한 대상자 입력으로 복귀
 }
-export function safeReturn(value){try{const url=new URL(value||'care-account.html',location.href);return url.origin===location.origin&&/\/(?:index|care-[\w-]+|institution-[\w-]+)\.html$/.test(url.pathname)?url.pathname+url.search:'care-account.html';}catch{return 'care-account.html';}}
+export function safeReturn(value){try{const url=new URL(value||'care-account.html',location.href);return url.origin===location.origin&&/\/(?:index|care-[\w-]+|institution-[\w-]+)\.html$/.test(url.pathname)?url.pathname+url.search+(url.pathname.endsWith('/care-account.html')&&url.hash==='#careRecipient'?'#careRecipient':''):'care-account.html';}catch{return 'care-account.html';}} // SOFTM-RECIPIENT-RETURN 날짜:20261121 : 로그인 뒤 명시적인 대상자 입력 위치만 보존하며 외부 주소와 기타 해시는 계속 차단
 export async function saveBlob(blob,name){
  if(typeof globalThis.hannunSaveFile==='function'){
   if(blob.size>10*1024*1024)throw new Error('10MB 이하 파일을 저장할 수 있습니다.');

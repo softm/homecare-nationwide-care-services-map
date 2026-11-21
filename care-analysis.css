@@ -58,3 +58,76 @@
 @media(max-width:720px){.analysis-main{padding:26px 16px 80px}.analysis-top{min-height:62px;padding:11px 14px}.analysis-brand small{display:none}.analysis-brand-mark{width:36px;height:36px}.analysis-top nav a{min-height:40px;padding:0 11px;font-size:13px}.analysis-top nav a:last-child{display:none}.analysis-intro{display:block;margin-bottom:20px}.analysis-intro h1{font-size:31px}.analysis-intro>div>p:last-child{font-size:15px}.analysis-privacy-note{display:block;max-width:none;margin-top:14px}.analysis-stepper{margin:0 -16px 20px;padding:0 16px;overflow:auto;scrollbar-width:none}.analysis-stepper ol{display:flex;gap:8px;width:max-content}.analysis-stepper li{width:146px}.analysis-stepper button{min-height:72px;grid-template-columns:31px 1fr;padding:10px 12px}.analysis-stepper button>span{width:31px;height:31px;border-radius:10px}.analysis-stepper button small{font-size:11px}.analysis-condition-card>header,.analysis-form{padding:20px}.analysis-condition-card>header h2{font-size:23px}.analysis-inputs{grid-template-columns:1fr}.analysis-condition-summary{display:block;padding:20px}.analysis-condition-summary dl{grid-template-columns:1fr 1fr}.analysis-candidate-count{margin-top:16px}.analysis-submit .analysis-primary{order:1;width:100%;margin:0}.analysis-submit span{order:0;width:100%}.analysis-stage-heading{display:block}.analysis-stage-heading button{margin-top:12px}.analysis-stage-heading h2{font-size:26px}.analysis-summary{grid-template-columns:1fr 1fr}.analysis-summary-main{grid-column:1/-1}.analysis-summary>div{padding:16px}.analysis-summary-stat:last-child{grid-column:1/-1}.analysis-bars{grid-template-columns:1fr}.analysis-section-head{display:block}.analysis-picks{margin-top:12px}.analysis-card{display:block}.analysis-card>.care-photo-figure,.analysis-card .care-photo-image{height:210px;min-height:210px}.analysis-card-placeholder{min-height:150px}.analysis-card-body{display:block;padding:18px}.analysis-card-heading{display:block}.analysis-badges{justify-content:flex-start;margin-bottom:8px}.analysis-evidence,.analysis-verify{margin-top:11px}.analysis-card-actions{display:grid;grid-template-columns:1fr 1fr}.analysis-card-actions>*{min-width:0}.analysis-card-actions>button:first-child{grid-column:1/-1}.analysis-compare-tray{bottom:8px;grid-template-columns:1fr auto;gap:10px;padding:12px}.analysis-compare-tray-copy{grid-column:1}.analysis-compare-tray-list{grid-column:1/-1;grid-row:2}.analysis-compare-tray>.analysis-primary{grid-column:2;grid-row:1}.analysis-consultation-side{grid-template-columns:1fr}.analysis-session-note{grid-column:auto}.analysis-source{margin-bottom:130px}}
 @media print{.analysis-top,.analysis-intro,.analysis-stepper,.analysis-condition-layout,.analysis-status,.analysis-compare-tray,.analysis-stage-heading button,.analysis-consultation-side button,.analysis-consultation-side a,.analysis-footer{display:none!important}.analysis-main{max-width:none;padding:0}.analysis-stage-panel[hidden]{display:none!important}.analysis-consultation-layout{display:block}.analysis-consultation-card{break-inside:avoid;box-shadow:none}.analysis-question-list input{appearance:none;border:1px solid #222}.analysis-source{margin-bottom:0}}
 /** SOFTM-GUIDED-COMPARE END */
+
+/** SOFTM-ANALYSIS-GUIDE START 날짜:20261121 : 유형·위치·추가 조건의 순서와 현재 단계의 다음 행동을 쉽게 읽도록 구성 */
+.analysis-next-action{display:flex;align-items:start;gap:12px;padding:15px 18px;margin:0 0 24px;border:1px solid #c9e9df;border-left:4px solid #16856b;border-radius:12px;background:#f1fbf7;color:#284e42;font-size:14px;line-height:1.6}
+.analysis-next-action>strong{flex:none;color:#0e6e57}
+.analysis-type-fieldset{min-width:0;padding:0;margin:0 0 28px;border:0}
+.analysis-type-fieldset>legend,.analysis-location-section>h3{font-size:18px;font-weight:750;line-height:1.45;color:#203f34;padding:0;margin:0 0 8px}
+.analysis-type-fieldset>.analysis-note{margin:0 0 14px}
+.analysis-type-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.analysis-page .analysis-type-choice{display:flex;align-items:start;gap:9px;min-width:0;min-height:92px;padding:14px 12px;border:1px solid #d5e2dc;border-radius:13px;background:#fff;cursor:pointer;transition:background .15s,border-color .15s}
+.analysis-page .analysis-type-choice:hover{background:#f5fbf8;border-color:#7bb8a5}
+.analysis-page .analysis-type-choice:has(input:checked){background:#e4f7ef;border-color:#16856b;box-shadow:inset 0 0 0 1px #16856b}
+.analysis-page .analysis-type-choice:focus-within{outline:3px solid #87cdb8;outline-offset:2px}
+.analysis-page .analysis-type-choice input{display:block;flex:0 0 18px;width:18px;height:18px;min-height:18px;min-width:18px;padding:0;margin:2px 0 0;accent-color:#16856b}
+.analysis-type-choice>span{display:grid;gap:5px;min-width:0}
+.analysis-type-choice strong{font-size:14px;line-height:1.4;word-break:keep-all;overflow-wrap:anywhere}
+.analysis-type-choice small{font-size:12px;line-height:1.5;color:#65796f;font-weight:400;word-break:keep-all;overflow-wrap:anywhere}
+.analysis-location-section{padding-top:23px;border-top:1px solid #e2eae7}
+.analysis-location-section .analysis-inputs{grid-template-columns:minmax(0,2fr) minmax(120px,1fr)}
+.analysis-location-section .analysis-address{grid-column:auto}
+.analysis-preferences{margin-top:24px;padding-top:23px}
+.analysis-preferences summary{font-size:18px;line-height:1.45;flex-wrap:wrap}
+.analysis-preferences summary span{font-size:12px;white-space:nowrap;padding:4px 8px;border-radius:6px;background:#eaf5ef;color:#2a6652}
+.analysis-submit>.analysis-primary{display:inline-flex;justify-content:center;align-items:center;gap:12px;font-weight:750;font-size:16px}
+.analysis-page .analysis-recipient{margin:22px 30px 0;padding:20px;border:1px solid #cce8dc;border-radius:14px;background:#f3fbf7}
+.analysis-recipient:has(>.analysis-recipient-button){display:grid;grid-template-columns:1fr;gap:12px}
+.analysis-recipient strong{display:block;font-size:16px;line-height:1.5;color:#203f34}
+.analysis-recipient .analysis-optional{display:inline-block;margin-bottom:6px;font-size:11px;font-weight:700;color:#4e7565}
+.analysis-recipient p{font-size:13px;line-height:1.6;margin:6px 0 0;color:#61766c}
+.analysis-page .analysis-recipient-button{display:inline-flex;align-items:center;justify-content:center;gap:18px;width:max-content;max-width:100%;min-height:46px;padding:11px 18px;border:1px solid #106d53;border-radius:10px;background:#106d53;color:#fff;font-size:14px;font-weight:750;line-height:1.5;text-decoration:none;box-shadow:0 3px 8px #164b3214}
+.analysis-page .analysis-recipient-button:hover{background:#08553e;color:#fff;border-color:#08553e}
+.analysis-page .analysis-recipient-button.secondary{background:#fff;color:#106d53;box-shadow:none}
+.analysis-recipient .hc-actions{margin-top:14px}
+.analysis-brand-mark{background:transparent;border-radius:0;object-fit:contain}
+@media(max-width:720px){
+ .analysis-stepper{margin:0 0 12px;padding:0;overflow:visible}
+ .analysis-stepper ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:auto;gap:8px}
+ .analysis-stepper li{width:auto}
+ .analysis-stepper button{min-height:64px;padding:10px;column-gap:8px;grid-template-columns:28px minmax(0,1fr)}
+ .analysis-stepper button>span{width:28px;height:28px;border-radius:9px}
+ .analysis-stepper button strong{font-size:13px}
+ .analysis-stepper button small{font-size:11px}
+ .analysis-next-action{display:block;padding:12px 14px;font-size:13px}
+ .analysis-next-action>strong{display:block;margin-bottom:3px}
+ .analysis-type-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .analysis-page .analysis-type-choice{padding:12px 10px;gap:7px;min-height:96px}
+ .analysis-type-choice strong{font-size:13px}
+ .analysis-page .analysis-recipient{margin:18px 20px 0;padding:16px}
+ .analysis-page .analysis-recipient-button{width:100%;gap:10px;padding-inline:12px}
+ .analysis-location-section .analysis-inputs{grid-template-columns:1fr}
+ .analysis-type-fieldset>legend,.analysis-location-section>h3,.analysis-preferences summary{font-size:16px}
+}
+@media(max-width:360px){.analysis-condition-card>header,.analysis-form{padding:16px}.analysis-page .analysis-recipient{margin-inline:16px}.analysis-type-choice small{font-size:11px}.analysis-page .analysis-type-choice{padding:11px 8px}}
+/** SOFTM-ANALYSIS-GUIDE END */
+/** SOFTM-ANALYSIS-GUIDE START 날짜:20261121 : 선택 입력이 필수 단계처럼 보이지 않도록 PC는 옆에, 모바일은 간결한 사전 안내로 표시 */
+.analysis-condition-layout{grid-template-areas:"form recipient" "form summary";grid-template-rows:auto 1fr}
+.analysis-condition-card{grid-area:form}
+.analysis-condition-summary{grid-area:summary}
+.analysis-page #analysisRecipient{grid-area:recipient;margin:0;padding:20px}
+.analysis-page #analysisRecipient .analysis-recipient-button{width:100%}
+@media(max-width:1000px){.analysis-condition-layout{grid-template-areas:"recipient" "form" "summary";grid-template-rows:auto}.analysis-page #analysisRecipient{padding:18px}}
+/** SOFTM-ANALYSIS-GUIDE END */
+/** SOFTM-ANALYSIS-GUIDE START 날짜:20261121 : 작은 화면에서 안내가 선택을 밀어내지 않고 다음 단계 버튼이 온전한 한 줄을 차지하도록 보정 */
+.analysis-preferences summary{position:relative;padding-right:28px}
+.analysis-preferences summary:after{position:absolute;right:0;top:0}
+@media(max-width:720px){
+ .analysis-intro h1{font-size:27px}
+ .analysis-privacy-note{margin-top:10px;padding:0;border:0;border-radius:0;background:none;font-size:11px}
+ .analysis-page .analysis-submit{flex-direction:column;align-items:stretch;gap:12px}
+ .analysis-page .analysis-submit>.analysis-primary{width:100%;margin:0;order:1}
+ .analysis-page .analysis-submit>span{flex:none;width:100%;order:0}
+ .analysis-preferences summary span{margin-left:0}
+}
+/** SOFTM-ANALYSIS-GUIDE END */

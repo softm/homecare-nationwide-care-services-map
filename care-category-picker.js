@@ -61,7 +61,13 @@
    if(id===type)button.setAttribute('aria-current','true');
    button.onclick=()=>selectType(id);menu.append(button);
   }
-  const toggle=document.createElement('button');toggle.type='button';toggle.className='care-type-toggle';toggle.textContent='유형 ▾';toggle.setAttribute('aria-label','돌봄 유형 선택');toggle.setAttribute('aria-controls','careTypePanel');toggle.setAttribute('aria-expanded','false');header.append(menu,toggle);document.body.append(header); // SOFTM-TYPE-DEFAULT 날짜:20260914 : 유형 선택 기능임을 짧게 알리고 모바일 상단 공간을 확보
+  /** SOFTM-TYPE-SELECTOR START 날짜:20261121 : 현재 기관 유형과 변경 가능한 조작부를 한 버튼에서 읽을 수 있도록 표시 */
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='care-type-toggle';
+  const value=document.createElement('span');value.className='care-type-value';value.textContent=type?menuLabel(type):'유형 선택';
+  toggle.append(value);toggle.insertAdjacentHTML('beforeend','<svg class="care-type-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>');
+  toggle.setAttribute('aria-label',type?`현재 ${menuLabel(type)} · 기관 유형 변경`:'기관 유형 선택');toggle.title=toggle.getAttribute('aria-label');
+  toggle.setAttribute('aria-controls','careTypePanel');toggle.setAttribute('aria-expanded','false');header.append(menu,toggle);document.body.append(header);
+  /** SOFTM-TYPE-SELECTOR END */
   /** SOFTM-CATEGORY-BACK START 날짜:20260911 : 이전 동작을 유지한 채 카테고리 스크롤 밖으로 옮겨 모바일에서도 상단에서 복귀 */
   const back=document.querySelector('.care-workspace-back');
   if(back){
@@ -127,6 +133,7 @@
    const button=document.createElement('a');button.href=destination(location.href,id).href;button.className='care-type-option '+color;button.dataset.type=id;button.hidden=false; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 유형 패널을 열면 9개 기관 유형을 처음부터 모두 표시
    button.innerHTML=`<span class="care-type-icon" aria-hidden="true">${icon}</span><span><strong>${title}</strong><small>${official}</small><span>${description}</span></span><span aria-hidden="true">›</span>`;
    button.classList.toggle('care-type-simple',title===official); // SOFTM-TYPE-SPACE 날짜:20261007 : 같은 유형명을 두 줄로 반복하지 않아 선택 목록의 공간을 확보
+   if(id===type){button.setAttribute('aria-current','true');button.lastElementChild.textContent='✓';button.lastElementChild.className='care-type-selected';button.title='현재 선택된 유형';} // SOFTM-TYPE-SELECTOR 날짜:20261121 : 선택창을 열어도 현재 검색 중인 유형을 잃지 않도록 체크 표시
    button.onclick=event=>{try{selectType(id);event.preventDefault();}catch(error){console.error(error);}};list.append(button); // SOFTM-TYPE-MENU 날짜:20260911 : 현재 상태를 보존해 전환하되 오류가 나면 링크의 기본 이동을 사용
    /** SOFTM-TYPE-LINK END */
   }

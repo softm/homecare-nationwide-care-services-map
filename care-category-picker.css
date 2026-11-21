@@ -123,3 +123,7 @@ body.care-type-open .care-type-map-overlay .care-type-simple strong { font-size:
 body.care-type-open .care-type-map-overlay .care-type-simple small { display:none; }
 @media(min-width:600px) { body.care-type-open .care-type-map-overlay .care-type-options { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 /** SOFTM-TYPE-SPACE END */
+/** SOFTM-TYPE-SELECTOR START 날짜:20261121 : 현재 검색 중인 유형을 선택창에서도 테두리와 체크로 구분 */
+body .care-type-option[aria-current="true"]{background:#e1f8f2;border-color:#23876b;box-shadow:inset 0 0 0 1px #23876b}
+.care-type-selected{color:#0e6e57;font-size:17px;font-weight:800}
+/** SOFTM-TYPE-SELECTOR END */

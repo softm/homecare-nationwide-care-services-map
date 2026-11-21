@@ -9,7 +9,7 @@
 <!-- SOFTM-CARE-ANALYSIS START 날짜:20260911 : 집 주변의 선택 근거와 상담 준비를 한 화면에서 제공 -->
 <!-- SOFTM-ANALYSIS-STITCH START 날짜:20260915 : 지도와 동일한 서체와 디자인을 캐시 갱신으로 적용 -->
 <link rel="stylesheet" href="stitch-fonts.css?v=20260914-1">
-<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-analysis.css?v=20261119-guide2"><link rel="stylesheet" href="care-comparison-workspace.css?v=20261119-guide1"> <!-- SOFTM-CONSULTATION-TRAY 날짜:20261119 : 상담 질문 단계의 비교 바 겹침 보정을 이전 캐시 없이 적용 --><!-- SOFTM-GUIDED-COMPARE 날짜:20261119 : 조건부터 상담 준비까지 같은 카드와 세 곳 비교표를 적용 --><!-- SOFTM-ANALYSIS-STITCH END -->
+<link rel="stylesheet" href="care-theme.css"><link rel="stylesheet" href="care-analysis.css?v=20261121-guide3"><link rel="stylesheet" href="care-comparison-workspace.css?v=20261119-guide1"> <!-- SOFTM-CONSULTATION-TRAY 날짜:20261119 : 상담 질문 단계의 비교 바 겹침 보정을 이전 캐시 없이 적용 --><!-- SOFTM-GUIDED-COMPARE 날짜:20261119 : 조건부터 상담 준비까지 같은 카드와 세 곳 비교표를 적용 --><!-- SOFTM-ANALYSIS-STITCH END -->
 <link rel="stylesheet" href="care-photos.css?v=20260911-gallery1"><link rel="stylesheet" href="photo-viewer.css?v=20260904-2">
 <script src="care-data.js" defer></script><script src="advanced-search.js" defer></script>
 <script src="region-bounds.js" defer></script><script src="viewport-regions.js" defer></script>
@@ -18,7 +18,7 @@
 <script src="naver-geocoder.js" defer></script><script src="nhis-static-data.js" defer></script>
 <script src="map-experience.js?v=20260911-analysis1" defer></script><script src="photo-viewer.js?v=20260911-gallery1" defer></script>
 <script src="care-compare-evidence.js?v=20261118-policy1" defer></script><script src="care-comparison-workspace.js?v=20261119-guide1" defer></script><script src="care-basket-share.js?v=20261119-guide1" defer></script><!-- SOFTM-GUIDED-COMPARE 날짜:20261119 : 맞춤분석과 지도 비교가 같은 평가연도·세 곳 선택·공개 기관 공유 정책을 사용 -->
-<script type="module" src="care-analysis.js?v=20261120-guardian1"></script> <!-- SOFTM-GUIDED-COMPARE 날짜:20261119 : 4단계 흐름과 상담 준비를 이전 캐시 없이 적용 -->
+<script type="module" src="care-analysis.js?v=20261121-guide3"></script> <!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 유형 카드·자동 펼침·단계 안내를 새 버전으로 적용 -->
 <!-- SOFTM-CARE-ANALYSIS END -->
 <!-- SOFTM-BRAND-ICON START 날짜:20260913 : 모든 진입 페이지의 탭과 홈 화면 아이콘을 같은 브랜드로 연결 -->
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 64x64">
@@ -29,29 +29,34 @@
 <!-- SOFTM-PRETENDARD 날짜:20260916 : 로컬 가변 서체를 타이포그래피 규칙보다 먼저 연결 -->
 <link rel="stylesheet" href="pretendard-fonts.css?v=1.3.9">
 <link rel="stylesheet" href="care-typography.css?v=20260916-pretendard1">
-<link rel="stylesheet" href="care-service.css?v=20261121-layout1"><!-- SOFTM-LAYOUT-CACHE 날짜:20261121 : 회원 선택·지도 메뉴 겹침 수정 스타일을 새 버전으로 적용 --><script type="module" src="care-shell.mjs"></script><!-- SOFTM-MEMBERS 날짜:20261120 : 기존 화면에 공용 탐색·계정·디자인 연결 -->
+<link rel="stylesheet" href="care-service.css?v=20261121-guide3"><!-- SOFTM-LAYOUT-CACHE 날짜:20261121 : 회원 선택·지도 메뉴 겹침 수정 스타일을 새 버전으로 적용 --><script type="module" src="care-shell.mjs"></script><!-- SOFTM-MEMBERS 날짜:20261120 : 기존 화면에 공용 탐색·계정·디자인 연결 -->
 </head>
 <body class="analysis-page" data-analysis-step="conditions">
 <!-- SOFTM-GUIDED-COMPARE START 날짜:20261119 : 검색보다 선택 근거를 먼저 준비하도록 조건·후보·비교·상담의 네 단계를 한 흐름으로 제공 -->
-<header class="analysis-top"><a href="index.html" class="analysis-brand"><span class="analysis-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"></path><path d="M8.5 12h2l1-2 1.5 4 1-2h1.5"></path></svg></span><span>돌봄한눈<small>가족을 위한 기관 선택 안내</small></span></a><nav aria-label="주요 메뉴"><a href="index.html?type=daycare" id="analysisMap">지도에서 찾기</a><a href="about.html">서비스 소개</a></nav></header>
+<header class="analysis-top"><a href="index.html" class="analysis-brand"><img class="analysis-brand-mark" src="assets/brand/dolbom-hannun-icon-20261007.png" width="36" height="36" alt=""><span>돌봄한눈<small>가족을 위한 기관 선택 안내</small></span></a><nav aria-label="주요 메뉴"><a href="index.html?type=daycare" id="analysisMap">지도에서 찾기</a><a href="about.html">서비스 소개</a></nav></header><!-- SOFTM-BRAND-CONSISTENCY 날짜:20261121 : 공용 헤더 적용 전에도 지도와 같은 대표 아이콘을 표시 -->
 <main class="analysis-main">
-<section class="analysis-intro" aria-labelledby="analysisPageTitle"><div><p>맞춤 비교</p><h1 id="analysisPageTitle">첫 기관 선택의 막막함을 줄입니다.</h1><p>조건을 입력하고 공개 근거를 확인한 뒤, 최대 세 곳을 비교해 상담 질문까지 준비하세요.</p></div><span class="analysis-privacy-note">주소와 선택 조건은 공유 링크에 포함하지 않습니다.</span></section>
+<section class="analysis-intro" aria-labelledby="analysisPageTitle"><div><p>맞춤 찾기</p><h1 id="analysisPageTitle">우리 가족에게 맞는 돌봄기관 찾기</h1><p>필요한 돌봄과 위치를 고르면, 후보 비교부터 상담 준비까지 이어집니다.</p></div><span class="analysis-privacy-note">주소와 선택 조건은 공유 링크에 포함하지 않습니다.</span></section><!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 추상적인 소개 대신 이 화면에서 할 일을 먼저 안내 -->
 <nav class="analysis-stepper" aria-label="맞춤 비교 진행 단계"><ol><li><button type="button" data-analysis-step="conditions" aria-current="step"><span>1</span><strong>조건 입력</strong><small>지역·돌봄·거리</small></button></li><li><button type="button" data-analysis-step="candidates" disabled><span>2</span><strong>후보 검토</strong><small>근거·확인사항</small></button></li><li><button type="button" data-analysis-step="compare" disabled><span>3</span><strong>시설 비교</strong><small>최대 3곳</small></button></li><li><button type="button" data-analysis-step="prepare" disabled><span>4</span><strong>상담 준비</strong><small>질문·가족 공유</small></button></li></ol></nav>
+<p class="analysis-next-action" id="analysisNextAction" role="status"><strong>지금 할 일</strong><span>아래에서 돌봄 유형을 고르고 위치·조건을 확인한 뒤, ‘추천 후보 보기’를 누르세요.</span></p><!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 현재 단계에서 다음 단계로 넘어가는 구체적인 행동을 항상 안내 -->
 <section class="analysis-condition-layout" id="analysisConditionStage" aria-labelledby="analysisConditionTitle">
-<div class="analysis-condition-card"><header><span>시설 찾기 · 1단계</span><h2 id="analysisConditionTitle" tabindex="-1">돌봄 조건을 알려주세요</h2><p>필수 조건부터 입력하면 가족 상황에 맞는 시설 후보를 찾아드려요.</p></header>
-<!-- SOFTM-GUARDIAN 날짜:20261120 : 조건 입력에서 대상자 적용 여부를 명시적으로 선택 -->
-<section class="analysis-recipient" id="analysisRecipient" aria-label="돌봄 대상자 조건"><p role="status">대상자 정보를 확인하고 있어요.</p></section>
+<div class="analysis-condition-card"><header><span>1 / 4단계 · 조건 입력</span><h2 id="analysisConditionTitle" tabindex="-1">어떤 돌봄이 필요하신가요?</h2><p>유형 → 위치 → 원하는 조건 순서로 선택해 주세요.</p></header><!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 입력 순서와 전체 진행 위치를 함께 표시 -->
 <form id="analysisForm" class="analysis-form">
+<!-- SOFTM-ANALYSIS-TYPES START 날짜:20261121 : 유형 이름과 이용 상황을 바로 비교할 수 있는 선택 카드와 기존 검색 상태 연결 -->
+<fieldset class="analysis-type-fieldset"><legend>먼저, 필요한 돌봄을 골라주세요</legend><p id="analysisTypeHelp" class="analysis-note">한 가지를 선택하세요. 유형을 바꾸면 아래 조건도 함께 바뀝니다.</p><div id="analysisTypeChoices" class="analysis-type-choices"></div></fieldset>
+<select id="analysisType" hidden aria-hidden="true" tabindex="-1"><option value="daycare">주·야간보호센터</option></select>
+<section class="analysis-location-section" aria-labelledby="analysisLocationTitle"><h3 id="analysisLocationTitle">다음, 어디에서 찾을까요?</h3>
 <div class="analysis-inputs"><label class="analysis-address">기준 주소<input id="analysisAddress" required maxlength="160" autocomplete="off" placeholder="예: 성남시 분당구 정자일로 95" aria-describedby="analysisAddressHelp"></label>
-<label>찾는 돌봄<select id="analysisType"><option value="daycare">주·야간보호센터</option></select></label>
 <label>집 주변 범위<select id="analysisRadius"><option value="1">직선 1km</option><option value="3" selected>직선 3km</option><option value="5">직선 5km</option><option value="10">직선 10km</option></select></label></div>
+<!-- SOFTM-ANALYSIS-TYPES END -->
 <!-- SOFTM-ANALYSIS-ORIGIN START 날짜:20260911 : 자동 위치의 출처와 직접 주소 변경을 함께 제공 -->
 <div class="analysis-origin-row"><p id="analysisOriginStatus" class="analysis-note" role="status">기준 위치를 자동으로 확인하고 있습니다.</p><button id="analysisLocate" type="button">현재 위치</button></div>
 <p id="analysisAddressHelp" class="analysis-note">다른 곳을 분석하려면 도로명·건물번호를 입력해 주세요.</p>
+</section><!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 위치 입력을 유형 선택과 구분해 순서대로 확인 -->
 <!-- SOFTM-ANALYSIS-ORIGIN END -->
-<details class="analysis-preferences"><summary>함께 확인하고 싶은 조건 <span id="analysisPreferenceCount">선택 안 함</span></summary><p>원하는 항목만 고르세요. 조건을 고르지 않아도 거리·공개정보·상담 질문을 함께 분석합니다.</p><fieldset id="analysisCriteria"><legend class="analysis-sr">희망 조건</legend></fieldset></details>
-<div class="analysis-submit"><button id="analysisRun" class="analysis-primary" type="submit">추천 후보 보기</button><button id="analysisCancel" type="button" hidden>분석 취소</button><span>이동시간·송영·빈자리는 기관에 직접 확인합니다.</span></div>
+<details class="analysis-preferences" open><summary>마지막으로, 원하는 조건을 골라주세요 <span id="analysisPreferenceCount">선택 안 함</span></summary><p id="analysisPreferencesHelp">함께 확인하고 싶은 조건을 여러 개 선택할 수 있어요. 선택하지 않아도 후보를 볼 수 있습니다.</p><fieldset id="analysisCriteria"><legend class="analysis-sr">희망 조건</legend></fieldset></details><!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 조건을 처음부터 펼쳐 선택 가능한 항목을 발견할 수 있게 안내 -->
+<div class="analysis-submit"><button id="analysisRun" class="analysis-primary" type="submit">추천 후보 보기 →</button><button id="analysisCancel" type="button" hidden>분석 취소</button><span>다음 단계에서 후보를 담아 비교할 수 있어요.</span></div><!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : 실행 버튼이 다음 단계로 이어진다는 점을 명확히 안내 -->
 </form></div>
+<section class="analysis-recipient" id="analysisRecipient" aria-label="돌봄 대상자 조건"><p role="status">대상자 정보를 확인하고 있어요.</p></section><!-- SOFTM-ANALYSIS-GUIDE 날짜:20261121 : PC는 입력 옆에, 모바일은 입력 위에 대상자 정보 버튼 배치 -->
 <aside class="analysis-condition-summary" aria-labelledby="analysisConditionSummaryTitle"><h2 id="analysisConditionSummaryTitle">적용 조건 요약</h2><dl><div><dt>희망 지역</dt><dd id="analysisSummaryRegion">주소 확인 전</dd></div><div><dt>시설 유형</dt><dd id="analysisSummaryType">주·야간보호센터</dd></div><div><dt>거리 범위</dt><dd id="analysisSummaryRadius">직선 3km</dd></div><div><dt>추가 조건</dt><dd id="analysisSummaryCriteria">선택 안 함</dd></div></dl><div class="analysis-candidate-count"><span>현재 조건의 후보</span><strong id="analysisSummaryCandidates">분석 전</strong></div><p>입력한 조건은 후보 확인에만 사용되며 품질 순위를 만들지 않습니다.</p></aside>
 </section>
 <section id="analysisAddressChoices" class="analysis-address-choices" aria-labelledby="analysisAddressChoiceTitle" hidden><h2 id="analysisAddressChoiceTitle">분석할 주소를 선택해 주세요</h2><p>같은 검색어에 여러 주소가 있어요. 선택하면 바로 분석합니다.</p><div id="analysisAddressOptions"></div></section>

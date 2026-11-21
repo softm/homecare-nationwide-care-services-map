@@ -32,7 +32,7 @@
         /** SOFTM-MOBILE-SEARCH-MENU START 날짜:20261027 : 검색창과 도구를 접어도 입력한 검색어의 존재와 복귀 경로를 잃지 않음 */
         ui.innerHTML = `<div class="care-mobile-focus-top">
             <div class="care-mobile-focus-chips" role="toolbar" aria-label="지도 검색 도구">
-                <button type="button" data-mobile-focus="type" aria-haspopup="dialog">${svg('type')}<span data-focus-type>유형 선택 ▾</span></button>
+                <button type="button" data-mobile-focus="type" aria-haspopup="dialog">${svg('type')}<span data-focus-type>유형 선택</span></button><!-- SOFTM-TYPE-SELECTOR 날짜:20261121 : 유형명과 별도의 펼침 화살표를 사용하여 긴 이름도 확인 가능 -->
                 <button type="button" data-mobile-focus="filter" aria-expanded="false">${svg('filter')}<span data-focus-filter>필터</span></button>
                 <button type="button" data-mobile-focus="search" aria-expanded="false" aria-controls="careMobileFocusSearch">${svg('search')}<span data-focus-search>검색</span></button>
                 <button type="button" data-mobile-focus="close" aria-label="지도 도구 숨기기" title="지도 도구 숨기기">${svg('close')}</button>
@@ -207,7 +207,11 @@
             ui.querySelector('[data-mobile-focus="list"]').setAttribute('aria-label', loading ? '검색 결과 확인 중' : `검색 결과 ${count} 목록`); // SOFTM-INITIAL-LOADING 날짜:20261026 : 보조기기에도 미완료 상태를 0건과 구분
             setText('[data-focus-saved]', String(root.CareMapExperience?.rows().length || 0));
             /* SOFTM-MAP-STYLE START 날짜:20261005 : 조건 갱신으로 아이콘이 사라지지 않도록 문구만 변경 */
-            setText('[data-focus-type]', (document.querySelector('.care-type-menu-item[aria-current="true"]')?.textContent || '유형 선택') + ' ▾');
+            /** SOFTM-TYPE-SELECTOR START 날짜:20261121 : 모바일 지도에서도 현재 유형과 변경 동작을 함께 안내 */
+            const selectedType = document.querySelector('.care-type-menu-item[aria-current="true"]')?.textContent;
+            setText('[data-focus-type]', selectedType || '유형 선택');
+            ui.querySelector('[data-mobile-focus="type"]').setAttribute('aria-label', selectedType ? `현재 ${selectedType} · 기관 유형 변경` : '기관 유형 선택');
+            /** SOFTM-TYPE-SELECTOR END */
             const filtered = document.querySelector('.care-mobile-filter-toggle')?.classList.contains('has-active-filters');
             const filterCount = document.querySelector('.care-mobile-filter-toggle')?.dataset.filterCount;
             setText('[data-focus-filter]', filtered ? `필터 · ${filterCount || '설정됨'}` : '필터'); // SOFTM-MOBILE-CHIPS 날짜:20261010 : 모바일 칩 문구를 짧게 줄여 지도 가림을 줄임
