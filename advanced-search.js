@@ -97,6 +97,18 @@
         return { matches, hasFeature };
     }
 
+    /** SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 선택한 조건과 무관하게 기관기호로 확인된 돌봄서비스만 상세에 제공 */
+    function confirmedFeatures(row, type, index) {
+        const serviceGroups = new Set(['dementia', 'cognitive', 'first', 'respite', 'integrated', 'pilot']);
+        const { hasFeature } = createMatcher(index, type);
+        const items = groupsFor(type).filter(group => serviceGroups.has(group.id)).flatMap(group => {
+            const services = group.options.filter(([key]) => hasFeature(row, key)).map(([key, label]) => ({ key, label }));
+            return services.length ? [{ id: group.id, label: group.id === 'pilot' ? services[0].label : group.label, services }] : [];
+        });
+        return { items, sourceDate: index?.sourceDate || '' };
+    }
+    /** SOFTM-DETAIL-SPECIALTIES END */
+
     let indexTask;
     function loadIndex() {
         if (indexTask) return indexTask;
@@ -372,7 +384,7 @@
         sync();
         suggestions();
         if (countActive()) host.querySelector('details').open = true;
-        return { matches: row => !(loadError && hasDataFilter()) && model.matches(row, state), write: params => writeState(params, state), state: () => ({ ...state, features: [...state.features] }), report, cancel }; // SOFTM-SEARCH-FEEDBACK 날짜:20260904 : 기본조회 완료와 상세조회 취소도 공용 상태에 반영
+        return { matches: row => !(loadError && hasDataFilter()) && model.matches(row, state), confirmedFeatures: row => confirmedFeatures(row, type, index), write: params => writeState(params, state), state: () => ({ ...state, features: [...state.features] }), report, cancel }; // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 이미 읽은 공단 자료로 현재 기관의 특화를 즉시 판정해 상세 전환 시 응답 경쟁 방지
     }
     /** SOFTM-CARE-MATCH START 날짜:20260910 : 질문 안내에서도 동일한 특화 판정과 기존 조건의 명칭·전환 규칙을 사용 */
     function describeState(state, type) {
@@ -388,7 +400,7 @@
         const newInstitution = row.d && row.d >= '2023-06-10';
         return capacityMatch && (!staff || staff === 'rehab' && row.pt + row.ot > 0 || staff === 'nurse' && row.rn > 0 || staff === 'nursing' && row.rn + row.na > 0 || staff === 'new' && newInstitution);
     }
-    const api = { updateFilterUrl, mount, createMatcher, readState, writeState, sanitize, addressParts, groupsFor, emptyState, loadIndex, describeState, matchesLegacy }; // SOFTM-FILTER-RELOAD 날짜:20260917 : 두 지도의 기본 조건도 같은 URL 갱신 경로를 사용
+    const api = { updateFilterUrl, mount, createMatcher, confirmedFeatures, readState, writeState, sanitize, addressParts, groupsFor, emptyState, loadIndex, describeState, matchesLegacy }; // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 목록과 상세에서 같은 기관기호·유형별 특화 판정 공유
     /** SOFTM-CARE-MATCH END */
     root.CareAdvancedSearch = Object.freeze(api);
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -97,6 +97,15 @@
                     : '등록 정원은 빈자리, 등록 인력은 실제 근무조를 뜻하지 않습니다.';
         return { confirmed, verify, unknown, note };
     }
+    /** SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 확인된 특화 전체를 먼저 노출하고 세부 유형과 자료 시점도 제공 */
+    function renderFeatures(report) {
+        if (!report?.items?.length) return '';
+        const sourceDate = String(report.sourceDate || '').replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3');
+        const badges = report.items.map(item => `<li>${escape(item.label)}</li>`).join('');
+        const services = report.items.map(item => `<li><b>${escape(item.label)}</b><span>${item.services.map(service => escape(service.label)).join(' · ')}</span></li>`).join('');
+        return `<section class="care-detail-features" aria-label="확인된 특화서비스"><h3>확인된 특화서비스</h3><ul class="care-feature-badges">${badges}</ul><p class="care-feature-source">공단 기관검색 · 특화자료 기준 ${escape(sourceDate || '미확인')}</p><details class="care-feature-guide"><summary>세부 유형·이용 안내</summary><ul>${services}</ul><p>공단 검색자료에 등재된 서비스입니다. 현재 이용 대상·운영 일정은 기관에 확인해 주세요.</p></details></section>`;
+    }
+    /** SOFTM-DETAIL-SPECIALTIES END */
     /** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 반복 평가·빈 상태 상자를 없애고 실제 누락과 펼쳐볼 상담 질문만 표시 */
     function renderReview(c, type, context = {}) {
         const data = review(c, type);
@@ -105,7 +114,7 @@
         const missing = [...new Set(data.unknown.map(value => value.label))];
         const source = context.source || (type === 'nursing-hospital' ? '건강보험심사평가원 요양기관 개설현황' : '국민건강보험공단 공개 수집 자료');
         const sourceDate = context.sourceDate || '미확인';
-        return `${render(c, type, { showNote: false })}<section class="care-decision-review" aria-label="추가 확인 정보">${staff.length ? `<p class="care-review-staff"><b>추가 등록 인력</b><span>${staff.map(escape).join(' · ')}</span></p>` : ''}${missing.length ? `<p class="care-review-missing"><b>공개자료 미확인</b><span>${missing.map(escape).join(' · ')}</span></p>` : ''}<details class="care-review-questions"><summary><span>상담할 때 확인하기</span><span class="care-review-count">${data.verify.length}개 항목</span></summary><ul>${data.verify.map(item).join('')}</ul><p class="care-review-note">${escape(data.note)}</p></details><p class="care-review-source">${escape(source)}<span>검색자료 기준 ${escape(sourceDate)}</span></p></section>`;
+        return `${render(c, type, { showNote: false })}${type === 'nursing-hospital' ? '' : renderFeatures(context.features)}<section class="care-decision-review" aria-label="추가 확인 정보">${staff.length ? `<p class="care-review-staff"><b>추가 등록 인력</b><span>${staff.map(escape).join(' · ')}</span></p>` : ''}${missing.length ? `<p class="care-review-missing"><b>공개자료 미확인</b><span>${missing.map(escape).join(' · ')}</span></p>` : ''}<details class="care-review-questions"><summary><span>상담할 때 확인하기</span><span class="care-review-count">${data.verify.length}개 항목</span></summary><ul>${data.verify.map(item).join('')}</ul><p class="care-review-note">${escape(data.note)}</p></details><p class="care-review-source">${escape(source)}<span>검색자료 기준 ${escape(sourceDate)}</span></p></section>`; // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 병원을 제외한 상세 핵심 수치 바로 아래에 실제 특화서비스 배치
     }
     /** SOFTM-DETAIL-ESSENTIALS END */
     /** SOFTM-DETAIL-REVIEW END */

@@ -8,6 +8,23 @@
 .care-decision-cell .care-decision-context{display:block;margin-top:2px;color:#52665c;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
 .care-decision-note{margin:5px 0 0;color:#607168;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 @media(max-width:380px){.care-decision-cell{padding:7px 6px}.care-decision-grid{gap:4px}.care-decision-cell dd{font-size:17px}}
+/** SOFTM-DETAIL-SPECIALTIES START 날짜:20261121 : 확인된 특화명을 작은 팝업에서도 줄임 없이 읽고 세부 유형은 펼쳐서 확인 */
+#detailDecision .care-detail-features{margin:10px 0;padding:12px;border:1px solid #c8e3d6;border-radius:12px;background:#f3faf6;color:#20513f}
+#detailDecision .care-detail-features h3{margin:0 0 8px;font-size:14px;line-height:1.5;font-weight:750}
+#detailDecision .care-feature-badges{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+#detailDecision .care-feature-badges li{max-width:100%;box-sizing:border-box;padding:5px 10px;border-radius:12px;background:#dcefe4;color:#155c41;font-size:14px;font-weight:700;line-height:1.6;overflow-wrap:anywhere;word-break:keep-all}
+#detailDecision .care-feature-source{margin:8px 0 0;color:#536e60;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+#detailDecision .care-feature-guide{margin-top:4px}
+#detailDecision .care-feature-guide>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;list-style:none;cursor:pointer;font-size:12px;line-height:1.5;font-weight:650}
+#detailDecision .care-feature-guide>summary::-webkit-details-marker{display:none}
+#detailDecision .care-feature-guide>summary::after{content:'';flex:none;width:7px;height:7px;margin:0 4px 4px;border:solid #42665a;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+#detailDecision .care-feature-guide[open]>summary::after{transform:rotate(225deg);margin-bottom:-3px}
+#detailDecision .care-feature-guide>summary:focus-visible{outline:2px solid #087f6b;outline-offset:2px;border-radius:4px}
+#detailDecision .care-feature-guide ul{display:grid;gap:8px;margin:0;padding:8px 0;border-top:1px solid #d2e7db;list-style:none;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+#detailDecision .care-feature-guide li b,#detailDecision .care-feature-guide li span{display:block}
+#detailDecision .care-feature-guide li span{color:#536e60}
+#detailDecision .care-feature-guide p{margin:4px 0 0;color:#536e60;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+/** SOFTM-DETAIL-SPECIALTIES END */
 /** SOFTM-DETAIL-ESSENTIALS START 날짜:20261121 : 반복 상태 카드 대신 필요한 추가 정보와 접힌 상담 질문으로 본문 공간 확보 */
 #detailDecision .care-decision-review{margin:8px 0 12px;color:#203c35}
 #detailDecision .care-review-staff,#detailDecision .care-review-missing{display:flex;flex-wrap:wrap;gap:3px 8px;margin:8px 0;font-size:12px;line-height:1.6;overflow-wrap:anywhere}

@@ -120,12 +120,12 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <!-- SOFTM-LIST-ACTIONS 날짜:20260913 : 목록 동작의 균일한 크기와 선택 상태를 이전 캐시 없이 적용 -->
 <!-- SOFTM-INSTITUTION-SHARE 날짜:20260914 : 기관 공유와 지도 공유의 구분을 캐시 없이 적용 -->
 <!-- SOFTM-POPUP-CONTEXT START 날짜:20260924 : 유형별 판단 요약과 팝업 방향에 맞는 마커 위치를 두 지도에 공용 적용 -->
-<link rel="stylesheet" href="care-decision-summary.css?v=20261121-essentials1"> <!-- SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 간결해진 상세 요약을 이전 스타일 캐시 없이 적용 -->
+<link rel="stylesheet" href="care-decision-summary.css?v=20261121-specialties1"> <!-- SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 확인된 특화서비스 강조 스타일 갱신 -->
 <!-- SOFTM-INSTITUTION-CONTENT START 날짜:20261118 : 기관 직접 제공 운영정보·사진을 공단 자료와 구분해 상세에 표시 -->
 <link rel="stylesheet" href="institution-content.css?v=20261118-1">
 <!-- SOFTM-INSTITUTION-CONTENT END -->
 <link rel="stylesheet" href="care-comparison-workspace.css?v=20261121-personal-cost1"><script src="care-compare-evidence.js?v=20261118-policy1"></script><script src="care-comparison-workspace.js?v=20261121-personal-cost1"></script><!-- SOFTM-GUIDED-COMPARE 날짜:20261119 : 지도 비교표도 보관 후보 중 세 곳을 골라 핵심 지표부터 읽도록 통일 -->
-<script src="care-decision-summary.js?v=20261121-essentials1"></script> <!-- SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 중복·빈 상태를 제거하고 상담 질문은 펼쳐서 확인 -->
+<script src="care-decision-summary.js?v=20261121-specialties1"></script> <!-- SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 상세에 확인된 특화와 세부 이용 유형 표시 -->
 <script src="care-popup-geometry.js?v=20260924-1"></script>
 <!-- SOFTM-POPUP-CONTEXT END -->
 <link rel="stylesheet" href="care-detail-layout.css?v=20261012-popup-height2"><script src="care-detail-layout.js?v=20261007-detail-content1"></script><!-- SOFTM-DETAIL-HEIGHT 날짜:20261012 : 더 높인 모바일 상세 팝업과 촘촘한 상세 탭을 이전 캐시 없이 적용 --> <!-- SOFTM-LIST-NAVIGATION 날짜:20260911 : 통합 지도 목록의 아이콘·문구 길안내 버튼을 이전 캐시 없이 적용 -->
@@ -247,7 +247,7 @@ body.care-map-page :is(#splitMapType,[data-focus="layers"],[data-mobile-focus="l
 <script type="module" src="institution-content.js?v=20261118-1"></script>
 <!-- SOFTM-INSTITUTION-CONTENT END -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
-<script src="advanced-search.js?v=20260917-filter-reload1"></script><!-- SOFTM-FILTER-RELOAD 날짜:20260917 : 조건 초기화 URL 동기화를 이전 캐시 없이 적용 --><!-- SOFTM-ADVANCED-SEARCH 날짜:20260904 : 공단 제공 서비스와 설립주체의 공통 판정을 로드 --> <!-- SOFTM-CARE-MATCH 날짜:20260910 : 질문 안내와 특화 판정 연결을 최신 버전으로 함께 적용 -->
+<script src="advanced-search.js?v=20261121-specialties1"></script><!-- SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 목록과 상세의 공단 특화 판정 공유 -->
 <!-- SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 공식 수가 계산과 세션 비교함을 같은 공용 모듈로 연결 -->
 <script src="care-cost-rates.js?v=20261121-personal-cost1"></script>
 <script src="care-cost-engine.js?v=20260904-1"></script>
@@ -1065,7 +1065,7 @@ function openDetail(c,reveal=true){
  activeDetail=c;officialDetailToken++;basicInfoToken++;officialActiveTab=11;
  syncDetailOverlayChrome(true); // SOFTM-DETAIL-EXPANDED 날짜:20261010 : 팝업 호출 즉시 모바일 상세를 확장 지도 조작 상태로 동기화
  $('detailRegion').textContent=`${c.p} ${c.c} · ${c.tn||CONFIG.label}`;$('detailName').textContent=c.n;
- $('detailDecision').innerHTML=CareDecisionSummary.renderReview(c,TYPE,{source:CONFIG.source==='hira'?'건강보험심사평가원 요양기관 개설현황':'국민건강보험공단 공개 수집 자료',sourceDate:CONFIG.sourceDate}); // SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 핵심 수치 뒤에는 추가 인력·실제 누락과 접힌 상담 질문만 표시
+ $('detailDecision').innerHTML=CareDecisionSummary.renderReview(c,TYPE,{source:CONFIG.source==='hira'?'건강보험심사평가원 요양기관 개설현황':'국민건강보험공단 공개 수집 자료',sourceDate:CONFIG.sourceDate,features:advancedSearch?.confirmedFeatures?.(c)}); // SOFTM-DETAIL-SPECIALTIES 날짜:20261121 : 맞춤조건 선택 여부와 무관하게 현재 기관의 확인된 특화 전체 표시
  const distance=Number.isFinite(c._distance)?c._distance.toFixed(1)+'km':'—',officialLabel=CONFIG.source==='hira'?'심평원 정보':'공단 원문',staff=mainStaffCount(c),capacity=Number(c.z)||0,staffRatio=!c.staffMissing&&capacity&&staff?`${(capacity/staff).toFixed(1)}명당 1명`:'—',evaluation=c.g?`${esc(c.et||CONFIG.label)} · ${c.ey||'-'}년 · ${esc(c.ed||'-')}`:CONFIG.source==='hira'?'장기요양기관 공단평가 대상과 다른 의료기관 자료입니다.':'공식 세부평가 미연결'; // SOFTM-DATA-UNIFIED 날짜:20260904 : 일부 인력 미수집일 때 정원 대비 비율을 확정값으로 계산하지 않음
  const live=CONFIG.source==='nhis'?`<section class="basic-live-card"><div id="basicLive"><div class="basic-live-loading">전화번호와 운영정보를 확인하고 있습니다.</div></div></section>`:''; // SOFTM-DETAIL-LAYOUT 날짜:20260911 : 위치·연락처 공통 제목 아래에 연락 필드만 배치
  /** SOFTM-EQUIPMENT-VIEW START 날짜:20260904 : 사업소에 해당하지 않는 정원·돌봄인력을 0명으로 오해하지 않도록 기본정보에서 제외 */
