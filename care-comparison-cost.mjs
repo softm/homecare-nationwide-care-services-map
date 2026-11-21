@@ -44,7 +44,7 @@ export async function mount(host,{type,rows}){
     for(const item of mounted)if(!item.workspace.isConnected||item.workspace===workspace)mounted.delete(item);
     let state=states.get(type)||initial(type);states.set(type,state);
     workspace.querySelector('[data-cost-controls]')?.remove();
-    const container=document.createElement('div');container.dataset.costControls='';workspace.querySelector('.care-compare-layout').before(container);
+    const container=document.createElement('div');container.dataset.costControls='';workspace.querySelector('.care-compare-layout').after(container); // SOFTM-COMPARE-CORE-FIRST 날짜:20261122 : 핵심 비교 내용을 먼저 읽은 뒤 개인 비용 조건을 입력
     const cells=[...workspace.querySelectorAll('[data-cost-index]')];
     let status='로그인한 보호자의 저장 정보를 확인하고 있어요.',timer;
     const update=()=>{
