@@ -11,7 +11,7 @@ Node 22.13 이상에서 이 디렉토리의 `npm install`, `npm test`를 실행�
 ## 운영 연결
 
 1. 기존 Cloudflare 계정의 실제 D1/Supabase와 Worker 상태를 확인한다. 2026-11-20 전용 회원·기관 D1을 새로 생성해 실제 ID를 구성했으며, 단계별 현황은 [운영 연결 기록](../../docs/HOMECARE-DEPLOYMENT.md)을 따른다. DB 생성은 Worker 배포 완료를 의미하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 실제 생성된 DB와 아직 연결되지 않은 서비스를 구분 -->
-2. 기존 전용 D1을 재사용하고 Supabase의 비공개 `homecare-documents`를 사용한다. 버킷 생성과 가상 파일 시험은 완료했으며 Worker에는 `SUPABASE_SECRET_KEY`를 secret으로 등록해야 한다. `INSTITUTIONS_DB`는 기관 Worker의 DB와 같은 리소스여야 한다. `npm run deploy`의 preflight는 예시 ID를 거부하지만 실제 저장소 권한·DNS·SNS 연결까지 검증하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 중복 DB 생성과 설정 검사만으로 운영 준비를 단정하는 오류 방지 -->
+2. 기존 전용 D1을 재사용하고 Supabase의 비공개 `homecare-documents`를 사용한다. 버킷과 `SUPABASE_SECRET_KEY` 연결·실제 Worker 배포 및 가상 기관 API 시험을 완료했다. `INSTITUTIONS_DB`는 기관 Worker의 DB와 같은 리소스다. `npm run deploy`의 preflight는 예시 ID를 거부하지만 실제 저장소 권한·DNS·SNS 연결까지 검증하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261121 : 서버 연결 완료와 운영 화면 검증을 구분 -->
 3. 회원 DB에 `migrations/0001_members.sql`과 `0002_care_recipient.sql`을 순서대로, 기관 DB에 기존 마이그레이션과 `0006_member_registration.sql`을 적용한다. 원격 적용 전 백업과 현재 스키마를 확인한다.
 4. 전용 Worker를 `api.homecare.designboard.net`에 연결한다. 웹은 기존 `homecare.designboard.net`에 남는다. 기관 Worker의 `ACCOUNT` 바인딩은 `softm-homecare-members`, 회원 Worker의 `INSTITUTIONS` 바인딩은 `softm-homecare-pilot`이다.
 5. 각 제공자에 `https://api.homecare.designboard.net/api/auth/oauth/{google|kakao|naver}/callback`을 등록한다. `GOOGLE_CLIENT_ID/SECRET`, `KAKAO_CLIENT_ID/SECRET`, `NAVER_CLIENT_ID/SECRET`을 Wrangler secrets로 설정한다. 네이버 공개 검수 완료 후 `NAVER_PUBLIC_ENABLED=true`로 바꾼다. 비밀키는 파일·Git·로그에 넣지 않는다.
@@ -19,7 +19,7 @@ Node 22.13 이상에서 이 디렉토리의 `npm install`, `npm test`를 실행�
 7. 기존 기관 담당자는 새 기관회원 가입 후 운영자가 기존 권한과 증빙을 대조한다. 이메일 일치만으로 UID를 합치지 않는다. 이미 소유자가 있는 기관은 자동 승인되지 않으며 기존 소유권 이전을 별도 기록·트랜잭션으로 처리한다. 기존 공통 보관소는 `?legacyAccount=1`에서 명시적으로 복원한다.
 
 <!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 운영 연결과 가상 시험을 구분하고 기관 담당자 제출 흐름을 유지 -->
-기관 담당자가 가입 화면에서 사업자등록증을 직접 제출하고, 승인 후 기관 관리 화면에서 사진을 등록합니다. [파일 연결부](../homecare-storage/README.md)가 기존 소유권 검사와 삭제 재시도를 유지합니다. 현재 `FILE_UPLOADS_ENABLED=false`이며 Worker secret·운영 배포·로그인 검증·독립 백업은 미완료입니다. 로컬 개발도 업로드 비활성 기본값을 따릅니다. 테스트는 운영 키 없이 저장소를 주입합니다.
+기관 담당자가 가입 화면에서 사업자등록증을 직접 제출하고, 승인 후 기관 관리 화면에서 사진을 등록합니다. [파일 연결부](../homecare-storage/README.md)가 기존 소유권 검사와 삭제 재시도를 유지합니다. Worker secret·배포·실제 API의 가상 가입→승인→파일 등록·삭제 18개 검사는 완료했습니다. 운영 브라우저의 로그인·API 도메인 연결·독립 백업은 남아 있어 `FILE_UPLOADS_ENABLED=false`를 유지합니다. 로컬 개발도 업로드 비활성 기본값을 따릅니다. 자동 테스트는 운영 키 없이 저장소를 주입합니다.
 <!-- SOFTM-SUPABASE-STORAGE END -->
 
 ## 저장과 권한
