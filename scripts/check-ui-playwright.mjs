@@ -6,6 +6,7 @@ import { resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { gunzipSync } from 'node:zlib';
+import { verifySavedMarkers } from './check-saved-markers-playwright.mjs'; // SOFTM-SAVED-MARKER 날짜:20261121 : 공용 숨김 브라우저·쓰기 차단 조건에서 마커 담기 상태도 검증
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=fileURLToPath(new URL('../',import.meta.url)).replace(/\/$/,'');
@@ -69,6 +70,7 @@ const cases=[
  {name:'map-daycare',url:'index.html?type=daycare'},
  {name:'map-facility',url:'index.html?type=facility'},
  {name:'map-hospital',url:'index.html?type=nursing-hospital'},
+ ...['daycare','facility','nursing-hospital'].map(type=>({name:`map-saved-markers-${type}`,url:`index.html?type=${type}&lat=37.5663&lng=126.9018&z=14`,action:'map-saved-markers'})), // SOFTM-SAVED-MARKER 날짜:20261121 : 공단 시설·재가·병원을 같은 공개 지도 위치와 담기 시나리오로 검증
  ...['menu','types','filter','advanced','match-1','match-2','match-3','saved','compare','detail','list','full'].map(action=>({name:`map-${action}`,url:'index.html?type=daycare',action:`map-${action}`,seed:['saved','compare'].includes(action)})),
  {name:'installation-guide',url:'care-account.html',action:'install'},
 ];
@@ -169,6 +171,7 @@ async function run(c,width){
   }
   /** SOFTM-ANALYSIS-GUIDE END */
   if(c.action?.startsWith('map-')){
+   if(c.action==='map-saved-markers')result.savedMarkers=await verifySavedMarkers(page,{out,name:c.name,width}); // SOFTM-SAVED-MARKER 날짜:20261121 : 담기·해제·복원·배율에 따른 실제 표시와 기존 선택 보존 확인
    const more=page.locator('[data-mobile-focus=more]');
    const openMenu=async()=>{if(await more.isVisible())await more.click();else await page.locator('.care-menu-trigger').click();};
    if(c.action==='map-menu')await openMenu();
