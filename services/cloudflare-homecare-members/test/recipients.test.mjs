@@ -5,7 +5,7 @@ import worker from '../src/index.mjs';
 import {environment,client,pendingRegistration} from './helpers.mjs';
 import {CARE_CONSENT_VERSION} from '../../../care-recipient-model.mjs';
 const path='/api/me/care-recipient';
-const profile={relationship:'parent',sex:'female',mobility:'wheelchair',careNeeds:['dementia','rehabilitation'],authority:'subject-consent',healthConsent:true};
+const profile={relationship:'parent',sex:'female',mobility:'wheelchair',careNeeds:['dementia','rehabilitation'],grade:'3',burden:'reduced60',authority:'subject-consent',healthConsent:true};
 const guardian={name:'시험 보호자',phone:'010-1234-5678',province:'경기도',city:'부천시'};
 const put=(c,body=profile,revision=0)=>c.call(path,{method:'PUT',body,headers:{'If-Match':String(revision)}});
 async function ready(env,username='guardian-one'){const c=client(env);await c.signup('personal',username);await c.call('/api/me/profile',{method:'PATCH',body:guardian});return c;}
@@ -58,3 +58,15 @@ test('대상자 삭제·보관소 삭제·탈퇴에서 대상자와 동의 기�
  }
 });
 /** SOFTM-GUARDIAN END */
+
+/** SOFTM-PERSONAL-COST START 날짜:20261121 : 비용 조건의 실제 D1 왕복·미확인 전환·동의·소유권 검증 */
+test('저장한 장기요양등급과 감경 조건을 소유자만 읽고 미확인으로 되돌릴 수 있다',async()=>{
+ const env=environment(),a=await ready(env),b=await ready(env,'cost-guardian-two');
+ for(const body of [{...profile,grade:'A'},{...profile,burden:'12'},{...profile,healthConsent:false}])assert.equal((await put(a,body)).status,400);
+ assert.equal((await put(a)).status,200);
+ let saved=(await a.call(path)).body.data;assert.equal(saved.profile.grade,'3');assert.equal(saved.profile.burden,'reduced60');assert.equal(saved.consentVersion,CARE_CONSENT_VERSION);
+ assert.equal((await b.call(path)).body.data.profile,null);
+ assert.equal((await put(a,{...profile,grade:'',burden:''},saved.revision)).status,200);
+ saved=(await a.call(path)).body.data;assert.equal(saved.profile.grade,'');assert.equal(saved.profile.burden,'');
+});
+/** SOFTM-PERSONAL-COST END */
