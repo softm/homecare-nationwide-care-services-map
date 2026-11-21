@@ -17,7 +17,7 @@ test("fresh migration은 게시·draft·철회·suspended·일별 중복 불변�
   const schemaDatabase = join(directory, "schema.sqlite");
   try {
     execFileSync("sqlite3", [database], {
-      input: migrationOne + readFileSync(new URL("../migrations/0006_member_registration.sql", import.meta.url), "utf8"),
+      input: migrationOne + readFileSync(new URL("../migrations/0006_member_registration.sql", import.meta.url), "utf8") + readFileSync(new URL("../migrations/0007_service_facts.sql", import.meta.url), "utf8"), // SOFTM-KEY 날짜:20261121 : 운영정보 테이블과 통합 스키마 일치 검사
       encoding: "utf8",
     });
     execFileSync("sqlite3", [schemaDatabase], { input: schemaSql, encoding: "utf8" });
