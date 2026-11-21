@@ -229,4 +229,18 @@ body.analysis-page .analysis-card-actions>button:first-child[aria-pressed=true] 
 .analysis-page .analysis-confirm-actions button { min-height:48px; padding:11px 14px; border-radius:10px; font-size:16px; }
 .analysis-page .analysis-confirm-actions .analysis-primary { background:#087a61; border-color:#087a61; color:white; }
 @media(max-width:400px) { .analysis-page .analysis-confirm { padding:22px; } .analysis-confirm h2 { font-size:24px; } .analysis-confirm-actions { grid-template-columns:1fr; } }
+/** SOFTM-BULK-CANDIDATES START 날짜:20261122 : 목록 첫머리에서 전체 담기와 바로 비교를 발견하고 작은 화면에서도 누르기 쉽게 배치 */
+.analysis-bulk-actions { display:flex; flex-wrap:wrap; align-items:center; gap:16px 24px; margin:0 0 20px; padding:22px; border:1px solid #b6dbcb; border-radius:16px; background:#edf8f2; }
+.analysis-bulk-copy { flex:1 1 320px; min-width:0; }
+.analysis-bulk-copy>strong { display:block; color:#163f32; font-size:19px; line-height:1.5; }
+.analysis-bulk-copy>p { margin:6px 0 0; color:#52665c; font-size:14px; line-height:1.6; word-break:keep-all; overflow-wrap:anywhere; }
+.analysis-bulk-buttons { display:flex; flex-wrap:wrap; gap:10px; }
+.analysis-page .analysis-bulk-buttons>button { min-height:48px; padding:11px 16px; border-radius:10px; font-size:15px; font-weight:750; }
+.analysis-page .analysis-bulk-buttons>button:disabled { background:#e4ece7; border-color:#cfdbd4; color:#62756b; cursor:default; opacity:1; }
+.analysis-bulk-buttons>button:focus-visible { outline:3px solid #16856b; outline-offset:3px; }
+.analysis-bulk-status { flex:1 1 100%; margin:0; padding-top:12px; border-top:1px solid #c7dfd3; color:#14634b; font-size:14px; font-weight:650; }
+.analysis-bulk-status:empty { display:none; }
+.analysis-compare-panel { scroll-margin-top:88px; }
+@media(max-width:720px) { .analysis-bulk-actions { padding:18px; gap:14px; } .analysis-bulk-buttons { display:grid; grid-template-columns:1fr; width:100%; } .analysis-bulk-buttons>button { width:100%; } }
+/** SOFTM-BULK-CANDIDATES END */
 /** SOFTM-EMPTY-CONDITIONS END */

@@ -89,7 +89,8 @@ function setStep(next, { push = false, focus = true } = {}) {
     }
     currentStep = next; document.body.dataset.analysisStep = next;
     /** SOFTM-ANALYSIS-GUIDE START 날짜:20261121 : 단계와 선택 수에 맞춰 바로 다음 행동을 안내 */
-    const nextAction = {conditions:'아래에서 돌봄 유형을 고르고 위치·조건을 확인한 뒤, ‘추천 후보 보기’를 누르세요.',candidates:selected.length<2?'후보에서 비교할 기관을 2곳 이상 담아주세요. 한 번에 최대 3곳을 비교할 수 있어요.':`비교할 기관을 골랐어요. 아래 ‘${selected.length}곳 비교하기’ 버튼으로 차이를 확인하세요.`,compare:'기관별 차이와 확인할 항목을 살펴본 뒤, ‘상담 질문 준비’를 누르세요.',prepare:'질문을 확인하고 기관별 ‘답변·방문 기록 이어가기’를 눌러 기록하세요. 저장한 기록은 가족과 공유할 수 있어요.'};
+    const candidateCount = candidateEntries().length; // SOFTM-BULK-CANDIDATES 날짜:20261122 : 현재 필터의 후보 수에 맞춰 다음 행동 안내
+    const nextAction = {conditions:'아래에서 돌봄 유형을 고르고 위치·조건을 확인한 뒤, ‘추천 후보 보기’를 누르세요.',candidates:candidateCount>=2?`후보 전체를 한 번에 담거나, ‘가까운 ${Math.min(candidateCount,3)}곳 바로 비교’로 시작하세요.`:selected.length>=2?`아래 ‘${selected.length}곳 비교하기’로 담아둔 기관을 비교하세요.`:'비교하려면 후보가 2곳 이상 필요해요. 조건 수정에서 거리 범위를 넓혀보세요.',compare:'기관별 차이와 확인할 항목을 살펴본 뒤, ‘상담 질문 준비’를 누르세요.',prepare:'질문을 확인하고 기관별 ‘답변·방문 기록 이어가기’를 눌러 기록하세요. 저장한 기록은 가족과 공유할 수 있어요.'}; // SOFTM-BULK-CANDIDATES 날짜:20261122 : 개별 담기 없이도 바로 비교할 수 있는 다음 행동 안내
     $('analysisNextAction').querySelector('span').textContent = nextAction[next];
     /** SOFTM-ANALYSIS-GUIDE END */
     document.querySelectorAll('button[data-analysis-step]').forEach(button => {
@@ -339,12 +340,57 @@ function render() {
         ${featureError || photoError ? `<div class="analysis-warning" role="status">${featureError ? '특화서비스' : ''}${featureError && photoError ? '·' : ''}${photoError ? '사진' : ''} 자료를 불러오지 못해 해당 항목을 미확인으로 표시했습니다. <button type="button" data-analysis-retry>자료 다시 확인</button></div>` : ''}
         ${!size ? '<p class="analysis-empty">확인된 위치 중 선택한 범위 안의 기관이 없습니다. 조건 수정에서 범위를 넓히거나 아래 위치 미확인 기관을 살펴보세요.</p>' : ''}
         ${size && report.counts.length ? `<details class="analysis-full-data"><summary>주변 기관의 공개정보 확인 현황</summary><div><p>미확인은 서비스 미제공을 뜻하지 않으며 같은 기관이 여러 항목에 포함될 수 있습니다.</p><div class="analysis-bars">${report.counts.map(count => `<article class="analysis-bar"><header><strong>${esc(count.label)}</strong><span>${count.confirmed} / ${size}곳</span></header><meter min="0" max="${size}" value="${count.confirmed}" aria-label="${esc(count.label)} 확인 ${count.confirmed}곳, 전체 ${size}곳"></meter><p>확인 ${count.confirmed}곳 · 조건과 다름 ${count.different}곳 · 미확인 ${count.unknown}곳</p></article>`).join('')}</div></div></details>` : ''}
-        <section class="analysis-section"><div class="analysis-section-head"><div><h3>시설 후보</h3><p>보관할 후보는 여러 곳, 한 번의 비교는 최대 3곳까지 선택합니다.</p></div><div class="analysis-picks"><button type="button" data-analysis-view="nearby" aria-pressed="true">가까운 후보 ${size}곳</button>${input.type==='daycare'?'<button type="button" data-analysis-view="recent" aria-pressed="false">최근 이용정보 5항목 확인</button>':''}${input.selected.size ? `<button type="button" data-analysis-view="confirmed" aria-pressed="false">조건 모두 확인 ${chosen.allConfirmed.length}곳</button>` : ''}</div></div><div id="analysisCards" class="analysis-cards"></div><button class="analysis-more" id="analysisMore" type="button" hidden>후보 12곳 더 보기</button></section>
+        <section class="analysis-section"><div class="analysis-section-head"><div><h3>시설 후보</h3><p>보관할 후보는 여러 곳, 한 번의 비교는 최대 3곳까지 선택합니다.</p></div><div class="analysis-picks"><button type="button" data-analysis-view="nearby" aria-pressed="true">가까운 후보 ${size}곳</button>${input.type==='daycare'?'<button type="button" data-analysis-view="recent" aria-pressed="false">최근 이용정보 5항목 확인</button>':''}${input.selected.size ? `<button type="button" data-analysis-view="confirmed" aria-pressed="false">조건 모두 확인 ${chosen.allConfirmed.length}곳</button>` : ''}</div></div>
+        <!-- SOFTM-BULK-CANDIDATES START 날짜:20261122 : 긴 후보 목록을 일일이 담지 않고 보관·비교하는 진입점 -->
+        <section class="analysis-bulk-actions" aria-labelledby="analysisBulkTitle"><div class="analysis-bulk-copy"><strong id="analysisBulkTitle">후보를 한 번에 담고 비교하세요</strong><p id="analysisBulkDescription"></p></div><div class="analysis-bulk-buttons"><button type="button" data-analysis-save-all aria-describedby="analysisBulkDescription"></button><button type="button" class="analysis-primary" data-analysis-compare-nearest aria-describedby="analysisBulkDescription"></button></div><p id="analysisBulkStatus" class="analysis-bulk-status" role="status" aria-live="polite"></p></section>
+        <!-- SOFTM-BULK-CANDIDATES END -->
+        <div id="analysisCards" class="analysis-cards"></div><button class="analysis-more" id="analysisMore" type="button" hidden>후보 12곳 더 보기</button></section>
         ${report.unknownLocation.length ? `<section class="analysis-section analysis-warning"><h3>위치 확인이 더 필요한 ${report.unknownLocation.length}곳</h3><p>선택한 반경에 걸친 행정지역의 후보이며 반경 안인지 아직 확인되지 않았습니다.</p><button type="button" data-analysis-retry>미확인 위치 다시 확인</button><details><summary>기관 목록과 주소 보기</summary><ul>${report.unknownLocation.map(row => `<li><a href="${esc(mapUrl(input.type, row))}" rel="nofollow">${esc(row.n)}</a> · ${esc(row.a || '주소 미확인')}</li>`).join('')}</ul></details></section>` : ''}
         <section class="analysis-source">${input.type !== 'nursing-hospital' && size ? gradeTable(report.nearby) : ''}<p>근거: ${input.type === 'nursing-hospital' ? '심평원 개설현황' : '국민건강보험공단 공개 수집 자료'} · 검색 자료 기준일 ${esc(report.sourceDate || '미확인')}${report.featureDate ? ` · 특화서비스 기준일 ${esc(report.featureDate)}` : ''}. 개별 항목의 변경일과 평가연도는 다를 수 있습니다.</p><p>직선거리는 실제 이동시간이나 방문·송영 범위를 뜻하지 않습니다. 공개 정원은 빈자리가 아니며 등록사진은 현재 시설 상태나 촬영일을 보장하지 않습니다.</p></section></section>
         <section class="analysis-stage-panel analysis-compare-panel" data-analysis-panel="compare" hidden></section><section class="analysis-stage-panel" data-analysis-panel="prepare" hidden></section><aside class="analysis-compare-tray" id="analysisCompareTray" aria-label="보관한 비교 후보"></aside>`;
     renderCards(); renderTray(); observeAnalysisEnd();
 }
+/** SOFTM-BULK-CANDIDATES START 날짜:20261122 : 필터·더보기와 같은 후보 전체를 중복 없이 보관하고 거리순 세 곳을 바로 비교 */
+function candidateEntries() {
+    if (!current) return [];
+    if (view === 'confirmed') return current.chosen.allConfirmed;
+    if (view === 'recent') return current.report.nearby.filter(entry => current.recentIds?.has(String(entry.row.i)));
+    return current.report.nearby;
+}
+function renderCandidateActions() {
+    if (!current || !$('analysisBulkDescription')) return;
+    const entries = candidateEntries(), count = entries.length;
+    const saved = entries.filter(entry => current.basket.has(entry.row.i)).length;
+    const save = document.querySelector('[data-analysis-save-all]'), compare = document.querySelector('[data-analysis-compare-nearest]');
+    const filter = {nearby:'가까운 후보',confirmed:'조건을 모두 확인한 후보',recent:'최근 이용정보를 확인한 후보'}[view];
+    $('analysisBulkDescription').textContent = count ? `${filter} ${count.toLocaleString()}곳 전체 · ${saved.toLocaleString()}곳 담김. 바로 비교는 거리순 최대 3곳을 담아 비교합니다.` : '현재 목록에 후보가 없습니다. 다른 목록을 선택하거나 조건을 수정해 주세요.';
+    save.textContent = count && saved === count ? `후보 ${count.toLocaleString()}곳 모두 담김` : `후보 ${count.toLocaleString()}곳 한 번에 담기`;
+    save.disabled = !count || saved === count;
+    compare.textContent = count >= 2 ? `가까운 ${Math.min(count, 3)}곳 바로 비교` : '비교할 후보 2곳 필요';
+    compare.disabled = count < 2;
+}
+function saveCandidates(compare = false) {
+    const entries = candidateEntries();
+    if (!entries.length || (compare && entries.length < 2)) return;
+    const ids = (compare ? entries.slice(0, 3) : entries).map(entry => String(entry.row.i));
+    const added = ids.filter(id => !current.basket.has(id));
+    current.basket.replace([...current.basket.ids(), ...ids]);
+    if (compare) comparisonSelection.clear();
+    comparisonSelection.sync([...comparisonSelection.ids(), ...ids], true);
+    syncBasket();
+    const message = compare ? `가까운 ${ids.length}곳을 담아 비교합니다. 기존에 담아둔 기관도 그대로 보관됩니다.` : `${ids.length.toLocaleString()}곳 모두 담았습니다. 새로 담은 후보 ${added.length.toLocaleString()}곳 · 전체 보관 ${current.basket.ids().length.toLocaleString()}곳`;
+    $('analysisBulkStatus').textContent = message;
+    $('analysisStatus').textContent = message;
+    if (compare) {
+        setStep('compare', { push: true });
+        document.querySelector('[data-analysis-panel="compare"]').scrollIntoView({ block:'start', behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    }
+    if (added.length && current.input.type === 'daycare') {
+        // 실제 시범기관의 새 담기만 집계해 일괄 담기 수만큼 불필요한 요청을 보내지 않음.
+        void listPilot().then(rows => { for (const row of rows) if (added.includes(String(row.institutionId))) void trackPilot('save', row.institutionId); }).catch(() => {});
+    }
+}
+/** SOFTM-BULK-CANDIDATES END */
 /** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 비교할 수치를 일정한 위치에 크게 표시하고 긴 질문은 필요할 때 펼쳐 읽도록 분리 */
 function candidateFacts(row, type, distance) {
     const cells = [...CareDecisionSummary.summary(row, type).cells];
@@ -362,7 +408,7 @@ function candidateCost(row, type) {
 function renderCards({ append = false } = {}) {
     const { report, chosen, input, summaries } = current;
     const confirmed = new Set(chosen.allConfirmed.map(entry => String(entry.row.i)));
-    const entries = view === 'confirmed' ? report.nearby.filter(entry => confirmed.has(String(entry.row.i))) : view==='recent'?report.nearby.filter(entry=>current.recentIds?.has(String(entry.row.i))):report.nearby; // SOFTM-KEY 날짜:20261121 : 확인된 다섯 항목이 유효한 기관만 원래 거리 순서로 표시
+    const entries = candidateEntries(); // SOFTM-BULK-CANDIDATES 날짜:20261122 : 표시 목록과 일괄 작업의 필터·거리 순서를 일치
     const host = $('analysisCards'), start = append ? host.children.length : 0; if (!append) host.replaceChildren();
     if (!entries.length) host.innerHTML = '<p class="analysis-empty">이 항목에 해당하는 후보가 없습니다. 가까운 후보에서 공개 근거와 확인할 질문을 살펴보세요.</p>';
     for (const entry of entries.slice(start, limit)) {
@@ -428,7 +474,7 @@ function syncBasket() {
     if (!current) return;
     comparisonSelection?.sync(basketRows(), false);
     document.querySelectorAll('[data-analysis-save]').forEach(button => { const saved = current.basket.has(button.dataset.analysisSave); button.setAttribute('aria-pressed', String(saved)); button.textContent = saved ? '후보 보관됨' : '비교 후보에 담기'; button.closest('.analysis-card')?.classList.toggle('is-saved', saved); }); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 담은 기관은 버튼과 카드 테두리에서 함께 구분
-    renderTray(); setStep(currentStep, { focus: false });
+    renderCandidateActions(); renderTray(); setStep(currentStep, { focus: false }); // SOFTM-BULK-CANDIDATES 날짜:20261122 : 개별 담기·해제도 일괄 담기 개수와 버튼에 즉시 반영
 }
 async function shareComparison() {
     const status = $('analysisShareStatus'), ids = activeRows().map(row => String(row.i)); if (!status) return;
@@ -491,7 +537,9 @@ $('analysisResults').addEventListener('click', async event => {
     if (!current) return;
     const button = event.target.closest('button'); if (!button) return;
     if (button.hasAttribute('data-analysis-retry')) { const { input, address } = current; invalidate('확인되지 않은 자료를 다시 확인합니다.'); void run(input, address, generation); }
-    else if (button.dataset.analysisView) { if(button.dataset.analysisView==='recent'){const context=current;button.disabled=true;try{const rows=await listPilot();if(current!==context)return;current.recentIds=new Set(rows.filter(row=>row.recent).map(row=>row.institutionId));}catch(error){alert(error.message);return;}finally{button.disabled=false;}} view = button.dataset.analysisView; limit = 12; document.querySelectorAll('[data-analysis-view]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.analysisView === view))); renderCards(); }
+    else if (button.dataset.analysisView) { if(button.dataset.analysisView==='recent'){const context=current;button.disabled=true;try{const rows=await listPilot();if(current!==context)return;current.recentIds=new Set(rows.filter(row=>row.recent).map(row=>row.institutionId));}catch(error){alert(error.message);return;}finally{button.disabled=false;}} view = button.dataset.analysisView; limit = 12; $('analysisBulkStatus').textContent = ''; document.querySelectorAll('[data-analysis-view]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.analysisView === view))); renderCards(); } // SOFTM-BULK-CANDIDATES 날짜:20261122 : 다른 필터에서는 이전 목록의 담기 완료 안내를 지움
+    else if (button.hasAttribute('data-analysis-save-all')) saveCandidates(); // SOFTM-BULK-CANDIDATES 날짜:20261122 : 표시 제한 이후 후보까지 한 번에 담기
+    else if (button.hasAttribute('data-analysis-compare-nearest')) saveCandidates(true); // SOFTM-BULK-CANDIDATES 날짜:20261122 : 현재 필터의 가까운 세 곳 담기와 비교를 한 동작으로 연결
     else if (button.id === 'analysisMore') showMoreCards(); // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 자동 로드 미지원 환경의 수동 더보기도 같은 추가 방식으로 처리
     else if (button.dataset.analysisSave) {
         const id = button.dataset.analysisSave, wasSaved = current.basket.has(id); current.basket.toggle(id);
