@@ -131,3 +131,89 @@
  .analysis-preferences summary span{margin-left:0}
 }
 /** SOFTM-ANALYSIS-GUIDE END */
+
+/** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 기관별 수치를 같은 위치에서 읽고 모바일에서도 작은 설명문 대신 핵심 값을 비교 */
+body.analysis-page .analysis-card { display:block; background:#fff; border:1px solid #ceddd7; border-radius:18px; box-shadow:0 4px 18px #153f2f08; }
+body.analysis-page .analysis-card.is-saved { border-color:#07856d; box-shadow:0 0 0 2px #07856d; }
+body.analysis-page .analysis-card-heading { display:grid; grid-template-columns:100px minmax(0,1fr) auto; align-items:center; gap:20px; padding:24px 24px 0; }
+body.analysis-page .analysis-card-heading .care-photo-figure { min-width:0; margin:0; }
+body.analysis-page .analysis-card .care-photo-image { width:100%; height:80px; min-height:0; border-radius:10px; }
+body.analysis-page .analysis-card figcaption { padding:4px 0 0; font-size:12px; line-height:1.4; }
+body.analysis-page .analysis-card-placeholder { min-height:96px; border-radius:10px; padding:10px; gap:4px; text-align:center; font-size:12px; line-height:1.4; }
+body.analysis-page .analysis-card-placeholder svg { width:30px; height:30px; }
+body.analysis-page .analysis-card-placeholder span { word-break:keep-all; }
+body.analysis-page .analysis-card-identity { min-width:0; }
+body.analysis-page .analysis-card .analysis-card-type { margin:0 0 5px; color:#08735e; font-size:14px; font-weight:650; }
+body.analysis-page .analysis-card .analysis-card-identity h3 { font-size:24px; font-weight:750; line-height:1.4; letter-spacing:-.4px; }
+body.analysis-page .analysis-card .analysis-card-address { margin:6px 0 0!important; color:#53655e; font-size:16px; line-height:1.5; word-break:keep-all; overflow-wrap:anywhere; }
+body.analysis-page .analysis-card .analysis-badges { align-self:start; justify-content:flex-end; max-width:200px; margin:0; font-size:14px; }
+body.analysis-page .analysis-card-body { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:none; gap:16px; padding:22px 24px 24px; }
+.analysis-key-facts { display:grid; grid-template-columns:repeat(var(--analysis-fact-columns,4),minmax(0,1fr)); gap:10px; margin:0; font-variant-numeric:tabular-nums; }
+.analysis-key-facts>div { min-width:0; padding:16px 18px; border:1px solid #dbe5e0; border-radius:12px; background:#f7f9f8; }
+.analysis-key-facts dt { color:#52665c; font-size:15px; line-height:1.5; }
+.analysis-key-facts dd { margin:5px 0; color:#163f32; font-size:27px; font-weight:750; line-height:1.3; overflow-wrap:anywhere; }
+.analysis-key-facts dd.is-unknown { color:#67746e; font-size:23px; }
+.analysis-key-facts small { display:block; min-height:20px; color:#65776e; font-size:14px; line-height:1.45; word-break:keep-all; overflow-wrap:anywhere; }
+.analysis-candidate-cost { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px 18px; padding:16px 18px; border:1px solid #b6dbcb; border-radius:12px; background:#edf8f2; color:#214d3e; }
+.analysis-candidate-cost>div>strong { font-size:16px; line-height:1.5; }
+.analysis-candidate-cost>div>strong>span { display:inline-block; margin-left:8px; font-size:13px; font-weight:500; }
+body.analysis-page .analysis-card .analysis-candidate-cost p { margin:3px 0 0; font-size:14px; line-height:1.5; color:#51685d; }
+.analysis-candidate-cost>b { font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+.analysis-candidate-cost>b>span { font-size:28px; font-weight:800; letter-spacing:-.5px; }
+.analysis-cost-note { grid-column:1/-1; }
+.analysis-candidate-cost.is-unavailable { background:#f7f9f8; border-color:#dbe5e0; }
+.analysis-candidate-cost.is-unavailable>b { font-size:19px; }
+.analysis-condition-matches { display:grid; grid-template-columns:140px minmax(0,1fr); align-items:start; gap:12px; font-size:15px; }
+.analysis-condition-matches>strong { padding-top:7px; }
+.analysis-condition-matches ul { display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none; }
+.analysis-condition-matches li { display:flex; flex-wrap:wrap; gap:5px 10px; padding:6px 10px; border:1px solid #e0d9c6; border-radius:8px; background:#fff9ed; color:#685021; }
+.analysis-condition-matches li[data-status=confirmed] { border-color:#b6dbcb; background:#edf8f2; color:#13634c; }
+.analysis-condition-matches li[data-status=different] { border-color:#d4dce5; background:#f0f3f7; color:#46576b; }
+.analysis-condition-matches li b { font-size:14px; }
+body.analysis-page .analysis-card .analysis-card-source { color:#64756d; font-size:14px; line-height:1.5; }
+body.analysis-page .analysis-card .analysis-card-questions { margin:0; padding:0; border:1px solid #dbe5e0; border-radius:10px; font-size:16px; line-height:1.6; }
+.analysis-card-questions>summary { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px 16px; list-style:none; }
+.analysis-card-questions>summary::-webkit-details-marker { display:none; }
+.analysis-card-questions>summary b { color:#08735e; }
+.analysis-card-questions>summary span { margin-left:auto; font-size:20px; }
+.analysis-card-questions[open]>summary span { transform:rotate(180deg); }
+.analysis-card-questions[open]>summary { border-bottom:1px solid #dbe5e0; }
+body.analysis-page .analysis-card .analysis-card-questions>p { margin:14px 16px 8px; color:#64756d; font-size:14px; }
+body.analysis-page .analysis-card .analysis-card-questions>ul { margin:0; padding:0 20px 16px 36px; font-size:16px; }
+.analysis-card-questions li+li { margin-top:7px; }
+body.analysis-page .analysis-card .analysis-card-actions { grid-column:auto; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin:0; padding-top:16px; font-size:16px; }
+body.analysis-page .analysis-card-actions>* { display:inline-flex; justify-content:center; align-items:center; min-height:48px; min-width:128px; padding:10px 20px; border:1px solid #bed6cc; border-radius:10px; text-decoration:none; }
+body.analysis-page .analysis-card-actions>button:first-child { margin-right:auto; background:#087a61; border-color:#087a61; color:#fff; font-weight:700; }
+body.analysis-page .analysis-card-actions>button:first-child[aria-pressed=true] { background:#d9f2e6; border-color:#07856d; color:#0b604a; }
+.analysis-card :is(button,a,summary):focus-visible { outline:3px solid #00866f; outline-offset:3px; }
+@media(max-width:1000px) {
+ body.analysis-page .analysis-card-heading { grid-template-columns:88px minmax(0,1fr); gap:12px 18px; }
+ body.analysis-page .analysis-card .analysis-badges { grid-column:2; justify-content:flex-start; max-width:none; }
+ .analysis-key-facts>div { padding:14px; }
+ .analysis-key-facts dd { font-size:25px; }
+}
+@media(max-width:720px) {
+ body.analysis-page .analysis-card-heading { padding:18px 16px 0; grid-template-columns:68px minmax(0,1fr); gap:10px 12px; }
+ body.analysis-page .analysis-card .analysis-card-identity h3 { font-size:22px; }
+ body.analysis-page .analysis-card .care-photo-image { height:68px; }
+ body.analysis-page .analysis-card-placeholder { min-height:84px; font-size:11px; padding:8px 4px; }
+ body.analysis-page .analysis-card-body { padding:18px 16px; gap:14px; }
+ body.analysis-page .analysis-card .analysis-badges { grid-column:1/-1; font-size:14px; }
+ .analysis-key-facts { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+ .analysis-key-facts>div:last-child:nth-child(odd) { grid-column:1/-1; }
+ .analysis-key-facts>div { padding:13px 12px; }
+ .analysis-key-facts dd { font-size:25px; }
+ .analysis-key-facts small { min-height:0; }
+ .analysis-candidate-cost { grid-template-columns:minmax(0,1fr); padding:14px; gap:8px; }
+ .analysis-candidate-cost>div>strong>span { margin-left:0; display:block; }
+ .analysis-candidate-cost>b { grid-row:2; }
+ .analysis-candidate-cost>b>span { font-size:28px; }
+ .analysis-condition-matches { grid-template-columns:1fr; gap:8px; }
+ .analysis-condition-matches>strong { padding-top:0; }
+ body.analysis-page .analysis-card .analysis-card-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+ body.analysis-page .analysis-card-actions>* { min-width:0; padding:10px 12px; }
+ body.analysis-page .analysis-card-actions>button:first-child { grid-column:1/-1; margin-right:0; }
+ body.analysis-page .analysis-card-actions>a:last-child:nth-child(2) { grid-column:1/-1; }
+ .analysis-card-questions>summary { padding:12px; }
+}
+/** SOFTM-CANDIDATE-FACTS END */

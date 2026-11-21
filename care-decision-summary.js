@@ -122,7 +122,7 @@
         const html = cells.map(({ label, value, detail }) => `<div class="care-decision-cell"><dt>${escape(label)}</dt><dd>${escape(value)}</dd>${detail ? `<span class="care-decision-context">${escape(detail)}</span>` : ''}</div>`).join('');
         return `<section class="care-decision-summary" aria-label="기관 판단 요약"><dl class="care-decision-grid" style="--care-decision-columns:${cells.length}">${html}</dl>${note ? `<p class="care-decision-note">${escape(note)}</p>` : ''}</section>`;
     }
-    globalThis.CareDecisionSummary = { render, review, renderReview, staffText, markerLines };
+    globalThis.CareDecisionSummary = { summary, render, review, renderReview, staffText, markerLines }; // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 맞춤 후보도 지도 목록과 같은 유형별 지표·누락 판정을 사용
     /** SOFTM-MARKER-INSIGHTS END */
 })();
 /** SOFTM-DECISION-SUMMARY END */

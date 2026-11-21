@@ -3,6 +3,12 @@ import { analyzeInstitutions, radiusBounds } from './care-analysis-engine.js?v=2
 import { resolveCoordinates } from './care-analysis-data.js?v=20260911-1';
 import { readOrigin, createOriginBinding } from './care-analysis-origin.js?v=20260911-binding1'; // SOFTM-ANALYSIS-ORIGIN 날짜:20260911 : 지도 위치와 현재 위치를 같은 취소 가능한 기본값으로 연결
 import { escapeHtml as esc, readJson, mapUrl, thumbnail, openComparison } from './care-photos-common.js?v=20260910-1';
+/** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 지도 목록과 맞춤 후보의 지표·비용 계산을 공유해 같은 기관의 값이 달라지지 않도록 연결 */
+import './care-decision-summary.js?v=20261121-candidates1';
+import './care-cost-rates.js?v=20260904-1';
+import './care-cost-engine.js?v=20260904-1';
+import './care-cost-preview.js?v=20261118-1';
+/** SOFTM-CANDIDATE-FACTS END */
 
 import { conditions as sharedConditions, saveConditions, ensureRecord, records as consultationRecords, saveRecord, questionId } from './care-workspace.mjs'; // SOFTM-MEMBERS 날짜:20261120 : 기존 조건·체크를 회원 작업공간과 연결
 import './care-shell.mjs';
@@ -312,6 +318,20 @@ function render() {
         <section class="analysis-stage-panel analysis-compare-panel" data-analysis-panel="compare" hidden></section><section class="analysis-stage-panel" data-analysis-panel="prepare" hidden></section><aside class="analysis-compare-tray" id="analysisCompareTray" aria-label="보관한 비교 후보"></aside>`;
     renderCards(); renderTray(); observeAnalysisEnd();
 }
+/** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 비교할 수치를 일정한 위치에 크게 표시하고 긴 질문은 필요할 때 펼쳐 읽도록 분리 */
+function candidateFacts(row, type, distance) {
+    const cells = [...CareDecisionSummary.summary(row, type).cells];
+    if (type === 'dementia' && !cells.some(cell => cell.label === '등록 정원')) {
+        cells.splice(1, 0, { label: '등록 정원', value: '유형별 확인', detail: '입소·방문 유형에 따라 다름' });
+    }
+    cells.unshift({ label: '기준지 거리', value: `${distance.toFixed(1)}km`, detail: '직선거리 기준' });
+    return `<dl class="analysis-key-facts" style="--analysis-fact-columns:${cells.length}">${cells.map(cell => `<div><dt>${esc(cell.label)}</dt><dd${cell.value === '미확인' ? ' class="is-unknown"' : ''}>${esc(cell.value)}</dd><small>${esc(cell.detail || (cell.label === '등록 정원' ? '현재 빈자리와 다름' : ''))}</small></div>`).join('')}</dl>`;
+}
+function candidateCost(row, type) {
+    const cost = CareCostPreview.build(type, row);
+    if (!cost) return '<section class="analysis-candidate-cost is-unavailable" aria-label="비용 안내"><div><strong>이용 비용</strong><p>이용 내용·기간에 따라 달라요. 기관 상담에서 확인해 주세요.</p></div><b>기관 확인 필요</b></section>';
+    return `<section class="analysis-candidate-cost" aria-label="월 예상 본인부담"><div><strong>월 예상 본인부담 <span>공통 조건 예시</span></strong><p>${esc(cost.conditions)}</p></div><b>약 <span>${esc(cost.amount)}</span></b><p class="analysis-cost-note">${esc(cost.year)}년 수가 · ${esc(cost.note)} · 기관별 견적이 아닙니다.</p></section>`;
+}
 function renderCards({ append = false } = {}) {
     const { report, chosen, input, summaries } = current;
     const confirmed = new Set(chosen.allConfirmed.map(entry => String(entry.row.i)));
@@ -320,25 +340,26 @@ function renderCards({ append = false } = {}) {
     if (!entries.length) host.innerHTML = '<p class="analysis-empty">이 항목에 해당하는 후보가 없습니다. 가까운 후보에서 공개 근거와 확인할 질문을 살펴보세요.</p>';
     for (const entry of entries.slice(start, limit)) {
         const { row, distance, conditions } = entry, photo = summaries?.[row.i];
-        const card = document.createElement('article'); card.className = 'analysis-card';
+        const card = document.createElement('article'); card.className = 'analysis-card'; card.dataset.institutionId = row.i;
+        const heading = document.createElement('header'); heading.className = 'analysis-card-heading';
         if (photo?.representative && photo.count > 0) {
-            const figure = thumbnail(photo.representative), button = figure.querySelector('button'); button.tabIndex = 0; button.dataset.analysisPhotos = row.i; button.setAttribute('aria-label', `${row.n} 등록사진 보기`); card.append(figure);
+            const figure = thumbnail(photo.representative), button = figure.querySelector('button'); button.tabIndex = 0; button.dataset.analysisPhotos = row.i; button.setAttribute('aria-label', `${row.n} 등록사진 보기`); heading.append(figure);
         } else {
-            const placeholder = document.createElement('div'); placeholder.className = 'analysis-card-placeholder'; placeholder.textContent = input.type === 'nursing-hospital' ? '의료기관 공개사진 미제공' : '등록사진 미확인'; card.append(placeholder);
+            const placeholder = document.createElement('div'); placeholder.className = 'analysis-card-placeholder'; placeholder.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M2 21h20M9 21v-5h6v5M8 7h2m4 0h2M8 11h2m4 0h2"/></svg><span>등록사진 미확인</span>'; heading.append(placeholder);
         }
         const body = document.createElement('div'); body.className = 'analysis-card-body';
         const selectedConditions = conditions.filter(condition => input.selected.has(condition.id)), selectedConfirmed = selectedConditions.filter(condition => condition.status === 'confirmed');
-        const reasons = [`선택 범위 안 · 직선 ${distance.toFixed(1)}km`];
-        if (input.type !== 'nursing-hospital' && /^[A-E]$/.test(row.g || row.ev?.grade || '')) reasons.push(evaluation(row, input.type));
-        if (['facility', 'daycare', 'short-stay', 'dementia'].includes(input.type) && Number(row.z) > 0) reasons.push(`공개 정원 ${row.z}명 확인`);
-        reasons.push(...selectedConfirmed.map(condition => `${condition.label} 확인`));
-        const verify = questions(entry).slice(0, 3), badge = selectedConditions.length ? `조건 확인 ${selectedConfirmed.length}/${selectedConditions.length}` : '거리순 후보';
-        body.innerHTML = `<div class="analysis-card-heading"><div><h3>${esc(row.n)}</h3><p class="analysis-card-address">${esc(row.a || '주소 미확인')}</p></div><div class="analysis-badges"><span>${esc(badge)}</span>${confirmed.has(String(row.i)) ? '<span>희망조건 모두 확인</span>' : ''}</div></div><section class="analysis-evidence"><h4>확인된 근거</h4><ul>${reasons.map(reason => `<li>${esc(reason)}</li>`).join('')}</ul></section><section class="analysis-verify"><h4>기관에 확인할 항목</h4><ul>${verify.map(question => `<li>${esc(question)}</li>`).join('')}</ul></section><div class="analysis-card-actions"><button type="button" data-analysis-save="${esc(row.i)}" aria-pressed="false">비교 후보에 담기</button><a href="${esc(mapUrl(input.type, row))}" rel="nofollow">기관 상세</a>${photo?.count > 0 ? `<button type="button" data-analysis-photos="${esc(row.i)}">사진 보기</button>` : ''}</div>`;
-        card.append(body); host.append(card);
+        const verify = questions(entry), badge = selectedConditions.length ? `선택 조건 ${selectedConfirmed.length}/${selectedConditions.length} 확인` : '가까운 거리순';
+        heading.insertAdjacentHTML('beforeend', `<div class="analysis-card-identity"><p class="analysis-card-type">${esc(row.tn || labels[input.type])}</p><h3>${esc(row.n)}</h3><p class="analysis-card-address">${esc(row.a || '주소 미확인')}</p></div><div class="analysis-badges"><span>${esc(badge)}</span>${selectedConditions.length && confirmed.has(String(row.i)) ? '<span>희망조건 모두 확인</span>' : ''}</div>`);
+        const statusLabels = { confirmed: '✓ 확인', different: '조건과 다름', unknown: '확인 필요' };
+        const matching = selectedConditions.length ? `<section class="analysis-condition-matches" aria-label="선택한 조건 확인"><strong>내가 선택한 조건</strong><ul>${selectedConditions.map(condition => `<li data-status="${esc(condition.status)}" title="${esc(condition.evidence)}"><span>${esc(condition.label)}</span><b>${statusLabels[condition.status]}</b></li>`).join('')}</ul></section>` : '';
+        body.innerHTML = `${candidateFacts(row, input.type, distance)}${candidateCost(row, input.type)}${matching}<p class="analysis-card-source">${input.type === 'nursing-hospital' ? '심평원 개설현황' : '국민건강보험공단 공개자료'} · 검색자료 기준 ${esc(report.sourceDate || '미확인')}</p><details class="analysis-card-questions"><summary>기관에 확인할 질문 <b>${verify.length}개</b><span aria-hidden="true">⌄</span></summary><p>${esc(CareDecisionSummary.review(row, input.type).note)}</p><ul>${verify.map(question => `<li>${esc(question)}</li>`).join('')}</ul></details><div class="analysis-card-actions"><button type="button" data-analysis-save="${esc(row.i)}" aria-pressed="false">비교 후보에 담기</button><a href="${esc(mapUrl(input.type, row))}" rel="nofollow">기관 상세</a>${photo?.count > 0 ? `<button type="button" data-analysis-photos="${esc(row.i)}">사진 보기</button>` : ''}</div>`;
+        card.append(heading, body); host.append(card);
     }
     $('analysisMore').hidden = entries.length <= limit;
     syncBasket(); scheduleAnalysisMore();
 }
+/** SOFTM-CANDIDATE-FACTS END */
 function renderTray() {
     const host = $('analysisCompareTray'); if (!host || !current) return;
     const rows = basketRows(), active = new Set(activeRows().map(row => String(row.i)));
@@ -378,7 +399,7 @@ function renderConsultation() {
 function syncBasket() {
     if (!current) return;
     comparisonSelection?.sync(basketRows(), false);
-    document.querySelectorAll('[data-analysis-save]').forEach(button => { const saved = current.basket.has(button.dataset.analysisSave); button.setAttribute('aria-pressed', String(saved)); button.textContent = saved ? '후보 보관됨' : '비교 후보에 담기'; });
+    document.querySelectorAll('[data-analysis-save]').forEach(button => { const saved = current.basket.has(button.dataset.analysisSave); button.setAttribute('aria-pressed', String(saved)); button.textContent = saved ? '후보 보관됨' : '비교 후보에 담기'; button.closest('.analysis-card')?.classList.toggle('is-saved', saved); }); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 담은 기관은 버튼과 카드 테두리에서 함께 구분
     renderTray(); setStep(currentStep, { focus: false });
 }
 async function shareComparison() {
