@@ -7,6 +7,7 @@
   "compatibility_date": "2026-11-18",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "preview_urls": false,
   "d1_databases": [
     { "binding": "DB", "database_name": "softm-homecare-members", "database_id": "a7670255-4de9-4a63-a8fc-445e6218fadd", "migrations_dir": "migrations" },
     { "binding": "INSTITUTIONS_DB", "database_name": "softm-homecare-pilot", "database_id": "b1068cbf-7f1e-4c28-99ea-8fb65da84b3c", "migrations_dir": "../cloudflare-homecare/migrations" }
@@ -16,7 +17,8 @@
     "FILE_STORAGE_PROVIDER": "supabase",
     "SUPABASE_URL": "https://feaouitfpiqjjqdxrtfx.supabase.co",
     "SUPABASE_DOCUMENTS_BUCKET": "homecare-documents",
-    "FILE_UPLOADS_ENABLED": "false",
+    // SOFTM-MEMBER-LIVE 날짜:20261121 : 사용자 요청에 따라 공식 사이트 기관 증빙 제출 개방
+    "FILE_UPLOADS_ENABLED": "true",
     "ENVIRONMENT": "production",
     "WEB_ORIGIN": "https://homecare.designboard.net",
     "API_ORIGIN": "https://api.homecare.designboard.net",
