@@ -1,3 +1,4 @@
+import {publicFacts,ServiceFactError,PILOT_STAGES,PILOT_SOURCES,readPilotEvent} from '../../homecare-service-facts.mjs'; // SOFTM-KEY 날짜:20261121 : 항목별 최신 운영정보 공개 조회
 import {
   EVENT_TYPES,
   ValidationError,
@@ -60,7 +61,7 @@ function failure(error) {
       { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } },
     );
   }
-  if (error instanceof HttpError || error instanceof StorageError) { // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 비밀값 없는 저장소 오류와 준비 상태를 전달
+  if (error instanceof HttpError || error instanceof StorageError || error instanceof ServiceFactError) { // SOFTM-SUPABASE-STORAGE 날짜:20261121 : 비밀값 없는 저장소 오류와 준비 상태를 전달
     return new Response(
       JSON.stringify({
         ok: false,
@@ -395,7 +396,10 @@ async function loadInstitution(env, institutionId, { publicOnly = false, include
 }
 
 async function getPublicInstitution(env, institutionId) {
-  return success(await loadInstitution(env, institutionId, { publicOnly: true }));
+  const data=await loadInstitution(env, institutionId, { publicOnly: true });
+  // SOFTM-KEY 날짜:20261121 : 추가 필드 조회 실패가 기존 소개·사진 API를 중단하지 않도록 보존
+  let serviceFacts=null;try{serviceFacts=(await publicFacts(env.DB,[institutionId]))[0]||null;}catch{}
+  return success({...data,serviceFacts});
 }
 
 async function servePublicPhoto(env, institutionId, photoId) {
@@ -1196,6 +1200,20 @@ async function routeRequest(request, env) {
     return success({ service: "homecare-pilot", status: "ok", billingEnabled: false });
   }
 
+  // SOFTM-KEY START 날짜:20261121 : 공개 일괄 조회는 50곳, 집계는 개인 답변 없이 일별 중복 제거
+  if(request.method==='GET'&&url.pathname==='/api/public/service-facts')return success(await publicFacts(env.DB,url.searchParams.has('ids')?url.searchParams.get('ids').split(','):undefined));
+  if(request.method==='POST'&&url.pathname==='/api/public/pilot-events'){
+    if(!request.headers.get('Origin'))throw new HttpError(403,'origin_required','서비스에서 이용해 주세요.');
+    const body=await readPilotEvent(request),id=body?.institutionId||'landing';if(!body||typeof body!=='object')throw new HttpError(400,'invalid_event','집계 항목을 확인해 주세요.');
+    if(!PILOT_STAGES.includes(body.stage)||!PILOT_SOURCES.includes(body.source))throw new HttpError(400,'invalid_event','집계 항목을 확인해 주세요.');
+    if(id==='landing'&&body.stage!=='visit')throw new HttpError(400,'invalid_event','기관을 확인해 주세요.');
+    if(id!=='landing'&&!(await publicFacts(env.DB,[id])).length)throw new HttpError(404,'not_enrolled','참여 기관이 아닙니다.');
+    const visitorId=validateVisitorId(body.visitorId),day=toServiceDateString();
+    const hash=await createDailyVisitorHash({secret:env.EVENT_HASH_SECRET,visitorId,day,institutionId:id,eventType:body.stage});
+    const recorded=await env.DB.prepare('INSERT OR IGNORE INTO service_pilot_events(day,institution_id,stage,source,visitor_hash,created_at) SELECT ?,?,?,?,?,? WHERE (SELECT count(*) FROM service_pilot_events WHERE day=?)<5000').bind(day,id,body.stage,body.source,hash,Math.floor(Date.now()/1000),day).run();
+    return success({recorded:Number(recorded?.meta?.changes||0)>0});
+  }
+  // SOFTM-KEY END
   let match;
   if (
     request.method === "GET" &&
@@ -1302,6 +1320,9 @@ export async function handleRequest(request, env) {
 }
 
 export async function handleScheduled(env) {
+  // SOFTM-KEY 날짜:20261121 : 시범 행동 집계는 90일 후 삭제
+  await env.DB.prepare('DELETE FROM service_pilot_events WHERE created_at<?').bind(Math.floor(Date.now()/1000)-90*86400).run();
+
   await env.DB.batch([
     env.DB.prepare("DELETE FROM event_dedup WHERE day < date('now', '+9 hours', '-8 days')"),
     env.DB.prepare(
