@@ -80,5 +80,5 @@ IA의 18개 화면은 위 표의 기존/신규 화면에 통합했다. 소개는
 - 회원 Worker dry-run 번들 성공. 운영 데이터·SNS·문자 발송에는 접근하지 않았으며 원격 배포를 수행하지 않았다. Android 네이티브 소스·산출물 변경은 없다.
 
 <!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 이전 로컬 R2 검증과 새 파일 저장소 연결 준비를 구분 -->
-2026-11-21 운영 파일 구성은 Supabase private 버킷으로 변경했다. 이전에 수행한 로컬 R2 에뮬레이터 검증은 당시 결과이며 운영 R2가 생성됐다는 뜻이 아니다. [새 파일 연결부](../services/homecare-storage/README.md)의 실제 버킷 시험은 통과했지만 Worker secret 등록·배포와 담당자의 실제 가입·증빙·사진 업로드는 미검증이다. 로그인 문제 보류 요청을 유지한다.
+2026-11-21 운영 파일 구성은 Supabase private 버킷으로 변경했다. 이전에 수행한 로컬 R2 에뮬레이터 검증은 당시 결과이며 운영 R2가 생성됐다는 뜻이 아니다. [파일 연결부](../services/homecare-storage/README.md)의 실제 버킷·Worker secret·배포 및 가상 기관의 API 검사 18개를 완료했다. 사용자가 로그인·API 주소 연결·실제 업로드 작업을 재개해 두 Worker 업로드를 활성화하고 Pages 게이트웨이와 카페24 CNAME을 구성했다. 공식 HTTPS·운영 브라우저·관리자 연결 상태는 [운영 기록](HOMECARE-DEPLOYMENT.md)을 따른다.
 <!-- SOFTM-SUPABASE-STORAGE END -->

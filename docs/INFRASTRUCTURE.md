@@ -161,9 +161,11 @@
 
 회원 D1에 `services/cloudflare-homecare-members/migrations/0002_care_recipient.sql`을 0001 다음으로 적용한다. 대상자 원문과 동의는 `care_recipients`, 보호자 연락처는 `users`에서 관리한다. `/api/me/care-recipient`는 본인 일반회원 쿠키·CSRF·revision을 검증하고 기관 Worker로 대상자 원문을 전달하지 않는다. 응답은 `Cache-Control: no-store`이며 정적 셸에 API 응답을 포함하지 않는다. 대상자 정보 삭제·보관소 삭제·탈퇴는 동의 기록도 삭제한다.
 
-공개 조건 매칭과 상담 질문은 기존 분석 엔진을 유지한다. 상담 회신 대상 표시는 계정 소유자 이름·휴대폰이며 실제 문자·이메일 전송 경로는 미연결이다. 이번 변경은 로컬 검증과 기능 브랜치 푸시 범위이며 운영 D1 적용·Worker 배포를 뜻하지 않는다.
+공개 조건 매칭과 상담 질문은 기존 분석 엔진을 유지한다. 상담 회신 대상 표시는 계정 소유자 이름·휴대폰이며 실제 문자·이메일 전송 경로는 미연결이다. 운영 D1에 0002를 적용하고 회원 Worker를 배포했다. 실제 웹 공개와 브라우저 검증 결과는 운영 연결 기록을 따른다. <!-- SOFTM-MEMBER-LIVE 날짜:20261121 : 이미 적용한 D1과 서버 상태를 최신화 -->
 <!-- SOFTM-GUARDIAN END -->
 
-<!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 파일 저장소 실제 준비와 미배포 상태 기록 -->
-기관 파일은 담당자가 웹 회원가입·기관 관리 화면에서 올린다. 운영 구성은 `services/homecare-storage/file-storage.mjs`를 통해 Supabase private 버킷에 연결한다. 2026-11-21 Free·카드 없음·추가 과금 제한과 파일 왕복·익명 거부·삭제를 확인했다. 실제 Worker secret·배포·회원 업로드는 아직 미완료이며 `FILE_UPLOADS_ENABLED=false`다. D1은 파일 키·권한·메타데이터만 보관한다. [운영 상태](HOMECARE-DEPLOYMENT.md), [저장소 구성·남은 작업](../services/homecare-storage/README.md)을 따른다.
+<!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 실제 파일 저장소·서버 배포와 웹 검증 상태를 구분 -->
+기관 파일은 담당자가 웹 회원가입·기관 관리 화면에서 올린다. 운영 구성은 `services/homecare-storage/file-storage.mjs`를 통해 Supabase private 버킷에 연결한다. 2026-11-21 Free·카드 없음·추가 과금 제한과 파일 왕복·익명 거부·삭제를 확인했다. 두 Worker secret·배포를 완료하고 사용자 지시로 `FILE_UPLOADS_ENABLED=true`를 적용했다. D1은 파일 키·권한·메타데이터만 보관한다. [운영 상태](HOMECARE-DEPLOYMENT.md), [저장소 구성·남은 작업](../services/homecare-storage/README.md)을 따른다.
+
+회원 API는 `api.homecare.designboard.net` → Cloudflare Pages `softm-homecare-api` → `MEMBERS` 서비스 바인딩 → `softm-homecare-members`로 연결한다. 카페24 DNS에는 이 서브도메인의 CNAME만 추가하며 기존 GitHub Pages 지도와 전체 네임서버는 유지한다. 게이트웨이에 저장소 비밀키나 DB를 추가하지 않는다. 공개 Bearer 헤더를 제거하고 기존 Secure·HttpOnly·SameSite=Lax 쿠키·Origin·CSRF 검증을 유지한다.
 <!-- SOFTM-SUPABASE-STORAGE END -->
