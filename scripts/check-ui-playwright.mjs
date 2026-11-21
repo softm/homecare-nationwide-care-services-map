@@ -148,6 +148,13 @@ async function run(c,width){
   await page.evaluate(()=>document.fonts.ready);
   await page.waitForTimeout(c.name.startsWith('map-')?4500:500);
   if(await page.locator('#welcomeAdDialog[open]').count())await page.locator('#welcomeAdClose').click();
+  /** SOFTM-BRAND-LOGO START 날짜:20261122 : 화면별 공통 헤더가 투명 배경 새 로고를 실제로 불러오는지 검증 */
+  const expectedBrand='dolbom-hannun-icon-20261122.png';
+  if(c.name==='map-daycare')assert.ok((await page.locator('.stitch-brand-icon').getAttribute('src')).endsWith(expectedBrand),'지도 헤더 새 로고');
+  if(c.name==='analysis')assert.ok((await page.locator('.analysis-brand-mark').getAttribute('src')).endsWith(expectedBrand),'맞춤찾기 헤더 새 로고');
+  if(c.name==='institution-profile')assert.ok((await page.locator('.portal-brand img').getAttribute('src')).endsWith(expectedBrand),'기관 관리 헤더 새 로고');
+  if(c.name==='facility')assert.ok((await page.locator('.hc-brand-icon').getAttribute('src')).endsWith(expectedBrand),'독립 상세 헤더 새 로고');
+  /** SOFTM-BRAND-LOGO END */
   if(c.name.startsWith('signup-')){
    const initial=c.name==='signup-institution'?'institution':'personal';
    assert.equal(await page.locator('[name=kind]:checked').inputValue(),initial);
@@ -169,7 +176,7 @@ async function run(c,width){
   if(c.name.startsWith('analysis')){
    assert.equal(await page.locator('#analysisTypeChoices input[type=radio]').count(),9,'9개 돌봄 유형 표시');
    assert.equal(await page.locator('.analysis-preferences').getAttribute('open'),'','조건 기본 펼침');
-   assert.ok((await page.locator('.hc-brand-icon').getAttribute('src')).endsWith('dolbom-hannun-icon-20261007.png'),'지도와 같은 대표 아이콘');
+   assert.ok((await page.locator('.hc-brand-icon').getAttribute('src')).endsWith(expectedBrand),'지도와 같은 대표 아이콘'); // SOFTM-BRAND-LOGO 날짜:20261122 : 새 투명 배경 로고를 공통 헤더에서 검증
    await page.locator('.analysis-recipient-button').first().click({trial:true});
   }
   if(c.action==='condition-choices'){
