@@ -302,6 +302,10 @@ async function run(c,width){
    }else assert.ok(await confirmation.isHidden(),'선택한 조건 또는 조건 없는 유형은 바로 검색');
    /** SOFTM-EMPTY-CONDITIONS END */
    await page.locator('[data-analysis-save]').first().waitFor({timeout:45000});
+   if(c.preferences?.length){
+    assert.equal(await page.locator('[data-analysis-view=confirmed]').getAttribute('aria-pressed'),'true','선택 조건 충족 후보를 기본 표시');
+    assert.equal(await page.locator('.analysis-condition-matches [data-status]:not([data-status=confirmed])').count(),0,'조건과 다르거나 미확인인 후보 기본 제외');
+   } // SOFTM-STRICT-CONDITION-FILTER 날짜:20261122 : 선택 조건이 배지 안내가 아니라 실제 기본 필터인지 검증
    /** SOFTM-CANDIDATE-FACTS START 날짜:20261121 : 공용 목록 값과 실제 표시·글자 크기·질문 펼침·담기 해제가 일치하는지 확인 */
    const card=page.locator('.analysis-card').first();
    result.candidateFacts=await page.evaluate(async type=>{

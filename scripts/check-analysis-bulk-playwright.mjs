@@ -21,6 +21,11 @@ export async function verifyAnalysisBulk(page, {out, width}) {
     const read = () => page.evaluate(() => ({saved:JSON.parse(sessionStorage.getItem('careCompare:v1:daycare')),active:JSON.parse(sessionStorage.getItem('careCompareActive:v1:daycare'))}));
     const back = () => page.locator('[data-analysis-panel=compare] [data-analysis-go=candidates]').first().click();
     const total = Number((await nearbyButton.textContent()).match(/(\d+)곳/)[1]);
+    assert.equal(await page.locator('[data-analysis-view=confirmed]').getAttribute('aria-pressed'), 'true', '선택 조건 충족 목록을 기본 표시');
+    const defaultIds = await ids();
+    const defaultGrades = await page.locator('.analysis-key-facts').evaluateAll(groups => groups.map(group => [...group.querySelectorAll('div')].find(cell => cell.querySelector('dt')?.textContent === '공단 평가')?.querySelector('dd')?.textContent));
+    assert.ok(defaultGrades.length >= 2 && defaultGrades.every(grade => /^[AB]등급$/.test(grade)), 'A·B 선택 시 C등급·미확인 기본 목록 제외');
+    await nearbyButton.click();
     const visible = await ids();
     assert.ok(total > 12 && visible.length === 12, '처음 표시한 12곳 이후에도 후보가 있는 실제 검색 결과');
     assert.equal(await nearestButton.textContent(), '가까운 3곳 바로 비교');
@@ -105,7 +110,7 @@ export async function verifyAnalysisBulk(page, {out, width}) {
     await page.locator('#analysisRun').click();
     await page.locator('[data-analysis-save]').first().waitFor({timeout:45000});
     await nearestButton.click();
-    assert.deepEqual((await read()).active, visible.slice(0,3));
+    assert.deepEqual((await read()).active, defaultIds.slice(0,3), '새 검색도 선택 조건 충족 후보로 바로 비교');
     return {total,initialRendered:visible.length,filters:[0,1,2,'confirmed'],previousPreserved:true,duplicates:false,persisted:true};
 }
 /** SOFTM-BULK-CANDIDATES END */
