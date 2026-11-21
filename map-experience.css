@@ -689,7 +689,7 @@ dialog.care-location-notice::backdrop { background:#132b4570; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid .search-btn { grid-column:1; grid-row:3; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid .care-mobile-filter-toggle { grid-column:2; grid-row:3; white-space:nowrap; }
 .care-map-page.care-mobile-filters-open .filters .filter-grid select { width:100%; min-width:0; box-sizing:border-box; font-size:14px; padding:8px; }
-.care-map-page.care-mobile-filters-open .filters .filter-grid input,.care-map-page.care-mobile-filters-open .filters .filter-grid button,.care-map-page.care-mobile-filters-open .filters .filter-grid select { min-height:44px; }
+.care-map-page.care-mobile-filters-open .filters .filter-grid input:not([type=checkbox]):not([type=radio]),.care-map-page.care-mobile-filters-open .filters .filter-grid button,.care-map-page.care-mobile-filters-open .filters .filter-grid select { min-height:44px; } /* SOFTM-FILTER-CHOICE 날짜:20261121 : 필터 펼침 상태에서도 라디오·체크박스 고유 크기를 유지 */
 /* SOFTM-FILTER-HIERARCHY END */
 
 /* SOFTM-FILTER-CLOSE START 날짜:20260910 : 펼친 조건은 상단 닫기와 바깥 영역으로 닫고 조회를 유일한 하단 실행으로 표시 */

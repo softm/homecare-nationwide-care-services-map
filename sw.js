@@ -20,5 +20,13 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fetch(request).then(response=>{if(response.ok)caches.open(CACHE_NAME).then(cache=>cache.put(pageKey,response.clone()));return response;}).catch(()=>caches.match(pageKey).then(hit=>hit||caches.match(ROOT))));return; // SOFTM-NAV-CACHE-PRIVACY 날짜:20261120 : 주소·검색·좌표 쿼리를 캐시 키에 남기지 않고 같은 화면 셸만 경로별로 보관
  }
  /** SOFTM-GUIDED-PWA END */
- event.respondWith(caches.open(CACHE_NAME).then(async cache=>{const cached=await cache.match(request,{ignoreSearch:true});const refresh=fetch(request).then(response=>{if(response.ok)cache.put(`${url.origin}${url.pathname}`,response.clone());return response;});if(cached){event.waitUntil(refresh.catch(()=>{}));return cached;}return refresh;}));
+ /** SOFTM-ASSET-VERSION START 날짜:20261121 : 새 CSS·모듈 버전을 이전 캐시로 바꾸지 않고 오프라인에서는 준비된 셸을 계속 사용 */
+ event.respondWith(caches.open(CACHE_NAME).then(async cache=>{
+  const bareKey=`${url.origin}${url.pathname}`,versioned=url.searchParams.has('v');
+  const cached=await cache.match(request,{ignoreSearch:!versioned});
+  const refresh=fetch(request).then(async response=>{if(response.ok)await cache.put(versioned?request:bareKey,response.clone()).catch(()=>{});return response;});
+  if(cached){event.waitUntil(refresh.catch(()=>{}));return cached;}
+  return refresh.catch(async error=>{const fallback=await cache.match(bareKey);if(fallback)return fallback;throw error;});
+ }));
+ /** SOFTM-ASSET-VERSION END */
 });

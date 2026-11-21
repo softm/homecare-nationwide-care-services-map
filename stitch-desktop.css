@@ -295,7 +295,7 @@ body.stitch-desktop .row .care-row-actions > :focus-visible,body.stitch-desktop 
  body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid #province { grid-column:1; width:100%; }
  body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid #city { grid-column:2; width:100%; }
  body.stitch-desktop:not(.care-mobile-filters-open) .filter-grid .care-mobile-filter-toggle { grid-column:3; background:#abefe8; color:#004541; border-radius:22px; }
- body.stitch-desktop .filter-grid :is(input,select,button) { min-height:46px; font-size:14px; }
+ body.stitch-desktop .filter-grid :is(input:not([type=checkbox]):not([type=radio]),select,button) { min-height:46px; font-size:14px; } /* SOFTM-FILTER-CHOICE 날짜:20261121 : 상세조건의 작은 선택 입력에는 텍스트 필드 최소 높이를 적용하지 않음 */
  body.stitch-desktop:not(.care-mobile-filters-open) .filters > .stitch-filter-summary:not([hidden]) { display:flex; position:absolute; top:146px; left:0; width:100%; padding:0 24px 14px; box-sizing:border-box; background:#fff; gap:6px; flex-wrap:wrap; }
  .stitch-filter-summary button { border:0; padding:5px 10px; border-radius:18px; font:inherit; font-size:12px; background:#e6eeff; color:#17332f; cursor:pointer; }
  body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:calc(202px + var(--stitch-filter-summary-height))!important; height:calc(100% - 202px - var(--stitch-filter-summary-height))!important; }
