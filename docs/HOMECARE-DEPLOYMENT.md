@@ -208,3 +208,15 @@ Node 22.13 이상을 사용한다. 이 PC의 기본 Node 20은 설치된 Wrangle
 - 지도·맞춤찾기·회원·상세·기관 관리 화면에서 동일한 여백 축소 자산과 깨진 이미지 여부를 검증한다.
 
 <!-- SOFTM-BRAND-TIGHT END -->
+
+## 2026-11-22 설치형 앱 아이콘 적용
+
+<!-- SOFTM-PWA-BRAND START 날짜:20261122 : 웹 헤더 로고를 설치형 PWA·iOS·파비콘까지 확장한 범위 기록 -->
+
+- 여백 축소 위치핀·집·하트 로고를 흰 배경 중앙에 배치해 `site-icon-192.png`, `site-icon-512.png`, `apple-touch-icon.png`를 생성했다.
+- 512px 아이콘은 Android maskable 안전영역 안에서 위치핀 끝과 외곽선이 잘리지 않도록 실제 마크를 약 78% 크기로 배치했다.
+- `favicon.ico`는 16·32·48·64·128·256px를 포함하고, `favicon.svg`도 같은 색과 형상으로 교체했다.
+- 매니페스트 아이콘과 첫 화면 링크에 `20261122-brand1` 버전을 붙여 이전 브라우저 캐시와 구분한다.
+- 변경 전 아이콘과 매니페스트는 `assets/brand/pwa-backup-20261122-before-tight/`에 보존한다.
+
+<!-- SOFTM-PWA-BRAND END -->
