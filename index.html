@@ -668,7 +668,7 @@ function focusMapCenter(marker){
 /** SOFTM-MAP-EXPERIENCE START 날짜:20260904 : 모바일 상세를 닫을 때 이전 목록과 스크롤로 복귀 */
 function focusCenter(id){if(CareListMode.isList()){const row=DATA.find(item=>item.i===id);if(row){clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);CareMapExperience.beginDetail(false,id);openDetail(row);CareDetailLayout.focus($('detailSheet'));}return;}/* SOFTM-LIST-MODE 날짜:20260930 : 순수 목록 상세는 지도와 좌표 확인 없이 즉시 표시 */preserveCareSelectionResults();/* SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 기관 확인 이동은 현재 결과와 순번 유지 */if(CareMapExperience.isBasketMap()&&!CareMapExperience.contains(id))CareMapExperience.exitBasketMap();/* SOFTM-BASKET-MAP 날짜:20260904 : 검색 목록의 다른 기관을 열면 원래 검색 지도로 복귀 */const c=DATA.find(x=>x.i===id);if(!c)return;CareMapExperience.beginDetail(mapReady&&markers.has(id),id);/* SOFTM-MARKER-PERSIST 날짜:20260915 : 상세 복귀에도 클릭한 기관 선택을 유지 */clearTimeout(detailMoveTimer);clearTimeout(markerBlinkTimer);restoreBlinkedMarker();$('detailSheet').hidden=true;$('detailSheet').style.visibility='';activeDetail=null;syncDetailOverlayChrome(false);/* SOFTM-DETAIL-CHROME 날짜:20261009 : 다른 기관으로 전환하기 전 이전 상세 오버레이 상태를 정리 *//* SOFTM-SELECTED-MARKER 날짜:20260914 : 목록과 마커 클릭에 동일한 선택 확대 적용 */focusMobileRow(id,false,true);if(!mapReady){openDetail(c);CareDetailLayout.focus($('detailSheet'));return}const marker=markers.get(id);if(!marker){toast('현재 지도영역에 표시된 마커가 없어 상세정보만 표시했습니다.');openDetail(c);CareDetailLayout.focus($('detailSheet'));return}if(!CareMapExperience.isBasketMap()&&!selected.has(id)){selected.add(id);marker.setMap(map);renderList()}clearTimeout(refreshTimer);skipIdleUntil=Date.now()+7000;if(window.innerWidth<=1000)document.querySelector('.map-card')?.scrollIntoView({behavior:'instant',block:'start'});openDetail(c,false);setStatus('선택 기관으로 이동 중',`${c.n} · 팝업에 가리지 않는 위치로 이동합니다.`);detailMoveTimer=setTimeout(()=>{if(markers.get(id)!==marker)return;map.panTo(focusMapCenter(marker));detailMoveTimer=setTimeout(()=>{detailMoveTimer=null;if(markers.get(id)!==marker)return;setStatus('선택 기관 확인 중',`${c.n} · 마커 강조 후 상세정보를 엽니다.`);blinkMarker(c,marker,()=>{if(markers.get(id)!==marker)return;$('detailSheet').style.visibility='';CareDetailLayout.focus($('detailSheet'));setStatus('선택 기관 상세',`${c.n} · 팝업을 닫아도 현재 지도 위치를 유지합니다.`)})},160)},0)} // SOFTM-POPUP-CONTEXT 날짜:20260924 : 기존 강조 대기 뒤 상세 조작으로 포커스를 옮기고 측면 패널의 가림을 피함
 /** SOFTM-MAP-EXPERIENCE END */
-/** SOFTM-PC-MARKER-SELECT START 날짜:20261010 : PC에서는 마커 첫 클릭을 목록 선택으로 끝내고 두 번째 클릭에서만 상세를 열어 탐색 흐름을 끊지 않음 */
+/** SOFTM-PC-MARKER-SELECT START 날짜:20261121 : 상세가 닫힌 PC 지도에서 첫 클릭은 목록 선택, 재클릭은 상세로 연결 */
 function markerSelectionRow(id){return [...document.querySelectorAll('#list .row,.care-basket-items [data-basket-id]')].find(row=>String(row.dataset.id||row.dataset.basketId)===String(id))}
 function scrollMarkerSelectionToList(id){
  const row=markerSelectionRow(id);if(!row)return;
@@ -683,11 +683,24 @@ function selectMarkerOnly(id){
  focusMobileRow(id,false,true);ensureMarkerSelectionInList(id);
  setStatus('선택 기관',`${c.n} · 한 번 더 누르면 상세정보를 엽니다.`);
 }
+/** SOFTM-MARKER-DETAIL-SWITCH START 날짜:20261121 : 열린 상세는 다른 마커 한 번 클릭으로 즉시 교체하고 지도 위치·최초 복귀 맥락을 보존 */
+function switchMarkerDetail(id){
+ const c=DATA.find(row=>row.i===id);if(!c||String(activeDetail?.i)===String(id))return;
+ clearTimeout(detailMoveTimer);detailMoveTimer=null;
+ clearTimeout(markerBlinkTimer);markerBlinkTimer=null;restoreBlinkedMarker();
+ preserveCareSelectionResults();
+ pcMarkerSelectedId=String(id);CareMapExperience.beginDetail(false,id);
+ openDetail(c);focusMobileRow(id,false,true);
+ CareDetailLayout.scroller($('detailBody')).scrollTop=0;CareDetailLayout.focus($('detailSheet'));
+ setStatus('선택 기관 상세',`${c.n} · 다른 마커를 누르면 상세정보가 바로 바뀝니다.`);
+}
 function handleMarkerClick(id){
+ if(activeDetail&&!$('detailSheet').hidden){switchMarkerDetail(id);return}
  if(window.innerWidth<=1000){careMapFocus?.enter();focusCenter(id);return}
  if(String(pcMarkerSelectedId)===String(id)&&mobileActiveMarker===markers.get(id)){focusCenter(id);return} // SOFTM-PC-SELECTION-RESTORE 날짜:20261010 : 목록에서 실제 선택이 바뀐 경우 오래된 ID로 상세를 열지 않음
  pcMarkerSelectedId=String(id);selectMarkerOnly(id);
 }
+/** SOFTM-MARKER-DETAIL-SWITCH END */
 /** SOFTM-PC-MARKER-SELECT END */
 /** SOFTM-SEARCH-FEEDBACK START 날짜:20260904 : 위치 확인부터 화면 반영까지 같은 요청으로 묶어 진행과 완료 건수를 전달 */
 /** SOFTM-MARKER-CLEAR-YIELD START 날짜:20260916 : 조건 변경 때 기존 수천 마커 제거도 분할하며 이전 마커 정리가 새 조회의 마커를 건드리지 않도록 분리 */
