@@ -1,5 +1,14 @@
 # 돌봄한눈 운영 연결 기록
 
+## 2026-11-24 목록 유형 선택 스크롤 운영 반영
+
+- 운영 `main`을 `26b1dbd9372b016d86bbff180a1f30a11e4157ec`까지 빠른 전진으로 반영했다.
+- 목록 화면의 유형 선택 패널을 결과 영역 좌표에 맞춘 고정 독립 스크롤 레이어로 변경하고 `care-category-picker.css/js?v=20261124-scroll2`를 배포했다.
+- 운영 `https://homecare.designboard.net/index.html?type=daycare&mode=list`의 1808×893 숨김 브라우저에서 패널 `clientHeight 773`, `scrollHeight 1308`, `overflow-y:auto`, `position:fixed`를 확인했다.
+- 마지막 `요양병원` 항목을 실제 선택해 `type=nursing-hospital&mode=list`로 전환되는 것을 확인했다. 실제 계정·기관 자료·API 쓰기는 사용하지 않았다.
+
+<!-- SOFTM-TYPE-LIST-SCROLL-LIVE 날짜:20261124 : 사용자가 보고한 운영 목록 스크롤 재현과 실제 배포 검증 기록 -->
+
 <!-- SOFTM-LIVE-D1 START 날짜:20261121 : 서버·DNS·운영 웹과 브라우저 검증 결과를 구분 -->
 
 ## 2026-11-21 기준 확인 결과
