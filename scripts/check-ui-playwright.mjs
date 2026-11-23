@@ -353,6 +353,13 @@ async function run(c,width){
     const buttons=page.locator('[data-analysis-save]');
     await buttons.nth(0).click();await buttons.nth(1).click();
     await page.locator('#analysisCompareTray [data-analysis-go=compare]').click();
+    /** SOFTM-MOBILE-COMPARE START 날짜:20261124 : 비교 클릭 직후 표 시작점 이동·하단 바 제거·모바일 가로 잘림을 실제 화면에서 검증 */
+    if(c.action==='analysis-compare'){
+     await page.waitForFunction(()=>{const panel=document.querySelector('[data-analysis-panel="compare"]');return panel&&!panel.hidden&&panel.getBoundingClientRect().top<innerHeight;});
+     const compareLayout=await page.evaluate(()=>{const panel=document.querySelector('[data-analysis-panel="compare"]'),tray=document.querySelector('#analysisCompareTray'),main=panel.querySelector('.care-compare-main'),heading=panel.querySelector('h2').getBoundingClientRect();return {headingVisible:heading.top>=0&&heading.top<innerHeight,trayHidden:getComputedStyle(tray).display==='none',fits:main.scrollWidth<=main.clientWidth+1};});
+     assert.equal(compareLayout.headingVisible,true,'비교 제목으로 화면 이동');assert.equal(compareLayout.trayHidden,true,'비교 중 하단 바 숨김');if(width<=640)assert.equal(compareLayout.fits,true,'모바일 비교표 가로 잘림 없음');
+    }
+    /** SOFTM-MOBILE-COMPARE END */
     if(c.action==='analysis-prepare')await page.locator('[data-analysis-panel=compare] [data-analysis-go=prepare]').click();
    }
   }

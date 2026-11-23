@@ -116,5 +116,17 @@ test('맞춤분석은 네 단계와 세 곳 비교·세션 상담 준비를 제�
     assert.match(indexHtml,/CareComparisonWorkspace\.render/);assert.match(indexHtml,/compareCandidates\.length<2/);
     assert.match(indexHtml,/compareFullOpen=.*\.care-full-compare/); // SOFTM-COMPARE-TABLE-OPEN 날짜:20261120 : 정렬 뒤 전체 표 펼침 상태를 유지하는 회귀 방지
 });
+/** SOFTM-MOBILE-COMPARE START 날짜:20261124 : 모바일 비교 진입·겹침 제거·한 화면 표 배치를 정적 검증 */
+test('모바일 비교는 표 시작점으로 이동하고 세 기관을 화면 폭 안에 표시한다',()=>{
+    const analysisCss=readFileSync(new URL('../care-analysis.css',import.meta.url),'utf8');
+    const compareCss=readFileSync(new URL('../care-comparison-workspace.css',import.meta.url),'utf8');
+    assert.match(analysisJs,/next==='compare'\|\|next==='prepare'/);
+    assert.match(analysisJs,/scrollIntoView\(\{block:'start'/);
+    assert.match(analysisCss,/data-analysis-step="compare"[\s\S]*\.analysis-compare-tray\{display:none\}/);
+    assert.match(compareCss,/grid-template-columns:repeat\(var\(--care-compare-count\),minmax\(0,1fr\)\)/);
+    assert.match(compareCss,/\.care-compare-label\{grid-column:1\/-1/);
+    assert.doesNotMatch(compareCss,/@media\(max-width:640px\)[^{]*\{[^}]*min-width:calc\(116px/);
+});
+/** SOFTM-MOBILE-COMPARE END */
 /** SOFTM-GUIDED-COMPARE END */
 /** SOFTM-COMPARE-EVIDENCE END */

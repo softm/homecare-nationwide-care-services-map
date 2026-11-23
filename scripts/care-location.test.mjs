@@ -46,6 +46,14 @@ test('취소한 검색은 후속 위치 요청을 시작하지 않음', async ()
     await assert.rejects(api.requestPosition(env, { isCurrent: () => false }), error => error.reason === 'timeout');
     assert.equal(env.calls.length, 1);
 });
+/** SOFTM-QUICK-LOCATION START 날짜:20261124 : 첫 화면 자동 요청은 짧게 한 번만 시도하고 수동 요청은 기존 정밀 재시도를 유지 */
+test('첫 화면 빠른 위치 확인은 6.5초 한 번만 사용한다', async () => {
+    const env=device([{code:3},point]);
+    await assert.rejects(api.requestPosition(env,{quick:true}),error=>error.reason==='timeout');
+    assert.equal(env.calls.length,1);assert.equal(env.calls[0].timeout,6500);assert.equal(env.calls[0].enableHighAccuracy,false);
+    assert.deepEqual(await api.requestPosition(env),point);assert.equal(env.calls.length,2);
+});
+/** SOFTM-QUICK-LOCATION END */
 /** SOFTM-LOCATION-NO-SCROLL START 날짜:20260914 : 모바일 권한 안내가 모든 기기 카드를 쌓아 내부 스크롤로 돌아가지 않도록 검사 */
 test('위치 권한 안내는 기기별 한 경로만 표시하고 모달 내부 스크롤을 사용하지 않음', () => {
     const source = readFileSync(new URL('../care-location.js', import.meta.url), 'utf8');
@@ -98,7 +106,7 @@ test('통합 지도 현재 위치 성공은 해당 좌표와 주변 조회를 �
     class LatLng { constructor(lat, lng) { this.lat = lat; this.lng = lng; } }
     const context = { mapReady: true, DATA: [], baseMarker: null, skipIdleUntil: 0, $: () => button,
         initialLocationViewport: null, refreshTimer: null, careViewportKey: () => 'national', clearTimeout() {}, // SOFTM-LOCATION-PREVIEW 날짜:20260913 : 첫 화면 조회 보류를 포함해 위치 성공 경로를 회귀검사
-        CareLocation: { request: async options => { requested++; assert.equal(options.isCurrent(), true); return point; }, hideNotice() {} },
+        CareLocation: { request: async options => { requested++; assert.equal(options.isCurrent(), true);assert.equal(options.quick,true); return point; }, hideNotice() {} },
         beginCareQuery: () => ({ current: () => true }), hideLoading() {}, showLoading() {}, setStatus() {}, cachedCoord() {}, hav() {},
         window: { naver: { maps: { LatLng, Point: class {}, Marker: class {} } } },
         map: { setCenter(value) { centered = value; }, setZoom(value) { zoom = value; }, fitBounds() { fitted++; } },

@@ -47,8 +47,20 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261121-type1/); // SOFTM-TYPE-SELECTOR 날짜:20261121 : 현재 유형 표시가 반영된 자산 버전 확인
+ assert.match(index,/care-category-picker\.js\?v=20261124-scroll1/); // SOFTM-TYPE-LIST-SCROLL 날짜:20261124 : 목록 유형 스크롤 수정 자산 버전 확인
 });
+/** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 짧은 목록 화면에서 방문목욕 아래 유형도 자체 스크롤로 접근 가능한지 정적 검증 */
+test('목록 유형 패널은 남은 화면 높이를 사용하고 마지막 유형까지 자체 스크롤한다',()=>{
+ const css=readFileSync(new URL('../care-category-picker.css',import.meta.url),'utf8');
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ assert.match(css,/\[data-care-mode="list"\] \.care-type-panel\{[\s\S]*height:var\(--care-type-list-space/);
+ assert.match(css,/overflow-y:auto!important/);
+ assert.match(css,/padding-bottom:calc\(28px \+ env\(safe-area-inset-bottom\)\)/);
+ assert.match(source,/root\.visualViewport\?\.height\|\|root\.innerHeight/);
+ assert.match(source,/--care-type-list-space/);
+ assert.match(source,/function open\(\)[\s\S]*positionPanel\(\);resize\(\)/);
+});
+/** SOFTM-TYPE-LIST-SCROLL END */
 test('첫 유형 선택은 손대지 않은 전국 지도를 넘기지 않고 일반 진입은 현재 위치를 우선한다',()=>{
  const source=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const picker=source.slice(source.indexOf('function mountCategoryPicker()'),source.indexOf('function bootUnselected()'));
