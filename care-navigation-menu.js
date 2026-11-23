@@ -13,6 +13,7 @@
         ['맞춤조건', '내 상황에 맞는 기관 조건을 선택해요', '.care-match-start', '✓'],
         ['사진 찾기', '기관 사진을 살펴보고 비교해요', '.care-photo-map-entry', '▧'], // SOFTM-PHOTO-DIRECT 날짜:20260930 : 지도 선행 없이 사진을 볼 수 있는 실제 동선으로 안내
         ['주변분석', '보고 있는 지역의 돌봄 환경을 살펴봐요', '.care-analysis-entry', '◎'],
+        ['수요·공급 지도', '돌봄기관이 부족할 가능성이 큰 지역을 살펴봐요', 'a[href="care-gap-map.html"]', '▦'], // SOFTM-CARE-GAP-ENTRY 날짜:20261123 : 모바일에서도 숨겨진 헤더 링크를 공용 메뉴로 연결
         ['이용 안내', '현재 돌봄 유형의 이용 방법을 확인해요', '.care-context-links .care-context-guide', '?'],
         ['서비스 소개', '돌봄한눈과 자료 출처를 알아봐요', '.care-context-links a[href="about.html"]', 'ⓘ']
     ];

@@ -1,0 +1,98 @@
+<!doctype html>
+<!-- SOFTM-CARE-GAP-PAGE START 날짜:20261123 : 노인인구·장기요양 인정자·기관 공급을 지역별 열지도로 비교 -->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#133f54">
+  <meta name="dcterms.modified" content="2026-11-23">
+  <title>돌봄기관 부족 가능지역 지도 | 돌봄한눈</title>
+  <meta name="description" content="지역별 65세 이상 인구, 장기요양 인정자 비율과 돌봄기관 수를 열지도 스펙트럼으로 비교해 공급 압력이 높은 지역을 살펴보세요.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <link rel="canonical" href="https://homecare.designboard.net/care-gap-map.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="돌봄한눈">
+  <meta property="og:title" content="돌봄기관 부족 가능지역 지도 | 돌봄한눈">
+  <meta property="og:description" content="지역별 돌봄 수요와 기관 공급을 같은 지도에서 비교합니다.">
+  <meta property="og:url" content="https://homecare.designboard.net/care-gap-map.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"돌봄기관 부족 가능지역 지도","url":"https://homecare.designboard.net/care-gap-map.html","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"JavaScript","isAccessibleForFree":true,"inLanguage":"ko-KR","dateModified":"2026-11-23","isPartOf":{"@type":"WebSite","name":"돌봄한눈","url":"https://homecare.designboard.net/"}}</script>
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 64x64">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="manifest.webmanifest?v=20261122-brand1">
+  <link rel="stylesheet" href="pretendard-fonts.css?v=1.3.9">
+  <link rel="stylesheet" href="care-gap-map.css?v=20261123-1">
+  <script src="hannun-pwa.js?v=20261119" defer></script>
+  <script type="module" src="care-gap-map.js?v=20261123-1"></script>
+</head>
+<body>
+  <a class="gap-skip" href="#gapDashboard">지도와 지역 목록으로 건너뛰기</a>
+  <header class="gap-header">
+    <a class="gap-brand" href="index.html"><img src="assets/brand/dolbom-hannun-icon-20261122-tight.png" width="40" height="40" alt=""><span>돌봄한눈<small>돌봄 수요·공급 지도</small></span></a>
+    <nav aria-label="주요 메뉴"><a href="index.html">기관 지도</a><a href="care-analysis.html">맞춤 찾기</a><a href="about.html">서비스 소개</a></nav>
+  </header>
+
+  <main>
+    <section class="gap-hero" aria-labelledby="gapTitle">
+      <div>
+        <p class="gap-eyebrow">전국 돌봄 수요·공급 한눈보기</p>
+        <h1 id="gapTitle">돌봄기관이 부족할 가능성이 높은 지역은 어디일까요?</h1>
+        <p>65세 이상 인구와 장기요양 인정자, 실제 공단 기관 목록을 시군구 단위로 겹쳐 봅니다. 붉을수록 선택한 돌봄 유형의 기관 한 곳이 담당할 수요가 상대적으로 큽니다.</p>
+      </div>
+      <div class="gap-hero-note"><strong>해석할 때 꼭 확인하세요</strong><span>이 지도는 공급 우선 검토를 위한 비교 지표입니다. 기관의 정원·빈자리·이동시간을 반영한 확정 부족 판정은 아닙니다.</span></div>
+    </section>
+
+    <section class="gap-dashboard" id="gapDashboard" aria-label="지역별 돌봄 수요와 기관 공급 분석">
+      <div class="gap-controls">
+        <label>돌봄기관 유형<select id="gapType"><option value="all">전체 장기요양기관</option></select></label>
+        <fieldset><legend>지도 색상 기준</legend><div class="gap-metric-tabs" id="gapMetricTabs"><button type="button" data-metric="supply" aria-pressed="true">돌봄 공급 압력</button><button type="button" data-metric="elderly" aria-pressed="false">65세 이상 비율</button><button type="button" data-metric="recognition" aria-pressed="false">장기요양 인정 비율</button></div></fieldset>
+        <p id="gapMetricHelp">장기요양 인정자 수를 기관 수로 나눠 지역 사이의 상대 공급 압력을 비교합니다.</p>
+      </div>
+
+      <div class="gap-summary" aria-label="전국 요약">
+        <article><span>65세 이상 인구</span><strong id="gapElderlyTotal">확인 중</strong><small id="gapElderlyRate">주민등록인구 기준</small></article>
+        <article><span>65세 이상 장기요양 인정자</span><strong id="gapRecognizedTotal">확인 중</strong><small id="gapRecognizedRate">공단 등급판정 기준</small></article>
+        <article><span id="gapInstitutionLabel">전체 장기요양기관</span><strong id="gapInstitutionTotal">확인 중</strong><small>기관기호 중복 제거</small></article>
+        <article><span>비교 지역</span><strong id="gapRegionTotal">확인 중</strong><small>동일 산식으로 비교</small></article>
+      </div>
+
+      <div class="gap-layout">
+        <section class="gap-map-card" aria-labelledby="gapMapTitle">
+          <header><div><p>지도 스펙트럼</p><h2 id="gapMapTitle">돌봄 공급 압력</h2></div><button type="button" id="gapResetMap">전국 보기</button></header>
+          <div class="gap-map-wrap">
+            <div id="careGapMap" role="img" aria-label="전국 시군구별 돌봄 수요와 기관 공급 열지도"></div>
+            <div class="gap-map-loading" id="gapMapLoading" role="status"><span></span><strong>지역 통계를 지도에 연결하고 있습니다</strong></div>
+            <div class="gap-map-message" id="gapMapMessage" role="status" hidden></div>
+            <div class="gap-map-key"><span class="gap-bubble-example">42</span><span>원 안 숫자는 선택한 유형의 기관 수입니다.</span></div>
+          </div>
+          <div class="gap-legend" id="gapLegend" aria-label="지도 색상 범례"></div>
+          <p class="gap-map-caption">지역을 누르면 고령인구·장기요양 인정자·기관 수와 산식이 오른쪽에 표시됩니다. 지도 조작이 어려우면 지역 목록에서 같은 정보를 확인할 수 있습니다.</p>
+        </section>
+
+        <aside class="gap-explorer" aria-labelledby="gapExplorerTitle">
+          <header><p>지역 탐색</p><h2 id="gapExplorerTitle">부족 가능지역 살펴보기</h2></header>
+          <div class="gap-region-filter"><label>시도<select id="gapProvince"><option value="">전국</option></select></label><label>지역명 검색<input id="gapSearch" type="search" maxlength="30" placeholder="예: 부천, 강진"></label></div>
+          <section class="gap-selected" id="gapSelected" aria-live="polite"><p>지도나 목록에서 지역을 선택해 주세요.</p></section>
+          <div class="gap-ranking-head"><strong id="gapRankingTitle">공급 압력이 높은 지역</strong><span id="gapRankingCount"></span></div>
+          <ol class="gap-ranking" id="gapRanking"></ol>
+          <button class="gap-more" id="gapMore" type="button" hidden>지역 더 보기</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="gap-method" aria-labelledby="gapMethodTitle">
+      <div><p>데이터와 산식</p><h2 id="gapMethodTitle">어떻게 부족 가능성을 비교했나요?</h2></div>
+      <div class="gap-method-grid">
+        <article><strong>돌봄 수요 지표</strong><p>시군구별 65세 이상 주민 중 장기요양 1~5등급 또는 인지지원등급을 인정받은 인원을 사용합니다. 공단이 1~4명을 <code>*</code>로 비식별한 셀은 1~4명 범위를 보존하고, 지도 색상 계산에만 중간값 2.5명을 사용합니다.</p></article>
+        <article><strong>기관 공급 지표</strong><p>돌봄한눈이 수집한 공단 기관 목록에서 기관기호를 지역·급여유형별로 중복 제거합니다. 전체 기관은 요양시설·주야간보호·방문요양·방문간호·방문목욕·단기보호·복지용구를 합쳐 중복 제거합니다.</p></article>
+        <article><strong>열지도 스펙트럼</strong><p><b>65세 이상 장기요양 인정자 ÷ 선택 유형 기관 수</b>를 전국 230개 비교 지역 안에서 상대 순위로 나눕니다. 기관이 0곳이면 가장 높은 공급 압력으로 표시합니다.</p></article>
+        <article><strong>확정 부족 판정이 아닌 이유</strong><p>기관 수만으로 실제 이용 가능 정원, 서비스 권역, 대기기간, 교통 접근성을 알 수 없습니다. 붉은 지역은 추가 확인 우선순위이며 정책·입지 판단에는 정원과 이용실적을 함께 확인해야 합니다.</p></article>
+      </div>
+      <details><summary>자료 기준일과 원문 보기</summary><ul id="gapSources"><li>자료 정보를 불러오고 있습니다.</li></ul></details>
+    </section>
+  </main>
+
+  <footer class="gap-footer"><p>돌봄한눈은 공개자료를 비교하기 쉽게 정리한 독립 정보 서비스입니다. 장기요양 자격 판정이나 기관의 실제 이용 가능 여부를 보증하지 않습니다.</p><div><a href="data-status.html">자료 수집 현황</a><a href="privacy.html">개인정보처리방침</a></div></footer>
+</body>
+</html>
+<!-- SOFTM-CARE-GAP-PAGE END -->

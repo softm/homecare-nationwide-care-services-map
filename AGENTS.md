@@ -116,6 +116,7 @@
 ## 데이터 원칙
 
 - 원본은 `source-data`에 보존한다.
+- 수요·공급 지도는 `care-gap-map.html`과 `data/care-gap/regions.json`을 사용한다. 65세 이상 인구·장기요양 인정자·기관기호 중복 제거 수를 시군구 단위로 결합하며, 공급 압력은 `65세 이상 장기요양 인정자 ÷ 선택 유형 기관 수`의 전국 상대 순위다. 이를 정원·빈자리·이동시간을 반영한 확정 부족 판정으로 표현하지 않는다. 재생성·행정구역 보정·자료 기준일은 `scripts/build-care-gap-map.mjs`와 `docs/HOMECARE-CARE-GAP-MAP.md`를 함께 갱신한다. <!-- SOFTM-CARE-GAP-POLICY 날짜:20261123 : 지도 지표의 산식·한계·갱신 경계를 유지 -->
 - `data/care/*.json.gz`·`manifest.json`은 수집 JSON에서 생성한다. 직접 수정하거나 기존 기관 데이터 JS를 다시 만들지 않는다. <!-- SOFTM-DATA-UNIFIED 날짜:20260904 : 지도 입력을 data로 통일 -->
 - 데이터를 재생성하면 `npm run check`로 개수·중복·참조 누락을 확인한다.
 - 공단 상세·사진은 `data/nhis`의 정적 JSON을 단일 기준으로 사용하고 두 지도가 `nhis-static-data.js`를 공유한다. // SOFTM-NHIS-POLICY 날짜:20260902 : 실시간 공단 크롤링 서버가 다시 생기지 않도록 정적 배포 구조를 고정
