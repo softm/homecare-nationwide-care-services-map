@@ -62,6 +62,7 @@ localScripts('about.html'); // SOFTM-BRAND-IDENTITY 날짜:20260904 : 신규 소
 localScripts('service-guide.html'); // SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 전체 4단계 여정의 고정 안내 주소와 공용 스타일 의존성을 검사
 localScripts('data-status.html'); // SOFTM-DATA-STATUS 날짜:20260910 : 수집 현황 페이지의 정적 의존성이 배포에서 빠지지 않도록 검사
 localScripts('care-cost.html'); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 공통 비용 화면의 스크립트와 공식 요금 계산 경계도 배포 전에 확인
+localScripts('care-gap-map.html'); // SOFTM-CARE-GAP 날짜:20261123 : 수요·공급 지도에 필요한 로컬 모듈이 배포에서 빠지지 않도록 검사
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-cost.test.mjs')], { stdio: 'inherit' }); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 감경·면제·한도·등급 조건의 예산 회귀를 정기 검사에 포함
 
 execFileSync(process.execPath, ['--test', path.join(root, 'scripts/care-basket.test.mjs')], { stdio: 'inherit' }); // SOFTM-BASKET-TEST 날짜:20260904 : 비교함 순서·검색 복귀·늦은 경로 취소를 정기 검사에 포함
@@ -152,6 +153,7 @@ for (const [htmlFile, publicUrl] of [['index.html', `${publicOrigin}/`], ...long
 const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
 const expectedSitemapUrls = [
   `${publicOrigin}/`,
+  `${publicOrigin}/care-gap-map.html`, // SOFTM-CARE-GAP 날짜:20261123 : 수요·공급 지도의 고정 공개 주소를 검색 대표 목록에 포함
   `${publicOrigin}/service-guide.html`, // SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 전체 이용 여정의 고정 주소와 사이트맵 수정일을 유지
   `${publicOrigin}/about.html`, // SOFTM-BRAND-IDENTITY 날짜:20260904 : 유형 안내 외에 독립 서비스의 소개 문서도 검색 대표 목록에 포함
   `${publicOrigin}/data-status.html`, // SOFTM-DATA-STATUS 날짜:20260910 : 공개 수집 현황의 대표 주소가 사이트맵에서 누락되지 않도록 검사
@@ -166,6 +168,7 @@ indexablePages.push(['service-guide.html', `${publicOrigin}/service-guide.html`]
 indexablePages.push(['data-status.html', `${publicOrigin}/data-status.html`]); // SOFTM-DATA-STATUS 날짜:20260910 : 현황 페이지의 공개 대표 주소와 구조화 데이터를 함께 검사
 indexablePages.push(['care-cost.html', `${publicOrigin}/care-cost.html`]); // SOFTM-CARE-COST-CHECK 날짜:20260904 : 비용 안내의 브랜드·대표 주소·구조화 데이터도 함께 검사
 indexablePages.push(['advertise.html', `${publicOrigin}/advertise.html`]); // SOFTM-B2B-REVENUE 날짜:20260917 : 상품 안내도 검색 대표 메타를 검증
+indexablePages.push(['care-gap-map.html', `${publicOrigin}/care-gap-map.html`]); // SOFTM-CARE-GAP 날짜:20261123 : 수요·공급 지도의 canonical·OG·구조화 데이터를 함께 검사
 for (const [htmlFile, canonical] of indexablePages) {
   const source = read(htmlFile);
   if (!source.includes('<meta name="robots" content="index,follow')) fail(`${htmlFile}: 검색 허용 robots 메타 누락`);
