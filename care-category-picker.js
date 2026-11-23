@@ -112,7 +112,15 @@
     const host=isMap?document.body:document.querySelector('.results');
     if(panel.parentElement!==host)host.append(panel);
     panel.classList.toggle('care-type-map-overlay',isMap);
-    if(!isMap||panel.hidden)return;
+    if(panel.hidden)return;
+    /** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 고정 헤더·검색 레일 아래의 실제 가용 높이를 목록 유형 패널에 전달 */
+    if(!isMap){
+     const viewportHeight=root.visualViewport?.height||root.innerHeight;
+     const top=Math.max(0,panel.getBoundingClientRect().top);
+     panel.style.setProperty('--care-type-list-space',`${Math.max(240,viewportHeight-top-8)}px`);
+     return;
+    }
+    /** SOFTM-TYPE-LIST-SCROLL END */
     const rect=document.querySelector('#naverMap').getBoundingClientRect();
     const ad=document.querySelector('.care-list-ad-zone:not([hidden])');
     const top=Math.max(0,rect.top),bottom=Math.min(root.innerHeight,rect.bottom,ad?ad.getBoundingClientRect().top:root.innerHeight);
@@ -139,7 +147,7 @@
   }
   const expandButton=panel.querySelector('.care-type-expand');panel.querySelector('header').insertBefore(expandButton,panel.querySelector('[data-close]'));
   let opener=toggle,previousInert=false,previousSaved=false;
-  function open(){opener=document.activeElement===document.body?toggle:document.activeElement;previousSaved=document.body.dataset.careWorkspace==='saved';if(previousSaved)document.getElementById('careSearchTab')?.click();if(document.body.classList.contains('care-mobile-filters-open'))document.querySelector('.care-filter-panel-close')?.click();const mapCard=document.querySelector('.map-card');previousInert=mapCard.inert;mapCard.inert=false;panel.hidden=false;document.body.classList.add('care-type-open');toggle.setAttribute('aria-expanded','true');resize();panel.querySelector('h2').focus({preventScroll:true});}
+  function open(){opener=document.activeElement===document.body?toggle:document.activeElement;previousSaved=document.body.dataset.careWorkspace==='saved';if(previousSaved)document.getElementById('careSearchTab')?.click();if(document.body.classList.contains('care-mobile-filters-open'))document.querySelector('.care-filter-panel-close')?.click();const mapCard=document.querySelector('.map-card');previousInert=mapCard.inert;mapCard.inert=false;panel.hidden=false;document.body.classList.add('care-type-open');toggle.setAttribute('aria-expanded','true');positionPanel();resize();panel.querySelector('h2').focus({preventScroll:true});} // SOFTM-TYPE-LIST-SCROLL 날짜:20261124 : 패널을 연 즉시 남은 화면 높이를 다시 계산
   function close(){document.querySelector('.map-card').inert=previousInert;panel.hidden=true;document.body.classList.remove('care-type-open','care-type-expanded');expandButton.setAttribute('aria-expanded','false');expandButton.textContent='확대 ↑';toggle.setAttribute('aria-expanded','false');if(previousSaved)document.getElementById('careSavedTab')?.click();resize();(opener?.isConnected?opener:toggle).focus({preventScroll:true});}
   toggle.onclick=()=>panel.hidden?open():close();panel.querySelector('[data-close]').onclick=close;
   panel.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close();}});

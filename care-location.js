@@ -18,7 +18,7 @@
         const detail = info({ reason }), error = new Error(`${detail.title}. ${detail.message}`);
         error.reason = reason; return error;
     }
-    function requestPosition(env = root, { isCurrent = () => true } = {}) {
+    function requestPosition(env = root, { isCurrent = () => true, quick = false } = {}) {
         if (env.isSecureContext === false) return Promise.reject(failure('insecure'));
         const policy = env.document?.permissionsPolicy || env.document?.featurePolicy;
         if (policy?.allowsFeature && !policy.allowsFeature('geolocation')) return Promise.reject(failure('policy'));
@@ -29,11 +29,11 @@
                     const point = { lat: position.coords.latitude, lng: position.coords.longitude };
                     if (!Number.isFinite(point.lat) || !Number.isFinite(point.lng) || Math.abs(point.lat) > 90 || Math.abs(point.lng) > 180) reject(failure('unavailable'));
                     else resolve(point);
-                }, error => reject(failure(reasonFor(error))), { enableHighAccuracy, timeout: enableHighAccuracy ? 20000 : 15000, maximumAge: 60000 });
+                }, error => reject(failure(reasonFor(error))), { enableHighAccuracy, timeout: quick ? 6500 : enableHighAccuracy ? 20000 : 15000, maximumAge: 60000 });
             } catch (error) { reject(failure(error.name === 'SecurityError' ? 'denied' : 'unavailable')); }
         });
         return attempt(false).catch(error => {
-            if (!isCurrent() || !['timeout', 'unavailable'].includes(error.reason)) throw error;
+            if (quick || !isCurrent() || !['timeout', 'unavailable'].includes(error.reason)) throw error;
             return attempt(true);
         });
     }
@@ -113,7 +113,7 @@
     function request(options) {
         requestCallers.push(typeof options?.isCurrent === 'function' ? options.isCurrent : () => true);
         if (inFlight) return inFlight;
-        inFlight = requestPosition(root, { isCurrent: () => requestCallers.some(current => current()) }).then(point => {
+        inFlight = requestPosition(root, { isCurrent: () => requestCallers.some(current => current()), quick: options?.quick === true }).then(point => {
             root.dispatchEvent?.(new CustomEvent('care-location-state', { detail: { reason: '' } }));
             return point;
         }, error => {
@@ -141,7 +141,7 @@
         try { state = (await root.navigator?.permissions?.query({ name: 'geolocation' }))?.state; } catch {}
         // 이미 허용·차단된 권한은 건드리지 않고 미결정 또는 권한 조회 미지원일 때 네이티브 요청을 실행합니다.
         if (state === 'granted' || state === 'denied') return null;
-        const point = await request();
+        const point = await request({ quick: true }); // SOFTM-QUICK-LOCATION 날짜:20261124 : 첫 화면 권한 확인은 6.5초 뒤 기본 지도로 복구하고 고정밀 재시도는 사용자가 직접 요청할 때 수행
         initialPoint = point;
         deliverInitialPosition();
         return point;

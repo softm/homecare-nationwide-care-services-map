@@ -5,6 +5,18 @@
 .care-type-open .results > :not(.care-type-panel){display:none!important}
 .care-type-panel{height:100%;min-height:0;overflow:auto;overscroll-behavior:contain;padding:20px 16px;background:#fff;color:#203d58;scrollbar-gutter:stable}
 .care-type-panel[hidden]{display:none!important}
+/** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 목록 화면에서도 유형 패널이 실제 남은 높이를 차지해 마지막 유형까지 독립 스크롤 */
+body.stitch-desktop.care-map-page[data-care-mode="list"] .care-type-panel{
+ box-sizing:border-box;
+ height:var(--care-type-list-space,calc(100dvh - 190px))!important;
+ max-height:var(--care-type-list-space,calc(100dvh - 190px));
+ min-height:min(240px,var(--care-type-list-space,calc(100dvh - 190px)));
+ overflow-y:auto!important;
+ overscroll-behavior-y:contain;
+ padding-bottom:calc(28px + env(safe-area-inset-bottom));
+ scroll-padding-block:12px calc(28px + env(safe-area-inset-bottom));
+}
+/** SOFTM-TYPE-LIST-SCROLL END */
 .care-type-panel header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
 .care-type-eyebrow{font-size:11px;color:#58728a;font-weight:650}
 .care-type-panel h2{margin:6px 0;font-size:22px;letter-spacing:-.04em}

@@ -558,7 +558,13 @@ $('analysisResults').addEventListener('click', async event => {
         else $('analysisStatus').textContent = `비교할 시설 ${result.ids.length}곳을 선택했습니다.`;
         renderTray(); if (currentStep === 'compare') renderComparison(); setStep(currentStep, { focus: false });
     }
-    else if (button.dataset.analysisGo) setStep(button.dataset.analysisGo, { push: true });
+    else if (button.dataset.analysisGo) {
+        const next=button.dataset.analysisGo;
+        setStep(next, { push: true });
+        /** SOFTM-MOBILE-COMPARE START 날짜:20261124 : 하단 비교 버튼을 누르면 단계만 바꾸지 않고 새 비교 내용의 시작점까지 이동 */
+        if(next==='compare'||next==='prepare')requestAnimationFrame(()=>document.querySelector(`[data-analysis-panel="${next}"]`)?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));
+        /** SOFTM-MOBILE-COMPARE END */
+    }
     else if (button.dataset.comparisonDetail) { const row = current.rowById.get(String(button.dataset.comparisonDetail)); if (row) location.href = facilityUrl(current.input.type, row); } // SOFTM-INDEPENDENT-DETAIL 날짜:20261122 : 비교표의 상세도 지도 팝업 대신 독립 화면으로 통일
     else if (button.hasAttribute('data-analysis-share')) void shareComparison();
     else if (button.hasAttribute('data-analysis-print')) window.print();

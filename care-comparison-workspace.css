@@ -6,7 +6,28 @@
 .care-compare-value{padding:17px 18px;border-right:1px solid #e1e9e6;border-bottom:1px solid #e1e9e6}.care-compare-value:last-child{border-right:0}.care-compare-value strong,.care-compare-value span{display:block}.care-compare-value strong{font-size:16px;overflow-wrap:anywhere}.care-compare-value span{margin-top:4px;color:#6d7a75;font-size:12px;line-height:1.4}.care-compare-value[data-tone="confirmed"] strong{color:#006f5e}.care-compare-value[data-tone="verify"] strong{color:#b35b19}.care-compare-value[data-tone="unknown"] strong{color:#68766f}
 .care-compare-guide{align-self:start;padding:22px;border:1px solid #dce7e3;border-radius:18px;background:#f7f9f8;box-shadow:0 8px 28px #153f2f08}.care-compare-guide-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#d8f7f2;color:#00715f;font-weight:900}.care-compare-guide h3{margin:16px 0 12px;font-size:20px}.care-compare-policy{padding-bottom:14px;border-bottom:1px solid #dce7e3;color:#485c55;font-size:13px;line-height:1.55}.care-compare-policy .compare-evidence-heading strong,.care-compare-policy .compare-evidence-heading span{display:block}.care-compare-policy .compare-evidence-heading span{margin-top:3px;color:#708079}.care-compare-policy p{margin:7px 0 0}.care-compare-guide ul{margin:16px 0 0;padding-left:19px;color:#4e605a;font-size:14px;line-height:1.65}.care-compare-guide li+li{margin-top:8px}.care-compare-criteria{margin-top:14px;padding:13px;border-radius:12px;background:#fff}.care-compare-criteria strong{font-size:13px}.care-compare-criteria p{margin:5px 0 0;color:#5d6e68;font-size:13px}
 @media(max-width:980px){.care-compare-layout{grid-template-columns:1fr}.care-compare-guide{display:grid;grid-template-columns:auto 1fr;gap:0 14px}.care-compare-guide-icon{grid-row:1/4}.care-compare-guide h3{margin:0 0 8px}.care-compare-policy,.care-compare-guide ul,.care-compare-criteria{grid-column:2}.care-compare-guide ul{margin-top:12px}}
-@media(max-width:640px){.care-compare-workspace{font-size:15px}.care-compare-picker{display:block;padding:15px}.care-compare-picker-list{margin-top:12px}.care-compare-layout{gap:14px;margin-top:14px}.care-compare-main{border-radius:14px}.care-compare-matrix{grid-template-columns:116px repeat(var(--care-compare-count),minmax(150px,1fr));min-width:calc(116px + var(--care-compare-count) * 150px)}.care-compare-label,.care-compare-value,.care-compare-facility{padding:13px}.care-compare-facility h3{font-size:15px}.care-compare-guide{display:block;padding:18px}.care-compare-guide-icon{margin-bottom:12px}.care-compare-policy,.care-compare-guide ul,.care-compare-criteria{grid-column:auto}}
+/** SOFTM-MOBILE-COMPARE START 날짜:20261124 : 모바일은 가로로 잘리는 PC 표 대신 지표 제목 아래 세 기관 값을 한 화면에서 비교 */
+@media(max-width:640px){
+ .care-compare-workspace{font-size:15px}
+ .care-compare-picker{display:block;padding:15px}
+ .care-compare-picker-list{display:grid;grid-template-columns:1fr;gap:7px;margin-top:12px;overflow:visible}
+ .care-compare-picker-list button{width:100%;min-width:0;white-space:normal;text-align:left;border-radius:10px;padding:10px 12px}
+ .care-compare-layout{gap:14px;margin-top:14px}
+ .care-compare-main{overflow:visible;border-radius:14px}
+ .care-compare-matrix{grid-template-columns:repeat(var(--care-compare-count),minmax(0,1fr));min-width:0}
+ .care-compare-label{grid-column:1/-1;padding:10px 12px;border-right:0;background:#edf4f1}
+ .care-compare-head-row>.care-compare-label{min-height:42px}
+ .care-compare-value,.care-compare-facility{min-width:0;padding:11px 8px;border-right:1px solid #e1e9e6}
+ .care-compare-facility h3{margin-top:8px;font-size:14px;line-height:1.45;word-break:keep-all}
+ .care-compare-facility p{display:-webkit-box;min-height:0;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:3;font-size:11px}
+ .care-compare-facility button{width:100%;min-width:0;padding:7px 4px;border-radius:9px;font-size:12px}
+ .care-compare-value strong{font-size:15px;line-height:1.4;word-break:keep-all}
+ .care-compare-value span{font-size:11px;word-break:keep-all}
+ .care-compare-guide{display:block;padding:18px}
+ .care-compare-guide-icon{margin-bottom:12px}
+ .care-compare-policy,.care-compare-guide ul,.care-compare-criteria{grid-column:auto}
+}
+/** SOFTM-MOBILE-COMPARE END */
 .compare-dialog{width:min(1280px,96vw);background:#f6f8f7}.compare-head{background:#004541}.compare-actions .excel-btn{background:#18c4a3;border-color:#75ddc9;color:#062c25}.compare-actions button:disabled{opacity:.45;cursor:default}.compare-dialog>.compare-evidence{display:none}.compare-scroll{padding:20px;background:#f6f8f7}.compare-dialog #compareBody>.care-compare-workspace{max-width:1220px;margin:auto}.care-full-compare{max-width:1220px;margin:20px auto 0;border:1px solid #dce7e3;border-radius:16px;background:#fff}.care-full-compare>summary{cursor:pointer;padding:16px 18px;color:#183b32;font-weight:800}.care-full-compare-scroll{overflow:auto;border-top:1px solid #dce7e3}.care-full-compare .compare-table th button{color:#29483f}.care-full-compare .compare-table th[aria-sort="ascending"] button,.care-full-compare .compare-table th[aria-sort="descending"] button{background:#d8f7f2;color:#006b59}.care-full-compare .compare-table th:first-child,.care-full-compare .compare-table td:first-child{background:#f7faf9}.compare-foot{background:#edf4f1;color:#5a6d66}
 @media(max-width:640px){.compare-scroll{padding:12px}.compare-dialog{width:100%}.compare-head{align-items:center}.compare-head h2{padding-top:0}.compare-actions [data-stitch-saved]{display:none}.care-full-compare{margin-top:14px;border-radius:14px}}
 /** SOFTM-GUIDED-COMPARE END */
