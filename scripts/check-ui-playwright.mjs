@@ -77,6 +77,7 @@ const cases=[
  {name:'region-province',url:'regions/gyeonggi-daycare.html'},
  {name:'region-city',url:'regions/seoul-마포구-daycare.html'},
  {name:'map-picker',url:'index.html'},
+ {name:'map-list-types',url:'index.html?type=home-bath&mode=list',action:'map-list-types'}, // SOFTM-TYPE-LIST-SCROLL 날짜:20261124 : 목록 화면에서 마지막 유형까지 실제 스크롤·선택 검증
  {name:'map-daycare',url:'index.html?type=daycare'},
  {name:'map-facility',url:'index.html?type=facility'},
  {name:'map-hospital',url:'index.html?type=nursing-hospital'},
@@ -206,6 +207,17 @@ async function run(c,width){
    if(c.action==='map-types'){
     const mobile=page.locator('[data-mobile-focus=type]');
     await (await mobile.isVisible()?mobile:page.locator('.care-type-toggle')).click();
+   }
+   if(c.action==='map-list-types'){
+    await page.locator('.care-type-toggle').click();
+    const panel=page.locator('#careTypePanel'),last=panel.locator('[data-type="nursing-hospital"]');
+    await panel.waitFor({state:'visible'});
+    const before=await panel.evaluate(node=>node.scrollTop);
+    await last.scrollIntoViewIfNeeded();
+    const after=await panel.evaluate(node=>node.scrollTop);
+    assert.ok(after>before,'목록 유형 패널이 마지막 유형까지 스크롤됨');
+    await last.click({trial:true});
+    assert.ok(await last.isVisible(),'마지막 유형을 화면에서 선택 가능');
    }
    if(['map-filter','map-advanced'].includes(c.action)){
     const mobile=page.locator('[data-mobile-focus=filter]');
