@@ -116,8 +116,12 @@
     /** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 고정 헤더·검색 레일 아래의 실제 가용 높이를 목록 유형 패널에 전달 */
     if(!isMap){
      const viewportHeight=root.visualViewport?.height||root.innerHeight;
-     const top=Math.max(0,panel.getBoundingClientRect().top);
-     panel.style.setProperty('--care-type-list-space',`${Math.max(240,viewportHeight-top-8)}px`);
+     const host=document.querySelector('.results'),rect=host.getBoundingClientRect();
+     const top=Math.max(0,rect.top),left=Math.max(0,rect.left),width=Math.min(rect.width,root.innerWidth-left);
+     panel.style.setProperty('--care-type-list-top',`${top}px`);
+     panel.style.setProperty('--care-type-list-left',`${left}px`);
+     panel.style.setProperty('--care-type-list-width',`${width}px`);
+     panel.style.setProperty('--care-type-list-space',`${Math.max(0,viewportHeight-top)}px`);
      return;
     }
     /** SOFTM-TYPE-LIST-SCROLL END */

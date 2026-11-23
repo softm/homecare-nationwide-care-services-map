@@ -8,10 +8,17 @@
 /** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 목록 화면에서도 유형 패널이 실제 남은 높이를 차지해 마지막 유형까지 독립 스크롤 */
 body.stitch-desktop.care-map-page[data-care-mode="list"] .care-type-panel{
  box-sizing:border-box;
- height:var(--care-type-list-space,calc(100dvh - 190px))!important;
- max-height:var(--care-type-list-space,calc(100dvh - 190px));
- min-height:min(240px,var(--care-type-list-space,calc(100dvh - 190px)));
+ position:fixed;
+ z-index:190;
+ top:var(--care-type-list-top,114px);
+ left:var(--care-type-list-left,0px);
+ width:var(--care-type-list-width,100vw);
+ height:var(--care-type-list-space,calc(100dvh - 114px))!important;
+ max-height:none;
+ min-height:0;
  overflow-y:auto!important;
+ -webkit-overflow-scrolling:touch;
+ touch-action:pan-y;
  overscroll-behavior-y:contain;
  padding-bottom:calc(28px + env(safe-area-inset-bottom));
  scroll-padding-block:12px calc(28px + env(safe-area-inset-bottom));
