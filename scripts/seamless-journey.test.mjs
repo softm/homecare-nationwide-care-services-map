@@ -54,6 +54,14 @@ test('브랜드 컨셉과 핵심가치는 일관성·신뢰성·투명성·실�
   assert.match(serviceGuide, /공개자료를 일관된 기준으로 연결/);
 });
 
+test('무료 검색과 달리 가족이 같은 공개 비교표를 보고 공유 범위를 통제하도록 안내한다',()=>{
+  for(const text of ['찾은 후보를 가족과 같은 기준으로 결정하세요','평가연도·정원·공개 인력','7일 뒤 자동 만료','주소·연락처·대상자 정보·개인 조건·예상비용'])assert.match(serviceGuide,new RegExp(text));
+  for(const text of ['일반적인 무료 기관 검색','가족 공유','하나의 읽기 전용 링크','7일 자동 만료·즉시 중단'])assert.match(about,new RegExp(text));
+  const records=read('care-records.mjs'),pages=read('care-pages.mjs'),analysis=read('care-analysis.js'),workspace=read('care-workspace.mjs');
+  assert.match(records,/같은 공개 기준으로 함께 확인하세요/);assert.match(records,/공유하지 않음:[\s\S]*주소·연락처·대상자 정보·개인 이용조건·예상비용/);
+  assert.match(pages,/id="shareComparison"/);assert.match(analysis,/data-analysis-family-share/);assert.match(workspace,/export function publicComparison/);
+});
+
 test('지도 첫 진입은 위저드 없이 유형 선택 후 지도·목록으로 바로 연결한다', () => {
   assert.match(picker, /돌봄 유형을 먼저 선택해 주세요/);
   assert.match(picker, /선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/);

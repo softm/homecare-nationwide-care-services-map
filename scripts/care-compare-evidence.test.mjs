@@ -121,7 +121,7 @@ test('맞춤 비교는 현재 후보 필터 밖의 이전 비교 선택을 다�
     assert.match(analysisJs,/comparisonSelection\.sync\(comparisonRows\(\), true\)/);
     assert.match(analysisJs,/const rows = activeRows\(\), allRows = comparisonRows\(\)/);
     assert.doesNotMatch(analysisJs,/const rows = activeRows\(\), allRows = basketRows\(\)/);
-    assert.match(analysisHtml,/care-analysis\.js\?v=20261124-strict-compare1/);
+    assert.match(analysisHtml,/care-analysis\.js\?v=20261124-family-share1/);
 }); // SOFTM-STRICT-COMPARE 날짜:20261124 : A·B 선택 뒤 C등급·미확인이 비교표에 남는 회귀 방지
 /** SOFTM-MOBILE-COMPARE START 날짜:20261124 : 모바일 비교 진입·겹침 제거·한 화면 표 배치를 정적 검증 */
 test('모바일 비교는 표 시작점으로 이동하고 세 기관을 화면 폭 안에 표시한다',()=>{
