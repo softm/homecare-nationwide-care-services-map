@@ -20,8 +20,9 @@
     // SOFTM-MEMBER-LIVE 날짜:20261121 : 사용자 요청에 따라 공식 사이트 기관 증빙 제출 개방
     "FILE_UPLOADS_ENABLED": "true",
     "ENVIRONMENT": "production",
-    "WEB_ORIGIN": "https://homecare.designboard.net",
-    "API_ORIGIN": "https://api.homecare.designboard.net",
+    "WEB_ORIGIN": "https://dolbomhannun.kr",
+    "API_ORIGIN": "https://api.dolbomhannun.kr",
+    "LEGACY_ORIGINS": "https://homecare.designboard.net,https://api.homecare.designboard.net",
     "NAVER_PUBLIC_ENABLED": "false"
   },
   "triggers": { "crons": ["31 18 * * *"] }
