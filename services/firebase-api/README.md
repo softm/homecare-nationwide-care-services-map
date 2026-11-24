@@ -8,7 +8,7 @@
 - 함수: `directions`
 - 리전: `asia-northeast3`(서울)
 - 런타임: Node.js 22
-- 허용 Origin: `https://homecare.designboard.net`, `https://softm.github.io`, 로컬 개발 주소
+- 허용 Origin: `https://dolbomhannun.kr`, 이전 기간의 `https://homecare.designboard.net`, `https://softm.github.io`, 로컬 개발 주소 <!-- SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 주소를 우선하고 기존 주소는 전환 기간에만 유지 -->
 - 상한: 최대 인스턴스 3개, 인스턴스당 동시 요청 30개, 호출당 15초
 - Artifact Registry: 7일이 지난 함수 이미지를 자동 정리
 
