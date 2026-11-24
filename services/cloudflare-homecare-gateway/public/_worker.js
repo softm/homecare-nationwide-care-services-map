@@ -1,6 +1,8 @@
 /** SOFTM-MEMBER-DOMAIN START 날짜:20261121 : 동일 사이트의 HTTPS API에서 보안 쿠키를 그대로 전달하고 내부 인증 경계 유지 */
-const HOSTS = new Set(['api.homecare.designboard.net', 'softm-homecare-api.pages.dev']);
-const ORIGINS = new Set(['https://homecare.designboard.net', 'https://api.homecare.designboard.net']);
+/** SOFTM-DOMAIN-MIGRATION START 날짜:20261124 : 새 API 도메인을 기본으로 받고 이전 기간에만 기존 호스트를 함께 허용 */
+const HOSTS = new Set(['api.dolbomhannun.kr', 'api.homecare.designboard.net', 'softm-homecare-api.pages.dev']);
+const ORIGINS = new Set(['https://dolbomhannun.kr', 'https://api.dolbomhannun.kr', 'https://homecare.designboard.net', 'https://api.homecare.designboard.net']);
+/** SOFTM-DOMAIN-MIGRATION END */
 
 function unavailable(request, status, code) {
   const headers = new Headers({ 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex', 'Vary': 'Origin' });
