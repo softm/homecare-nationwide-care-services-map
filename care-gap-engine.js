@@ -60,7 +60,7 @@ export function recognitionRange(properties) {
 }
 
 export function institutionSearchUrl(properties, type = 'all') {
-    const url = new URL('index.html', 'https://homecare.designboard.net/');
+    const url = new URL('index.html', 'https://dolbomhannun.kr/'); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 지역 기관 탐색을 새 공식 주소로 연결
     if (type !== 'all') url.searchParams.set('type', type);
     url.searchParams.set('p', properties.mapProvince || properties.province);
     if (properties.mapLegacyCity) url.searchParams.set('c', properties.mapLegacyCity);
@@ -70,7 +70,7 @@ export function institutionSearchUrl(properties, type = 'all') {
 }
 
 export function guidedSearchUrl(properties, type = 'all') {
-    const url = new URL('care-analysis.html', 'https://homecare.designboard.net/');
+    const url = new URL('care-analysis.html', 'https://dolbomhannun.kr/'); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 맞춤 분석 연결도 새 도메인으로 일치
     if (type !== 'all') url.searchParams.set('type', type === 'dementia' ? 'daycare' : type);
     return `${url.pathname.slice(1)}${url.search}`;
 }

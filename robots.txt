@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # SOFTM-SEO-DOMAIN 날짜:20260903 : 존재하는 공개 도메인 사이트맵만 안내해 검색로봇의 잘못된 수집 요청을 방지
-Sitemap: https://homecare.designboard.net/sitemap.xml
+Sitemap: https://dolbomhannun.kr/sitemap.xml

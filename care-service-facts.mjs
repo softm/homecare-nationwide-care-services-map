@@ -1,7 +1,7 @@
 /** SOFTM-KEY START 날짜:20261121 : 모든 공개 화면에서 같은 정보·출처·만료를 표시하고 50곳씩 일괄 조회 */
 import {FACT_KEYS,FACT_LABELS,SOURCE_LABELS,factState,factText,knownFact,allFresh} from './care-service-facts-model.mjs';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-export const factsApiBase=()=>globalThis.CARE_INSTITUTION_API_BASE||'https://api.homecare.designboard.net';
+export const factsApiBase=()=>globalThis.CARE_INSTITUTION_API_BASE||'https://api.dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 기관 운영정보도 새 동일 사이트 API에서 제공
 export const dateFact=n=>n?new Date(n*1000).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'}):'미확인';
 const queue=new Map();let scheduled=false;
 async function flush(){const pending=[...queue];queue.clear();scheduled=false;for(let at=0;at<pending.length;at+=50){const chunk=pending.slice(at,at+50);let rows=null;try{const response=await fetch(`${factsApiBase()}/api/public/service-facts?ids=${chunk.map(([id])=>id).join(',')}`,{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});if(!response.ok)throw Error();const body=await response.json();if(!Array.isArray(body.data))throw Error();rows=body.data;}catch{}for(const [id,resolvers] of chunk)for(const resolve of resolvers)resolve(rows===null?null:rows.find(r=>r.institutionId===id)||{institutionId:id,facts:{},pilot:false});}}

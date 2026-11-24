@@ -11,7 +11,7 @@ export function captureScope(current) {
     if (!current?.ready || !current.type) return null;
     const fromMap = current.kind === 'map' && current.map;
     const ids = fromMap ? visibleMarkerIds(current.map, current.entries || []) : [...new Set((current.rows || []).map(row => String(row.i)))];
-    const source = new URL(current.source || 'index.html', 'https://homecare.designboard.net/');
+    const source = new URL(current.source || 'index.html', 'https://dolbomhannun.kr/'); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 사진 탐색 복귀 주소를 새 공식 도메인으로 해석
     source.searchParams.delete('institution');
     if (fromMap) {
         const center = current.map.getCenter();
