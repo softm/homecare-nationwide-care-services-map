@@ -19,12 +19,13 @@ import {
 /** SOFTM-HOMECARE-PILOT START 날짜:20261118 : 입력·파일·출처·익명 집계의 보안 경계를 회귀검사 */
 
 test("운영 Origin과 명시한 로컬 Origin만 허용한다", () => {
-  const origins = "https://homecare.designboard.net,https://softm.github.io";
+  const origins = "https://dolbomhannun.kr,https://homecare.designboard.net,https://softm.github.io"; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 주소 전환 중 기존 화면의 안전한 요청을 함께 허용
+  assert.equal(isAllowedOrigin("https://dolbomhannun.kr", origins), true);
   assert.equal(isAllowedOrigin("https://homecare.designboard.net", origins), true);
   assert.equal(isAllowedOrigin("https://softm.github.io", origins), true);
   assert.equal(isAllowedOrigin("http://localhost:3000", origins, "http://localhost:3000"), true);
   assert.equal(isAllowedOrigin("http://localhost:8787", origins, "http://localhost:3000"), false);
-  assert.equal(isAllowedOrigin("https://homecare.designboard.net.evil.example", origins), false);
+  assert.equal(isAllowedOrigin("https://dolbomhannun.kr.evil.example", origins), false);
 });
 
 test("공통 계정 응답은 homecare site와 uid를 모두 확인한다", () => {
@@ -156,7 +157,7 @@ test("방문자 해시는 날짜·기관·행동마다 달라 원본 식별자�
 });
 
 test("익명 방문 쿠키를 발급하고 다시 읽는다", () => {
-  const cookie = buildVisitorCookie("abcdefghijklmnopqrstuvwx", "https://homecare.designboard.net/api");
+  const cookie = buildVisitorCookie("abcdefghijklmnopqrstuvwx", "https://dolbomhannun.kr/api");
   assert.match(cookie, /HttpOnly/);
   assert.match(cookie, /Secure/);
   assert.equal(parseVisitorCookie("foo=1; hc_visit=abcdefghijklmnopqrstuvwx; bar=2"), "abcdefghijklmnopqrstuvwx");
