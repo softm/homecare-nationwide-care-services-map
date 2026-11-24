@@ -2,8 +2,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import gateway from '../../cloudflare-homecare-gateway/public/_worker.js';
-const base = 'https://api.homecare.designboard.net';
-const origin = 'https://homecare.designboard.net';
+const base = 'https://api.dolbomhannun.kr';
+const origin = 'https://dolbomhannun.kr';
+
+/** SOFTM-DOMAIN-MIGRATION START 날짜:20261124 : 주소 전환 중 기존 도메인의 로그인 세션과 새 도메인의 요청을 모두 안전하게 전달 */
+test('새 API와 이전 API 호스트는 허용하고 유사 호스트는 거부한다', async () => {
+  const env = { MEMBERS: { async fetch(request) { return Response.json({ host: new URL(request.url).hostname }); } } };
+  assert.equal((await gateway.fetch(new Request(`${base}/api/auth/session`, { headers: { Origin: origin } }), env)).status, 200);
+  assert.equal((await gateway.fetch(new Request('https://api.homecare.designboard.net/api/auth/session', { headers: { Origin: 'https://homecare.designboard.net' } }), env)).status, 200);
+  assert.equal((await gateway.fetch(new Request('https://api.dolbomhannun.kr.evil.example/api/auth/session', { headers: { Origin: origin } }), env)).status, 421);
+});
+/** SOFTM-DOMAIN-MIGRATION END */
 
 test('API 이외 경로·다른 호스트·미설정 바인딩은 외부 요청 없이 거부한다', async () => {
   let calls = 0;

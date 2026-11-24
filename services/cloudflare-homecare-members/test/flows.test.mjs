@@ -2,9 +2,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import worker,{handleScheduled} from '../src/index.mjs';
-import {sha,challenge,random,now} from '../src/security.mjs';
+import {allowedOrigin,sha,challenge,random,now} from '../src/security.mjs';
 import {environment,client,institutionBody,pendingRegistration} from './helpers.mjs';
 const workspace={v:1,baskets:{daycare:['24215000294']},activeCompare:{daycare:['24215000294']},consultations:[]};
+/** SOFTM-DOMAIN-MIGRATION START 날짜:20261124 : 새 공식 주소와 이전 기간 주소만 정확히 허용하는지 검증 */
+test('새 웹·API와 명시한 이전 Origin만 허용한다',()=>{
+ const env={ENVIRONMENT:'production',WEB_ORIGIN:'https://dolbomhannun.kr',API_ORIGIN:'https://api.dolbomhannun.kr',LEGACY_ORIGINS:'https://homecare.designboard.net,https://api.homecare.designboard.net'};
+ assert.equal(allowedOrigin(env.WEB_ORIGIN,env),true);
+ assert.equal(allowedOrigin(env.API_ORIGIN,env),true);
+ assert.equal(allowedOrigin('https://homecare.designboard.net',env),true);
+ assert.equal(allowedOrigin('https://api.homecare.designboard.net',env),true);
+ assert.equal(allowedOrigin('https://dolbomhannun.kr.evil.example',env),false);
+});
+/** SOFTM-DOMAIN-MIGRATION END */
 test('일반회원은 아이디·비밀번호와 약관으로 즉시 완료되며 해시만 저장한다',async()=>{const env=environment(),c=client(env),r=await c.signup();assert.equal(r.status,201);assert.equal(r.body.data.user.onboarding,'complete');assert.equal(r.body.data.user.name,'');assert.ok(r.body.data.recoveryCode);const credential=env.DB.db.prepare('SELECT * FROM credentials').get();assert.match(credential.password_hash,/^scrypt\$16384\$8\$5\$/);assert.notEqual(credential.recovery_hash,r.body.data.recoveryCode);assert.ok(r.headers.get('set-cookie').includes('HttpOnly'));assert.equal((await c.call('/api/auth/session')).status,200);});
 test('아이디 중복과 약한 비밀번호·미동의를 거부한다',async()=>{const env=environment(),c=client(env);await c.signup();assert.equal((await c.signup('personal','TESTER')).status,409);assert.equal((await c.call('/api/auth/signup',{method:'POST',body:{username:'another',password:'short',kind:'personal',terms:true}})).status,400);assert.equal((await c.call('/api/auth/signup',{method:'POST',body:{username:'another',password:'long-password-for-test',kind:'personal'}})).status,400);});
 test('잘못된 비밀번호를 거부하고 로그아웃 후 세션을 재사용할 수 없다',async()=>{const env=environment(),c=client(env);await c.signup();const old=c.cookie;await c.call('/api/auth/logout',{method:'POST',body:{}});assert.equal((await c.call('/api/auth/session')).status,401);assert.equal((await c.call('/api/auth/login',{method:'POST',body:{username:'tester',password:'wrong-password'}})).status,401);assert.equal((await c.call('/api/auth/login',{method:'POST',body:{username:'tester',password:'long-password-for-test'}})).status,200);const response=await worker.fetch(new Request(env.API_ORIGIN+'/api/auth/session',{headers:{Cookie:old}}),env);assert.equal(response.status,401);});
