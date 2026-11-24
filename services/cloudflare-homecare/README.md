@@ -51,7 +51,8 @@ npx wrangler secret put EVENT_HASH_SECRET
 
 허용 Origin은 정확히 다음과 같습니다.
 
-- `https://homecare.designboard.net`
+- `https://dolbomhannun.kr`
+- `https://homecare.designboard.net` (도메인 이전 기간에만 허용)
 - `https://softm.github.io`
 - `http://localhost:3000` — 운영 `wrangler.jsonc`에는 없고 로컬 `.dev.vars`의 `DEV_ALLOWED_ORIGIN`에만 명시한 개발 주소
 
@@ -101,7 +102,7 @@ npx wrangler d1 migrations apply DB --remote
 
 ```http
 Authorization: Bearer <account-token>
-Origin: https://homecare.designboard.net
+Origin: https://dolbomhannun.kr
 ```
 
 계정 서비스의 정상 응답은 `{ "uid": "...", "site": "homecare" }`여야 합니다. `site`가 다르거나 빠진 세션은 거부합니다.
