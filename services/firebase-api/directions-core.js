@@ -1,5 +1,6 @@
 /** SOFTM-FIREBASE-DIRECTIONS START 날짜:20261026 : 공용 길찾기에서 비밀키 보호와 호출량 상한을 함께 유지 */
 export const ALLOWED_ORIGINS = new Set([
+  "https://dolbomhannun.kr",
   "https://homecare.designboard.net",
   "https://softm.github.io",
   "http://localhost:3000",
