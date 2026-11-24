@@ -13,17 +13,17 @@
 <meta name="dcterms.modified" content="2026-11-19"> <!-- SOFTM-SEAMLESS-JOURNEY 날짜:20261119 : 지도 첫 유형 선택에 원스톱 심리스 여정을 반영한 날짜를 사이트맵과 일치 -->
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"> <!-- SOFTM-SEO-INDEX 날짜:20260904 : 사용자 요청에 따라 지도 페이지의 검색 등록 차단을 해제 -->
 <!-- SOFTM-SEO-LANDING START 날짜:20260903 : 검색용 정적 소개 페이지와 지도 도구의 역할을 분리해 중복 URL이 검색결과에서 경쟁하지 않도록 구성 -->
-<link rel="canonical" id="canonicalUrl" href="https://homecare.designboard.net/"> <!-- SOFTM-ROOT-MAP 날짜:20260925 : 첫 진입 지도는 루트 주소를 기본 대표로 제공한다. -->
+<link rel="canonical" id="canonicalUrl" href="https://dolbomhannun.kr/"> <!-- SOFTM-ROOT-MAP 날짜:20260925 : 첫 진입 지도는 루트 주소를 기본 대표로 제공한다. -->
 <meta property="og:locale" content="ko_KR">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="돌봄한눈">
 <meta property="og:title" id="ogTitle" content="돌봄한눈 | 전국 장기요양기관 찾기·요양병원 찾기">
 <meta property="og:description" id="ogDescription" content="장기요양기관 찾기와 요양병원 비교를 지도에서 제공합니다.">
-<meta property="og:url" id="ogUrl" content="https://homecare.designboard.net/">
+<meta property="og:url" id="ogUrl" content="https://dolbomhannun.kr/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" id="twitterTitle" content="돌봄한눈 | 전국 장기요양기관 찾기·요양병원 찾기">
 <meta name="twitter:description" id="twitterDescription" content="장기요양기관 찾기와 요양병원 비교를 지도에서 제공합니다.">
-<script type="application/ld+json" id="structuredData">[{"@context":"https://schema.org","@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"https://homecare.designboard.net/"},{"@context":"https://schema.org","@type":"WebApplication","name":"전국 장기요양기관 찾기·요양병원 지도","url":"https://homecare.designboard.net/","description":"장기요양기관 찾기와 요양병원 비교를 지도에서 제공하는 돌봄한눈 웹 서비스","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"JavaScript","isAccessibleForFree":true,"inLanguage":"ko-KR","dateModified":"2026-10-08","isPartOf":{"@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"https://homecare.designboard.net/"},"featureList":["현재 지도영역 기관 검색","공개 평가등급 및 총점 필터","선택기관 비교표","선택기관 엑셀 다운로드","최적 순회경로"]}]</script> <!-- SOFTM-SEARCH-ROOT 날짜:20261008 : 루트 지도에서도 장기요양기관 찾기 대표 신호와 WebSite 식별자를 함께 제공 -->
+<script type="application/ld+json" id="structuredData">[{"@context":"https://schema.org","@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"https://dolbomhannun.kr/"},{"@context":"https://schema.org","@type":"WebApplication","name":"전국 장기요양기관 찾기·요양병원 지도","url":"https://dolbomhannun.kr/","description":"장기요양기관 찾기와 요양병원 비교를 지도에서 제공하는 돌봄한눈 웹 서비스","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"JavaScript","isAccessibleForFree":true,"inLanguage":"ko-KR","dateModified":"2026-10-08","isPartOf":{"@type":"WebSite","name":"돌봄한눈","alternateName":"돌봄한눈 장기요양기관 찾기","url":"https://dolbomhannun.kr/"},"featureList":["현재 지도영역 기관 검색","공개 평가등급 및 총점 필터","선택기관 비교표","선택기관 엑셀 다운로드","최적 순회경로"]}]</script> <!-- SOFTM-SEARCH-ROOT 날짜:20261008 : 루트 지도에서도 장기요양기관 찾기 대표 신호와 WebSite 식별자를 함께 제공 -->
 <!-- SOFTM-SEO-LANDING END -->
 <style>
 /* SOFTM-FILTER-CHOICE 날짜:20261121 : 텍스트 입력 폭·높이 규칙에서 선택 입력을 제외해 상세조건 체크박스가 늘어나는 문제 방지 */
@@ -303,7 +303,7 @@ let MANIFEST={},CONFIG; // SOFTM-DATA-UNIFIED 날짜:20260904 : 두 지도가 �
 const params=new URLSearchParams(location.search),requested=params.get('type');
 let categoryStorage;try{categoryStorage=localStorage;}catch{} // SOFTM-TYPE-ENTRY 날짜:20260911 : 저장소 차단 환경에서도 첫 선택을 제공
 const TYPE=CareCategoryPicker.resolve(location.href,categoryStorage); // SOFTM-TYPE-ENTRY 날짜:20260911 : URL·직접 선택 기록이 없으면 유형 미선택으로 시작
-const PUBLIC_ORIGIN='https://homecare.designboard.net'; // SOFTM-SEO-DOMAIN 날짜:20260903 : 미러 주소로 접속해도 검색 대표 주소가 공개 도메인에서 흔들리지 않도록 고정
+const PUBLIC_ORIGIN='https://dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 공유·검색 대표 주소를 새 공식 도메인으로 고정
 /** SOFTM-SEO-LANDING START 날짜:20260903 : 검색용 정적 소개 페이지와 실제 지도 공유 주소를 유형별로 정확히 연결 */
 const SEARCH_LABELS={facility:'요양원·공동생활가정',daycare:'주·야간보호센터','home-care':'방문요양센터','home-nursing':'방문간호센터','home-bath':'방문목욕기관','short-stay':'단기보호센터','welfare-equipment':'복지용구사업소',dementia:'치매전담형 기관','nursing-hospital':'요양병원(의료기관)'}; // SOFTM-CARE-CATEGORIES 날짜:20260904 : 기본 급여·특화 유형·의료기관의 분류와 표시 범위를 일치
 const LANDING_URLS={facility:'nursing-home-map.html',daycare:'daycare-map.html','home-care':'home-care-map.html','home-nursing':'home-nursing-map.html','home-bath':'home-bath-map.html','short-stay':'short-stay-care-map.html','welfare-equipment':'welfare-equipment-map.html',dementia:'dementia-care-map.html','nursing-hospital':'nursing-hospital-map.html'}; // SOFTM-CARE-CATEGORIES 날짜:20260904 : 기본 급여·특화 유형·의료기관의 분류와 표시 범위를 일치

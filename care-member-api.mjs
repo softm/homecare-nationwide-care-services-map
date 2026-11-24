@@ -1,5 +1,5 @@
 /** SOFTM-MEMBERS START 날짜:20261120 : 브라우저에는 인증 토큰을 저장하지 않고 전용 계정 쿠키와 CSRF로 통신 */
-export const API_BASE=typeof location!=='undefined'&&['localhost','127.0.0.1'].includes(location.hostname)?`${location.protocol}//${location.hostname}:8788`:'https://api.homecare.designboard.net';
+export const API_BASE=typeof location!=='undefined'&&['localhost','127.0.0.1'].includes(location.hostname)?`${location.protocol}//${location.hostname}:8788`:'https://api.dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인에서 SameSite 회원 쿠키를 유지하도록 API도 같은 사이트로 이전
 let auth=null,sessionRevision=0,pendingSession=null;
 export const currentSession=()=>auth;
 export async function api(path,{method='GET',body,headers={},blob=false}={}) {

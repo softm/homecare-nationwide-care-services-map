@@ -15,7 +15,7 @@
         const valid = point && Number.isFinite(point.lat) && Number.isFinite(point.lng) && point.lat >= 31.43 && point.lat <= 44.35 && point.lng >= 122.37 && point.lng <= 132;
         const web = valid ? `https://map.kakao.com/link/to/${encodeURIComponent(c.n)},${point.lat},${point.lng}` : `https://map.naver.com/p/search/${encodeURIComponent(c.a || c.n)}`;
         if (!valid) return { href: web, web, label: '주소로 지도 검색' };
-        const query = new URLSearchParams({dlat:point.lat, dlng:point.lng, dname:c.n, appname:'https://homecare.designboard.net'}).toString();
+        const query = new URLSearchParams({dlat:point.lat, dlng:point.lng, dname:c.n, appname:'https://dolbomhannun.kr'}).toString(); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 외부 길안내에도 새 서비스 주소를 앱 식별자로 전달
         if (/Android/i.test(ua)) return {href:`intent://navigation?${query}#Intent;scheme=nmap;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.nmap;S.browser_fallback_url=${encodeURIComponent(web)};end`, web, label:'네이버 내비 길안내'};
         if (/iPhone|iPad|iPod/i.test(ua)) return {href:`nmap://navigation?${query}`, web, label:'네이버 내비 길안내'};
         return {href:web, web, label:'길안내'};
@@ -41,7 +41,7 @@
     /** SOFTM-POPUP-NAVIGATION END */
     /** SOFTM-INSTITUTION-SHARE START 날짜:20260914 : 검색조건이나 사용자 위치 없이 선택한 기관 상세를 바로 여는 공개 링크만 공유 */
     function institutionUrl(c, type) {
-        return `https://homecare.designboard.net/index.html?${new URLSearchParams({type, institution:String(c.i)})}`;
+        return `https://dolbomhannun.kr/index.html?${new URLSearchParams({type, institution:String(c.i)})}`; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 기관 공유 링크를 새 공식 도메인으로 생성
     }
     function shareButton(c, type) {
         return `<button type="button" class="care-popup-share" data-institution-share="${escape(institutionUrl(c,type))}" data-share-name="${escape(c.n)}" data-share-address="${escape(c.a || '')}" aria-label="${escape(c.n)} 기관 정보 공유"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.2M8.7 13.3l6.6 4.2"/></svg><span aria-live="polite">공유</span></button>`;
