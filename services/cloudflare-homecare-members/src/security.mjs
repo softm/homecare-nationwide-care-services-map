@@ -17,7 +17,12 @@ export function text(value,max=200) { return typeof value==='string'?value.repla
 export function cookieName(env) { return env.ENVIRONMENT==='test'||env.ENVIRONMENT==='development'?'hc_session':'__Host-hc_session'; }
 export function cookie(env,value='',age=0) { return `${cookieName(env)}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${age}${env.ENVIRONMENT==='test'||env.ENVIRONMENT==='development'?'':'; Secure'}`; }
 export function token(request,env) { const match=(request.headers.get('Cookie')||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(`${cookieName(env)}=`)); return match?.slice(cookieName(env).length+1)||''; }
-export function allowedOrigin(origin,env) { return origin===env.WEB_ORIGIN||origin===env.API_ORIGIN||(env.ENVIRONMENT!=='production'&&env.DEV_ORIGIN&&origin===env.DEV_ORIGIN); }
+/** SOFTM-DOMAIN-MIGRATION START 날짜:20261124 : 새 동일 사이트 API로 이전하는 동안 기존 세션의 안전한 로그아웃도 허용 */
+export function allowedOrigin(origin,env) {
+ const legacy=String(env.LEGACY_ORIGINS||'').split(',').map(value=>value.trim()).filter(Boolean);
+ return origin===env.WEB_ORIGIN||origin===env.API_ORIGIN||legacy.includes(origin)||(env.ENVIRONMENT!=='production'&&env.DEV_ORIGIN&&origin===env.DEV_ORIGIN);
+}
+/** SOFTM-DOMAIN-MIGRATION END */
 export function requireOrigin(request,env) { if(!allowedOrigin(request.headers.get('Origin'),env)) fail('origin_denied','허용되지 않은 요청입니다.',403); }
 export async function boundedBody(request,max) {
  if(Number(request.headers.get('Content-Length'))>max)fail('too_large','전송할 자료가 너무 큽니다.',413);
