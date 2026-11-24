@@ -137,7 +137,7 @@ for (const [device, width, height] of [['desktop', 728, 90], ['mobile', 320, 100
 /** SOFTM-LANDING-ADS END */
 
 /** SOFTM-SEO-LANDING-CHECK START 날짜:20260903 : 공개 도메인·브랜드·검색 대표 페이지와 지도 도구의 색인 경계가 다시 섞이지 않도록 자동 검증 */
-const publicOrigin = 'https://homecare.designboard.net';
+const publicOrigin = 'https://dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 전체 프로젝트의 대표 URL을 새 공식 도메인으로 검증
 if (read('CNAME').trim() !== new URL(publicOrigin).hostname) fail('CNAME과 검색 대표 Origin이 다릅니다.');
 const robotsSource = read('robots.txt');
 const sitemapDirectives = [...robotsSource.matchAll(/^Sitemap:\s*(\S+)/gim)].map(match => match[1]);

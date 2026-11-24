@@ -24,7 +24,7 @@ function createElement() {
     };
 }
 
-function setup(href = 'https://homecare.designboard.net/index.html?type=facility') {
+function setup(href = 'https://dolbomhannun.kr/index.html?type=facility') {
     const body = createElement(), nodes = new Map(), replacements = [];
     const buttons = ['list', 'map'].map(mode => ({ ...createElement(), dataset: { careModeChoice: mode } }));
     const list = { before(node) { nodes.set(node.id, node); } };
@@ -54,11 +54,11 @@ function setup(href = 'https://homecare.designboard.net/index.html?type=facility
 
 test('URL의 명시적 목록모드만 복원하고 기존 주소와 잘못된 모드는 지도모드로 연다', () => {
     const { api } = setup();
-    assert.equal(api.resolveMode('https://homecare.designboard.net/?mode=list&type=daycare'), 'list');
+    assert.equal(api.resolveMode('https://dolbomhannun.kr/?mode=list&type=daycare'), 'list');
     for (const query of ['', '?mode=map', '?mode=LIST', '?mode=unknown', '?type=list']) {
-        assert.equal(api.resolveMode(`https://homecare.designboard.net/${query}`), 'map');
+        assert.equal(api.resolveMode(`https://dolbomhannun.kr/${query}`), 'map');
     }
-    assert.equal(setup('https://homecare.designboard.net/?mode=list').body.dataset.careMode, 'list');
+    assert.equal(setup('https://dolbomhannun.kr/?mode=list').body.dataset.careMode, 'list');
 });
 
 test('90개를 넘는 전체 기관을 기관기호로 집계하고 동일 명칭의 별도 등록과 지역을 구분한다', () => {
@@ -94,7 +94,7 @@ test('평가 미확인을 낮은 등급과 구분하며 빈 결과와 평가연�
 });
 
 test('요양병원 요약에는 공단 평가 수치나 등급을 표시하지 않고 심평원 출처를 구분한다', () => {
-    const { api, nodes } = setup('https://homecare.designboard.net/?mode=list&type=nursing-hospital');
+    const { api, nodes } = setup('https://dolbomhannun.kr/?mode=list&type=nursing-hospital');
     api.mount({});
     api.renderSummary([{ i: 'hospital', p: '서울특별시', c: '중구', g: 'A', ey: 2025 }], { type: 'nursing-hospital', scope: '서울', sourceDate: '2026-09-30' });
     const summary = nodes.get('careListSummary');
@@ -106,7 +106,7 @@ test('요양병원 요약에는 공단 평가 수치나 등급을 표시하지 �
 });
 
 test('목록 요약의 지역명과 자료 기준일은 HTML로 해석하지 않으며 빈 평가 상태를 표시한다', () => {
-    const { api, nodes } = setup('https://homecare.designboard.net/?mode=list');
+    const { api, nodes } = setup('https://dolbomhannun.kr/?mode=list');
     api.mount({});
     api.renderSummary([], { type: 'facility', scope: '<img src=x>', sourceDate: '<b>기준일</b>' });
     const html = nodes.get('careListSummary').innerHTML;
@@ -117,7 +117,7 @@ test('목록 요약의 지역명과 자료 기준일은 HTML로 해석하지 않
 });
 
 test('모드 전환은 기존 검색·공유 쿼리와 해시·history state를 보존하고 반복 선택은 재실행하지 않는다', async () => {
-    const initial = 'https://homecare.designboard.net/index.html?type=facility&q=%EC%9A%94%EC%96%91&p=%EC%84%9C%EC%9A%B8&basket=one%2Ctwo#institution';
+    const initial = 'https://dolbomhannun.kr/index.html?type=facility&q=%EC%9A%94%EC%96%91&p=%EC%84%9C%EC%9A%B8&basket=one%2Ctwo#institution';
     const s = setup(initial), events = [];
     s.api.mount({
         beforeChange: (next, previous) => events.push(`before:${previous}:${next}`),
@@ -151,7 +151,7 @@ test('모드 전환은 기존 검색·공유 쿼리와 해시·history state를 
 });
 
 test('지도 전환의 반환 Promise는 실제 준비 완료까지 기다리고 실패는 연결된 오류 처리기로 전달한다', async () => {
-    const s = setup('https://homecare.designboard.net/?mode=list');
+    const s = setup('https://dolbomhannun.kr/?mode=list');
     let finish, settled = false;
     s.api.mount({ change: () => new Promise(resolve => { finish = resolve; }) });
     const pending = s.api.setMode('map').then(() => { settled = true; });
@@ -215,7 +215,7 @@ function setupListQuery() {
     const context = {
         URL, TYPE: 'facility', CONFIG: { sourceDate: '2026-09-30' }, refreshTimer: 0,
         filtered: [], areaRows: [], careMatchRows: [], resultCount: 0, careUnresolvedCount: 0,
-        location: { href: 'https://homecare.designboard.net/?type=facility&mode=list&basket=one#saved' },
+        location: { href: 'https://dolbomhannun.kr/?type=facility&mode=list&basket=one#saved' },
         history: { state: { retained: true }, replaceState(state, title, url) { context.location.href = String(url); } },
         $: id => elements[id],
         beginCareQuery() { const id = ++revision; return { current: () => id === revision }; },

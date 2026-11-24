@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const INDEXNOW_ORIGIN = 'https://homecare.designboard.net';
+export const INDEXNOW_ORIGIN = 'https://dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 도메인의 변경 URL만 색인 알림으로 제출
 export const INDEXNOW_ENDPOINT = 'https://searchadvisor.naver.com/indexnow';
 export const INDEXNOW_KEY = '91a7b2a3636189e640caa808f522e865';
 export const INDEXNOW_KEY_LOCATION = `${INDEXNOW_ORIGIN}/${INDEXNOW_KEY}.txt`;

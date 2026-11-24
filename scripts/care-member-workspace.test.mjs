@@ -16,7 +16,7 @@ test('중복 세션 조회를 하나로 합치고 늦은 401 응답이 새 로�
 /** SOFTM-RECIPIENT-RETURN START 날짜:20261121 : 대상자 입력 복귀를 허용해도 외부 주소·임의 해시를 허용하지 않는지 확인 */
 test('대상자 입력 복귀 위치만 보존하고 외부 로그인 복귀 주소를 차단한다',async t=>{
  const previous=globalThis.location;t.after(()=>{if(previous===undefined)delete globalThis.location;else globalThis.location=previous;});
- globalThis.location={href:'https://homecare.designboard.net/care-account.html',origin:'https://homecare.designboard.net'};
+ globalThis.location={href:'https://dolbomhannun.kr/care-account.html',origin:'https://dolbomhannun.kr'};
  const {safeReturn}=await import('../care-member-api.mjs');
  assert.equal(safeReturn('care-account.html#careRecipient'),'/care-account.html#careRecipient');
  assert.equal(safeReturn('care-account.html#unrecognized'),'/care-account.html');

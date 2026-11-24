@@ -6,7 +6,7 @@ import {gunzipSync} from 'node:zlib';
 import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 assert.equal(process.env.ALLOW_LIVE_TEST_ACCOUNT,'1','가상 운영 계정 생성·삭제 검증을 명시적으로 활성화해야 합니다.');
-const site='https://homecare.designboard.net',apiOrigin='https://api.homecare.designboard.net';
+const site='https://dolbomhannun.kr',apiOrigin='https://api.dolbomhannun.kr';
 const out=process.env.AUDIT_OUTPUT;assert.ok(out,'검증 결과를 저장할 경로가 필요합니다.');await mkdir(out,{recursive:true});
 const rows=JSON.parse(gunzipSync(await readFile(new URL('../data/care/daycare.json.gz',import.meta.url)))).filter(row=>String(row.t).split(',').includes('B03')).slice(0,3);
 const browser=await chromium.launch({headless:true}),context=await browser.newContext({viewport:{width:1440,height:1000},locale:'ko-KR',serviceWorkers:'block'}),page=await context.newPage();

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { gunzipSync } from 'node:zlib'; // SOFTM-DATA-REGIONS 날짜:20260904 : 지도와 지역 목록이 같은 압축 JSON을 읽도록 통일
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const REGIONAL_ORIGIN = 'https://homecare.designboard.net';
+export const REGIONAL_ORIGIN = 'https://dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 지역 검색 페이지의 대표 주소를 새 공식 도메인으로 일원화
 export const REGIONAL_TYPES = {
   daycare: {
     label: '주간보호센터', landing: 'daycare-map.html', category: '주야간보호센터 찾기',

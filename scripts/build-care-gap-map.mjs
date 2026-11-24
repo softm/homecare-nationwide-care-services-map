@@ -353,7 +353,7 @@ async function build(options) {
                 { label: '행정안전부 주민등록 인구통계', date: POPULATION_DATE, url: 'https://jumin.mois.go.kr/etcStatOldAge.do' },
                 { label: '국민건강보험공단 노인장기요양보험 등급판정 현황', date: RECOGNITION_DATE, url: 'https://www.data.go.kr/data/3051421/fileData.do' },
                 { label: '대한민국 행정동 경계(admdongkor)', date: options.boundary ? '2026-10-01' : '2026-04-01', url: 'https://github.com/vuski/admdongkor' },
-                { label: '돌봄한눈 국민건강보험공단 장기요양기관 수집 목록', date: INSTITUTION_DATE, url: 'https://homecare.designboard.net/data-status.html' }
+                { label: '돌봄한눈 국민건강보험공단 장기요양기관 수집 목록', date: INSTITUTION_DATE, url: 'https://dolbomhannun.kr/data-status.html' } // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 수요·공급 지도의 출처 링크를 새 공식 주소로 연결
             ],
             diagnostics: { institutionUnmatched, boundaryUnmatched }
         },

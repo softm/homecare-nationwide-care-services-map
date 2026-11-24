@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { decodeHtml, inspectRegionalPage, localLinkPath } from './validate-regional-seo.mjs';
 
-const origin = 'https://homecare.designboard.net';
+const origin = 'https://dolbomhannun.kr';
 const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 
 function fixture(t) {

@@ -68,7 +68,7 @@ export async function verifyAnalysisBulk(page, {out, width}) {
 
     // 최신 정보 응답만 가상 처리하며 운영 기관·상담 자료는 수정하지 않음.
     let recent = [];
-    await page.route('**/api/public/service-facts', route => route.fulfill({status:200,headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':'https://homecare.designboard.net'},body:JSON.stringify({data:recent.map(institutionId=>({institutionId,recent:true}))})}));
+    await page.route('**/api/public/service-facts', route => route.fulfill({status:200,headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':'https://dolbomhannun.kr'},body:JSON.stringify({data:recent.map(institutionId=>({institutionId,recent:true}))})}));
     const filter = async values => {
         recent = values;
         await nearbyButton.click();
