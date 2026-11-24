@@ -24,7 +24,7 @@ import { fileStorage, StorageError } from '../../homecare-storage/file-storage.m
 /** SOFTM-HOMECARE-PILOT START 날짜:20261118 : 기관 직접 정보관리·사진·조회 통계를 무료 시범운영 범위로 제공 */
 
 const PILOT_AGREEMENT_VERSION = "homecare-pilot-20261118-v1";
-const DEFAULT_ALLOWED_ORIGINS = "https://homecare.designboard.net,https://softm.github.io";
+const DEFAULT_ALLOWED_ORIGINS = "https://dolbomhannun.kr,https://homecare.designboard.net,https://softm.github.io"; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인의 기관 정보 요청을 허용하고 기존 주소는 이전 기간만 유지
 const MANAGE_ROLES = ["owner", "editor"];
 const HARD_MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const HARD_MAX_PHOTOS_PER_INSTITUTION = 10;
