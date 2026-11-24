@@ -18,7 +18,7 @@ const root=fileURLToPath(new URL('../',import.meta.url)).replace(/\/$/,'');
 const mode=process.env.AUDIT_MODE||'checkout';
 assert.ok(['live','checkout'].includes(mode),'AUDIT_MODE must be live or checkout');
 const out=resolve(process.env.AUDIT_OUTPUT||resolve(tmpdir(),`homecare-ui-${Date.now()}`),process.env.AUDIT_LABEL||mode);
-const site=process.env.AUDIT_SITE||'https://homecare.designboard.net';
+const site=process.env.AUDIT_SITE||'https://dolbomhannun.kr';
 const rows=JSON.parse(gunzipSync(await readFile(root+'/data/care/daycare.json.gz'))).slice(0,3);
 const costRows=Object.fromEntries(['facility','home-care'].map(type=>[type,JSON.parse(gunzipSync(readFileSync(root+'/data/care/'+type+'.json.gz'))).find(row=>String(row.t).split(',').includes(type==='facility'?'A03':'B01'))])); // SOFTM-PERSONAL-COST 날짜:20261121 : 공식 일반 급여가 있는 시설·방문요양 입력 확인
 const record={key:`daycare:${rows[0].i}`,type:'daycare',institutionId:rows[0].i,name:rows[0].n,address:rows[0].a,phone:'',status:'scheduled',visitAt:'2026-11-25T14:00',updatedAt:1795212000000,questions:[{id:'q:1',text:'현재 이용 가능한 자리와 대기기간은 어떻게 되나요?',answer:'화면 검증용 예시 답변입니다.',checked:true},{id:'q:2',text:'추가 비용과 식사비는 얼마인가요?',answer:'',checked:false}],notes:'화면 검증용 예시 메모',checklist:[{id:'space',text:'생활공간·이동 동선 확인',checked:false},{id:'staff',text:'담당 인력과 응급 대응 확인',checked:true}]};
@@ -111,7 +111,7 @@ async function run(c,width){
  },{seed:c.seed,rows,record,user:c.user});
  await page.route('**/*',async route=>{
   const req=route.request(),u=new URL(req.url());
-  if(u.hostname==='api.homecare.designboard.net'){
+  if(u.hostname==='api.dolbomhannun.kr'){
    // 가상 응답은 레이아웃 전용이며 실제 서버 가입·심사·쓰기 요청을 만들지 않는다.
    const headers={'Access-Control-Allow-Origin':site,'Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'Content-Type,X-CSRF-Token,If-Match','Content-Type':'application/json'};
    const send=(data,status=200)=>route.fulfill({status,headers,body:JSON.stringify(status>=400?{error:{code:'layout_denied',message:'화면 검증용 로그인 안내'}}:{data})});

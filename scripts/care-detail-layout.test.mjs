@@ -48,7 +48,7 @@ test('좌표 미확인은 주소, 주소 누락은 기관명 하나만 검색한
 test('기관 공유 링크는 공개 도메인의 유형과 기관기호만 포함한다',()=>{
  const layout=context.window.CareDetailLayout;
  const url=new URL(layout.institutionUrl({i:'A&12',n:'기관'},'home-care'));
- assert.equal(url.origin,'https://homecare.designboard.net');
+ assert.equal(url.origin,'https://dolbomhannun.kr');
  assert.equal(url.pathname,'/index.html');
  assert.deepEqual([...url.searchParams.keys()],['type','institution']);
  assert.equal(url.searchParams.get('institution'),'A&12');
@@ -62,7 +62,7 @@ test('기관 공유 링크는 공개 도메인의 유형과 기관기호만 포�
 test('기관 공유는 기본 공유창 취소를 존중하고 실패 시 링크 복사를 시도한다',async()=>{
  for(const mode of ['copy','native-fail','cancel','copy-fail']){
   let click,copied='';const label={textContent:'공유'};
-  const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'공개 주소',institutionShare:'https://homecare.designboard.net/?institution=1'},querySelector:()=>label};
+  const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'공개 주소',institutionShare:'https://dolbomhannun.kr/?institution=1'},querySelector:()=>label};
   const navigator={clipboard:{writeText:async value=>{if(mode==='copy-fail')throw Error();copied=value;}}};
   if(mode==='native-fail'||mode==='cancel')navigator.share=async()=>{const error=Error();error.name=mode==='cancel'?'AbortError':'NotAllowedError';throw error;};
   const sandbox={window:{},navigator,URLSearchParams,setTimeout(){},document:{readyState:'loading',addEventListener:(name,fn,capture)=>{if(name==='click'&&!capture)click=fn;}} /* SOFTM-DETAIL-SWIPE 날짜:20261005 : 공유 검사는 다른 제스처 이벤트와 분리 */};
@@ -79,7 +79,7 @@ test('기관 공유는 기본 공유창 취소를 존중하고 실패 시 링크
 test('팝업 상태의 지도 공유는 기관 URL만 전달하고 일반 지도 공유는 가로채지 않는다',async()=>{
  const listeners=[];let payload,stopped=false;
  const label={textContent:'공유'};
- const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'주소',institutionShare:'https://homecare.designboard.net/?type=facility&institution=14119001002'},querySelector:()=>label,getClientRects:()=>[{}]};
+ const button={disabled:false,isConnected:true,dataset:{shareName:'기관',shareAddress:'주소',institutionShare:'https://dolbomhannun.kr/?type=facility&institution=14119001002'},querySelector:()=>label,getClientRects:()=>[{}]};
  const sandbox={window:{},URLSearchParams,setTimeout(){},getComputedStyle:()=>({visibility:'visible'}),navigator:{share:async data=>{payload=data}},document:{readyState:'loading',addEventListener:(name,fn,capture)=>listeners.push({fn,capture}) /* SOFTM-DETAIL-SWIPE 날짜:20261005 : 실제 DOM 초기화 없이 공유 핸들러만 검사 */,querySelectorAll:()=>[button]}};
  vm.runInNewContext(readFileSync(new URL('../care-detail-layout.js',import.meta.url),'utf8'),sandbox);
  const handler=listeners.find(item=>item.capture).fn;

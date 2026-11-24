@@ -128,7 +128,7 @@ function setup({ saved, mode = 'list', storageError = false, propertyError = fal
         querySelectorAll: selector => body.querySelectorAll(selector),
         addEventListener() {}
     };
-    const location = { href: 'https://homecare.designboard.net/index.html?type=facility&mode=list&p=서울&basket=one#saved' };
+    const location = { href: 'https://dolbomhannun.kr/index.html?type=facility&mode=list&p=서울&basket=one#saved' };
     const sessionStorage = {
         getItem(key) { if (storageError) throw Error('storage denied'); return values.get(key) ?? null; },
         setItem(key, value) { if (storageError) throw Error('storage denied'); writes.push([key, value]); values.set(key, value); }

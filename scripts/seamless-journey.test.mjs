@@ -60,7 +60,7 @@ test('지도 첫 진입은 위저드 없이 유형 선택 후 지도·목록으�
   assert.doesNotMatch(picker, /원스톱 심리스 · 1\/4|aria-current="step"|4단계 요약/);
   assert.match(picker, /href="service-guide\.html#seamless-journey"/);
   assert.match(index, /care-seamless-journey\.css\?v=20261120-map1/);
-  assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/service-guide\.html<\/loc><lastmod>2026-11-20<\/lastmod>/);
+  assert.match(sitemap, /<loc>https:\/\/dolbomhannun\.kr\/service-guide\.html<\/loc><lastmod>2026-11-20<\/lastmod>/); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인의 서비스 안내 색인을 검증
   assert.ok(existsSync(new URL('../service-guide.html', import.meta.url)));
 });
 
@@ -106,7 +106,7 @@ test('두 번째 후속 인포그래픽은 평가·정원·인력을 단정 없�
   assert.match(topic, /기관과 공식 출처에서 최종 확인/);
   assert.match(styles, /\.care-evidence-points \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(styles, /@media \(max-width: 900px\)[\s\S]*?\.care-evidence-points \{ grid-template-columns: 1fr; \}/);
-  assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/about\.html<\/loc><lastmod>2026-11-20<\/lastmod>/);
+  assert.match(sitemap, /<loc>https:\/\/dolbomhannun\.kr\/about\.html<\/loc><lastmod>2026-11-20<\/lastmod>/); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인의 서비스 소개 색인을 검증
 });
 
 test('세 번째 후속 인포그래픽은 등급부터 실제 부담액 확인까지 비용 요소를 안내한다', () => {
@@ -125,7 +125,7 @@ test('세 번째 후속 인포그래픽은 등급부터 실제 부담액 확인�
   assert.match(costStyles, /\.cost-infographic-steps \{[^}]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
   assert.match(costStyles, /@media \(max-width: 600px\)[\s\S]*?\.cost-infographic-steps \{ grid-template-columns: 1fr; \}/);
   assert.match(costStyles, /\.cost-infographic-action a \{[^}]*min-height: 46px/);
-  assert.match(sitemap, /<loc>https:\/\/homecare\.designboard\.net\/care-cost\.html<\/loc><lastmod>2026-11-20<\/lastmod>/);
+  assert.match(sitemap, /<loc>https:\/\/dolbomhannun\.kr\/care-cost\.html<\/loc><lastmod>2026-11-20<\/lastmod>/); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인의 비용 안내 색인을 검증
 });
 
 test('공식 서비스 구분·자료 출처와 기존 핵심 행동을 보존한다', () => {

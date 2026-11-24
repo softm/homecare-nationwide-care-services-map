@@ -5,7 +5,7 @@ import { gunzipSync } from 'node:zlib'; // SOFTM-DATA-REGIONS 날짜:20260904 : 
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ORIGIN = 'https://homecare.designboard.net';
+const ORIGIN = 'https://dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인 기준으로 지역 SEO를 검증
 const TYPES = { daycare: 'daycare-map.html', facility: 'nursing-home-map.html', 'home-care': 'home-care-map.html' };
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 

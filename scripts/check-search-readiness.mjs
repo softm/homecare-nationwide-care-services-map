@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-export const publicOrigin = 'https://homecare.designboard.net';
+export const publicOrigin = 'https://dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 실제 검색 준비 검사를 새 공식 주소에서 수행
 const root = new URL('../', import.meta.url);
 const decode = value => value.replaceAll('&amp;', '&').replaceAll('&quot;', '"').replaceAll('&#39;', "'");
 

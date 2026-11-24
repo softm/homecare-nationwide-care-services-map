@@ -11,26 +11,26 @@ import {
 } from './submit-indexnow.mjs';
 
 test('같은 공개 도메인의 변경 URL만 정규화하고 중복·fragment를 제거한다', () => {
-  assert.deepEqual(normalizeIndexNowUrls(['/', '/about.html#source', 'https://homecare.designboard.net/about.html']), [
-    'https://homecare.designboard.net/',
-    'https://homecare.designboard.net/about.html',
+  assert.deepEqual(normalizeIndexNowUrls(['/', '/about.html#source', 'https://dolbomhannun.kr/about.html']), [
+    'https://dolbomhannun.kr/',
+    'https://dolbomhannun.kr/about.html',
   ]);
   assert.throws(() => normalizeIndexNowUrls(['https://example.com/']), /다른 도메인/);
   assert.throws(() => normalizeIndexNowUrls([]), /하나 이상/);
 });
 
 test('네이버 규격의 host·공개 키·URL 목록을 만든다', () => {
-  assert.deepEqual(indexNowPayload(['https://homecare.designboard.net/']), {
-    host: 'homecare.designboard.net',
+  assert.deepEqual(indexNowPayload(['https://dolbomhannun.kr/']), {
+    host: 'dolbomhannun.kr',
     key: INDEXNOW_KEY,
     keyLocation: INDEXNOW_KEY_LOCATION,
-    urlList: ['https://homecare.designboard.net/'],
+    urlList: ['https://dolbomhannun.kr/'],
   });
 });
 
 test('공개 키 확인 후에만 네이버 IndexNow로 요청한다', async () => {
   const calls = [];
-  const status = await submitIndexNow(['https://homecare.designboard.net/'], {
+  const status = await submitIndexNow(['https://dolbomhannun.kr/'], {
     fetchImpl: async (url, options = {}) => {
       calls.push({ url, options });
       if (url === INDEXNOW_KEY_LOCATION) return new Response(`${INDEXNOW_KEY}\n`, { status: 200 });
@@ -40,12 +40,12 @@ test('공개 키 확인 후에만 네이버 IndexNow로 요청한다', async () 
   });
   assert.equal(status, 202);
   assert.equal(calls.length, 2);
-  assert.equal(JSON.parse(calls[1].options.body).urlList[0], 'https://homecare.designboard.net/');
+  assert.equal(JSON.parse(calls[1].options.body).urlList[0], 'https://dolbomhannun.kr/');
 });
 
 test('키가 아직 배포되지 않았으면 제출을 중단한다', async () => {
   let postCalled = false;
-  await assert.rejects(() => submitIndexNow(['https://homecare.designboard.net/'], {
+  await assert.rejects(() => submitIndexNow(['https://dolbomhannun.kr/'], {
     fetchImpl: async (url) => {
       if (url === INDEXNOW_KEY_LOCATION) return new Response('old-key', { status: 200 });
       postCalled = true;

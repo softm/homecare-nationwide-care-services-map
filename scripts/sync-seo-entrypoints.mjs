@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { getRegionalSeoPages } from './build-regional-seo.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ORIGIN = 'https://homecare.designboard.net';
+const ORIGIN = 'https://dolbomhannun.kr'; // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 유형 안내와 사이트맵의 공식 주소를 새 도메인으로 생성
 const CONFIG = {
   daycare: { file: 'daycare-map.html', label: '주간보호센터', intro: '장기요양기관 찾기를 통해 공단 자료에서 주야간보호로 분류된 주간보호센터를 지역별로 확인하세요. 기관 주소와 공개 평가연도를 살펴보고, 지도로 이동해 위치·정원·인력을 비교할 수 있습니다.', compare: '송영 가능 지역과 이용 시간을 확인하세요', detail: '지역 목록에는 공개자료의 기관 주소가 표시됩니다. 실제 송영 범위·이용 시간·현재 이용 가능 여부는 센터에 확인하세요.' },
   facility: { file: 'nursing-home-map.html', label: '요양원', intro: '장기요양기관 찾기를 통해 지역별 요양원 목록에서 기관 주소와 공단 공개 평가연도를 확인하세요. 해당 시설 자료에 포함된 노인요양공동생활가정도 함께 안내하며 기관별 실제 유형을 표시합니다.', compare: '평가연도와 실제 시설 유형을 함께 확인하세요', detail: '공단 평가등급은 공개된 평가의 결과입니다. 기관마다 평가연도가 다르므로 주소·정원·인력과 함께 비교하고, 입소 가능 여부는 기관에 확인하세요.' },

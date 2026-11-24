@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const origin='https://homecare.designboard.net';
+const origin='https://dolbomhannun.kr';
 const source=readFileSync(new URL('../sw.js',import.meta.url),'utf8');
 function worker({entries=[],offline=false}={}){
  const values=new Map(entries.map(([path,value])=>[origin+path,value]));
