@@ -4,7 +4,10 @@
     "target": {
       "namespace": "android_app",
       "package_name": "net.softm.care.homecare",
-      "sha256_cert_fingerprints": ["8D:50:96:09:80:83:90:20:81:0E:91:D2:26:A8:1E:9D:B9:0B:26:36:0B:14:2D:00:0F:97:B2:DA:78:69:21:0E"]
+      "sha256_cert_fingerprints": [
+        "9A:64:DC:6A:4C:86:FC:2D:36:D3:60:43:15:B4:70:06:D4:B0:60:1B:3E:4B:81:33:64:92:99:7B:56:2E:01:50",
+        "8D:50:96:09:80:83:90:20:81:0E:91:D2:26:A8:1E:9D:B9:0B:26:36:0B:14:2D:00:0F:97:B2:DA:78:69:21:0E"
+      ]
     }
   }
 ]
