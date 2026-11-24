@@ -67,7 +67,7 @@ function makeEnv(db = new FakeDB(), accountPayload = { uid: "user-1", site: "hom
           return Response.json(accountPayload);
         },
       },
-      ALLOWED_ORIGINS: "https://homecare.designboard.net,https://softm.github.io",
+      ALLOWED_ORIGINS: "https://dolbomhannun.kr,https://softm.github.io",
       DEV_ALLOWED_ORIGIN: "http://localhost:3000",
       EVENT_HASH_SECRET: "01234567890123456789012345678901",
     },
@@ -75,13 +75,13 @@ function makeEnv(db = new FakeDB(), accountPayload = { uid: "user-1", site: "hom
   };
 }
 
-function authHeaders(origin = "https://homecare.designboard.net") {
+function authHeaders(origin = "https://dolbomhannun.kr") {
   return { Origin: origin, Authorization: "Bearer test-token" };
 }
 
 test("허용 Origin의 상태 응답에 CORS와 결제 비활성 상태를 표시한다", async () => {
   const { env } = makeEnv();
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/health", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/health", {
     headers: { Origin: "https://softm.github.io" },
   }), env);
   assert.equal(response.status, 200);
@@ -91,8 +91,8 @@ test("허용 Origin의 상태 응답에 CORS와 결제 비활성 상태를 표�
 
 test("부분 일치 도메인은 CORS 이전에 거부한다", async () => {
   const { env } = makeEnv();
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/health", {
-    headers: { Origin: "https://homecare.designboard.net.evil.example" },
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/health", {
+    headers: { Origin: "https://dolbomhannun.kr.evil.example" },
   }), env);
   assert.equal(response.status, 403);
   assert.equal((await response.json()).error.code, "origin_not_allowed");
@@ -100,10 +100,10 @@ test("부분 일치 도메인은 CORS 이전에 거부한다", async () => {
 
 test("CORS preflight는 콘텐츠 동시성 If-Match 헤더를 허용한다", async () => {
   const { env } = makeEnv();
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/api/institutions/me", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/api/institutions/me", {
     method: "OPTIONS",
     headers: {
-      Origin: "https://homecare.designboard.net",
+      Origin: "https://dolbomhannun.kr",
       "Access-Control-Request-Method": "PUT",
       "Access-Control-Request-Headers": "Authorization, Content-Type, If-Match",
     },
@@ -115,13 +115,13 @@ test("CORS preflight는 콘텐츠 동시성 If-Match 헤더를 허용한다", as
 test("계정 서비스 바인딩에 실제 Origin과 Bearer를 전달한다", async () => {
   const db = new FakeDB();
   const { env, accountRequests } = makeEnv(db);
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/api/institutions/me", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/api/institutions/me", {
     headers: authHeaders(),
   }), env);
   assert.equal(response.status, 200);
   assert.equal(accountRequests.length, 1);
   assert.equal(accountRequests[0].url, "https://account.internal/api/apps/homecare/session");
-  assert.equal(accountRequests[0].headers.get("Origin"), "https://homecare.designboard.net");
+  assert.equal(accountRequests[0].headers.get("Origin"), "https://dolbomhannun.kr");
   assert.equal(accountRequests[0].headers.get("Authorization"), "Bearer test-token");
   const body = await response.json();
   assert.deepEqual(body.data.institutions, []);
@@ -130,7 +130,7 @@ test("계정 서비스 바인딩에 실제 Origin과 Bearer를 전달한다", as
 
 test("다른 site의 계정 세션은 기관 API 권한으로 사용하지 않는다", async () => {
   const { env } = makeEnv(new FakeDB(), { uid: "user-1", site: "another-site" });
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/api/institutions/me", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/api/institutions/me", {
     headers: authHeaders(),
   }), env);
   assert.equal(response.status, 401);
@@ -157,7 +157,7 @@ test("일반 기관 신청은 pending으로만 저장하고 권한을 부여하�
     return null;
   });
   const { env } = makeEnv(db);
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/api/institutions/claim", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/api/institutions/claim", {
     method: "POST",
     headers: { ...authHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -186,7 +186,7 @@ test("일반 기관 신청은 pending으로만 저장하고 권한을 부여하�
 test("일반 기관 신청은 공단 기관기호 11자리만 허용한다", async () => {
   const db = new FakeDB();
   const { env } = makeEnv(db);
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/api/institutions/claim", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/api/institutions/claim", {
     method: "POST",
     headers: { ...authHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -238,7 +238,7 @@ test("프로필 저장은 게시 상태를 draft로 되돌린 뒤 명시 게시�
   });
   const { env } = makeEnv(db);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/profile",
+    "https://dolbomhannun.kr/api/institutions/24119001267/profile",
     {
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json", "If-Match": '"1"' },
@@ -272,7 +272,7 @@ test("콘텐츠 변경은 If-Match가 없거나 stale이면 409 content_conflict
   ));
   const { env: missingEnv } = makeEnv(missingDb);
   const missing = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/profile",
+    "https://dolbomhannun.kr/api/institutions/24119001267/profile",
     {
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -291,7 +291,7 @@ test("콘텐츠 변경은 If-Match가 없거나 stale이면 409 content_conflict
   };
   const { env: staleEnv } = makeEnv(staleDb);
   const stale = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/profile",
+    "https://dolbomhannun.kr/api/institutions/24119001267/profile",
     {
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json", "If-Match": '"1"' },
@@ -317,7 +317,7 @@ test("운영 중지 기관의 승인된 담당자도 수정·재게시할 수 �
   });
   const { env } = makeEnv(db);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/profile",
+    "https://dolbomhannun.kr/api/institutions/24119001267/profile",
     {
       method: "PUT",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -337,9 +337,9 @@ test("공개 행동은 익명 해시만 D1에 저장하고 일별 중복을 집�
     return null;
   });
   const { env } = makeEnv(db);
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/api/public/events", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/api/public/events", {
     method: "POST",
-    headers: { Origin: "https://homecare.designboard.net", "Content-Type": "application/json" },
+    headers: { Origin: "https://dolbomhannun.kr", "Content-Type": "application/json" },
     body: JSON.stringify({
       institutionId: "24119001267",
       type: "detail_view",
@@ -355,7 +355,7 @@ test("공개 행동은 익명 해시만 D1에 저장하고 일별 중복을 집�
 
 test("공개 행동 기록은 Origin 없는 서버 직접 호출을 거부한다", async () => {
   const { env } = makeEnv(new FakeDB());
-  const response = await worker.fetch(new Request("https://homecare.designboard.net/api/public/events", {
+  const response = await worker.fetch(new Request("https://dolbomhannun.kr/api/public/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -394,8 +394,8 @@ test("공개 기관 응답에는 인증 미리보기 경로를 노출하지 않�
   });
   const { env } = makeEnv(db);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/public/institutions/24119001267",
-    { headers: { Origin: "https://homecare.designboard.net" } },
+    "https://dolbomhannun.kr/api/public/institutions/24119001267",
+    { headers: { Origin: "https://dolbomhannun.kr" } },
   ), env);
   assert.equal(response.status, 200);
   const publicData = (await response.json()).data;
@@ -424,7 +424,7 @@ test("draft 사진은 인증·멤버십 확인 뒤 no-store Blob으로 미리본
   const { env } = makeEnv(db);
   env.PHOTOS.get = async () => ({ body: Uint8Array.from([0xff, 0xd8]), httpEtag: '"etag-1"' });
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/photos/photo-1/content",
+    "https://dolbomhannun.kr/api/institutions/24119001267/photos/photo-1/content",
     { headers: authHeaders() },
   ), env);
   assert.equal(response.status, 200);
@@ -449,7 +449,7 @@ test("사진 업로드는 환경값과 무관하게 요청 크기를 5 MiB 상�
   const { env } = makeEnv(db);
   env.MAX_PHOTO_BYTES = String(100 * 1024 * 1024);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/photos",
+    "https://dolbomhannun.kr/api/institutions/24119001267/photos",
     {
       method: "POST",
       headers: {
@@ -502,7 +502,7 @@ test("R2 사진 객체는 공개 캐시를 허용하지 않고 인증 응답에 
   form.set("altText", "기관 전경");
   form.set("isCover", "true");
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/photos",
+    "https://dolbomhannun.kr/api/institutions/24119001267/photos",
     { method: "POST", headers: { ...authHeaders(), "If-Match": '"1"' }, body: form },
   ), env);
   assert.equal(response.status, 201);
@@ -543,7 +543,7 @@ test("업로드 D1 실패 뒤 R2 정리도 실패하면 queue를 시도하고 �
   const form = new FormData();
   form.set("photo", new Blob([Uint8Array.from([0xff, 0xd8, 0xff])], { type: "image/jpeg" }), "orphan.jpg");
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/photos",
+    "https://dolbomhannun.kr/api/institutions/24119001267/photos",
     { method: "POST", headers: { ...authHeaders(), "If-Match": '"1"' }, body: form },
   ), env);
   assert.equal(response.status, 409);
@@ -587,7 +587,7 @@ test("공개하기는 D1 트리거 합산 변경 건수를 허용하고 stale If
   });
   const { env } = makeEnv(db);
   const published = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/submit",
+    "https://dolbomhannun.kr/api/institutions/24119001267/submit",
     { method: "POST", headers: { ...authHeaders(), "If-Match": '"1"' } },
   ), env);
   assert.equal(published.status, 200);
@@ -606,7 +606,7 @@ test("공개하기는 D1 트리거 합산 변경 건수를 허용하고 stale If
   });
   const { env: staleEnv } = makeEnv(staleDb);
   const stale = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/submit",
+    "https://dolbomhannun.kr/api/institutions/24119001267/submit",
     { method: "POST", headers: { ...authHeaders(), "If-Match": '"1"' } },
   ), staleEnv);
   assert.equal(stale.status, 409);
@@ -637,7 +637,7 @@ test("시범운영 동의는 frontend 버전과 세 가지 확인을 모두 요�
   });
   const { env } = makeEnv(db);
   const invalid = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/pilot-agreement",
+    "https://dolbomhannun.kr/api/institutions/24119001267/pilot-agreement",
     {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -648,7 +648,7 @@ test("시범운영 동의는 frontend 버전과 세 가지 확인을 모두 요�
   assert.equal((await invalid.json()).error.code, "pilot_confirmations_required");
 
   const valid = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/pilot-agreement",
+    "https://dolbomhannun.kr/api/institutions/24119001267/pilot-agreement",
     {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -700,7 +700,7 @@ test("협약 철회는 감사·비공개 트리거 합산에도 성공하고 수
   });
   const { env } = makeEnv(db, { uid: "user-2", site: "homecare" });
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/pilot-agreement",
+    "https://dolbomhannun.kr/api/institutions/24119001267/pilot-agreement",
     {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -743,7 +743,7 @@ test("수락 기록이 없는 협약 철회는 명시적인 409로 거부한다"
   });
   const { env } = makeEnv(db);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/pilot-agreement",
+    "https://dolbomhannun.kr/api/institutions/24119001267/pilot-agreement",
     {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -769,7 +769,7 @@ test("사용한 초대 코드는 같은 사용자도 다시 사용할 수 없다
   });
   const { env } = makeEnv(db);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/claim",
+    "https://dolbomhannun.kr/api/institutions/claim",
     {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -808,7 +808,7 @@ test("초대 권한 생성 후 한 번만 소비하며 기존 멤버십을 upser
   });
   const { env } = makeEnv(db);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/claim",
+    "https://dolbomhannun.kr/api/institutions/claim",
     {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -836,7 +836,7 @@ test("없는 프로그램 삭제는 revision을 올리거나 draft로 바꾸지 
   });
   const { env } = makeEnv(db);
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/programs/missing-program",
+    "https://dolbomhannun.kr/api/institutions/24119001267/programs/missing-program",
     { method: "DELETE", headers: { ...authHeaders(), "If-Match": '"1"' } },
   ), env);
   assert.equal(response.status, 404);
@@ -869,7 +869,7 @@ test("사진 삭제는 D1 삭제·draft·정리 대기열 뒤에 R2를 삭제한
   const { env } = makeEnv(db);
   env.PHOTOS.delete = async () => order.push("r2");
   const response = await worker.fetch(new Request(
-    "https://homecare.designboard.net/api/institutions/24119001267/photos/photo-1",
+    "https://dolbomhannun.kr/api/institutions/24119001267/photos/photo-1",
     { method: "DELETE", headers: { ...authHeaders(), "If-Match": '"1"' } },
   ), env);
   assert.equal(response.status, 200);
