@@ -64,7 +64,7 @@ AdSense 계정과 사이트 심사는 운영자 Google 계정에서만 진행할
 
 운영 전환 절차:
 
-1. Google AdSense에서 `homecare.designboard.net` 사이트를 추가하고 소유권·정책 심사를 완료한다.
+1. Google AdSense에서 `dolbomhannun.kr` 사이트를 추가하고 소유권·정책 심사를 완료한다. 이전 사이트 승인을 새 도메인 승인으로 간주하지 않는다. <!-- SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 광고 심사도 새 공식 도메인 기준으로 다시 확인 -->
 2. AdSense의 코드 구현 안내에서 publisher ID(`ca-pub-...`)를 확인한다.
 3. `google-ads-config.js`의 `publisherId`에 실제 값을 입력한다.
 4. AdSense 관리화면의 Auto ads에서 Vignette ads와 Anchor ads 등 오버레이 형식을 켠다. 전면광고 성격의 Vignette는 페이지 코드에서 임의 호출하지 않고 Auto ads 설정으로 운영한다.
@@ -84,7 +84,7 @@ Android 앱 `돌봄한눈`(`net.softm.care.homecare`)은 autorunnavi AdMob 앱 I
 google.com, pub-4219853075548260, DIRECT, f08c47fec0942fa0
 ```
 
-AdMob 콘솔의 앱 인증이 보류되면 `https://homecare.designboard.net/app-ads.txt`가 위 내용으로 응답하는지 먼저 확인한 뒤 콘솔의 `업데이트 확인`을 실행한다.
+AdMob 콘솔의 앱 인증이 보류되면 `https://dolbomhannun.kr/app-ads.txt`가 위 내용으로 응답하는지 먼저 확인한 뒤 콘솔의 `업데이트 확인`을 실행한다. <!-- SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 앱 인증 파일 확인 주소를 새 도메인으로 전환 -->
 
 <!-- SOFTM-ADMOB-APP-ADS END -->
 

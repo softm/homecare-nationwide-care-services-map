@@ -99,7 +99,7 @@
 | `ALLOWED_ORIGINS` | `services/cloudflare-homecare/wrangler.jsonc` | 예 | 기관 Worker의 정확한 CORS Origin 목록 | 공식 공개 Origin 변경 시 공통 계정 허용 목록과 함께 변경 |
 | `DEV_ALLOWED_ORIGIN` | 커밋하지 않는 `.dev.vars` | 예 | 로컬 기관 화면의 단일 허용 Origin | 운영 배포 변수에는 넣지 않음 |
 
-네이버 Maps Application의 Web 서비스 URL에는 최소 `https://homecare.designboard.net`, 레거시 `https://softm.github.io`, `http://localhost:3000`을 등록한다. `http://127.0.0.1:3000`은 별도 Origin이므로 이 주소로 브라우저 검증하려면 별도로 등록해야 한다. Firebase Directions 함수의 CORS 허용 Origin도 같은 공개·로컬 주소를 포함한다. <!-- SOFTM-FIREBASE-DIRECTIONS 날짜:20261026 : 공식 공개 도메인과 공용 함수 호출 출처를 동기화 -->
+네이버 Maps Application의 Web 서비스 URL에는 최소 `https://dolbomhannun.kr`, 전환 기간의 `https://homecare.designboard.net`, 레거시 `https://softm.github.io`, `http://localhost:3000`을 등록한다. `http://127.0.0.1:3000`은 별도 Origin이므로 이 주소로 브라우저 검증하려면 별도로 등록해야 한다. Firebase Directions 함수의 CORS 허용 Origin도 같은 공개·로컬 주소를 포함한다. <!-- SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인과 이전 기간의 호출 출처를 동기화 -->
 
 ## 로컬 실행 표
 
@@ -153,7 +153,7 @@
 
 기관 DB `0006_member_registration.sql`은 기존 기관 D1에 적용한다. 회원 D1은 별도이며 Supabase 증빙 버킷은 기관 사진 버킷과 분리한다. 기관 Worker `ACCOUNT`와 회원 Worker `INSTITUTIONS` 서비스 바인딩을 함께 배포해야 한다. 기존 공통 계정은 `?legacyAccount=1`에서 이전 보관소를 명시적으로 복원하는 경우에만 연결한다.
 
-저장소 설정의 D1 ID는 2026-11-20 생성·마이그레이션한 실제 전용 DB다. [운영 연결 기록](HOMECARE-DEPLOYMENT.md)에 인증·DB·Supabase·Worker·도메인·SNS별 상태를 구분한다. DB 준비와 로컬 번들 검사를 실제 Worker 배포·SNS 제공자 설정·운영 App Link 검증으로 간주하지 않는다. `api.homecare.designboard.net` DNS와 인증 자원이 준비되기 전에 웹의 회원 화면을 운영 메인에 배포하지 않는다. <!-- SOFTM-LIVE-D1 날짜:20261120 : 운영 DB 준비 결과와 서비스 공개 전제조건을 구분 -->
+저장소 설정의 D1 ID는 2026-11-20 생성·마이그레이션한 실제 전용 DB다. [운영 연결 기록](HOMECARE-DEPLOYMENT.md)에 인증·DB·Supabase·Worker·도메인·SNS별 상태를 구분한다. DB 준비와 로컬 번들 검사를 실제 Worker 배포·SNS 제공자 설정·운영 App Link 검증으로 간주하지 않는다. `api.dolbomhannun.kr` DNS와 인증 자원이 준비되기 전에 새 도메인의 회원 화면을 운영 완료로 표시하지 않는다. <!-- SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 회원 API의 DNS·인증서 확인을 공개 전제조건으로 유지 -->
 <!-- SOFTM-MEMBERS END -->
 
 <!-- SOFTM-GUARDIAN START 날짜:20261120 : 보호자·대상자 정보의 서버 경계와 운영 적용 순서 -->
@@ -167,5 +167,5 @@
 <!-- SOFTM-SUPABASE-STORAGE START 날짜:20261121 : 실제 파일 저장소·서버 배포와 웹 검증 상태를 구분 -->
 기관 파일은 담당자가 웹 회원가입·기관 관리 화면에서 올린다. 운영 구성은 `services/homecare-storage/file-storage.mjs`를 통해 Supabase private 버킷에 연결한다. 2026-11-21 Free·카드 없음·추가 과금 제한과 파일 왕복·익명 거부·삭제를 확인했다. 두 Worker secret·배포를 완료하고 사용자 지시로 `FILE_UPLOADS_ENABLED=true`를 적용했다. D1은 파일 키·권한·메타데이터만 보관한다. [운영 상태](HOMECARE-DEPLOYMENT.md), [저장소 구성·남은 작업](../services/homecare-storage/README.md)을 따른다.
 
-회원 API는 `api.homecare.designboard.net` → Cloudflare Pages `softm-homecare-api` → `MEMBERS` 서비스 바인딩 → `softm-homecare-members`로 연결한다. 카페24 DNS에는 이 서브도메인의 CNAME만 추가하며 기존 GitHub Pages 지도와 전체 네임서버는 유지한다. 게이트웨이에 저장소 비밀키나 DB를 추가하지 않는다. 공개 Bearer 헤더를 제거하고 기존 Secure·HttpOnly·SameSite=Lax 쿠키·Origin·CSRF 검증을 유지한다.
+회원 API는 `api.dolbomhannun.kr` → Cloudflare Pages `softm-homecare-api` → `MEMBERS` 서비스 바인딩 → `softm-homecare-members`로 연결한다. 권한 DNS에는 이 서브도메인의 CNAME만 추가하며 기존 GitHub Pages 지도와 전체 네임서버는 유지한다. 게이트웨이에 저장소 비밀키나 DB를 추가하지 않는다. 공개 Bearer 헤더를 제거하고 기존 Secure·HttpOnly·SameSite=Lax 쿠키·Origin·CSRF 검증을 유지한다. 이전 `api.homecare.designboard.net`은 새 API 실사용과 세션 전환을 확인할 때까지 허용한다. <!-- SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 API 주소와 안전한 이전 기간을 함께 정의 -->
 <!-- SOFTM-SUPABASE-STORAGE END -->
