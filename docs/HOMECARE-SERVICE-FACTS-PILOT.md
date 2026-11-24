@@ -126,6 +126,6 @@ UI 검증은 사용자 Chrome과 분리된 숨김 Playwright에서 수행했다.
 
 ## 운영 적용 — 2026-11-22
 
-사용자의 명시적인 푸시·운영 반영 승인 후 DB 백업과 복원 검사를 마치고 기관 D1 migration 0007 → 기관 Worker → 회원 Worker → GitHub Pages `main` 순서로 적용했다. 보호자 안내 주소는 `https://homecare.designboard.net/care-pilot.html`, 운영자 주소는 `https://homecare.designboard.net/care-pilot-admin.html`이다.
+사용자의 명시적인 푸시·운영 반영 승인 후 DB 백업과 복원 검사를 마치고 기관 D1 migration 0007 → 기관 Worker → 회원 Worker → GitHub Pages `main` 순서로 적용했다. 보호자 안내 주소는 `https://dolbomhannun.kr/care-pilot.html`, 운영자 주소는 `https://dolbomhannun.kr/care-pilot-admin.html`이다. <!-- SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 시범운영 안내의 공식 주소를 새 도메인으로 전환 -->
 
 실제 사이트의 가입·로그인, 개인 상담 조건/결과 저장·복원, 조건 변경 안내, 선택적 가족 공유와 비공개 필드 제외를 확인했다. 시험 계정은 모두 삭제했으며 실제 기관의 참여 등록은 수행하지 않았다. 배포 시 참여 기관이 0곳이므로 보호자 화면은 준비 중 안내를 제공한다. 실제 기관의 항목 게시·수정은 담당자 가입·승인·동의·참여 설정을 거쳐 별도로 점검한다. API 버전·웹 소스 커밋·배포 검증 증거는 `HOMECARE-DEPLOYMENT.md`의 같은 날짜 기록을 따른다.
