@@ -27,7 +27,7 @@
     "SUPABASE_PHOTOS_BUCKET": "homecare-photos",
     // SOFTM-MEMBER-LIVE 날짜:20261121 : 승인된 기관 담당자의 사진 등록 개방
     "FILE_UPLOADS_ENABLED": "true",
-    "ALLOWED_ORIGINS": "https://homecare.designboard.net,https://softm.github.io",
+    "ALLOWED_ORIGINS": "https://dolbomhannun.kr,https://homecare.designboard.net,https://softm.github.io",
     "MAX_PHOTO_BYTES": "5242880",
     "MAX_PHOTOS_PER_INSTITUTION": "10"
   },
