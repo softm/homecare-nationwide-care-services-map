@@ -4,11 +4,21 @@ import { fail, text } from './security.mjs';
 export const TYPES=['daycare','facility','home-care','home-nursing','home-bath','short-stay','welfare-equipment','dementia','nursing-hospital'];
 const strings=(values,max=Infinity)=>{if(!Array.isArray(values))return [];if(values.length>max||values.some(v=>typeof v!=='string'||!v.length||v.length>256))fail('invalid_list','저장 항목의 형식이나 개수를 확인해 주세요.');return [...new Set(values)];};
 const multiline=(value,max)=>typeof value==='string'?value.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g,'').trim().slice(0,max):'';
+/** SOFTM-FAMILY-COMPARE-SHARE START 날짜:20261124 : 공유 가능한 공개 비교지표를 서버에서 다시 허용목록으로 정리 */
+const count=value=>value!==null&&value!==undefined&&value!==''&&Number.isInteger(Number(value))&&Number(value)>=0&&Number(value)<=100000?Number(value):null;
+function cleanComparison(value){
+ if(!value||typeof value!=='object'||Array.isArray(value))return null;
+ const grade=/^[A-E]$/.test(value.grade||'')?value.grade:value.grade==='N'?'N':'';
+ const evaluationYear=Number.isInteger(Number(value.evaluationYear))&&Number(value.evaluationYear)>=2000&&Number(value.evaluationYear)<=2100?Number(value.evaluationYear):null;
+ return {grade,evaluationYear,capacity:count(value.capacity),nursing:count(value.nursing),caregivers:count(value.caregivers),designatedDate:/^\d{4}-\d{2}-\d{2}$/.test(value.designatedDate||'')?value.designatedDate:'',sourceDate:text(value.sourceDate,40)};
+}
+/** SOFTM-FAMILY-COMPARE-SHARE END */
 export function cleanRecord(value) {
  if(!value||!TYPES.includes(value.type)||!text(value.institutionId,256))fail('invalid_record','상담 기관을 확인해 주세요.');
  const questions=(Array.isArray(value.questions)?value.questions:[]).slice(0,60).map(q=>({id:text(q.id,512),text:text(q.text,500),answer:multiline(q.answer,2000),checked:q.checked===true})).filter(q=>q.id&&q.text);
  const checklist=(Array.isArray(value.checklist)?value.checklist:[]).slice(0,30).map(q=>({id:text(q.id,80),text:text(q.text,300),checked:q.checked===true})).filter(q=>q.id&&q.text);
- return {key:`${value.type}:${text(value.institutionId,256)}`,type:value.type,institutionId:text(value.institutionId,256),name:text(value.name,120),address:text(value.address,200),phone:text(value.phone,40),status:['preparing','contacted','scheduled','completed'].includes(value.status)?value.status:'preparing',visitAt:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value.visitAt)?value.visitAt:'',questions,checklist,...(value.useConditions?{useConditions:cleanUseConditions(value.useConditions)}:{}),...(value.useCheck?{useCheck:cleanUseCheck(value.useCheck)}:{}),notes:multiline(value.notes,5000),updatedAt:Number.isSafeInteger(value.updatedAt)?value.updatedAt:0};
+ const comparison=cleanComparison(value.comparison);
+ return {key:`${value.type}:${text(value.institutionId,256)}`,type:value.type,institutionId:text(value.institutionId,256),name:text(value.name,120),address:text(value.address,200),phone:text(value.phone,40),status:['preparing','contacted','scheduled','completed'].includes(value.status)?value.status:'preparing',visitAt:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value.visitAt)?value.visitAt:'',questions,checklist,...(comparison?{comparison}:{}),...(value.useConditions?{useConditions:cleanUseConditions(value.useConditions)}:{}),...(value.useCheck?{useCheck:cleanUseCheck(value.useCheck)}:{}),notes:multiline(value.notes,5000),updatedAt:Number.isSafeInteger(value.updatedAt)?value.updatedAt:0};
 }
 export function cleanWorkspace(value) {
  if(value?.v!==1)fail('invalid_workspace','저장 형식을 확인해 주세요.');
@@ -23,6 +33,6 @@ export function shareSnapshot(value) {
  if(value.records?.length>3)fail('share_limit','한 번에 3곳까지 공유할 수 있습니다.');
  const records=(Array.isArray(value.records)?value.records:[]).map(cleanRecord);
  if(!records.length)fail('empty_share','공유할 상담 기록을 선택해 주세요.');
- return {title:text(value.title,100)||'우리 가족 시설 비교',records:records.map(r=>({type:r.type,institutionId:r.institutionId,name:r.name,status:r.status,questions:r.questions.map(q=>({text:q.text,checked:q.checked,...(value.includeAnswers===true?{answer:q.answer}:{})})),checklist:r.checklist.map(q=>({text:q.text,checked:q.checked})),...(value.includeUseCheck===true&&r.useCheck?{useCheck:shareUseCheck(r.useCheck)}:{}),...(value.includeNotes===true?{notes:r.notes}:{})}))};
+ return {title:text(value.title,100)||'우리 가족 시설 비교',records:records.map(r=>({type:r.type,institutionId:r.institutionId,name:r.name,status:r.status,...(r.comparison?{comparison:r.comparison}:{}),questions:r.questions.map(q=>({text:q.text,checked:q.checked,...(value.includeAnswers===true?{answer:q.answer}:{})})),checklist:r.checklist.map(q=>({text:q.text,checked:q.checked})),...(value.includeUseCheck===true&&r.useCheck?{useCheck:shareUseCheck(r.useCheck)}:{}),...(value.includeNotes===true?{notes:r.notes}:{})}))};
 }
 /** SOFTM-MEMBERS END */
