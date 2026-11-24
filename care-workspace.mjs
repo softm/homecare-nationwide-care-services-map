@@ -13,13 +13,23 @@ export function saveConditions(value){write('careUnifiedConditions:v1',value);wr
 export const records=()=>read('careMemberRecords:v1',[]);
 export function questionId(text){return `q:${text.trim().normalize('NFC')}`;}
 export function saveRecord(record){const all=records(),index=all.findIndex(r=>r.key===record.key),next={...record,updatedAt:Date.now()};if(index>=0)all[index]=next;else all.push(next);write('careMemberRecords:v1',all);return next;}
-export function ensureRecord(type,row,questions=[]){
+/** SOFTM-FAMILY-COMPARE-SHARE START 날짜:20261124 : 가족 공유에는 개인 위치·비용 대신 공공 비교지표만 보존 */
+const number=value=>value===null||value===undefined||value===''||!Number.isFinite(Number(value))?null:Number(value);
+export function publicComparison(row,context={}){
+ const grade=/^[A-E]$/.test(row.g||row.ev?.grade||'')?String(row.g||row.ev?.grade):row.g==='N'||row.ev?.grade==='N'?'N':'';
+ const year=number(row.ey||row.ev?.year),capacity=number(row.z),registered=number(row.rn),assistant=number(row.na),caregivers=number(row.cw);
+ const nursing=row.staffMissing||registered===null&&assistant===null?null:(registered||0)+(assistant||0);
+ return {grade,evaluationYear:Number.isInteger(year)&&year>=2000&&year<=2100?year:null,capacity:Number.isInteger(capacity)&&capacity>=0?capacity:null,nursing:Number.isInteger(nursing)&&nursing>=0?nursing:null,caregivers:row.staffMissing?null:Number.isInteger(caregivers)&&caregivers>=0?caregivers:null,designatedDate:/^\d{4}-\d{2}-\d{2}$/.test(row.d||'')?row.d:'',sourceDate:String(context.sourceDate||'').slice(0,40)};
+}
+export function ensureRecord(type,row,questions=[],context={}){
  const key=`${type}:${row.i}`,existing=records().find(r=>r.key===key);
  const defaults=['현재 입소·이용 가능한 자리와 대기 기간은 어떻게 되나요?','본인부담금과 비급여를 포함한 실제 월 비용은 얼마인가요?','필요한 돌봄을 제공하는 인력과 야간 대응을 확인할 수 있나요?','가족 방문과 상담은 어떻게 진행되나요?'];
  const list=[...new Set([...questions,...defaults])].map(text=>({id:questionId(text),text,answer:'',checked:false}));
- if(existing){const previous=new Map(existing.questions.map(q=>[q.id,q]));const additions=list.filter(q=>!previous.has(q.id));if(!additions.length)return existing;existing.questions.push(...additions);return saveRecord(existing);}
- return saveRecord({key,type,institutionId:String(row.i),name:row.n||'',address:row.a||'',phone:row.phone||'',status:'preparing',visitAt:'',questions:list,notes:'',checklist:[['space','생활공간·이동 동선 확인'],['hygiene','청결·식사 환경 확인'],['staff','담당 인력과 응급 대응 확인'],['cost','계약서·비용 항목 확인']].map(([id,text])=>({id,text,checked:false}))});
+ const comparison=publicComparison(row,context);
+ if(existing){const previous=new Map(existing.questions.map(q=>[q.id,q]));const additions=list.filter(q=>!previous.has(q.id)),changed=JSON.stringify(existing.comparison)!==JSON.stringify(comparison);if(!additions.length&&!changed)return existing;existing.questions.push(...additions);existing.comparison=comparison;return saveRecord(existing);}
+ return saveRecord({key,type,institutionId:String(row.i),name:row.n||'',address:row.a||'',phone:row.phone||'',status:'preparing',visitAt:'',questions:list,comparison,notes:'',checklist:[['space','생활공간·이동 동선 확인'],['hygiene','청결·식사 환경 확인'],['staff','담당 인력과 응급 대응 확인'],['cost','계약서·비용 항목 확인']].map(([id,text])=>({id,text,checked:false}))});
 }
+/** SOFTM-FAMILY-COMPARE-SHARE END */
 export function snapshot(){return {v:1,baskets:Object.fromEntries(TYPES.map(t=>[t,basketIds(t)])),activeCompare:Object.fromEntries(TYPES.map(t=>[t,activeIds(t)])),conditions:conditions(),consultations:records()};}
 export function applySnapshot(value){if(value?.v!==1)throw new Error('저장본 형식을 확인해 주세요.');for(const type of TYPES){write(`careCompare:v1:${type}`,value.baskets?.[type]||[]);write(`careCompareActive:v1:${type}`,(value.activeCompare?.[type]||[]).slice(0,3));}write('careMemberRecords:v1',value.consultations||[]);if(value.conditions)saveConditions(value.conditions);else {store()?.removeItem('careUnifiedConditions:v1');store()?.removeItem('careMatch:v1');}}
 export function mergeSnapshots(remote,local){const result={...local,conditions:local.conditions||remote?.conditions||null,baskets:{},activeCompare:{}};for(const type of TYPES){result.baskets[type]=[...new Set([...(remote?.baskets?.[type]||[]),...(local.baskets[type]||[])])];result.activeCompare[type]=local.activeCompare[type]?.length?local.activeCompare[type]:(remote?.activeCompare?.[type]||[]).slice(0,3);}const map=new Map((remote?.consultations||[]).map(r=>[r.key,r]));for(const record of local.consultations)map.set(record.key,record);result.consultations=[...map.values()];return result;}
