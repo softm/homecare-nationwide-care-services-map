@@ -269,11 +269,34 @@
   line-height: 1.4;
 }
 
-.care-seamless-entry-copy > span:last-child {
+.care-seamless-entry-copy > span {
   color: #5b7084;
   font-size: 12px;
   line-height: 1.45;
 }
+
+/** SOFTM-TYPE-REVIEW-GUIDE START 날짜:20261126 : 첫 유형 선택 전에 위치·공개정보·기관 확인의 판단 순서를 한 화면에 안내 */
+.care-type-review-guide { margin-top: 8px; padding: 11px 12px; border: 1px solid #d2e2dc; border-radius: 14px; background: linear-gradient(135deg,#f4faf7,#f7f9fc); }
+.care-type-review-guide > b { display: block; margin-bottom: 8px; color: #31584c; font-size: 13px; line-height: 1.4; }
+.care-type-review-guide ol { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0; margin: 0; padding: 0; list-style: none; }
+.care-type-review-guide li { display: flex; align-items: center; min-width: 0; gap: 8px; padding: 2px 10px; }
+.care-type-review-guide li:first-child { padding-left: 0; }
+.care-type-review-guide li:last-child { padding-right: 0; }
+.care-type-review-guide li:not(:last-child) { border-right: 1px solid #d4e1dc; }
+.care-type-review-icon { display: grid; flex: 0 0 34px; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: #e2f1eb; color: #286957; }
+.care-type-review-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.care-type-review-guide strong,.care-type-review-guide small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.care-type-review-guide strong { color: #294a40; font-size: 13px; line-height: 1.35; }
+.care-type-review-guide small { color: #61736c; font-size: 10px; line-height: 1.35; }
+@media (max-width: 460px) {
+  .care-type-review-guide { padding-inline: 9px; }
+  .care-type-review-guide li { align-items: flex-start; flex-direction: column; gap: 4px; padding-inline: 7px; }
+  .care-type-review-icon { width: 30px; height: 30px; }
+  .care-type-review-icon svg { width: 18px; height: 18px; }
+  .care-type-review-guide strong { font-size: 12px; }
+  .care-type-review-guide small { white-space: normal; }
+}
+/** SOFTM-TYPE-REVIEW-GUIDE END */
 
 .care-seamless-entry-link {
   display: inline-flex;
