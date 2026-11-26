@@ -101,30 +101,44 @@
         new MutationObserver(syncBasket).observe(document.querySelector('#careSavedTab [data-saved-count]'), {childList:true, subtree:true, characterData:true});
         new MutationObserver(syncBasket).observe(document.body, {attributes:true, attributeFilter:['data-care-workspace']});
         syncBasket();
-        document.getElementById('list').addEventListener('click', async event => {
+        /** SOFTM-PHONE-ONE-TAP START 날짜:20261126 : 카드에 번호를 먼저 표시하고 한 번의 선택으로 시스템 전화 화면을 열도록 실제 tel 링크로 교체 */
+        const listHost = document.getElementById('list');
+        async function hydratePhone(button) {
+            if (!button?.isConnected || button.dataset.phoneLoading === 'true') return null;
+            button.dataset.phoneLoading = 'true'; button.disabled = true;
+            const output = button.closest('.row')?.querySelector('[data-phone-result]');
+            try {
+                const phone = String(await options.phone(button.dataset.stitchPhone) || '').trim();
+                if (!button.isConnected) return null;
+                const number = phone.replace(/[^0-9+]/g, '');
+                if (number.length < 8) {
+                    button.textContent = '전화번호 미공개'; button.setAttribute('aria-label', '공개된 전화번호 없음');
+                    if (output) { output.hidden = false; output.textContent = '공개된 전화번호가 없습니다. 기관 상세에서 공단 원문을 확인해 주세요.'; }
+                    return null;
+                }
+                const link = document.createElement('a');
+                link.className = button.className; link.dataset.stitchPhoneLink = button.dataset.stitchPhone;
+                link.href = `tel:${number}`; link.textContent = `${phone} 전화하기`;
+                link.setAttribute('aria-label', `${phone}로 전화하기`); link.title = `${phone}로 전화하기`;
+                if (output) { output.hidden = true; output.replaceChildren(); }
+                button.replaceWith(link); return link;
+            } catch (_) {
+                if (button.isConnected) { button.disabled = false; button.textContent = '전화번호 다시 확인'; button.setAttribute('aria-label', '전화번호 다시 확인'); }
+                if (output) { output.hidden = false; output.textContent = '전화번호를 불러오지 못했습니다. 다시 확인해 주세요.'; }
+                return null;
+            } finally { if (button.isConnected) { button.disabled = false; delete button.dataset.phoneLoading; } }
+        }
+        const hydratePhones = () => listHost.querySelectorAll('[data-stitch-phone]').forEach(button => { void hydratePhone(button); });
+        new MutationObserver(hydratePhones).observe(listHost, { childList: true, subtree: true });
+        hydratePhones();
+        listHost.addEventListener('click', async event => {
+            const link = event.target.closest('[data-stitch-phone-link]');
+            if (link) { root.dispatchEvent(new CustomEvent('care:phone-click', { detail: { institutionId: link.dataset.stitchPhoneLink } })); return; }
             const button = event.target.closest('[data-stitch-phone]');
             if (!button || button.disabled) return;
-            const output = button.closest('.row').querySelector('[data-phone-result]');
-            const originalLabel = button.textContent;
-            output.hidden = false; output.textContent = '전화번호 확인 중…'; button.disabled = true; button.textContent = '☎ 확인 중…';
-            try {
-                const phone = String(await options.phone(button.dataset.stitchPhone) || '');
-                if (!output.isConnected) return;
-                output.replaceChildren();
-                const number = phone.replace(/[^0-9+]/g, '');
-                if (number.length >= 8) {
-                    const link = document.createElement('a'); link.href = `tel:${number}`; link.textContent = `${phone} · 전화 걸기`;
-                    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'stitch-phone-copy'; copy.setAttribute('aria-label', `${phone} 복사`); copy.title = '전화번호 복사';
-                    copy.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg>';
-                    copy.onclick = async () => { try { await copyPhone(phone); copy.setAttribute('aria-label', `${phone} 복사됨`); copy.title = '복사됨'; } catch (_) { copy.setAttribute('aria-label', `${phone} 복사 실패`); copy.title = '복사 실패'; } };
-                    output.append(link, copy); // SOFTM-PHONE-COPY 날짜:20261118 : 전화번호 옆 복사 아이콘으로 번호를 클립보드에 저장
-                } else output.textContent = '공개된 전화번호가 없습니다. 상세정보에서 공단 원문을 확인해 주세요.';
-            } catch (_) { output.textContent = '전화번호를 불러오지 못했습니다. 전화 버튼을 눌러 다시 확인해 주세요.'; }
-            finally {
-                button.disabled = false; button.textContent = originalLabel;
-                if (output.isConnected) requestAnimationFrame(() => output.scrollIntoView({block:'nearest', behavior:'smooth'}));
-            } // SOFTM-PHONE-FEEDBACK 날짜:20261118 : 버튼에 즉시 로딩 상태를 표시하고 완료된 번호 안내가 카드 아래에서 가려지지 않도록 이동
+            event.preventDefault(); const hydrated = await hydratePhone(button); if (hydrated) root.location.href = hydrated.href;
         });
+        /** SOFTM-PHONE-ONE-TAP END */
     }
     root.StitchControls = Object.freeze({mount});
 })(globalThis);

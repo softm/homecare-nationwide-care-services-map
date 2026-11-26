@@ -39,7 +39,7 @@
                     return { cancelled: true };
                 }
                 update({ phase: 'searching', message: '현재 위치의 기관을 찾고 있습니다…' });
-                const outcome = await options.apply(address);
+                const outcome = await options.apply(address, point); // SOFTM-DISTANCE-FIRST 날짜:20261126 : 확인한 실제 좌표를 지역 적용 뒤 거리순 정렬에도 전달
                 if (!current()) return { cancelled: true };
                 /** SOFTM-LOCATION-RESULT START 날짜:20260930 : 실제 조회 성공에서만 적용 지역·건수를 완료 상태로 보관 */
                 update({ result: outcome?.cancelled ? null : { scope: outcome.scope, count: outcome.count }, phase: 'ready', message: outcome?.cancelled ? '검색조건이 바뀌어 위치 검색을 취소했습니다.' : `${outcome.scope} · ${outcome.count.toLocaleString('ko-KR')}곳 검색 완료` });
@@ -61,9 +61,9 @@
             if (!options.enabled()) {
                 revision++; clearResult(); // SOFTM-LOCATION-RESULT 날짜:20260930 : 지도 전환 뒤 목록의 이전 완료 표시를 재사용하지 않음
                 if (['loading', 'searching'].includes(state.phase)) { attempted = false; update({ phase: 'idle', label: '위치 확인 전', message: '' }); }
-            } else if (!attempted) void locate();
+            }
         }
-        return { locate, sync, clearResult, state: () => ({ ...state }) }; // SOFTM-LOCATION-RESULT 날짜:20260930 : 새 조회에 완료 표시 해제 경로를 제공
+        return { locate, sync, clearResult, state: () => ({ ...state }) }; // SOFTM-LOCATION-EXPLICIT 날짜:20261126 : sync는 권한을 자동 요청하지 않고 명시적 버튼 상태만 유지
     }
 
     function mount(options) {

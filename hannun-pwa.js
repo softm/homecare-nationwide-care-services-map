@@ -36,6 +36,10 @@ function hannunMountInstallUI(){
  document.getElementById('hannun-pwa-install').addEventListener('click',hannunRequestInstall);
  document.getElementById('hannun-pwa-action').addEventListener('click',hannunRequestInstall);
  document.querySelector('.hannun-pwa-close').addEventListener('click',()=>document.getElementById('hannun-pwa-dialog').close());
+ /** SOFTM-PWA-NONBLOCKING START 날짜:20261126 : 기관 카드와 전화 행동을 가리지 않도록 지도 화면의 설치 진입점을 전체 메뉴 안으로 이동 */
+ const menuHost=document.querySelector('#careNavigationMenu nav'),install=document.getElementById('hannun-pwa-install');
+ if(menuHost&&install){install.classList.add('hannun-pwa-install-menu');menuHost.append(install);}
+ /** SOFTM-PWA-NONBLOCKING END */
 }
 
 function hannunStaticResources(){
