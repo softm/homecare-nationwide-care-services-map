@@ -47,7 +47,7 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261126-quick-start-remove1/); // SOFTM-QUICK-START-REMOVE 날짜:20261126 : 중복 첫 방문 안내를 제거한 최신 자산 버전 확인
+ assert.match(index,/care-category-picker\.js\?v=20261126-type-review1/); // SOFTM-TYPE-REVIEW-GUIDE 날짜:20261126 : 기관 판단 안내가 포함된 최신 자산 버전 확인
 });
 /** SOFTM-QUICK-START-REMOVE START 날짜:20261126 : 기존 검색·위치 영역과 중복되는 첫 방문 안내 카드를 다시 만들지 않는지 검증 */
 test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는다',()=>{
@@ -59,6 +59,16 @@ test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는
  assert.doesNotMatch(source,/현재 위치로 찾기를 누른 뒤 필요한 돌봄을 선택해 주세요/);
 });
 /** SOFTM-QUICK-START-REMOVE END */
+/** SOFTM-TYPE-REVIEW-GUIDE START 날짜:20261126 : 유형 선택 상단에 기관 판단 기준 세 가지를 함께 표시하는지 검증 */
+test('유형 선택 상단은 위치·공개정보·기관 확인 기준을 안내한다',()=>{
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../care-seamless-journey.css',import.meta.url),'utf8');
+ for(const text of ['기관을 이렇게 살펴보세요','위치','생활권 안 후보 찾기','공개정보','평가·정원·인력 비교','기관 확인','빈자리·비용·운영 상담'])assert.match(source,new RegExp(text));
+ assert.match(source,/aria-label="기관을 살펴보는 세 가지 기준"/);
+ assert.match(css,/\.care-type-review-guide ol \{[^}]*grid-template-columns: repeat\(3/);
+ assert.match(css,/@media \(max-width: 460px\)/);
+});
+/** SOFTM-TYPE-REVIEW-GUIDE END */
 /** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 짧은 목록 화면에서 방문목욕 아래 유형도 자체 스크롤로 접근 가능한지 정적 검증 */
 test('목록 유형 패널은 남은 화면 높이를 사용하고 마지막 유형까지 자체 스크롤한다',()=>{
  const css=readFileSync(new URL('../care-category-picker.css',import.meta.url),'utf8');

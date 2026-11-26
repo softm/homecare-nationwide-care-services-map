@@ -67,7 +67,7 @@ test('지도 첫 진입은 위저드 없이 유형 선택 후 지도·목록으�
   assert.match(picker, /선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/);
   assert.doesNotMatch(picker, /원스톱 심리스 · 1\/4|aria-current="step"|4단계 요약/);
   assert.match(picker, /href="service-guide\.html#seamless-journey"/);
-  assert.match(index, /care-seamless-journey\.css\?v=20261120-map1/);
+  assert.match(index, /care-seamless-journey\.css\?v=20261126-type-review1/); // SOFTM-TYPE-REVIEW-GUIDE 날짜:20261126 : 유형 선택 판단 안내 최신 스타일 확인
   assert.match(sitemap, /<loc>https:\/\/dolbomhannun\.kr\/service-guide\.html<\/loc><lastmod>2026-11-20<\/lastmod>/); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인의 서비스 안내 색인을 검증
   assert.ok(existsSync(new URL('../service-guide.html', import.meta.url)));
 });
