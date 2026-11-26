@@ -36,11 +36,12 @@ function controller(overrides = {}) {
     return { api, rendered, applied, requests, setEnabled(value) { enabled = value; }, setSignature(value) { signature = value; } };
 }
 
-test('목록 진입은 현재 위치를 한 번 표시하고 기존 검색조건에는 적용하지 않는다', async () => {
+test('목록 진입은 위치 권한을 자동 요청하지 않고 사용자가 누른 뒤에만 주소를 확인한다', async () => {
     const env = controller();
     env.api.sync();
-    assert.equal(env.api.state().phase, 'loading');
-    await settle();
+    assert.equal(env.api.state().phase, 'idle');
+    assert.equal(env.requests.length, 0);
+    await env.api.locate(false);
     assert.equal(env.api.state().phase, 'ready');
     assert.equal(env.api.state().label, '경기도 광명시 철산동');
     assert.equal(env.applied.length, 0);
@@ -183,7 +184,7 @@ function mountedLocation({ denied = false } = {}) {
 }
 
 test('권한이 차단된 위치 찾기 버튼은 재요청 대신 권한 안내를 열고 기존 검색을 유지한다', async () => {
-    const env = mountedLocation({ denied: true }); env.api.sync(); await settle();
+    const env = mountedLocation({ denied: true }); env.api.sync(); env.main.onclick(); await settle();
     assert.equal(env.api.state().phase, 'error');
     const original = { ...env.conditions };
     env.main.onclick(); env.main.onclick(); await settle();
@@ -204,12 +205,12 @@ test('상세 안내의 위치 다시 확인은 주소만 갱신하고 검색 버
     dialog.querySelector('[data-location-detail-retry]').onclick(); await settle();
     assert.equal(dialog.open, false);
     assert.equal(env.document.activeElement, env.help);
-    assert.equal(env.requests.length, 2);
+    assert.equal(env.requests.length, 1);
     assert.equal(env.api.state().phase, 'ready');
     assert.equal(env.applied.length, 0);
     assert.deepEqual(env.conditions, original);
     env.main.onclick(); await settle();
-    assert.equal(env.requests.length, 3);
+    assert.equal(env.requests.length, 2);
     assert.deepEqual(env.applied, [address]);
     assert.deepEqual(env.conditions, { province: '경기도', city: '광명시', query: '' });
 });
@@ -295,9 +296,9 @@ test('실제 필터 적용은 없는 지역 옵션을 추가해 0곳을 보존�
         let value = initial;
         return { options: [{ value: '' }, { value: initial }], add(option) { this.options.push(option); }, get value() { return value; }, set value(next) { value = this.options.some(option => option.value === next) ? next : ''; } };
     }
-    const nodes = { province: select('경기도'), city: select('광명시'), q: { value: '기존 기관명' } };
+    const nodes = { province: select('경기도'), city: select('광명시'), q: { value: '기존 기관명' }, sort: { value: 'rating' } };
     const gradeFilters = new Set(['A']), scoreFilters = new Set(['high']), features = new Set(['green']), messages = [];
-    const context = vm.createContext({ careListLocation: null, CareListLocation: { resolveRegion, mount: options => options }, TYPE: 'short-stay', DATA: rows,
+    const context = vm.createContext({ careListLocation: null, CareListLocation: { resolveRegion, mount: options => options }, CareResultSort: { setCurrentPoint() {} }, TYPE: 'short-stay', DATA: rows,
         gradeFilters, scoreFilters, advancedSearch: { state: () => ({ features: [...features] }), reset() { features.clear(); } },
         MapViewportSearch: { regionKey }, NATIONAL_REGION_BOUNDS: { regions: bounds }, $: id => nodes[id],
         Option: function (text, value) { this.text = text; this.value = value; },
@@ -311,6 +312,7 @@ test('실제 필터 적용은 없는 지역 옵션을 추가해 0곳을 보존�
     assert.deepEqual(selected, { province: '대전광역시', city: '유성구', q: '' });
     assert.equal(result.count, 0);
     assert.equal(result.scope, '대전광역시 유성구');
+    assert.equal(nodes.sort.value, 'distance'); // SOFTM-DISTANCE-FIRST 날짜:20261126 : 실제 위치 조회 뒤 가까운 기관을 먼저 표시
     assert.deepEqual([...gradeFilters], ['A']);
     assert.deepEqual([...scoreFilters], ['high']);
     assert.deepEqual([...features], ['green']);

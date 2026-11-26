@@ -12,7 +12,7 @@ test('목록·지도 전환은 오른쪽 로그인 버튼의 전용 공간을 �
     assert.match(styles, /@media \(min-width:1001px\)[\s\S]*?\.care-mode-toggle \{ right:66px; \}/);
     assert.match(styles, /data-care-mode="list"\] \.care-mode-toggle \{ top:2px; right:60px;/);
     const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-    assert.match(index, /care-list-mode\.css\?v=20261119-account1/);
+    assert.match(index, /care-list-mode\.css\?v=20261126-quick-start1/);
 });
 
 function createElement() {
@@ -59,6 +59,7 @@ test('URL의 명시적 목록모드만 복원하고 기존 주소와 잘못된 �
         assert.equal(api.resolveMode(`https://dolbomhannun.kr/${query}`), 'map');
     }
     assert.equal(setup('https://dolbomhannun.kr/?mode=list').body.dataset.careMode, 'list');
+    assert.equal(api.resolveMode('https://dolbomhannun.kr/?type=daycare', true), 'list'); // SOFTM-MOBILE-LIST-FIRST 날짜:20261126 : 쿼리 없는 모바일은 목록을 기본으로 사용
 });
 
 test('90개를 넘는 전체 기관을 기관기호로 집계하고 동일 명칭의 별도 등록과 지역을 구분한다', () => {

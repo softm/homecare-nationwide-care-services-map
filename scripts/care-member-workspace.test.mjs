@@ -14,6 +14,14 @@ test('단일 기관 상세는 비교할 다른 기관 없이 실제 평가 지�
 test('병원 원문 식별자는 서버와 동일한 출처 포함 키가 되고 공단 번호는 그대로 유지한다',()=>{assert.equal(memberInstitutionId('24215000294','daycare'),'24215000294');const raw='병원+/=identifier';assert.equal(memberInstitutionId(raw,'nursing-hospital'),'hira:'+Buffer.from(raw).toString('base64url'));assert.equal(memberInstitutionId(raw,'daycare'),'');});
 test('중복 세션 조회를 하나로 합치고 늦은 401 응답이 새 로그인을 지우지 않는다',async t=>{const original=globalThis.fetch; t.after(()=>globalThis.fetch=original);let finish,calls=0;globalThis.fetch=()=>{calls++;return new Promise(resolve=>finish=resolve)};const m=await import('../care-member-api.mjs');const first=m.refreshSession(),second=m.refreshSession();assert.equal(first,second);assert.equal(calls,1);const signedIn={user:{id:'new-user'},csrf:'new-csrf'};m.acceptSession(signedIn);finish(Response.json({error:{message:'만료'}},{status:401}));assert.deepEqual(await first,signedIn);assert.deepEqual(m.currentSession(),signedIn);});
 
+/** SOFTM-PUBLIC-FIRST START 날짜:20261126 : 회원 API 응답이 늦어도 공개 기관 화면 렌더링을 기다리지 않는지 정적 검증 */
+test('공개 기관 화면은 회원 세션을 기다리지 않고 먼저 렌더링한다',()=>{
+ const source=readFileSync(new URL('../care-pages.mjs',import.meta.url),'utf8');
+ assert.match(source,/const publicRender=render\(\);void refreshSession\(\)\.catch\(\(\)=>\{\}\);await publicRender/);
+ assert.doesNotMatch(source,/await refreshSession\(\)/);
+});
+/** SOFTM-PUBLIC-FIRST END */
+
 /** SOFTM-RECIPIENT-RETURN START 날짜:20261121 : 대상자 입력 복귀를 허용해도 외부 주소·임의 해시를 허용하지 않는지 확인 */
 test('대상자 입력 복귀 위치만 보존하고 외부 로그인 복귀 주소를 차단한다',async t=>{
  const previous=globalThis.location;t.after(()=>{if(previous===undefined)delete globalThis.location;else globalThis.location=previous;});
