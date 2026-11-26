@@ -47,7 +47,7 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261126-type-review1/); // SOFTM-TYPE-REVIEW-GUIDE 날짜:20261126 : 기관 판단 안내가 포함된 최신 자산 버전 확인
+ assert.match(index,/care-category-picker\.js\?v=20261126-type-guide-compact1/); // SOFTM-TYPE-GUIDE-COMPACT 날짜:20261126 : 제목 옆 버튼이 포함된 최신 자산 버전 확인
 });
 /** SOFTM-QUICK-START-REMOVE START 날짜:20261126 : 기존 검색·위치 영역과 중복되는 첫 방문 안내 카드를 다시 만들지 않는지 검증 */
 test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는다',()=>{
@@ -69,6 +69,16 @@ test('유형 선택 상단은 위치·공개정보·기관 확인 기준을 안�
  assert.match(css,/@media \(max-width: 460px\)/);
 });
 /** SOFTM-TYPE-REVIEW-GUIDE END */
+/** SOFTM-TYPE-GUIDE-COMPACT START 날짜:20261126 : 안내 링크가 제목 옆 버튼으로 배치되고 이전 문구가 제거되는지 검증 */
+test('이용 흐름 링크는 간결한 유형 선택 제목 옆 버튼으로 표시한다',()=>{
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../care-seamless-journey.css',import.meta.url),'utf8');
+ assert.match(source,/care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요<\/strong><a class="care-seamless-entry-link"/);
+ assert.doesNotMatch(source,/돌봄 유형을 먼저 선택해 주세요/);
+ assert.match(css,/\.care-seamless-entry-head \{[^}]*justify-content: space-between/);
+ assert.match(css,/\.care-seamless-entry-link \{[\s\S]*?border: 1px solid/);
+});
+/** SOFTM-TYPE-GUIDE-COMPACT END */
 /** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 짧은 목록 화면에서 방문목욕 아래 유형도 자체 스크롤로 접근 가능한지 정적 검증 */
 test('목록 유형 패널은 남은 화면 높이를 사용하고 마지막 유형까지 자체 스크롤한다',()=>{
  const css=readFileSync(new URL('../care-category-picker.css',import.meta.url),'utf8');
