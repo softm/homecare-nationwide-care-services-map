@@ -240,10 +240,6 @@
 }
 
 .care-seamless-entry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   margin: 8px 0 12px;
   padding: 10px 11px;
   border: 1px solid #cbdbe8;
@@ -256,6 +252,9 @@
   min-width: 0;
   gap: 2px;
 }
+
+/** SOFTM-TYPE-GUIDE-COMPACT START 날짜:20261126 : 이용 흐름 링크를 제목 옆 버튼으로 배치해 안내 카드의 불필요한 여백 제거 */
+.care-seamless-entry-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 
 .care-seamless-entry-label {
   color: #173f6b;
@@ -303,13 +302,14 @@
   align-items: center;
   flex: 0 0 auto;
   min-height: 44px;
-  padding: 0 8px;
-  border-radius: 8px;
+  padding: 0 12px;
+  border: 1px solid #a9c1d7;
+  border-radius: 9px;
+  background: #fff;
   color: #245888;
   font-size: 12px;
   font-weight: 800;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 .care-seamless-entry-link:focus-visible {
@@ -320,6 +320,7 @@
 body.care-type-open .care-type-map-overlay .care-seamless-entry {
   margin-block: 5px 8px;
 }
+/** SOFTM-TYPE-GUIDE-COMPACT END */
 
 /** SOFTM-CARE-TYPE-INFOGRAPHIC START 날짜:20261120 : 한 가지 질문에서 생활 방식별 돌봄 유형과 지도 행동으로 연결 */
 .care-topic-infographic { margin: 28px 0; padding: 30px; border: 1px solid #d4e0e9; border-radius: 22px; background: #f7fafc; }
@@ -445,14 +446,11 @@ body.care-type-open .care-type-map-overlay .care-seamless-entry {
   }
 
   .care-seamless-entry {
-    align-items: flex-start;
-    flex-wrap: wrap;
     padding-inline: 10px;
   }
 
-  .care-seamless-entry-link {
-    margin-left: auto;
-  }
+  .care-seamless-entry-head { align-items: flex-start; }
+  .care-seamless-entry-link { min-height: 36px; padding-inline: 9px; text-align: center; }
 
   .care-topic-infographic { padding: 20px; }
   .care-type-paths { grid-template-columns: 1fr; }
