@@ -435,6 +435,4 @@ body[data-care-mode="list"] .care-list-data-info > summary:focus-visible { outli
 /** SOFTM-ROUTE-CONTROLS END */
 
 /** SOFTM-LOCATION-BEFORE-TYPE START 날짜:20261126 : 모바일 첫 방문의 위치 우선 행동을 짧고 명확한 카드로 제공 */
-.care-quick-start{width:min(520px,100%);margin:20px auto;padding:24px;border:1px solid #cfe0ea;border-radius:20px;background:linear-gradient(145deg,#f7fbff,#eef7f3);text-align:left;box-shadow:0 12px 28px #173f6b14}
-.care-quick-start>span{display:block;color:#245888;font-size:12px;font-weight:850}.care-quick-start h2{margin:8px 0;font-size:clamp(21px,5vw,28px);line-height:1.3}.care-quick-start p{margin:0 0 18px;color:#52677a;line-height:1.6}.care-quick-start button{width:100%;min-height:52px;margin-top:9px;border:0;border-radius:13px;background:#245888;color:#fff;font-weight:850;cursor:pointer}.care-quick-start button.secondary{border:1px solid #aac1d4;background:#fff;color:#173f6b}.care-quick-start button:disabled{opacity:.65;cursor:wait}.care-quick-start [data-quick-status]{min-height:24px;margin:12px 0 0;font-size:13px}
 /** SOFTM-LOCATION-BEFORE-TYPE END */

@@ -161,7 +161,7 @@
   /** SOFTM-TYPE-A11Y END */
   const all=panel.querySelector('.care-type-all');all.onclick=()=>{const expanded=all.getAttribute('aria-expanded')!=='true';all.setAttribute('aria-expanded',String(expanded));all.textContent=expanded?'주요 유형만 보기':'전체 유형 보기 · 9개';[...list.children].forEach((button,index)=>button.hidden=!expanded&&index>=3);};
   const expand=panel.querySelector('.care-type-expand');expand.onclick=()=>{const expanded=document.body.classList.toggle('care-type-expanded');expand.setAttribute('aria-expanded',String(expanded));expand.textContent=expanded?'축소 ↓':'확대 ↑';resize();};
-  if(!type){document.querySelector('#list').innerHTML='<div class="empty">현재 위치로 찾기를 누른 뒤 필요한 돌봄을 선택해 주세요.</div>';if(!deferInitialOpen)open();} // SOFTM-LOCATION-BEFORE-TYPE 날짜:20261126 : 모바일 첫 방문은 위치 확인 뒤 쉬운 돌봄 문장 선택으로 진행
+  if(!type){document.querySelector('#list').replaceChildren();if(!deferInitialOpen)open();} // SOFTM-QUICK-START-REMOVE 날짜:20261126 : 중복 온보딩 문구 없이 기존 검색·위치 조작만 유지
   return {open,close};
  }
  root.CareCategoryPicker=Object.freeze({categories,menuOrder,menuLabel,resolve,save,destination,mount});
