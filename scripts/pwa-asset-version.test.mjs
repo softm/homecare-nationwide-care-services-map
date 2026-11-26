@@ -49,7 +49,7 @@ test('API와 회원 인증 응답은 자산 캐시로 가로채지 않는다',as
  assert.deepEqual(w.requests,[]);
 });
 test('시작 화면은 외부 CSS보다 먼저 표시되고 본 화면 스타일 준비까지 유지된다',()=>{
- assert.ok(index.indexOf('id="hannunStartupStyle"')<index.indexOf('<link'));
+ const startupStyle=index.indexOf('id="hannunStartupStyle"');assert.notEqual(startupStyle,-1);assert.ok(startupStyle<index.indexOf('<link'));
  assert.doesNotMatch(index,/<link[^>]+rel="stylesheet"/s);
  assert.match(index,/link\[data-hannun-style\]/);
  assert.match(index,/setTimeout\(\(\)=>f\(true\),8000\)/);
