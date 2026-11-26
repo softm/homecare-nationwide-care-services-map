@@ -47,20 +47,18 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261126-location-first1/); // SOFTM-LOCATION-BEFORE-TYPE 날짜:20261126 : 위치 확인 뒤 유형을 여는 최신 자산 버전 확인
+ assert.match(index,/care-category-picker\.js\?v=20261126-quick-start-remove1/); // SOFTM-QUICK-START-REMOVE 날짜:20261126 : 중복 첫 방문 안내를 제거한 최신 자산 버전 확인
 });
-/** SOFTM-LOCATION-BEFORE-TYPE START 날짜:20261126 : 모바일 목록 첫 방문의 위치 우선 진입과 이후 유형 선택 연결을 검증 */
-test('모바일 첫 방문은 위치 선택을 먼저 보여주고 위치 확인 뒤 돌봄 유형을 연다',()=>{
+/** SOFTM-QUICK-START-REMOVE START 날짜:20261126 : 기존 검색·위치 영역과 중복되는 첫 방문 안내 카드를 다시 만들지 않는지 검증 */
+test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는다',()=>{
  const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../care-list-mode.css',import.meta.url),'utf8');
  const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
- assert.match(index,/현재 위치로 가까운 기관 찾기/);
- assert.match(index,/지역을 직접 선택하기/);
- assert.match(index,/deferInitialOpen:!TYPE&&CareListMode\.isList\(\)/);
- assert.match(index,/await CareLocation\.request\(\)[\s\S]*url\.searchParams\.set\('start','current'\)[\s\S]*categoryPicker\.open\(\)/);
- assert.match(source,/deferInitialOpen=false/);
- assert.match(source,/if\(!deferInitialOpen\)open\(\)/);
+ assert.doesNotMatch(index,/care-quick-start|data-quick-location|data-quick-region/);
+ assert.doesNotMatch(css,/care-quick-start/);
+ assert.doesNotMatch(source,/현재 위치로 찾기를 누른 뒤 필요한 돌봄을 선택해 주세요/);
 });
-/** SOFTM-LOCATION-BEFORE-TYPE END */
+/** SOFTM-QUICK-START-REMOVE END */
 /** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 짧은 목록 화면에서 방문목욕 아래 유형도 자체 스크롤로 접근 가능한지 정적 검증 */
 test('목록 유형 패널은 남은 화면 높이를 사용하고 마지막 유형까지 자체 스크롤한다',()=>{
  const css=readFileSync(new URL('../care-category-picker.css',import.meta.url),'utf8');
