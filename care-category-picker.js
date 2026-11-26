@@ -97,7 +97,7 @@
   /** SOFTM-SEAMLESS-JOURNEY START 날짜:20261119 : 위저드처럼 보이는 진행 단계를 만들지 않고 유형 선택 후 지도·목록으로 바로 진입함을 안내 */
   panel.innerHTML=`<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header>
     <div class="care-seamless-entry">
-      <div class="care-seamless-entry-copy"><div class="care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요</strong><a class="care-seamless-entry-link" href="service-guide.html#seamless-journey">전체 이용 흐름 보기</a></div><span>선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다. 이후 아래 세 가지 기준으로 살펴보세요.</span>
+      <div class="care-seamless-entry-copy"><div class="care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요</strong><a class="care-seamless-entry-link" href="service-guide.html#seamless-journey">전체 이용 흐름 보기</a></div>
         <div class="care-type-review-guide" aria-label="기관을 살펴보는 세 가지 기준">
           <b>기관을 이렇게 살펴보세요</b>
           <ol>
