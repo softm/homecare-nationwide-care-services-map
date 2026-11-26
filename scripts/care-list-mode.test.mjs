@@ -6,6 +6,7 @@ import vm from 'node:vm';
 
 const source = fs.readFileSync(new URL('../care-list-mode.js', import.meta.url), 'utf8');
 const styles = fs.readFileSync(new URL('../care-list-mode.css', import.meta.url), 'utf8');
+const serviceStyles = fs.readFileSync(new URL('../care-service.css', import.meta.url), 'utf8');
 const plain = value => JSON.parse(JSON.stringify(value));
 
 test('목록·지도 전환은 오른쪽 로그인 버튼의 전용 공간을 유지한다', () => {
@@ -13,6 +14,8 @@ test('목록·지도 전환은 오른쪽 로그인 버튼의 전용 공간을 �
     assert.match(styles, /data-care-mode="list"\] \.care-mode-toggle \{ top:2px; right:60px;/);
     const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     assert.match(index, /care-list-mode\.css\?v=20261126-quick-start1/);
+    assert.match(index, /care-service\.css\?v=20261127-list-mode-top1/);
+    assert.match(serviceStyles, /hc-integrated\[data-care-mode=list\] \.care-mode-toggle\{top:2px!important;right:60px!important;bottom:auto!important/);
 });
 
 function createElement() {
