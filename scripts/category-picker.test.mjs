@@ -47,7 +47,7 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261126-type-guide-compact1/); // SOFTM-TYPE-GUIDE-COMPACT 날짜:20261126 : 제목 옆 버튼이 포함된 최신 자산 버전 확인
+ assert.match(index,/care-category-picker\.js\?v=20261127-type-guide-copy-remove1/); // SOFTM-TYPE-GUIDE-COPY-REMOVE 날짜:20261127 : 상단 설명이 제거된 최신 자산 버전 확인
 });
 /** SOFTM-QUICK-START-REMOVE START 날짜:20261126 : 기존 검색·위치 영역과 중복되는 첫 방문 안내 카드를 다시 만들지 않는지 검증 */
 test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는다',()=>{
@@ -75,6 +75,7 @@ test('이용 흐름 링크는 간결한 유형 선택 제목 옆 버튼으로 �
  const css=readFileSync(new URL('../care-seamless-journey.css',import.meta.url),'utf8');
  assert.match(source,/care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요<\/strong><a class="care-seamless-entry-link"/);
  assert.doesNotMatch(source,/돌봄 유형을 먼저 선택해 주세요/);
+ assert.doesNotMatch(source,/선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/);
  assert.match(css,/\.care-seamless-entry-head \{[^}]*justify-content: space-between/);
  assert.match(css,/\.care-seamless-entry-link \{[\s\S]*?border: 1px solid/);
 });

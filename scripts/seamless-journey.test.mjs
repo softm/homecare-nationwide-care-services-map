@@ -64,10 +64,10 @@ test('무료 검색과 달리 가족이 같은 공개 비교표를 보고 공유
 
 test('지도 첫 진입은 위저드 없이 유형 선택 후 지도·목록으로 바로 연결한다', () => {
   assert.match(picker, /돌봄 유형을 선택해 주세요/);
-  assert.match(picker, /선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/);
+  assert.doesNotMatch(picker, /선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/); // SOFTM-TYPE-GUIDE-COPY-REMOVE 날짜:20261127 : 중복 설명 제거 확인
   assert.doesNotMatch(picker, /원스톱 심리스 · 1\/4|aria-current="step"|4단계 요약/);
   assert.match(picker, /href="service-guide\.html#seamless-journey"/);
-  assert.match(index, /care-seamless-journey\.css\?v=20261126-type-guide-compact1/); // SOFTM-TYPE-GUIDE-COMPACT 날짜:20261126 : 유형 선택 제목 옆 버튼 최신 스타일 확인
+  assert.match(index, /care-seamless-journey\.css\?v=20261127-type-guide-copy-remove1/); // SOFTM-TYPE-GUIDE-COPY-REMOVE 날짜:20261127 : 유형 선택 상단 설명 제거 최신 스타일 확인
   assert.match(sitemap, /<loc>https:\/\/dolbomhannun\.kr\/service-guide\.html<\/loc><lastmod>2026-11-20<\/lastmod>/); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인의 서비스 안내 색인을 검증
   assert.ok(existsSync(new URL('../service-guide.html', import.meta.url)));
 });
