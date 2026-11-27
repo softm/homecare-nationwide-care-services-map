@@ -4,6 +4,23 @@ const HOSTS = new Set(['api.dolbomhannun.kr', 'api.homecare.designboard.net', 's
 const ORIGINS = new Set(['https://dolbomhannun.kr', 'https://api.dolbomhannun.kr', 'https://homecare.designboard.net', 'https://api.homecare.designboard.net']);
 /** SOFTM-DOMAIN-MIGRATION END */
 
+/** SOFTM-SEO-DOMAIN-REDIRECT START 날짜:20261127 : 구도메인의 검색 신호와 기존 공유 경로를 새 공식 도메인으로 승계 */
+const LEGACY_SITE_HOST = 'homecare.designboard.net';
+const OFFICIAL_SITE_ORIGIN = 'https://dolbomhannun.kr';
+
+function redirectLegacySite(url) {
+  const target = new URL(url.pathname + url.search, OFFICIAL_SITE_ORIGIN);
+  return new Response(null, {
+    status: 301,
+    headers: {
+      'Location': target.href,
+      'Cache-Control': 'public, max-age=3600',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+/** SOFTM-SEO-DOMAIN-REDIRECT END */
+
 function unavailable(request, status, code) {
   const headers = new Headers({ 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex', 'Vary': 'Origin' });
   const origin = request.headers.get('Origin');
@@ -17,6 +34,7 @@ function unavailable(request, status, code) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.hostname === LEGACY_SITE_HOST) return redirectLegacySite(url); // SOFTM-SEO-DOMAIN-REDIRECT 날짜:20261127 : 모든 구주소의 경로와 쿼리를 일대일 301로 유지
     if (!HOSTS.has(url.hostname)) return unavailable(request, 421, 'host_denied');
     if (url.pathname !== '/health' && !url.pathname.startsWith('/api/')) return unavailable(request, 404, 'not_found');
     if (!env.MEMBERS?.fetch) return unavailable(request, 503, 'service_unavailable');
