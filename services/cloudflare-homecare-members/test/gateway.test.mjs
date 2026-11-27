@@ -1,9 +1,21 @@
 /** SOFTM-MEMBER-DOMAIN START 날짜:20261121 : 공개 API 경유 시 내부 Bearer 인증 우회·쿠키 손실·파일 변형·캐시 노출 방지 */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises'; // SOFTM-DOMAIN-SSL 날짜:20261127 : 배포 산출물의 인증 경로 제외 설정을 검증
 import gateway from '../../cloudflare-homecare-gateway/public/_worker.js';
 const base = 'https://api.dolbomhannun.kr';
 const origin = 'https://dolbomhannun.kr';
+
+/** SOFTM-DOMAIN-SSL START 날짜:20261127 : 사용자 지정 도메인 인증 요청만 Worker 호출에서 제외하고 API 경로는 유지 */
+test('Pages 라우팅은 인증서 검증 경로만 게이트웨이에서 제외한다', async () => {
+  const routes = JSON.parse(await readFile(new URL('../../cloudflare-homecare-gateway/public/_routes.json', import.meta.url), 'utf8'));
+  assert.deepEqual(routes, {
+    version: 1,
+    include: ['/*'],
+    exclude: ['/.well-known/acme-challenge/*'],
+  });
+});
+/** SOFTM-DOMAIN-SSL END */
 
 /** SOFTM-DOMAIN-MIGRATION START 날짜:20261124 : 주소 전환 중 기존 도메인의 로그인 세션과 새 도메인의 요청을 모두 안전하게 전달 */
 test('새 API와 이전 API 호스트는 허용하고 유사 호스트는 거부한다', async () => {
