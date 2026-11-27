@@ -19,6 +19,10 @@ curl -I 'https://homecare.designboard.net/daycare-map.html?source=legacy'
 
 공개 요청의 `Authorization`은 제거하고 내부 전달 호스트는 `members-gateway.internal`로 고정한다. 기관 Worker 전용 `account.internal` Bearer 검증 경계를 공개하지 않는다. 쿠키·Origin·CSRF와 multipart 본문을 전달하며 `__Host-` 쿠키의 Secure·HttpOnly·SameSite 설정을 낮추지 않는다. 응답 캐시는 금지하고 토큰·헤더·URL·예외 원문을 로그로 남기지 않는다.
 
+<!-- SOFTM-DOMAIN-SSL START 날짜:20261127 : 외부 DNS 사용자 지정 도메인의 인증서 검증 요청을 API 게이트웨이가 가로채지 않도록 분리 -->
+`_routes.json`은 `/.well-known/acme-challenge/*`만 Pages Function 호출에서 제외한다. Cloudflare의 사용자 지정 도메인 HTTP 인증 경로는 정적 Pages 계층이 처리하고, `/health`와 `/api/*`는 기존 `_worker.js` 게이트웨이를 계속 거친다.
+<!-- SOFTM-DOMAIN-SSL END -->
+
 Node 22.13 이상과 회원 Worker에 설치한 고정 버전 Wrangler를 사용한다.
 
 ```sh
