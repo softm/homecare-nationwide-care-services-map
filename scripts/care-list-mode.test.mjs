@@ -7,16 +7,28 @@ import vm from 'node:vm';
 const source = fs.readFileSync(new URL('../care-list-mode.js', import.meta.url), 'utf8');
 const styles = fs.readFileSync(new URL('../care-list-mode.css', import.meta.url), 'utf8');
 const serviceStyles = fs.readFileSync(new URL('../care-service.css', import.meta.url), 'utf8');
+const stitchStyles = fs.readFileSync(new URL('../stitch-desktop.css', import.meta.url), 'utf8');
 const plain = value => JSON.parse(JSON.stringify(value));
 
 test('목록·지도 전환은 오른쪽 로그인 버튼의 전용 공간을 유지한다', () => {
     assert.match(styles, /@media \(min-width:1001px\)[\s\S]*?\.care-mode-toggle \{ right:66px; \}/);
     assert.match(styles, /data-care-mode="list"\] \.care-mode-toggle \{ top:2px; right:60px;/);
     const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-    assert.match(index, /care-list-mode\.css\?v=20261126-quick-start1/);
+    assert.match(index, /care-list-mode\.css\?v=20261128-workspace-tabs-remove1/);
+    assert.match(index, /stitch-desktop\.css\?v=20261128-workspace-tabs-remove1/);
     assert.match(index, /care-service\.css\?v=20261127-list-mode-top1/);
     assert.match(serviceStyles, /hc-integrated\[data-care-mode=list\] \.care-mode-toggle\{top:2px!important;right:60px!important;bottom:auto!important/);
 });
+
+/** SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE START 날짜:20261128 : PC 중복 작업 탭 제거와 모바일 하단 전환 유지 검증 */
+test('PC는 중복 작업 탭을 숨기고 검색 영역을 상단 주 메뉴 바로 아래에 배치한다', () => {
+    assert.match(styles, /--care-list-controls-top:64px/);
+    assert.match(styles, /data-care-mode="list"\] \.care-workspace-tabs \{[\s\S]*?display:none!important/);
+    assert.match(styles, /@media \(max-width:1000px\)[\s\S]*?\.care-workspace-tabs \{ display:flex!important/);
+    assert.match(stitchStyles, /@media \(min-width:1001px\)[\s\S]*?\.care-workspace-tabs \{ display:none!important; \}/);
+    assert.match(stitchStyles, /\.filters \{ top:64px; \}/);
+});
+/** SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE END */
 
 function createElement() {
     return {

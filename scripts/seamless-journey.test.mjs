@@ -93,13 +93,12 @@ test('첫 후속 인포그래픽은 질문·핵심 유형·CTA·출처와 주의
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*?\.care-type-paths \{ grid-template-columns: 1fr; \}/);
 });
 
-test('지도 검색·기관 목록에 같은 판단 인포그래픽을 제공한다', () => { // SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 상세는 사용자 요청에 따라 중복 상태 카드 없이 핵심 정보만 제공
+test('지도 검색·기관 목록은 중복 판단 인포그래픽 없이 핵심 근거만 제공한다', () => { // SOFTM-MAP-INFOGRAPHIC-REMOVE 날짜:20261128 : 목록 위 안내 블록 제거 확인
   const listStyles = read('care-list-view.css');
-  assert.match(index, /class="care-search-infographic"/);
-  for (const text of ['위치', '생활권 안 후보 찾기', '공개정보', '평가·정원·인력 비교', '기관 확인', '빈자리·비용·운영 상담']) assert.match(index, new RegExp(text));
+  assert.doesNotMatch(index, /class="care-search-infographic"/);
+  assert.doesNotMatch(index, /기관을 이렇게 살펴보세요/);
   assert.match(index, /function careListEvidenceHtml\(c\)[\s\S]*?if\(!globalThis\.CareDecisionSummary\)return ''/);
   assert.match(listStyles, /\.care-list-evidence \{ display:block/);
-  assert.match(styles, /\.care-search-infographic ol \{[^}]*grid-template-columns: repeat\(3,minmax\(0,1fr\)\)/);
 });
 
 test('두 번째 후속 인포그래픽은 평가·정원·인력을 단정 없이 읽도록 안내한다', () => {

@@ -47,7 +47,7 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261127-type-guide-copy-remove1/); // SOFTM-TYPE-GUIDE-COPY-REMOVE 날짜:20261127 : 상단 설명이 제거된 최신 자산 버전 확인
+ assert.match(index,/care-category-picker\.js\?v=20261128-review-guide-remove1/); // SOFTM-TYPE-REVIEW-GUIDE-REMOVE 날짜:20261128 : 반복 판단 안내 제거 최신 자산 확인
 });
 /** SOFTM-QUICK-START-REMOVE START 날짜:20261126 : 기존 검색·위치 영역과 중복되는 첫 방문 안내 카드를 다시 만들지 않는지 검증 */
 test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는다',()=>{
@@ -59,16 +59,12 @@ test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는
  assert.doesNotMatch(source,/현재 위치로 찾기를 누른 뒤 필요한 돌봄을 선택해 주세요/);
 });
 /** SOFTM-QUICK-START-REMOVE END */
-/** SOFTM-TYPE-REVIEW-GUIDE START 날짜:20261126 : 유형 선택 상단에 기관 판단 기준 세 가지를 함께 표시하는지 검증 */
-test('유형 선택 상단은 위치·공개정보·기관 확인 기준을 안내한다',()=>{
+/** SOFTM-TYPE-REVIEW-GUIDE-REMOVE START 날짜:20261128 : 유형 선택 상단의 반복 기관 판단 안내가 제거됐는지 검증 */
+test('유형 선택 상단은 반복되는 기관 판단 안내를 표시하지 않는다',()=>{
  const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
- const css=readFileSync(new URL('../care-seamless-journey.css',import.meta.url),'utf8');
- for(const text of ['기관을 이렇게 살펴보세요','위치','생활권 안 후보 찾기','공개정보','평가·정원·인력 비교','기관 확인','빈자리·비용·운영 상담'])assert.match(source,new RegExp(text));
- assert.match(source,/aria-label="기관을 살펴보는 세 가지 기준"/);
- assert.match(css,/\.care-type-review-guide ol \{[^}]*grid-template-columns: repeat\(3/);
- assert.match(css,/@media \(max-width: 460px\)/);
+ assert.doesNotMatch(source,/기관을 이렇게 살펴보세요|care-type-review-guide|기관을 살펴보는 세 가지 기준/);
 });
-/** SOFTM-TYPE-REVIEW-GUIDE END */
+/** SOFTM-TYPE-REVIEW-GUIDE-REMOVE END */
 /** SOFTM-TYPE-GUIDE-COMPACT START 날짜:20261126 : 안내 링크가 제목 옆 버튼으로 배치되고 이전 문구가 제거되는지 검증 */
 test('이용 흐름 링크는 간결한 유형 선택 제목 옆 버튼으로 표시한다',()=>{
  const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
