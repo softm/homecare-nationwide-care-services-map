@@ -12,6 +12,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const context = vm.createContext({ window: {}, setTimeout }); // SOFTM-QUERY-YIELD 날짜:20260916 : 입력 처리 양보를 실제 타이머로 검증
 /** SOFTM-DATA-UNIFIED START 날짜:20260904 : 폐기한 JS 대신 실제 지도와 같은 data/care 자료를 사용 */
 for (const file of ['region-bounds.js', 'viewport-regions.js']) vm.runInContext(read(file), context);
+vm.runInContext(read('region-outlines.js'), context); // SOFTM-REGION-OUTLINE 날짜:20261128 : 선택 지역 외곽선 생성 결과를 범위 자료와 함께 검증
 const api = context.window.MapViewportSearch;
 const data = {};
 for (const [type, config] of Object.entries(JSON.parse(read('data/care/manifest.json')))) {
@@ -28,6 +29,15 @@ test('모든 유형의 원본 지역명이 시군구 인덱스에 직접 연결�
         assert.ok(context.window.NATIONAL_REGION_BOUNDS.regions[key], `미등록 지역: ${key}`);
     }
 });
+
+test('모든 시도·시군구가 사각형이 아닌 닫힌 실제 외곽선을 제공한다',()=>{
+    const outlines=context.window.NATIONAL_REGION_OUTLINES.outlines;
+    for(const key of Object.keys(context.window.NATIONAL_REGION_BOUNDS.regions)){
+        assert.ok(outlines[key]?.length,`외곽선 누락: ${key}`);
+        for(const path of outlines[key]){assert.ok(path.length>=4,`외곽선 좌표 부족: ${key}`);assert.deepEqual(path[0],path.at(-1),`외곽선 미폐합: ${key}`);}
+    }
+    assert.ok(outlines['서울특별시|강남구'][0].length>4,'단순 사각형이 아닌 실제 경계를 유지');
+}); // SOFTM-REGION-OUTLINE 날짜:20261128 : 지역 선택 지도에 공식 행정구역 형태를 표시
 
 test('수도권 화면에서 9점 사이에 있던 인천·부천·광명 지역을 모두 포함', () => {
     const selected = api.select(data.daycare, viewport);

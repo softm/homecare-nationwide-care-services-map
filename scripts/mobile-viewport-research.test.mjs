@@ -5,10 +5,10 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import '../map-experience.js';
 function setup() {
-    let job, searches = 0, preparations = 0, enabled = true;
+    let job, searches = 0, preparations = 0, enabled = true; const reasons = [];
     const clock = { setTimeout(fn) { job = fn; return 1; }, clearTimeout() { job = null; } };
-    const controller = CareMapExperience.createZoomResearch({ enabled: () => enabled, prepare: () => preparations++, search: () => searches++ }, clock);
-    return { controller, flush() { const fn = job; job = null; fn?.(); }, counts: () => ({ searches, preparations }), disable() { enabled = false; } };
+    const controller = CareMapExperience.createZoomResearch({ enabled: () => enabled, prepare: reason => { preparations++; reasons.push(`prepare:${reason}`); }, search: reason => { searches++; reasons.push(`search:${reason}`); } }, clock);
+    return { controller, flush() { const fn = job; job = null; fn?.(); }, counts: () => ({ searches, preparations, reasons }), disable() { enabled = false; } };
 }
 test('내부 확대에는 검색하지 않고 바로 뒤 사용자 확대는 대기 중이어도 조회한다', () => {
     const s = setup(); s.controller.zoom(); s.flush(); assert.equal(s.counts().searches, 0);
@@ -27,8 +27,17 @@ test('핀치 중 dragstart가 섞여도 확대 의도를 보존해 마지막 영
     s.controller.idle(); s.flush(); assert.equal(s.counts().searches, 1);
 });
 test('이 지역 재검색은 사용자 줌 없이 즉시 실행하고 예약된 조회를 대체한다', () => {
-    const s = setup(); s.controller.research(); assert.equal(s.counts().searches, 1);
+    const s = setup(); s.controller.research(); assert.equal(s.counts().searches, 1); assert.deepEqual(s.counts().reasons,['prepare:manual','search:manual']);
     s.controller.gesture(); s.controller.zoom(); s.controller.research(); s.flush(); assert.equal(s.counts().searches, 2);
+});
+test('자동 확대 조회와 명시적인 이 지역 재검색 사유를 구분한다',()=>{const s=setup();s.controller.gesture();s.controller.zoom();s.flush();assert.deepEqual(s.counts().reasons,['prepare:zoom','prepare:zoom','search:zoom']);}); // SOFTM-REGION-SCOPE 날짜:20261128 : 지역 조건을 해제할 수 있는 명시 재검색을 자동 확대와 구분
+test('행정구역 조회는 자동 화면 조회를 막고 명시 재검색에서만 외곽선과 범위 잠금을 해제한다',()=>{
+    const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+    assert.match(html,/careRegionSearchScope\)\{hideLoading\(\);setStatus/);
+    assert.match(html,/reason==='manual'\)\{clearRegionSearchScope\(\);CareRegionEntry\.markManual\('viewport'\)\}/);
+    assert.match(html,/activateRegionSearchScope\(province,city\);fitRegionSearchScope\(scope\)/);
+    assert.match(html,/loadMarkers\(filtered,\{fit:false,regionText:`지역 조건 · \$\{scope\.label\}`/);
+    assert.match(html,/region-outlines\.js\?v=20261128-region-scope1/);
 });
 for (const name of ['index.html']) {
     test(`${name}: 1~5건은 끝에 한 광고, 6·12·18건은 기존 슬롯 유지`, () => {
