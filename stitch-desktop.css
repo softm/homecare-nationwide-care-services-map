@@ -404,8 +404,10 @@ body.stitch-desktop .care-results-more { display:block; width:calc(100% - 48px);
  body.stitch-desktop .filter-grid :is(input,select,button) { min-height:44px; }
  body.stitch-desktop:not(.care-mobile-filters-open) .filters > .stitch-filter-toolbar { margin-top:4px; }
  body.stitch-desktop:not(.care-mobile-filters-open) .filters > .stitch-filter-summary:not([hidden]) { top:150px; padding:0 16px 6px; flex-wrap:nowrap; overflow-x:auto; }
- body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:calc(202px + var(--stitch-filter-summary-height))!important; height:calc(100% - 202px - var(--stitch-filter-summary-height))!important; }
- body.stitch-desktop.care-map-page[data-care-mode="map"]:not(.care-map-focus):not(.care-mobile-filters-open)[data-care-workspace="search"] .filters:not(.has-active-filter-conditions)~.layout>.results { top:160px!important; height:calc(100% - 160px)!important; } /** SOFTM-RESULT-GAP 날짜:20261118 : 숨긴 초기화 행의 42px 예약을 제거해 검색 조작 바로 아래에서 결과 시작 */
+ /** SOFTM-RESULT-GAP-WORKSPACE START 날짜:20261128 : 제거된 PC 작업 탭의 52px 오프셋을 없애 필터와 결과 목록을 빈 회색 영역 없이 연결 */
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:calc(150px + var(--stitch-filter-summary-height))!important; height:calc(100% - 150px - var(--stitch-filter-summary-height))!important; }
+ body.stitch-desktop.care-map-page[data-care-mode="map"]:not(.care-map-focus):not(.care-mobile-filters-open)[data-care-workspace="search"] .filters:not(.has-active-filter-conditions)~.layout>.results { top:108px!important; height:calc(100% - 108px)!important; }
+ /** SOFTM-RESULT-GAP-WORKSPACE END */
  body.stitch-desktop .list-head { padding:8px 16px 4px; }
  body.stitch-desktop .select-tools { padding:0 16px 6px; }
  body.stitch-desktop .layout #list { padding:8px 10px; }
