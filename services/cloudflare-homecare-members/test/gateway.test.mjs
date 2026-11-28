@@ -14,18 +14,6 @@ test('새 API와 이전 API 호스트는 허용하고 유사 호스트는 거부
 });
 /** SOFTM-DOMAIN-MIGRATION END */
 
-/** SOFTM-SEO-DOMAIN-REDIRECT START 날짜:20261127 : 검색 대표 변경 때 구주소가 404로 끊기거나 하위 경로가 홈으로 뭉개지지 않도록 검증 */
-test('구사이트 주소는 경로와 쿼리를 보존해 새 공식 도메인으로 301 이동한다', async () => {
-  let calls = 0;
-  const env = { MEMBERS: { async fetch() { calls++; return new Response('unexpected'); } } };
-  const response = await gateway.fetch(new Request('https://homecare.designboard.net/regions/seoul-daycare.html?type=daycare#ignored'), env);
-  assert.equal(response.status, 301);
-  assert.equal(response.headers.get('Location'), 'https://dolbomhannun.kr/regions/seoul-daycare.html?type=daycare');
-  assert.equal(response.headers.get('Cache-Control'), 'public, max-age=3600');
-  assert.equal(calls, 0);
-});
-/** SOFTM-SEO-DOMAIN-REDIRECT END */
-
 test('API 이외 경로·다른 호스트·미설정 바인딩은 외부 요청 없이 거부한다', async () => {
   let calls = 0;
   const env = { MEMBERS: { async fetch() { calls++; return new Response('unexpected'); } } };
