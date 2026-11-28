@@ -25,6 +25,9 @@
  function score(row){const value=row.es??row.ev?.score;return typeof value==='number'&&Number.isFinite(value)?value:-Infinity;}
  /** SOFTM-DEFAULT-SCORE END */
  function usesCenter(mode){return centerModes.has(mode);}
+ /** SOFTM-SORT-DEFAULT-LABEL START 날짜:20261128 : 공단 평가점수순이 적용된 기본 상태는 긴 기술명 대신 기본 정렬로 표시 */
+ function triggerText(mode,label,suffix){return mode==='rating'?'기본 정렬':'정렬 · '+label+suffix;}
+ /** SOFTM-SORT-DEFAULT-LABEL END */
  /** SOFTM-DISTANCE-FIRST START 날짜:20261126 : 목록의 내 위치 찾기 결과를 지도 없이도 같은 거리순 엔진에 적용 */
  function setCurrentPoint(point){
   const valid=point&&Number.isFinite(point.lat)&&Number.isFinite(point.lng)&&Math.abs(point.lat)<=90&&Math.abs(point.lng)<=180;
@@ -89,7 +92,7 @@
    originHelp.textContent=active?(nextOrigin==='current'?'기기에서 확인한 내 위치를 고정 기준으로 사용합니다. 지도를 움직여도 바뀌지 않습니다.':'현재 지도 가운데를 기준으로 사용합니다. 지도를 이동해 다시 조회하면 기준도 함께 이동합니다.'):'정확도순과 거리순에서만 거리 기준 위치를 사용합니다.';
    sortHelp.textContent=mode==='accuracy'?'기관명·주소의 검색어 일치도를 먼저 보고, 같은 정확도는 선택한 기준 위치에서 가까운 순으로 표시합니다.':mode==='distance'?'선택한 기준 위치에서 가까운 기관부터 표시하며 위치 미확인 기관은 뒤에 둡니다.':'선택한 정렬 기준은 거리 기준 위치를 사용하지 않습니다.';
   }
-  const refresh=()=>{const label=select.selectedOptions[0].textContent,suffix=usesCenter(select.value)?' · '+originName():'';trigger.textContent='정렬 · '+label+suffix+' ⌄';trigger.setAttribute('aria-label','정렬 옵션: '+label+suffix);};
+  const refresh=()=>{const label=select.selectedOptions[0].textContent,suffix=usesCenter(select.value)?' · '+originName():'';const visible=triggerText(select.value,label,suffix);trigger.textContent=visible+' ⌄';trigger.setAttribute('aria-label','정렬 옵션: '+visible);}; // SOFTM-SORT-DEFAULT-LABEL 날짜:20261128 : 기본 평가점수 정렬은 버튼에서 간결한 기본 정렬로 안내
   trigger.onclick=()=>{dialog.querySelector(`[name="careSortOrigin"][value="${origin}"]`).checked=true;dialog.querySelector(`[name="careSortMode"][value="${select.value}"]`).checked=true;status.textContent='';refreshDialog();dialog.showModal();};
   dialog.querySelectorAll('[name="careSortMode"],[name="careSortOrigin"]').forEach(radio=>radio.addEventListener('change',refreshDialog));
   /** SOFTM-SORT-ORIGIN END */
@@ -111,6 +114,6 @@
   dialog.addEventListener('close',()=>{generation++;apply.disabled=false;trigger.focus({preventScroll:true});});
   select.addEventListener('change',refresh);refresh();
  }
- root.CareResultSort=Object.freeze({mount,sort,compare,relevance,distance,createPreference,usesCenter,setCurrentPoint}); // SOFTM-DISTANCE-FIRST 날짜:20261126 : 목록 위치 버튼이 실제 좌표 기반 거리순을 적용
+ root.CareResultSort=Object.freeze({mount,sort,compare,relevance,distance,createPreference,usesCenter,setCurrentPoint,triggerText}); // SOFTM-SORT-DEFAULT-LABEL 날짜:20261128 : 기본 정렬 버튼 문구를 회귀 검사할 수 있도록 순수 포맷 함수를 함께 제공
 })(typeof window==='undefined'?globalThis:window);
 /** SOFTM-RESULT-SORT END */
