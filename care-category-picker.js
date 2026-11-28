@@ -97,15 +97,7 @@
   /** SOFTM-SEAMLESS-JOURNEY START 날짜:20261119 : 위저드처럼 보이는 진행 단계를 만들지 않고 유형 선택 후 지도·목록으로 바로 진입함을 안내 */
   panel.innerHTML=`<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header>
     <div class="care-seamless-entry">
-      <div class="care-seamless-entry-copy"><div class="care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요</strong><a class="care-seamless-entry-link" href="service-guide.html#seamless-journey">전체 이용 흐름 보기</a></div>
-        <div class="care-type-review-guide" aria-label="기관을 살펴보는 세 가지 기준">
-          <b>기관을 이렇게 살펴보세요</b>
-          <ol>
-            <li><span class="care-type-review-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span><strong>위치</strong><small>생활권 안 후보 찾기</small></span></li>
-            <li><span class="care-type-review-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v16H4V5a2 2 0 0 1 2-2Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span><strong>공개정보</strong><small>평가·정원·인력 비교</small></span></li>
-            <li><span class="care-type-review-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4h8M9 3h6v3H9zM6 5h12v16H6z"/><path d="m9 13 2 2 4-5M9 18h6"/></svg></span><span><strong>기관 확인</strong><small>빈자리·비용·운영 상담</small></span></li>
-          </ol>
-        </div>
+      <div class="care-seamless-entry-copy"><div class="care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요</strong><a class="care-seamless-entry-link" href="service-guide.html#seamless-journey">전체 이용 흐름 보기</a></div>\n      <!-- SOFTM-TYPE-REVIEW-GUIDE-REMOVE 날짜:20261128 : 유형 선택과 결과 화면에서 반복되는 기관 판단 안내 제거 -->
       </div>
     </div>
     <div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="true">주요 유형만 보기</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>`; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 추가 조작 없이 모든 기관 유형을 먼저 비교할 수 있도록 기본 펼침 상태 제공

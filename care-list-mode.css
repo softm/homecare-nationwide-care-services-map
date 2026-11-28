@@ -64,7 +64,7 @@ body.care-map-page:not([data-care-mode="list"]) #careListSummary { display:none;
 /** SOFTM-LIST-MODE-LAYOUT START 날짜:20260930 : 지도 영역과 좌표 표시 조작을 숨겨 목록 검색에 화면 전체를 사용 */
 body.stitch-desktop.care-map-page[data-care-mode="list"] {
     --care-list-filter-height:112px;
-    --care-list-controls-top:120px;
+    --care-list-controls-top:64px; /* SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE 날짜:20261128 : 중복 작업 탭 없이 상단 메뉴 바로 아래에서 검색 조건 시작 */
     overflow:hidden;
     background:#f5f8f7;
 }
@@ -75,7 +75,7 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] :is(.care-list-scroll-t
 body.stitch-desktop.care-map-page[data-care-mode="list"] .care-workspace-tabs {
     position:fixed;
     inset:64px 0 auto;
-    display:flex!important;
+    display:none!important; /* SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE 날짜:20261128 : PC는 상단 주 메뉴의 기관 찾기·담은 기관 이동을 사용 */
     justify-content:flex-start;
     width:100%;
     height:56px;
@@ -174,7 +174,7 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] .layout {
     padding:0!important;
     overflow:hidden;
 }
-body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="saved"] .layout { top:120px!important; }
+body.stitch-desktop.care-map-page[data-care-mode="list"][data-care-workspace="saved"] .layout { top:64px!important; } /* SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE 날짜:20261128 : 담은 기관 본문도 주 메뉴 바로 아래에서 시작 */
 body.stitch-desktop.care-map-page[data-care-mode="list"] .layout > :is(.results,.care-saved-panel) {
     position:relative!important;
     inset:0!important;
@@ -317,7 +317,7 @@ body.stitch-desktop.care-map-page[data-care-mode="list"] .mobile-popup-layer:not
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-type-header { top:56px!important; left:0; right:0; width:100%; height:44px; padding:4px 10px; background:#fff; border-bottom:1px solid #dce7e3; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-type-header .care-type-menu-item { min-height:34px; padding:6px 10px; }
     /** SOFTM-WORKSPACE-TABS START 날짜:20260930 : 모바일은 하단 두 칸을 유지하고 선택 배경·아이콘·수량으로 현재 작업을 분명하게 표시 */
-    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-workspace-tabs { inset:auto 0 0; height:var(--care-mobile-tab-space,calc(58px + env(safe-area-inset-bottom))); padding:4px 8px calc(4px + env(safe-area-inset-bottom)); z-index:181; border-top:1px solid #dce7e3; border-bottom:0; }
+    body.stitch-desktop.care-map-page[data-care-mode="list"] .care-workspace-tabs { display:flex!important; inset:auto 0 0; height:var(--care-mobile-tab-space,calc(58px + env(safe-area-inset-bottom))); padding:4px 8px calc(4px + env(safe-area-inset-bottom)); z-index:181; border-top:1px solid #dce7e3; border-bottom:0; } /* SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE 날짜:20261128 : 상단 주 메뉴가 축약되는 모바일은 하단 작업 전환 유지 */
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-workspace-tab-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; width:100%; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-workspace-tab-list > [data-workspace] { min-width:0; min-height:44px; padding:5px 8px; border-radius:9px; font-size:14px; }
     body.stitch-desktop.care-map-page[data-care-mode="list"] .care-workspace-tab-list > [aria-selected="true"] { background:#e9f4ef; }
