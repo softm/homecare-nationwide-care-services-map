@@ -156,21 +156,21 @@ test('권한 조회 미지원도 위치 요청으로 대체하고 거절 후 수
     const retry = env.api.request(); assert.equal(env.calls(), 2);
     env.succeed(); await retry;
 });
-test('지도 진입은 초기화 분기 밖에서 권한을 요청하고 독립 목록 진입은 요청하지 않음', () => { // SOFTM-LIST-MODE 날짜:20260930 : 기존 지도 위치 권한 정책과 목록 직접 진입의 권한 생략을 함께 검증
+test('모든 첫 진입은 권한을 자동 요청하지 않고 명시적 위치 버튼을 기다림', () => { // SOFTM-LOCATION-EXPLICIT 날짜:20261126 : 예고 없는 권한 팝업을 제거
     for (const file of ['index.html']) {
         const source = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
         assert.match(source, /<script defer src="care-location-startup.js\?v=/);
     }
     const source = readFileSync(new URL('../care-location-startup.js', import.meta.url), 'utf8');
-    /** SOFTM-LIST-MODE START 날짜:20260930 : 목록 기능이 없는 기존 진입과 지도 진입의 요청은 유지하고 목록만 생략 */
+    /** SOFTM-LOCATION-EXPLICIT START 날짜:20261126 : 목록·지도 모두 사용자 행동 전에 권한 요청을 시작하지 않음 */
     for (const mode of [undefined, 'map', 'list']) {
         let requests = 0;
         const window = { CareLocation: { requestInitialPermission() { requests++; return Promise.resolve(point); } } };
         if (mode) window.CareListMode = { isList: () => mode === 'list' };
         vm.runInNewContext(source, { window });
-        assert.equal(requests, mode === 'list' ? 0 : 1);
+        assert.equal(requests, 0);
     }
-    /** SOFTM-LIST-MODE END */
+    /** SOFTM-LOCATION-EXPLICIT END */
     assert.doesNotMatch(source, /setCenter|setZoom|useCurrentLocation|location\.search/);
 });
 /** SOFTM-LOCATION-STARTUP END */

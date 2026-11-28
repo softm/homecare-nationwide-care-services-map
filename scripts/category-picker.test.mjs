@@ -47,8 +47,35 @@ test('유형 선택 카드는 스크립트 오류가 나도 이동 가능한 실
  assert.match(source,/document\.createElement\('a'\)/);
  assert.match(source,/button\.href=destination\(location\.href,id\)\.href/);
  assert.match(source,/selectType\(id\);event\.preventDefault\(\)/);
- assert.match(index,/care-category-picker\.js\?v=20261124-scroll2/); // SOFTM-TYPE-LIST-SCROLL 날짜:20261124 : 목록 유형 스크롤 수정 자산 버전 확인
+ assert.match(index,/care-category-picker\.js\?v=20261128-review-guide-remove1/); // SOFTM-TYPE-REVIEW-GUIDE-REMOVE 날짜:20261128 : 반복 판단 안내 제거 최신 자산 확인
 });
+/** SOFTM-QUICK-START-REMOVE START 날짜:20261126 : 기존 검색·위치 영역과 중복되는 첫 방문 안내 카드를 다시 만들지 않는지 검증 */
+test('모바일 첫 방문은 중복 위치 안내 카드를 표시하지 않는다',()=>{
+ const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../care-list-mode.css',import.meta.url),'utf8');
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ assert.doesNotMatch(index,/care-quick-start|data-quick-location|data-quick-region/);
+ assert.doesNotMatch(css,/care-quick-start/);
+ assert.doesNotMatch(source,/현재 위치로 찾기를 누른 뒤 필요한 돌봄을 선택해 주세요/);
+});
+/** SOFTM-QUICK-START-REMOVE END */
+/** SOFTM-TYPE-REVIEW-GUIDE-REMOVE START 날짜:20261128 : 유형 선택 상단의 반복 기관 판단 안내가 제거됐는지 검증 */
+test('유형 선택 상단은 반복되는 기관 판단 안내를 표시하지 않는다',()=>{
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ assert.doesNotMatch(source,/기관을 이렇게 살펴보세요|care-type-review-guide|기관을 살펴보는 세 가지 기준/);
+});
+/** SOFTM-TYPE-REVIEW-GUIDE-REMOVE END */
+/** SOFTM-TYPE-GUIDE-COMPACT START 날짜:20261126 : 안내 링크가 제목 옆 버튼으로 배치되고 이전 문구가 제거되는지 검증 */
+test('이용 흐름 링크는 간결한 유형 선택 제목 옆 버튼으로 표시한다',()=>{
+ const source=readFileSync(new URL('../care-category-picker.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../care-seamless-journey.css',import.meta.url),'utf8');
+ assert.match(source,/care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요<\/strong><a class="care-seamless-entry-link"/);
+ assert.doesNotMatch(source,/돌봄 유형을 먼저 선택해 주세요/);
+ assert.doesNotMatch(source,/선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/);
+ assert.match(css,/\.care-seamless-entry-head \{[^}]*justify-content: space-between/);
+ assert.match(css,/\.care-seamless-entry-link \{[\s\S]*?border: 1px solid/);
+});
+/** SOFTM-TYPE-GUIDE-COMPACT END */
 /** SOFTM-TYPE-LIST-SCROLL START 날짜:20261124 : 짧은 목록 화면에서 방문목욕 아래 유형도 자체 스크롤로 접근 가능한지 정적 검증 */
 test('목록 유형 패널은 남은 화면 높이를 사용하고 마지막 유형까지 자체 스크롤한다',()=>{
  const css=readFileSync(new URL('../care-category-picker.css',import.meta.url),'utf8');

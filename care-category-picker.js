@@ -40,7 +40,7 @@
   if(root.CareAdvancedSearch){const state=advanced||root.CareAdvancedSearch.readState?.(url.searchParams,type);if(state)root.CareAdvancedSearch.writeState(url.searchParams,root.CareAdvancedSearch.sanitize(state,type));}
   return url;
  }
- function mount({type,getMap,snapshot=()=>({}),resize=()=>{}}){
+ function mount({type,getMap,snapshot=()=>({}),resize=()=>{},deferInitialOpen=false}){
   let storage;try{storage=root.localStorage;}catch{}
   document.body.classList.add('care-type-enabled');document.body.classList.toggle('care-type-neutral',!type);
   /** SOFTM-TYPE-MENU-TEXT START 날짜:20260911 : 기존 텍스트형 상단 메뉴로 유형을 바로 선택하고 유형 안내는 별도 유지 */
@@ -93,12 +93,12 @@
   root.addEventListener('pageshow',revealSelectedCategory);
   document.fonts?.ready.then(revealSelectedCategory);
   /** SOFTM-CATEGORY-VISIBLE END */
-  const panel=document.createElement('section');panel.id='careTypePanel';panel.className='care-type-panel';panel.hidden=true;panel.setAttribute('aria-labelledby','careTypeTitle');
+  const panel=document.createElement('section');panel.id='careTypePanel';panel.className='care-type-panel';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby','careTypeTitle'); // SOFTM-TYPE-A11Y 날짜:20261126 : 유형 선택을 배경 탐색과 분리된 접근성 대화상자로 제공
   /** SOFTM-SEAMLESS-JOURNEY START 날짜:20261119 : 위저드처럼 보이는 진행 단계를 만들지 않고 유형 선택 후 지도·목록으로 바로 진입함을 안내 */
   panel.innerHTML=`<header><div><span class="care-type-eyebrow">돌봄한눈 · 기관 찾기</span><h2 id="careTypeTitle" tabindex="-1">어떤 돌봄이 필요하세요?</h2></div><button type="button" data-close aria-label="유형 선택 닫기">×</button></header>
     <div class="care-seamless-entry">
-      <div class="care-seamless-entry-copy"><span class="care-seamless-entry-label">원스톱 심리스</span><strong>돌봄 유형을 먼저 선택해 주세요</strong><span>선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다.</span></div>
-      <a class="care-seamless-entry-link" href="service-guide.html#seamless-journey">전체 이용 흐름 보기</a>
+      <div class="care-seamless-entry-copy"><div class="care-seamless-entry-head"><strong>돌봄 유형을 선택해 주세요</strong><a class="care-seamless-entry-link" href="service-guide.html#seamless-journey">전체 이용 흐름 보기</a></div>\n      <!-- SOFTM-TYPE-REVIEW-GUIDE-REMOVE 날짜:20261128 : 유형 선택과 결과 화면에서 반복되는 기관 판단 안내 제거 -->
+      </div>
     </div>
     <div class="care-type-options"></div><button type="button" class="care-type-all" aria-expanded="true">주요 유형만 보기</button><details class="care-type-help"><summary>유형이 헷갈리나요?</summary><p>낮이나 저녁에 기관을 오가며 이용하려면 <b>주·야간보호</b>, 집에서 일상생활 도움을 받으려면 <b>방문요양</b>, 기관에서 생활하며 돌봄받으려면 <b>요양원·공동생활가정</b>을 살펴보세요.</p><p>일정 기간의 돌봄은 단기보호, 집에서 간호·목욕 지원은 방문간호·방문목욕입니다. 치매전담형은 특화기관 모아보기이며 요양병원은 입원 진료를 제공하는 의료기관입니다.</p></details><button type="button" class="care-type-expand" aria-expanded="false" aria-label="유형 선택 화면 높이 조절">확대 ↑</button>`; // SOFTM-TYPE-DEFAULT 날짜:20260914 : 추가 조작 없이 모든 기관 유형을 먼저 비교할 수 있도록 기본 펼침 상태 제공
   /** SOFTM-SEAMLESS-JOURNEY END */
@@ -151,13 +151,17 @@
   }
   const expandButton=panel.querySelector('.care-type-expand');panel.querySelector('header').insertBefore(expandButton,panel.querySelector('[data-close]'));
   let opener=toggle,previousInert=false,previousSaved=false;
-  function open(){opener=document.activeElement===document.body?toggle:document.activeElement;previousSaved=document.body.dataset.careWorkspace==='saved';if(previousSaved)document.getElementById('careSearchTab')?.click();if(document.body.classList.contains('care-mobile-filters-open'))document.querySelector('.care-filter-panel-close')?.click();const mapCard=document.querySelector('.map-card');previousInert=mapCard.inert;mapCard.inert=false;panel.hidden=false;document.body.classList.add('care-type-open');toggle.setAttribute('aria-expanded','true');positionPanel();resize();panel.querySelector('h2').focus({preventScroll:true});} // SOFTM-TYPE-LIST-SCROLL 날짜:20261124 : 패널을 연 즉시 남은 화면 높이를 다시 계산
-  function close(){document.querySelector('.map-card').inert=previousInert;panel.hidden=true;document.body.classList.remove('care-type-open','care-type-expanded');expandButton.setAttribute('aria-expanded','false');expandButton.textContent='확대 ↑';toggle.setAttribute('aria-expanded','false');if(previousSaved)document.getElementById('careSavedTab')?.click();resize();(opener?.isConnected?opener:toggle).focus({preventScroll:true});}
+  let inertNodes=[];
+  function backgroundNodes(){const nodes=[];let current=panel;while(current?.parentElement){for(const sibling of current.parentElement.children)if(sibling!==current&&sibling.tagName!=='SCRIPT')nodes.push([sibling,sibling.inert]);if(current.parentElement===document.body)break;current=current.parentElement;}return nodes;}
+  /** SOFTM-TYPE-A11Y START 날짜:20261126 : 유형 선택 중 배경을 비활성화하고 Tab 이동을 패널 안에 유지 */
+  function open(){opener=document.activeElement===document.body?toggle:document.activeElement;previousSaved=document.body.dataset.careWorkspace==='saved';if(previousSaved)document.getElementById('careSearchTab')?.click();if(document.body.classList.contains('care-mobile-filters-open'))document.querySelector('.care-filter-panel-close')?.click();const mapCard=document.querySelector('.map-card');previousInert=mapCard.inert;panel.hidden=false;inertNodes=backgroundNodes();for(const [node] of inertNodes)node.inert=true;document.body.classList.add('care-type-open');toggle.setAttribute('aria-expanded','true');positionPanel();resize();panel.querySelector('h2').focus({preventScroll:true});}
+  function close(){for(const [node,wasInert] of inertNodes)node.inert=wasInert;inertNodes=[];document.querySelector('.map-card').inert=previousInert;panel.hidden=true;document.body.classList.remove('care-type-open','care-type-expanded');expandButton.setAttribute('aria-expanded','false');expandButton.textContent='확대 ↑';toggle.setAttribute('aria-expanded','false');if(previousSaved)document.getElementById('careSavedTab')?.click();resize();(opener?.isConnected?opener:toggle).focus({preventScroll:true});}
   toggle.onclick=()=>panel.hidden?open():close();panel.querySelector('[data-close]').onclick=close;
-  panel.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close();}});
+  panel.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close();return;}if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('a[href],button:not([disabled]):not([hidden]),[tabindex]:not([tabindex="-1"])')].filter(node=>!node.hidden);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
+  /** SOFTM-TYPE-A11Y END */
   const all=panel.querySelector('.care-type-all');all.onclick=()=>{const expanded=all.getAttribute('aria-expanded')!=='true';all.setAttribute('aria-expanded',String(expanded));all.textContent=expanded?'주요 유형만 보기':'전체 유형 보기 · 9개';[...list.children].forEach((button,index)=>button.hidden=!expanded&&index>=3);};
   const expand=panel.querySelector('.care-type-expand');expand.onclick=()=>{const expanded=document.body.classList.toggle('care-type-expanded');expand.setAttribute('aria-expanded',String(expanded));expand.textContent=expanded?'축소 ↓':'확대 ↑';resize();};
-  if(!type){document.querySelector('#list').innerHTML='<div class="empty">돌봄 유형을 고르면 기관이 표시됩니다.</div>';open();}
+  if(!type){document.querySelector('#list').replaceChildren();if(!deferInitialOpen)open();} // SOFTM-QUICK-START-REMOVE 날짜:20261126 : 중복 온보딩 문구 없이 기존 검색·위치 조작만 유지
   return {open,close};
  }
  root.CareCategoryPicker=Object.freeze({categories,menuOrder,menuLabel,resolve,save,destination,mount});

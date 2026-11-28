@@ -116,6 +116,13 @@ test('맞춤분석은 네 단계와 세 곳 비교·세션 상담 준비를 제�
     assert.match(indexHtml,/CareComparisonWorkspace\.render/);assert.match(indexHtml,/compareCandidates\.length<2/);
     assert.match(indexHtml,/compareFullOpen=.*\.care-full-compare/); // SOFTM-COMPARE-TABLE-OPEN 날짜:20261120 : 정렬 뒤 전체 표 펼침 상태를 유지하는 회귀 방지
 });
+test('맞춤 비교는 현재 후보 필터 밖의 이전 비교 선택을 다시 사용하지 않는다',()=>{
+    assert.match(analysisJs,/function comparisonRows\(\)/);
+    assert.match(analysisJs,/comparisonSelection\.sync\(comparisonRows\(\), true\)/);
+    assert.match(analysisJs,/const rows = activeRows\(\), allRows = comparisonRows\(\)/);
+    assert.doesNotMatch(analysisJs,/const rows = activeRows\(\), allRows = basketRows\(\)/);
+    assert.match(analysisHtml,/care-analysis\.js\?v=20261124-family-share1/);
+}); // SOFTM-STRICT-COMPARE 날짜:20261124 : A·B 선택 뒤 C등급·미확인이 비교표에 남는 회귀 방지
 /** SOFTM-MOBILE-COMPARE START 날짜:20261124 : 모바일 비교 진입·겹침 제거·한 화면 표 배치를 정적 검증 */
 test('모바일 비교는 표 시작점으로 이동하고 세 기관을 화면 폭 안에 표시한다',()=>{
     const analysisCss=readFileSync(new URL('../care-analysis.css',import.meta.url),'utf8');

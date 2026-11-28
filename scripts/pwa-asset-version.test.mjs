@@ -6,6 +6,7 @@ import vm from 'node:vm';
 
 const origin='https://dolbomhannun.kr';
 const source=readFileSync(new URL('../sw.js',import.meta.url),'utf8');
+const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 function worker({entries=[],offline=false}={}){
  const values=new Map(entries.map(([path,value])=>[origin+path,value]));
  const handlers=new Map(),requests=[];
@@ -46,6 +47,12 @@ test('API와 회원 인증 응답은 자산 캐시로 가로채지 않는다',as
  assert.equal(await w.read('/api/auth/session'),null);
  assert.equal(await w.read('/auth-callback.html'),null);
  assert.deepEqual(w.requests,[]);
+});
+test('시작 화면은 외부 CSS보다 먼저 표시되고 본 화면 스타일 준비까지 유지된다',()=>{
+ const startupStyle=index.indexOf('id="hannunStartupStyle"');assert.notEqual(startupStyle,-1);assert.ok(startupStyle<index.indexOf('<link'));
+ assert.doesNotMatch(index,/<link[^>]+rel="stylesheet"/s);
+ assert.match(index,/link\[data-hannun-style\]/);
+ assert.match(index,/setTimeout\(\(\)=>f\(true\),8000\)/);
 });
 /** SOFTM-PWA-BRAND START 날짜:20261122 : 설치 앱 아이콘의 새 로고 규격·버전·안전 배경을 고정 */
 test('설치 앱 매니페스트는 새 브랜드 아이콘과 흰 배경을 사용한다',()=>{

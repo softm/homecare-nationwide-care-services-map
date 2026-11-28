@@ -202,11 +202,13 @@ body.stitch-desktop.care-map-page .care-type-header { top:0!important; left:194p
 body.stitch-desktop.care-map-page .care-menu-trigger { top:10px; left:12px; right:auto; }
 body.stitch-desktop.care-map-focus .care-focus-top { padding-left:0; }
 @media (min-width:1001px) {
- body.stitch-desktop:not(.care-map-focus) .care-workspace-tabs { top:64px; left:0; width:var(--care-desktop-sidebar); height:56px; padding:6px 12px; background:#fff; border-bottom:1px solid #e5eeff; }
- body.stitch-desktop:not(.care-map-focus) .filters { top:120px; }
+ /** SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE START 날짜:20261128 : 상단 주 메뉴와 중복되는 PC 작업 탭 제거 후 검색·담은 기관 영역을 위로 정렬 */
+ body.stitch-desktop:not(.care-map-focus) .care-workspace-tabs { display:none!important; }
+ body.stitch-desktop:not(.care-map-focus) .filters { top:64px; }
  body.stitch-desktop:not(.care-map-focus) .layout { top:64px!important; }
- body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:182px!important; height:calc(100% - 182px)!important; }
- body.stitch-desktop:not(.care-map-focus)[data-care-workspace="saved"] .layout>.care-saved-panel { top:56px!important; height:calc(100% - 56px)!important; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="search"] .layout>.results { top:126px!important; height:calc(100% - 126px)!important; }
+ body.stitch-desktop:not(.care-map-focus)[data-care-workspace="saved"] .layout>.care-saved-panel { top:0!important; height:100%!important; }
+ /** SOFTM-DESKTOP-WORKSPACE-TABS-REMOVE END */
 }
 @media (max-width:1000px) {
  body.stitch-desktop { --stitch-category-height:56px; }

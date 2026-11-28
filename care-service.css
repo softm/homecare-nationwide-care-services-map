@@ -46,6 +46,8 @@ body.hc-portal .secondary-button{border-radius:28px;border-color:#19b590;color:#
  body.stitch-desktop.hc-integrated .care-type-header{left:196px;max-width:212px;padding:0} /* SOFTM-TYPE-SELECTOR 날짜:20261121 : 태블릿에서도 선택한 기관 이름을 그대로 표시 */
  body.stitch-desktop.hc-integrated .hc-map-account{right:10px}
  body.stitch-desktop.hc-integrated .care-mode-toggle{top:auto!important;right:12px!important;bottom:calc(74px + var(--care-list-ad-space,0px) + env(safe-area-inset-bottom))!important;z-index:155}
+ /** SOFTM-LIST-MODE-TOP 날짜:20261127 : 목록 화면의 목록·지도 전환은 하단 광고 위가 아니라 상단 헤더에 고정 */
+ body.stitch-desktop.hc-integrated[data-care-mode=list] .care-mode-toggle{top:2px!important;right:60px!important;bottom:auto!important;z-index:184}
  body.stitch-desktop.hc-integrated .care-workspace-tabs{visibility:hidden;pointer-events:none}
  body.stitch-desktop.hc-integrated[data-care-mode]{--care-mobile-tab-space:calc(62px + env(safe-area-inset-bottom))}
  body.hc-portal{padding-top:56px;padding-bottom:calc(80px + env(safe-area-inset-bottom))}

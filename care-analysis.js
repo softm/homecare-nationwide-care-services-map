@@ -70,12 +70,19 @@ function basketRows() {
         return { ...row, _distance: entry?.distance };
     }).filter(Boolean);
 }
+/** SOFTM-STRICT-COMPARE START 날짜:20261124 : 현재 후보 필터 밖의 이전 보관·비교 선택이 비교표에 다시 섞이지 않도록 제한 */
+function comparisonRows() {
+    if (!current) return [];
+    const allowed = new Set(candidateEntries().map(entry => String(entry.row.i)));
+    return basketRows().filter(row => allowed.has(String(row.i)));
+}
 function activeRows() {
     if (!current || !comparisonSelection) return [];
-    const rows = basketRows(), byId = new Map(rows.map(row => [String(row.i), row]));
+    const rows = comparisonRows(), byId = new Map(rows.map(row => [String(row.i), row]));
     comparisonSelection.sync(rows, false);
     return comparisonSelection.ids().map(id => byId.get(String(id))).filter(Boolean);
 }
+/** SOFTM-STRICT-COMPARE END */
 function setStep(next, { push = false, focus = true } = {}) {
     if (!analysisSteps.includes(next)) next = 'conditions';
     if (next !== 'conditions' && !current) next = 'conditions';
@@ -300,9 +307,10 @@ async function run(input, address, token) {
         const report = analyzeInstitutions(candidates, { ...options, criteria: input.criteria });
         const chosen = analyzeInstitutions(candidates, { ...options, criteria: input.criteria.filter(item => input.selected.has(item.id)) });
         const basket = CareMapExperience.createBasket(storage, input.type); basket.retain(new Set(rows.map(row => String(row.i))));
-        comparisonSelection = CareComparisonWorkspace.createSelection(storage, input.type, 3); comparisonSelection.sync(basket.ids(), true);
         current = { input, address, report, chosen, summaries, rows, rowById: new Map(rows.map(row => [String(row.i), row])), featureError: features.status === 'rejected', photoError: photos.status === 'rejected', basket };
-        view = input.selected.size ? 'confirmed' : 'nearby'; limit = 12; render(); // SOFTM-STRICT-CONDITION-FILTER 날짜:20261122 : 사용자가 고른 조건은 기본 후보 목록에서 실제 필터로 적용
+        view = input.selected.size ? 'confirmed' : 'nearby';
+        comparisonSelection = CareComparisonWorkspace.createSelection(storage, input.type, 3); comparisonSelection.sync(comparisonRows(), true);
+        limit = 12; render(); // SOFTM-STRICT-COMPARE 날짜:20261124 : 조건 검색 직후 이전 C등급·미확인 비교 선택을 조건 충족 후보로 교체
         $('analysisStatus').textContent = `분석 완료 · 반경 ${input.radiusKm}km 안 위치 확인 ${report.nearby.length.toLocaleString()}곳${report.unknownLocation.length ? ` · 위치 미확인 ${report.unknownLocation.length}곳은 별도 확인이 필요합니다.` : ''}`;
         $('analysisResults').hidden = false; updateConditionSummary(); setStep('candidates', { push: true, focus: false }); $('analysisResults').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); // SOFTM-GUIDED-COMPARE 날짜:20261119 : 분석이 끝나면 주소를 URL에 남기지 않고 후보 검토 단계로 이동
     } catch (error) { if (token === generation) { current = null; $('analysisStatus').textContent = error.message || '분석을 완료하지 못했습니다. 다시 분석해 주세요.'; } }
@@ -448,8 +456,8 @@ function renderFullDataTable(rows) {
 }
 function renderComparison() {
     const host = document.querySelector('[data-analysis-panel="compare"]'); if (!host || !current) return;
-    const rows = activeRows(), allRows = basketRows(), selectedCriteria = current.input.criteria.filter(item => current.input.selected.has(item.id)).map(item => item.label);
-    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 3단계</span><h2 tabindex="-1">선택한 시설을 같은 기준으로 비교합니다</h2><p>평가연도와 미확인 상태를 함께 읽고 실제 이용 가능 여부는 상담에서 확인하세요.</p></div><button type="button" data-analysis-go="candidates">후보 다시 보기</button></header>${CareComparisonWorkspace.render({ rows, allRows, activeIds: rows.map(row => row.i), type: current.input.type, source: current.input.type === 'nursing-hospital' ? 'hira' : 'nhis', sourceDate: current.report.sourceDate, selectedCriteria })}<details class="analysis-full-data"><summary>전체 공개자료 표 보기</summary><div>${renderFullDataTable(rows)}<p><a href="${esc(mapBasketLink())}" rel="nofollow">지도 비교함에서 정렬·엑셀 다운로드 이용</a></p></div></details><div class="analysis-compare-actions"><button type="button" data-analysis-go="candidates">후보 추가·교체</button><button type="button" class="analysis-primary" data-analysis-go="prepare" ${rows.length ? '' : 'disabled'}>상담 질문 준비</button></div>`;
+    const rows = activeRows(), allRows = comparisonRows(), selectedCriteria = current.input.criteria.filter(item => current.input.selected.has(item.id)).map(item => item.label);
+    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 3단계</span><h2 tabindex="-1">선택한 시설을 같은 기준으로 비교합니다</h2><p>평가연도와 미확인 상태를 함께 읽고 실제 이용 가능 여부는 상담에서 확인하세요.</p></div><button type="button" data-analysis-go="candidates">후보 다시 보기</button></header>${CareComparisonWorkspace.render({ rows, allRows, activeIds: rows.map(row => row.i), type: current.input.type, source: current.input.type === 'nursing-hospital' ? 'hira' : 'nhis', sourceDate: current.report.sourceDate, selectedCriteria })}<details class="analysis-full-data"><summary>전체 공개자료 표 보기</summary><div>${renderFullDataTable(rows)}<p><a href="${esc(mapBasketLink())}" rel="nofollow">지도 비교함에서 정렬·엑셀 다운로드 이용</a></p></div></details><div class="analysis-compare-actions"><button type="button" data-analysis-go="candidates">후보 추가·교체</button><button type="button" data-analysis-family-share ${rows.length ? '' : 'disabled'}>가족에게 비교 공유</button><button type="button" class="analysis-primary" data-analysis-go="prepare" ${rows.length ? '' : 'disabled'}>상담 질문 준비</button></div>`;
     void CareComparisonWorkspace.mountCosts(host,{type:current.input.type,rows}); // SOFTM-PERSONAL-COST 날짜:20261121 : 맞춤 비교표에 공식 급여 계산과 개인 등급 연결
 }
 function consultationKey() { return `careConsultation:v1:${current.input.type}`; }
@@ -461,7 +469,7 @@ function renderConsultation() {
     const cards = rows.map(row => {
         const entry = current.report.nearby.find(item => String(item.row.i) === String(row.i)) || { row, conditions: [] }, items = questions(entry);
         const previous = consultationRecords().find(record => record.key === `${current.input.type}:${row.i}`);
-        const record = ensureRecord(current.input.type, row, items);
+        const record = ensureRecord(current.input.type, row, items, {sourceDate:current.report.sourceDate});
         if (!previous && Array.isArray(checked[row.i])) {
             const legacy = new Set(checked[row.i].map(String));
             items.forEach((question, index) => { const saved = record.questions.find(q => q.id === questionId(question)); if (saved && (legacy.has(String(index)) || legacy.has(saved.id))) saved.checked = true; });
@@ -470,13 +478,13 @@ function renderConsultation() {
         const completed = new Set(record.questions.filter(question => question.checked).map(question => question.id));
         return `<article class="analysis-consultation-card"><header><h3>${esc(row.n)}</h3><span>${items.filter(question => completed.has(questionId(question))).length} / ${items.length} 확인</span></header><div class="analysis-question-list">${items.map((question, index) => `<label><input type="checkbox" data-consult-check="${esc(row.i)}" value="${esc(questionId(question))}" ${completed.has(questionId(question)) ? 'checked' : ''}><span>${esc(question)}</span></label>`).join('')}</div><a href="care-record.html?key=${encodeURIComponent(record.key)}">답변·방문 기록 이어가기 →</a></article>`;
     }).join('');
-    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 4단계</span><h2 tabindex="-1">전화와 방문 전에 질문을 준비하세요</h2><p>체크 상태는 상담 기록과 연결됩니다. 계정 저장과 기록 공유는 직접 선택할 수 있습니다.</p></div><button type="button" data-analysis-go="compare">비교표로 돌아가기</button></header><div class="analysis-consultation-layout"><div class="analysis-consultation-list">${cards || '<p class="analysis-empty">상담을 준비할 시설을 먼저 선택해 주세요.</p>'}</div><aside class="analysis-consultation-side"><section id="analysisGuardianContact"></section><section><h3>가족과 후보 공유</h3><p>공개 기관기호만 담긴 링크로 같은 시설을 다시 확인할 수 있습니다.</p><button type="button" class="analysis-primary" data-analysis-share>비교 시설 공유</button><p id="analysisShareStatus" role="status" aria-live="polite"></p></section><section><h3>방문용 확인표</h3><p>주소와 개인 조건 없이 현재 질문표만 인쇄합니다.</p><button type="button" data-analysis-print>질문표 인쇄</button></section><section><h3>지도에서 이어보기</h3><p>보관한 전체 후보의 위치·상세정보·경로를 확인합니다.</p><a class="analysis-action" href="${esc(mapBasketLink())}" rel="nofollow">담은 기관 지도 보기</a></section><section class="analysis-session-note"><strong>다른 기기에서도 이어보기</strong><p>상담 기록에서 답변을 작성하고 계정에 저장할 수 있습니다.</p><a class="analysis-action" href="care-records.html">상담 기록 열기</a></section></aside></div>`;
+    host.innerHTML = `<header class="analysis-stage-heading"><div><span>시설 찾기 · 4단계</span><h2 tabindex="-1">전화와 방문 전에 질문을 준비하세요</h2><p>체크 상태는 상담 기록과 연결됩니다. 계정 저장과 기록 공유는 직접 선택할 수 있습니다.</p></div><button type="button" data-analysis-go="compare">비교표로 돌아가기</button></header><div class="analysis-consultation-layout"><div class="analysis-consultation-list">${cards || '<p class="analysis-empty">상담을 준비할 시설을 먼저 선택해 주세요.</p>'}</div><aside class="analysis-consultation-side"><section id="analysisGuardianContact"></section><section><h3>가족과 비교 공유</h3><p>공개 지표 비교와 선택한 상담 기록을 7일 읽기 전용 링크로 공유합니다. 주소·연락처·대상자 정보·예상비용은 제외됩니다.</p><button type="button" class="analysis-primary" data-analysis-family-share>가족 비교 공유 관리</button></section><section><h3>후보 링크 빠르게 보내기</h3><p>로그인 없이 공개 기관기호만 담긴 후보 링크를 보냅니다.</p><button type="button" data-analysis-share>공개 후보 링크 복사</button><p id="analysisShareStatus" role="status" aria-live="polite"></p></section><section><h3>방문용 확인표</h3><p>주소와 개인 조건 없이 현재 질문표만 인쇄합니다.</p><button type="button" data-analysis-print>질문표 인쇄</button></section><section><h3>지도에서 이어보기</h3><p>보관한 전체 후보의 위치·상세정보·경로를 확인합니다.</p><a class="analysis-action" href="${esc(mapBasketLink())}" rel="nofollow">담은 기관 지도 보기</a></section><section class="analysis-session-note"><strong>다른 기기에서도 이어보기</strong><p>상담 기록에서 답변을 작성하고 계정에 저장할 수 있습니다.</p><a class="analysis-action" href="care-records.html">상담 기록 열기</a></section></aside></div>`;
     void mountGuardianContact($('analysisGuardianContact')); // SOFTM-GUARDIAN 날짜:20261120 : 상담 회신을 받을 계정 소유자 표시
 
 }
 function syncBasket() {
     if (!current) return;
-    comparisonSelection?.sync(basketRows(), false);
+    comparisonSelection?.sync(comparisonRows(), false);
     document.querySelectorAll('[data-analysis-save]').forEach(button => { const saved = current.basket.has(button.dataset.analysisSave); button.setAttribute('aria-pressed', String(saved)); button.textContent = saved ? '후보 보관됨' : '비교 후보에 담기'; button.closest('.analysis-card')?.classList.toggle('is-saved', saved); }); // SOFTM-CANDIDATE-FACTS 날짜:20261121 : 담은 기관은 버튼과 카드 테두리에서 함께 구분
     renderCandidateActions(); renderTray(); setStep(currentStep, { focus: false }); // SOFTM-BULK-CANDIDATES 날짜:20261122 : 개별 담기·해제도 일괄 담기 개수와 버튼에 즉시 반영
 }
@@ -494,6 +502,7 @@ async function shareComparison() {
     if (await CareBasketShare.copyLink(url)) { status.textContent = '비교 시설 공유 링크를 복사했습니다.'; return; }
     status.replaceChildren(); const link = document.createElement('a'); link.href = url; link.textContent = '공유 링크 열기'; link.rel = 'nofollow'; status.append('자동 복사가 제한됐습니다. ', link);
 }
+function manageFamilyShare(){const rows=activeRows();if(!rows.length)return;for(const row of rows){const entry=current.report.nearby.find(item=>String(item.row.i)===String(row.i))||{row,conditions:[]};ensureRecord(current.input.type,row,questions(entry),{sourceDate:current.report.sourceDate});}location.href=`care-share.html?manage=1&type=${encodeURIComponent(current.input.type)}&ids=${encodeURIComponent(rows.map(row=>row.i).join(','))}`;}
 /** SOFTM-GUIDED-COMPARE END */
 $('analysisType').innerHTML = Object.entries(labels).map(([type, label]) => `<option value="${type}">${label}</option>`).join('');
 renderTypeChoices(); // SOFTM-ANALYSIS-TYPES 날짜:20261121 : 기존 URL·저장 조건 복원 전에 접근 가능한 9개 유형 카드 생성
@@ -541,19 +550,19 @@ $('analysisResults').addEventListener('click', async event => {
     if (!current) return;
     const button = event.target.closest('button'); if (!button) return;
     if (button.hasAttribute('data-analysis-retry')) { const { input, address } = current; invalidate('확인되지 않은 자료를 다시 확인합니다.'); void run(input, address, generation); }
-    else if (button.dataset.analysisView) { if(button.dataset.analysisView==='recent'){const context=current;button.disabled=true;try{const rows=await listPilot();if(current!==context)return;current.recentIds=new Set(rows.filter(row=>row.recent).map(row=>row.institutionId));}catch(error){alert(error.message);return;}finally{button.disabled=false;}} view = button.dataset.analysisView; limit = 12; $('analysisBulkStatus').textContent = ''; document.querySelectorAll('[data-analysis-view]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.analysisView === view))); renderCards(); } // SOFTM-BULK-CANDIDATES 날짜:20261122 : 다른 필터에서는 이전 목록의 담기 완료 안내를 지움
+    else if (button.dataset.analysisView) { if(button.dataset.analysisView==='recent'){const context=current;button.disabled=true;try{const rows=await listPilot();if(current!==context)return;current.recentIds=new Set(rows.filter(row=>row.recent).map(row=>row.institutionId));}catch(error){alert(error.message);return;}finally{button.disabled=false;}} view = button.dataset.analysisView; limit = 12; $('analysisBulkStatus').textContent = ''; document.querySelectorAll('[data-analysis-view]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.analysisView === view))); comparisonSelection.sync(comparisonRows(),false);renderCards();renderTray(); } // SOFTM-STRICT-COMPARE 날짜:20261124 : 후보 필터를 바꾸면 비교 선택도 현재 필터 안에서만 유지
     else if (button.hasAttribute('data-analysis-save-all')) saveCandidates(); // SOFTM-BULK-CANDIDATES 날짜:20261122 : 표시 제한 이후 후보까지 한 번에 담기
     else if (button.hasAttribute('data-analysis-compare-nearest')) saveCandidates(true); // SOFTM-BULK-CANDIDATES 날짜:20261122 : 현재 필터의 가까운 세 곳 담기와 비교를 한 동작으로 연결
     else if (button.id === 'analysisMore') showMoreCards(); // SOFTM-ANALYSIS-AUTOLOAD 날짜:20260911 : 자동 로드 미지원 환경의 수동 더보기도 같은 추가 방식으로 처리
     else if (button.dataset.analysisSave) {
         const id = button.dataset.analysisSave, wasSaved = current.basket.has(id); current.basket.toggle(id);
-        const rows = basketRows(); comparisonSelection.sync(rows, false);
+        const rows = comparisonRows(); comparisonSelection.sync(rows, false);
         if(!wasSaved&&current.input.type==='daycare')void trackPilot('save',id); // SOFTM-KEY 날짜:20261121 : 담기 집계는 전화·상담 완료와 분리
         if (!wasSaved && comparisonSelection.ids().length < 3) comparisonSelection.toggle(id, rows);
         syncBasket(); $('analysisStatus').textContent = wasSaved ? `비교 후보에서 뺐습니다. 현재 ${current.basket.ids().length}곳을 보관 중입니다.` : `비교 후보에 담았습니다. 현재 ${current.basket.ids().length}곳을 보관 중입니다.`;
     }
     else if (button.dataset.analysisActive || button.dataset.comparisonSelect) {
-        const id = button.dataset.analysisActive || button.dataset.comparisonSelect, result = comparisonSelection.toggle(id, basketRows());
+        const id = button.dataset.analysisActive || button.dataset.comparisonSelect, result = comparisonSelection.toggle(id, comparisonRows());
         if (result.reason === 'limit') $('analysisStatus').textContent = '한 번에 최대 3곳까지 비교할 수 있습니다. 선택한 시설 하나를 먼저 해제해 주세요.';
         else $('analysisStatus').textContent = `비교할 시설 ${result.ids.length}곳을 선택했습니다.`;
         renderTray(); if (currentStep === 'compare') renderComparison(); setStep(currentStep, { focus: false });
@@ -566,6 +575,7 @@ $('analysisResults').addEventListener('click', async event => {
         /** SOFTM-MOBILE-COMPARE END */
     }
     else if (button.dataset.comparisonDetail) { const row = current.rowById.get(String(button.dataset.comparisonDetail)); if (row) location.href = facilityUrl(current.input.type, row); } // SOFTM-INDEPENDENT-DETAIL 날짜:20261122 : 비교표의 상세도 지도 팝업 대신 독립 화면으로 통일
+    else if (button.hasAttribute('data-analysis-family-share')) manageFamilyShare();
     else if (button.hasAttribute('data-analysis-share')) void shareComparison();
     else if (button.hasAttribute('data-analysis-print')) window.print();
     else if (button.dataset.analysisPhotos) { const row = current.report.nearby.find(entry => String(entry.row.i) === button.dataset.analysisPhotos)?.row; if (row) openComparison({ rows: [row], type: current.input.type, opener: button, title: `${row.n} 등록사진` }); }

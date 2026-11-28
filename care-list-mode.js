@@ -2,8 +2,15 @@
 (function (root) {
     'use strict';
     const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
-    const resolveMode = value => new URL(value).searchParams.get('mode') === 'list' ? 'list' : 'map';
-    let mode = root.location ? resolveMode(root.location.href) : 'map', options = {}, mounted = false, transition = 0;
+    /** SOFTM-MOBILE-LIST-FIRST START 날짜:20261126 : 급한 보호자가 전화 행동이 보이는 가까운 목록부터 확인하도록 모바일 기본 화면을 목록으로 지정 */
+    const resolveMode = (value, mobile = false) => {
+        const explicit = new URL(value).searchParams.get('mode');
+        if (explicit === 'list' || explicit === 'map') return explicit;
+        return mobile ? 'list' : 'map';
+    };
+    const mobileDefault = root.matchMedia?.('(max-width:1000px)')?.matches === true;
+    let mode = root.location ? resolveMode(root.location.href, mobileDefault) : 'map', options = {}, mounted = false, transition = 0;
+    /** SOFTM-MOBILE-LIST-FIRST END */
     const isList = () => mode === 'list';
     if (root.document) root.document.body.dataset.careMode = mode;
 

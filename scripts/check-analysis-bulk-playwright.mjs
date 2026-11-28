@@ -25,6 +25,9 @@ export async function verifyAnalysisBulk(page, {out, width}) {
     const defaultIds = await ids();
     const defaultGrades = await page.locator('.analysis-key-facts').evaluateAll(groups => groups.map(group => [...group.querySelectorAll('div')].find(cell => cell.querySelector('dt')?.textContent === '공단 평가')?.querySelector('dd')?.textContent));
     assert.ok(defaultGrades.length >= 2 && defaultGrades.every(grade => /^[AB]등급$/.test(grade)), 'A·B 선택 시 C등급·미확인 기본 목록 제외');
+    const initialActive=(await read()).active;
+    assert.ok(initialActive.length&&initialActive.every(id=>defaultIds.includes(id)),'A·B 검색 직후 이전 C등급·미확인 비교 선택 제외');
+    assert.ok(!initialActive.includes(previous),'필터 밖 이전 비교 기관 제거');
     await nearbyButton.click();
     const visible = await ids();
     assert.ok(total > 12 && visible.length === 12, '처음 표시한 12곳 이후에도 후보가 있는 실제 검색 결과');

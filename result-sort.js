@@ -25,6 +25,13 @@
  function score(row){const value=row.es??row.ev?.score;return typeof value==='number'&&Number.isFinite(value)?value:-Infinity;}
  /** SOFTM-DEFAULT-SCORE END */
  function usesCenter(mode){return centerModes.has(mode);}
+ /** SOFTM-DISTANCE-FIRST START 날짜:20261126 : 목록의 내 위치 찾기 결과를 지도 없이도 같은 거리순 엔진에 적용 */
+ function setCurrentPoint(point){
+  const valid=point&&Number.isFinite(point.lat)&&Number.isFinite(point.lng)&&Math.abs(point.lat)<=90&&Math.abs(point.lng)<=180;
+  currentPoint=valid?{lat:point.lat,lng:point.lng}:null;origin=valid?'current':'map';
+  return Boolean(valid);
+ }
+ /** SOFTM-DISTANCE-FIRST END */
  function sort(rows){
   if(config?.select.value==='rating'){rows.sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n,'ko'));return true;} // SOFTM-DEFAULT-SCORE 날짜:20260910 : 평가점수는 좌표 유무와 관계없이 높은 순으로 정렬
   if(!config||!['accuracy','distance'].includes(config.select.value))return false;
@@ -104,6 +111,6 @@
   dialog.addEventListener('close',()=>{generation++;apply.disabled=false;trigger.focus({preventScroll:true});});
   select.addEventListener('change',refresh);refresh();
  }
- root.CareResultSort=Object.freeze({mount,sort,compare,relevance,distance,createPreference,usesCenter}); // SOFTM-SORT-ORIGIN 날짜:20260910 : 중심점 사용 범위를 회귀검사할 수 있도록 공유
+ root.CareResultSort=Object.freeze({mount,sort,compare,relevance,distance,createPreference,usesCenter,setCurrentPoint}); // SOFTM-DISTANCE-FIRST 날짜:20261126 : 목록 위치 버튼이 실제 좌표 기반 거리순을 적용
 })(typeof window==='undefined'?globalThis:window);
 /** SOFTM-RESULT-SORT END */

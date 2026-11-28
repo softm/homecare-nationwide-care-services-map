@@ -54,12 +54,20 @@ test('브랜드 컨셉과 핵심가치는 일관성·신뢰성·투명성·실�
   assert.match(serviceGuide, /공개자료를 일관된 기준으로 연결/);
 });
 
+test('무료 검색과 달리 가족이 같은 공개 비교표를 보고 공유 범위를 통제하도록 안내한다',()=>{
+  for(const text of ['찾은 후보를 가족과 같은 기준으로 결정하세요','평가연도·정원·공개 인력','7일 뒤 자동 만료','주소·연락처·대상자 정보·개인 조건·예상비용'])assert.match(serviceGuide,new RegExp(text));
+  for(const text of ['일반적인 무료 기관 검색','가족 공유','하나의 읽기 전용 링크','7일 자동 만료·즉시 중단'])assert.match(about,new RegExp(text));
+  const records=read('care-records.mjs'),pages=read('care-pages.mjs'),analysis=read('care-analysis.js'),workspace=read('care-workspace.mjs');
+  assert.match(records,/같은 공개 기준으로 함께 확인하세요/);assert.match(records,/공유하지 않음:[\s\S]*주소·연락처·대상자 정보·개인 이용조건·예상비용/);
+  assert.match(pages,/id="shareComparison"/);assert.match(analysis,/data-analysis-family-share/);assert.match(workspace,/export function publicComparison/);
+});
+
 test('지도 첫 진입은 위저드 없이 유형 선택 후 지도·목록으로 바로 연결한다', () => {
-  assert.match(picker, /돌봄 유형을 먼저 선택해 주세요/);
-  assert.match(picker, /선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/);
+  assert.match(picker, /돌봄 유형을 선택해 주세요/);
+  assert.doesNotMatch(picker, /선택하면 가까운 기관을 찾는 지도·목록으로 바로 이동합니다/); // SOFTM-TYPE-GUIDE-COPY-REMOVE 날짜:20261127 : 중복 설명 제거 확인
   assert.doesNotMatch(picker, /원스톱 심리스 · 1\/4|aria-current="step"|4단계 요약/);
   assert.match(picker, /href="service-guide\.html#seamless-journey"/);
-  assert.match(index, /care-seamless-journey\.css\?v=20261120-map1/);
+  assert.match(index, /care-seamless-journey\.css\?v=20261127-type-guide-copy-remove1/); // SOFTM-TYPE-GUIDE-COPY-REMOVE 날짜:20261127 : 유형 선택 상단 설명 제거 최신 스타일 확인
   assert.match(sitemap, /<loc>https:\/\/dolbomhannun\.kr\/service-guide\.html<\/loc><lastmod>2026-11-20<\/lastmod>/); // SOFTM-DOMAIN-MIGRATION 날짜:20261124 : 새 공식 도메인의 서비스 안내 색인을 검증
   assert.ok(existsSync(new URL('../service-guide.html', import.meta.url)));
 });
@@ -85,13 +93,12 @@ test('첫 후속 인포그래픽은 질문·핵심 유형·CTA·출처와 주의
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*?\.care-type-paths \{ grid-template-columns: 1fr; \}/);
 });
 
-test('지도 검색·기관 목록에 같은 판단 인포그래픽을 제공한다', () => { // SOFTM-DETAIL-ESSENTIALS 날짜:20261121 : 상세는 사용자 요청에 따라 중복 상태 카드 없이 핵심 정보만 제공
+test('지도 검색·기관 목록은 중복 판단 인포그래픽 없이 핵심 근거만 제공한다', () => { // SOFTM-MAP-INFOGRAPHIC-REMOVE 날짜:20261128 : 목록 위 안내 블록 제거 확인
   const listStyles = read('care-list-view.css');
-  assert.match(index, /class="care-search-infographic"/);
-  for (const text of ['위치', '생활권 안 후보 찾기', '공개정보', '평가·정원·인력 비교', '기관 확인', '빈자리·비용·운영 상담']) assert.match(index, new RegExp(text));
+  assert.doesNotMatch(index, /class="care-search-infographic"/);
+  assert.doesNotMatch(index, /기관을 이렇게 살펴보세요/);
   assert.match(index, /function careListEvidenceHtml\(c\)[\s\S]*?if\(!globalThis\.CareDecisionSummary\)return ''/);
   assert.match(listStyles, /\.care-list-evidence \{ display:block/);
-  assert.match(styles, /\.care-search-infographic ol \{[^}]*grid-template-columns: repeat\(3,minmax\(0,1fr\)\)/);
 });
 
 test('두 번째 후속 인포그래픽은 평가·정원·인력을 단정 없이 읽도록 안내한다', () => {
