@@ -80,11 +80,11 @@
     function createZoomResearch({ enabled, prepare, search }, clock = root) {
         let userUntil = 0, pending = false, timer;
         const clear = () => { clock.clearTimeout(timer); timer = null; };
-        const run = () => { clear(); pending = false; userUntil = 0; if (!enabled()) return; prepare(); return search(); };
-        const schedule = () => { clear(); timer = clock.setTimeout(run, 650); };
+        const run = (reason = 'manual') => { clear(); pending = false; userUntil = 0; if (!enabled()) return; prepare(reason); return search(reason); };
+        const schedule = () => { clear(); timer = clock.setTimeout(() => run('zoom'), 650); };
         return {
             gesture() { userUntil = Date.now() + 2000; },
-            zoom() { if (!enabled() || Date.now() > userUntil) return; prepare(); pending = true; schedule(); },
+            zoom() { if (!enabled() || Date.now() > userUntil) return; prepare('zoom'); pending = true; schedule(); },
             idle() { if (pending) schedule(); },
             drag() { clear(); pending = false; },
             research: run,
@@ -107,7 +107,7 @@
         if (!button) { button = document.createElement('button'); button.type = 'button'; host.append(button); }
         button.classList.add('care-region-research'); button.textContent = '↻ 이 지역 재검색';
         button.setAttribute('aria-label', '현재 지도 영역에서 이 지역 재검색');
-        button.onclick = () => controller.research();
+        button.onclick = () => controller.research('manual'); // SOFTM-REGION-SCOPE 날짜:20261128 : 명시 버튼과 자동 확대·크기변경 조회를 구분해 지역 조건을 보호
         /** SOFTM-VIEWPORT-RESIZE START 날짜:20260910 : 목록을 접거나 회전해 늘어난 지도 영역도 수동 재검색과 같은 범위로 조회 */
         /* SOFTM-SELECTION-VIEWPORT 날짜:20260915 : 기관 선택에 따른 지도 크기 변경은 명시 조회와 구분 */
         let resizeTimer, width = host.clientWidth, height = host.clientHeight;
@@ -121,7 +121,7 @@
                 if (!host.clientWidth || !host.clientHeight || workspace !== 'search' || detailOrigin || config.preserveResults?.() || !config.enabled()) return;
                 options.resizeMap?.();
                 requestAnimationFrame(() => {
-                    if (workspace === 'search' && !detailOrigin && !config.preserveResults?.() && host.clientWidth && host.clientHeight && config.enabled()) void controller.research();
+                    if (workspace === 'search' && !detailOrigin && !config.preserveResults?.() && host.clientWidth && host.clientHeight && config.enabled()) void controller.research('resize');
                 });
             }, 400);
         });
