@@ -84,6 +84,18 @@ test('조건 없는 분할 지도는 숨은 초기화 행의 검색 결과 위 �
  assert.match(stitchDesktopCss,/\.layout>\.results \{ top:calc\(150px \+ var\(--stitch-filter-summary-height\)\)!important; height:calc\(100% - 150px - var\(--stitch-filter-summary-height\)\)!important; \}/); // SOFTM-RESULT-GAP-WORKSPACE 날짜:20261128 : 조건 유무 모두 결과 시작점이 실제 필터 높이와 일치하는지 검증
 });
 /** SOFTM-RESET-VISIBILITY END */
+/** SOFTM-RESULT-CARD-DENSITY START 날짜:20261128 : PC 분할 카드가 반복정보 대신 비교 핵심과 충분한 조작영역을 유지하는지 검증 */
+test('PC 분할 목록 카드는 중복 정보와 공통 행동을 접고 핵심 비교행을 짧게 표시한다',()=>{
+ assert.match(mapHtml,/care-list-evidence care-list-evidence-\$\{esc\(CONFIG\.source\)\}/);
+ assert.match(stitchDesktopCss,/data-care-mode="map"[\s\S]+\.care-result-summary \{ display:none; \}/);
+ assert.match(stitchDesktopCss,/care-list-evidence-nhis \.care-decision-cell:first-child \{ display:none; \}/);
+ assert.match(stitchDesktopCss,/care-list-cost-copy > small,[\s\S]+\.care-list-cost > p \{ display:none; \}/);
+ assert.match(stitchDesktopCss,/care-row-save-group > \[data-popup-saved\] \{ display:none; \}/);
+ assert.match(stitchDesktopCss,/care-list-navigation \{ grid-column:1\/3; grid-row:2; justify-self:stretch; \}[\s\S]+care-map-display \{ grid-column:3; grid-row:2; \}/);
+ assert.match(stitchDesktopCss,/care-list-navigation,.care-map-display\)[\s\S]+min-height:44px; height:44px/);
+ assert.match(stitchDesktopCss,/stitch-card-address[\s\S]+text-overflow:ellipsis; white-space:nowrap/);
+});
+/** SOFTM-RESULT-CARD-DENSITY END */
 test('검색은 유형·필터 옆 버튼으로 열리고 영역 포커스를 벗어나면 다시 숨는다',()=>{
  assert.match(mobileFocusSource,/data-mobile-focus="type"[\s\S]+data-mobile-focus="filter"[\s\S]+data-mobile-focus="search"[\s\S]+data-mobile-focus="close"/);
  assert.match(mobileFocusSource,/id="careMobileFocusSearch"[\s\S]+aria-hidden="true" hidden/);

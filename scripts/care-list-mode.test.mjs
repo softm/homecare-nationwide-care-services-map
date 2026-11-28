@@ -15,7 +15,7 @@ test('목록·지도 전환은 오른쪽 로그인 버튼의 전용 공간을 �
     assert.match(styles, /data-care-mode="list"\] \.care-mode-toggle \{ top:2px; right:60px;/);
     const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
     assert.match(index, /care-list-mode\.css\?v=20261128-workspace-tabs-remove1/);
-    assert.match(index, /stitch-desktop\.css\?v=20261128-result-gap2/); // SOFTM-RESULT-GAP-WORKSPACE 날짜:20261128 : 회색 잔여 여백 수정 자산 버전을 고정
+    assert.match(index, /stitch-desktop\.css\?v=20261128-result-card-density1/); // SOFTM-RESULT-CARD-DENSITY 날짜:20261128 : PC 분할 목록 카드 최적화 자산 버전을 고정
     assert.match(index, /care-service\.css\?v=20261127-list-mode-top1/);
     assert.match(serviceStyles, /hc-integrated\[data-care-mode=list\] \.care-mode-toggle\{top:2px!important;right:60px!important;bottom:auto!important/);
 });
